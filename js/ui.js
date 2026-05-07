@@ -390,7 +390,7 @@ function renderModernCards(dataList, isInitialLoad = false) {
 
         if (isActive) {
             html += `
-            <div class="card-3d-container ${animClass}" style="${animStyle}">
+            <div class="card-3d-container scroll-bounce-hidden ${animClass}" style="${animStyle}">
                 <button onclick="${onClickAction}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
                     <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
@@ -407,7 +407,7 @@ function renderModernCards(dataList, isInitialLoad = false) {
             </div>`;
         } else {
             html += `
-            <div class="card-3d-container ${animClass}" style="${animStyle}">
+            <div class="card-3d-container scroll-bounce-hidden ${animClass}" style="${animStyle}">
                 <button onclick="${onClickAction}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group">
                     <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
                         <i class="${plan.icon}"></i>
@@ -430,6 +430,21 @@ function renderModernCards(dataList, isInitialLoad = false) {
     } else {
         container.insertAdjacentHTML('beforeend', html);
     }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.remove('scroll-bounce-hidden');
+                entry.target.classList.add('scroll-bounce-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+
+    container.querySelectorAll('.card-3d-container.scroll-bounce-hidden').forEach(wrapper => {
+        observer.observe(wrapper);
+    });
+
     initNeomorphicTilt();
 }
 

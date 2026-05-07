@@ -123,6 +123,20 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     0%, 100% { box-shadow: 0 0 0 4px rgba(239,68,68,0.3), 0 0 20px rgba(239,68,68,0.5); }
     50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0.15), 0 0 30px rgba(239,68,68,0.7); }
 }
+@keyframes bounceInUp {
+    0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+    60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
+    80% { transform: translateY(2px) scale(0.99); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.scroll-bounce-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+.scroll-bounce-visible {
+    visibility: visible;
+    animation: bounceInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
 </style>
 </head>
 <body>
