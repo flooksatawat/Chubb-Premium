@@ -408,15 +408,15 @@ function renderModernCards(dataList, isInitialLoad = false) {
         } else {
             html += `
             <div class="card-3d-container ${animClass}" style="${animStyle}">
-                <button onclick="${onClickAction}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] ${plan.border} ${plan.cardBg} ${plan.shadow} group">
+                <button onclick="${onClickAction}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group">
                     <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
                         <i class="${plan.icon}"></i>
                     </div>
-                    <div class="flex-1 min-w-0 overflow-hidden">
+                    <div class="flex-1 min-w-0 overflow-hidden" style="transform: translateZ(10px)">
                         <h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors truncate">${plan.name}</h4>
                         <p class="text-[12px] ${plan.sub} font-medium leading-tight truncate">${plan.desc}</p>
                     </div>
-                    <div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1">
+                    <div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1" style="transform: translateZ(10px)">
                         <i class="fas fa-arrow-right text-[11px]"></i>
                     </div>
                 </button>
@@ -430,6 +430,24 @@ function renderModernCards(dataList, isInitialLoad = false) {
     } else {
         container.insertAdjacentHTML('beforeend', html);
     }
+    initNeomorphicTilt();
+}
+
+function initNeomorphicTilt() {
+    document.querySelectorAll('#planListContainer .neomorphic-menu-item:not([data-tilt])').forEach(card => {
+        card.setAttribute('data-tilt', '1');
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
+            const rotateX = -((y - rect.height / 2) / (rect.height / 2)) * 5;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
 }
 
 // 🌟 ระบบจับการ Scroll (คลีนสุดๆ ไม่กวนสเปคเครื่อง) 🌟
@@ -1876,11 +1894,12 @@ function showLineInAppModal() {
 /** พยายามแชร์ไฟล์ผ่าน Web Share API — return true ถ้าสำเร็จหรือ user กดยกเลิก */
 async function tryShareFile(file, title, text) {
     if (!navigator.share) return false;
+    if (navigator.canShare && !navigator.canShare({ files: [file] })) return false;
     try {
         await navigator.share({ files: [file], title, text });
         return true;
     } catch (err) {
-        if (err.name === 'AbortError') return true; // user กดยกเลิก — ไม่ใช่ error
+        if (err.name === 'AbortError') return true;
         return false;
     }
 }

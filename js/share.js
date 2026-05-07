@@ -22,33 +22,20 @@ function triggerInstallmentShare(type) {
     }
 
     pendingInstallmentData = { premOnly: premOnlyText, allText: allText, label: label };
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    currentShareType = 'installment';
     closePopup('installmentModal');
     Swal.fire({
-        title: 'แชร์ยอดชำระ' + label,
-        html: `<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-            <button id="swal-line-btn" style="width:100%;padding:12px;background:#06C755;color:#fff;font-weight:700;border:none;border-radius:12px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fab fa-line" style="font-size:18px;"></i> LINE</button>
-            <button id="swal-messenger-btn" style="width:100%;padding:12px;background:#0084FF;color:#fff;font-weight:700;border:none;border-radius:12px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fab fa-facebook-messenger" style="font-size:18px;"></i> Messenger</button>
-            <button id="swal-copy-btn" style="width:100%;padding:12px;background:#374151;color:#fff;font-weight:700;border:none;border-radius:12px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-copy" style="font-size:18px;"></i> คัดลอก</button>
+        html: `<div class="flex flex-col items-center mt-2 px-1">
+            <i class="fas fa-share-nodes text-3xl text-slate-800 mb-3"></i>
+            <h3 class="text-lg font-bold text-slate-700 mb-5">แชร์ยอดชำระ${label}</h3>
+            <div class="grid grid-cols-3 gap-3 w-full">
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#Edfced] rounded-2xl border border-[#b6e3b4] active:scale-95 transition-transform"><i class="fab fa-line text-4xl text-[#00B900] mb-2"></i><span class="text-[10px] font-bold text-[#00B900]">LINE</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#e6f2ff] rounded-2xl border border-[#b8daff] active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-4xl text-[#0084FF] mb-2"></i><span class="text-[10px] font-bold text-[#0084FF]">MESSENGER</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#f8f9fa] rounded-2xl border border-[#dee2e6] active:scale-95 transition-transform"><i class="fas fa-copy text-4xl text-slate-600 mb-2"></i><span class="text-[10px] font-bold text-slate-600">คัดลอก</span></button>
+            </div>
         </div>`,
         showConfirmButton: false,
         showCloseButton: true,
-        didOpen: () => {
-            document.getElementById('swal-line-btn').addEventListener('click', () => {
-                window.open('https://line.me/R/msg/text/?' + encodeURIComponent(allText), '_blank');
-                Swal.close();
-            });
-            document.getElementById('swal-messenger-btn').addEventListener('click', () => {
-                navigator.clipboard.writeText(allText).catch(() => {});
-                window.open(isMobile ? 'fb-messenger://' : 'https://www.messenger.com/', '_blank');
-                Swal.close();
-            });
-            document.getElementById('swal-copy-btn').addEventListener('click', () => {
-                navigator.clipboard.writeText(allText).then(() => {
-                    Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', timer: 1200, showConfirmButton: false });
-                });
-            });
-        }
     });
 }
 
@@ -77,45 +64,55 @@ function generateResultText(type) {
 }
 
 let currentShareType = '';
-function openGenericShareModal(type) { if (type === 'all' && !lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อนแชร์"); currentShareType = type; openPopup('genericShareModal'); }
 
-function handleGenericShare(platform) {
-    if (currentShareType === 'diseaseList') {
-        const text = 'https://short-url.org/1nMQi';
-        if (platform === 'copy') copyToClipboard(text, 'คัดลอกลิงก์เรียบร้อยแล้ว'); else executeShare(text, platform);
-    } else if (currentShareType === 'premium' || currentShareType === 'all' || currentShareType === 'slb' || currentShareType === 'wxn') {
-        if (platform === 'copy') {
-            Swal.fire({
-                title: 'เลือกรูปแบบการแชร์',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'ข้อมูลทั้งหมด',
-                cancelButtonText: 'ข้อมูลแบบย่อ',
-                reverseButtons: true,
-                confirmButtonColor: '#3b82f6',
-                cancelButtonColor: '#6b7280'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    copyToClipboard(generateResultText(currentShareType), "คัดลอกข้อมูลทั้งหมดเรียบร้อยแล้ว");
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    const shortText = `เพศ: ${lastCalculationData.gender} | อายุ: ${lastCalculationData.age} | วงเงิน: ${formatNum(lastCalculationData.sum)} บาท | ออมเงิน: ${Math.round(lastCalculationData.premium).toLocaleString()} บาท`;
-                    copyToClipboard(shortText, "คัดลอกข้อมูลแบบย่อเรียบร้อยแล้ว");
-                }
-                closePopup('resultModal'); closePopup('slbResultModal'); closePopup('wxnResultModal'); closePopup('dynamicResultModal');
-            });
-        } else {
-            closePopup('resultModal'); closePopup('slbResultModal'); closePopup('wxnResultModal'); closePopup('dynamicResultModal');
-            const shareText = generateResultText(currentShareType).replace(/(\d+(?:\.\d+)?)%\s*ของทุน(?:ประกัน)?/g, (match, p1) => `${formatNum(lastCalculationData.sum * (parseFloat(p1) / 100))} บาท`).replace(/(\d+(?:\.\d+)?)%\s*ของเบี้ย(?:ประกัน)?/g, (match, p1) => `${formatNum(lastCalculationData.premium * (parseFloat(p1) / 100))} บาท`);
-            executeShare(shareText, platform);
-        }
-    } else if (currentShareType === 'installmentPrem' || currentShareType === 'installmentAll') {
-        const textToShare = currentShareType === 'installmentPrem' ? pendingInstallmentData.premOnly : pendingInstallmentData.allText;
-        if (platform === 'copy') copyToClipboard(textToShare, `คัดลอกเรียบร้อยแล้ว`); else executeShare(textToShare, platform);
-    } else if (['scb', 'bbl', 'bay', 'kbank'].includes(currentShareType)) {
-        const bText = {"scb": "ธ.ไทยพาณิชย์ : 049-416-6866 สาขาถนนวิทยุ", "bbl": "ธ.กรุงเทพ : 147-312-5357 สาขาสุรวงศ์", "bay": "ธ.กรุงศรี : 001-016-4329 สาขาเพลินจิต", "kbank": "ธ.กสิกร : 099-132-6065 สาขาพหลโยธิน"};
-        if (platform === 'copy') copyToClipboard(bText[currentShareType], 'คัดลอกบัญชีเรียบร้อยแล้ว'); else executeShare(bText[currentShareType], platform);
+function openGenericShareModal(type) {
+    if (type === 'all' && !lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อนแชร์");
+    currentShareType = type;
+    Swal.fire({
+        html: `<div class="flex flex-col items-center mt-2 px-1">
+            <i class="fas fa-share-nodes text-3xl text-slate-800 mb-3"></i>
+            <h3 class="text-lg font-bold text-slate-700 mb-5">เลือกช่องทางการแชร์</h3>
+            <div class="grid grid-cols-3 gap-3 w-full">
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#Edfced] rounded-2xl border border-[#b6e3b4] active:scale-95 transition-transform"><i class="fab fa-line text-4xl text-[#00B900] mb-2"></i><span class="text-[10px] font-bold text-[#00B900]">LINE</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#e6f2ff] rounded-2xl border border-[#b8daff] active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-4xl text-[#0084FF] mb-2"></i><span class="text-[10px] font-bold text-[#0084FF]">MESSENGER</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#f8f9fa] rounded-2xl border border-[#dee2e6] active:scale-95 transition-transform"><i class="fas fa-copy text-4xl text-slate-600 mb-2"></i><span class="text-[10px] font-bold text-slate-600">คัดลอก</span></button>
+            </div>
+        </div>`,
+        showConfirmButton: false,
+        showCloseButton: true,
+    });
+}
+
+function _getShareText() {
+    if (currentShareType === 'installment') return pendingInstallmentData.allText || '';
+    if (currentShareType === 'diseaseList') return 'https://short-url.org/1nMQi';
+    if (['scb', 'bbl', 'bay', 'kbank'].includes(currentShareType)) {
+        const bText = { scb: 'ธ.ไทยพาณิชย์ : 049-416-6866 สาขาถนนวิทยุ', bbl: 'ธ.กรุงเทพ : 147-312-5357 สาขาสุรวงศ์', bay: 'ธ.กรุงศรี : 001-016-4329 สาขาเพลินจิต', kbank: 'ธ.กสิกร : 099-132-6065 สาขาพหลโยธิน' };
+        return bText[currentShareType] || '';
     }
-    closePopup('genericShareModal');
+    return generateResultText(currentShareType);
+}
+
+function _closeResultModals() {
+    ['resultModal', 'slbResultModal', 'wxnResultModal', 'dynamicResultModal'].forEach(id => closePopup(id));
+}
+
+function shareToLine() {
+    _closeResultModals();
+    window.open('https://line.me/R/msg/text/?' + encodeURIComponent(_getShareText()), '_blank');
+}
+
+function shareToMessenger() {
+    _closeResultModals();
+    window.open('fb-messenger://share/?link=' + encodeURIComponent(_getShareText()), '_blank');
+}
+
+function copyShareData() {
+    _closeResultModals();
+    const text = _getShareText();
+    navigator.clipboard.writeText(text).then(() => {
+        Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', timer: 1200, showConfirmButton: false });
+    }).catch(() => { copyToClipboard(text, 'คัดลอกเรียบร้อยแล้ว'); });
 }
 
 function copyToClipboard(text, msg) { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); const toast = document.createElement('div'); toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-xs font-bold z-[1000] shadow-xl transition-opacity duration-300"; toast.innerText = msg; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 2000); }
@@ -124,7 +121,7 @@ function copyToClipboardWithFeedback(text, callback, customHTML) { const el = do
 function executeShare(text, platform) {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (platform === 'line') { const lineUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text); if (isMobile) window.location.href = lineUrl; else window.open(lineUrl, '_blank'); } 
-    else if (platform === 'messenger') { const fbHtml = `<div class="w-14 h-14 bg-[#0084FF] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><i class='fab fa-facebook-messenger text-3xl text-white'></i></div><span class="text-base font-bold block mb-1">เปิด Messenger แล้ว</span><span class='text-xs font-medium opacity-90 block text-blue-200'>กรุณาวางข้อความในแชทที่ต้องการ</span>`; copyToClipboardWithFeedback(text, () => { if (isMobile) { window.location.href = 'fb-messenger://'; setTimeout(() => { window.open('https://www.messenger.com/', '_blank'); }, 800); } else { window.open('https://www.messenger.com/', '_blank'); } }, fbHtml); } 
+    else if (platform === 'messenger') { window.open('fb-messenger://share/?link=' + encodeURIComponent(text), '_blank'); }
 }
 
 let voiceRecog = null; let isVoiceListening = false;

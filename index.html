@@ -16,8 +16,58 @@
     <link rel="stylesheet" href="css/style.css">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
+body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
 /* Glassmorphism utility */
 .glass-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+.glass-modal {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(40px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.5) !important;
+}
+.neomorphic-menu-item {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-top: 2px solid rgba(255, 255, 255, 1) !important;
+    border-left: 2px solid rgba(255, 255, 255, 1) !important;
+    border-bottom: 1.5px solid rgba(200, 200, 200, 0.4) !important;
+    border-right: 1.5px solid rgba(200, 200, 200, 0.4) !important;
+    border-radius: 20px !important;
+    box-shadow:
+        6px 8px 20px rgba(0, 0, 0, 0.08),
+        -4px -4px 12px rgba(255, 255, 255, 0.9),
+        inset 1px 1px 3px rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transform-style: preserve-3d !important;
+}
+.neomorphic-menu-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+    transform: skewX(-25deg);
+    animation: glassShimmer 15s infinite;
+}
+@keyframes glassShimmer {
+    0% { left: -150%; }
+    20% { left: 150%; }
+    100% { left: 150%; }
+}
+.neomorphic-menu-item:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 100%) !important;
+    transform: translateY(-5px) scale(1.02) !important;
+    box-shadow:
+        0 15px 30px rgba(0, 0, 0, 0.08),
+        0 0 25px rgba(255, 255, 255, 0.9),
+        -4px -4px 12px rgba(255, 255, 255, 1) !important;
+}
 /* Truncate text utility */
 .truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
 /* Infinity scroll container */
@@ -437,9 +487,9 @@
             <div class="absolute w-full text-center font-bold text-[8.5px] text-slate-400/80 tracking-[0.15em] uppercase pointer-events-auto" style="bottom: max(env(safe-area-inset-bottom), 6px);">&copy; SATAWAT BUTTRAKAS</div>
         </div>
             <!-- 🌟 THE NEW ULTRA-MODERN PLAN SELECTION MODAL 🌟 -->
-        <div id="planSelectModal" class="absolute inset-0 z-[1000] hidden bg-slate-900/60 backdrop-blur-[12px] overflow-hidden rounded-[inherit]">
+        <div id="planSelectModal" class="absolute inset-0 z-[1000] hidden overflow-hidden rounded-[inherit]">
             <!-- ถอด flex ออก เปลี่ยนเป็น absolute เต็มจอ -->
-            <div id="planSelectCardWrapper" class="absolute inset-0 w-full h-full bg-[#f8fafc]/90 backdrop-blur-2xl overflow-hidden transition-all duration-500 opacity-0 translate-y-10">
+            <div id="planSelectCardWrapper" class="glass-modal absolute inset-0 w-full h-full overflow-hidden transition-all duration-500 opacity-0 translate-y-10">
                 
                 <div class="blob blob-1"></div><div class="blob blob-2"></div>
                 <div class="blob blob-3 absolute pointer-events-none"></div>
@@ -450,7 +500,7 @@
                 <!-- JS จะใส่ข้อมูลที่นี่ -->
                 </div>
                 
-                <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-transparent pointer-events-none z-20 transition-opacity duration-500"></div>
+                <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white/30 via-white/10 to-transparent pointer-events-none z-20 transition-opacity duration-500"></div>
 
                 <!-- Floating AI Bottom Bar -->
                 <div id="modalBottomBar" class="absolute bottom-6 left-4 right-4 z-30 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
@@ -992,8 +1042,6 @@
     
     <div id="genericShareModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" id="genericShareIconBg"><i id="genericShareIcon" class="fas fa-share-nodes text-2xl"></i></div><h3 id="genericShareTitle" class="text-lg font-bold text-slate-800 mb-4">เลือกช่องทางการแชร์</h3><div class="grid grid-cols-3 gap-2.5"><button onclick="handleGenericShare('line')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-[#00B900]/10 rounded-xl border border-[#00B900]/20 active:scale-95 transition-all shadow-sm hover:bg-[#00B900]/20"><i class="fab fa-line text-[#00B900] text-2xl"></i><span class="text-[10px] font-bold text-[#00B900] uppercase tracking-wider mt-1">LINE</span></button><button onclick="handleGenericShare('messenger')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-[#0084FF]/10 rounded-xl border border-[#0084FF]/20 active:scale-95 transition-all shadow-sm hover:bg-[#0084FF]/20"><i class="fab fa-facebook-messenger text-[#0084FF] text-xl"></i><span class="text-[10px] font-bold text-[#0084FF] uppercase tracking-wider mt-1">Messenger</span></button><button onclick="handleGenericShare('copy')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-slate-100 rounded-xl border border-slate-200 active:scale-95 transition-all shadow-sm hover:bg-slate-200"><i class="fas fa-copy text-slate-600 text-2xl"></i><span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mt-1">คัดลอก</span></button></div><button onclick="closePopup('genericShareModal')" class="mt-5 text-slate-400 hover:text-slate-600 text-xs font-medium w-full py-2">ยกเลิก</button></div></div>
     
-    <div id="installmentShareModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-share-nodes text-2xl"></i></div><h3 id="installmentShareTitle" class="text-lg font-bold text-[#1e3a8a] mb-4">เลือกรูปแบบการแชร์</h3><div class="space-y-2.5"><div class="w-full text-left"><button onclick="closePopup('installmentShareModal'); openGenericShareModal('installmentPrem')" class="w-full bg-slate-50 text-slate-700 border border-slate-200 p-3.5 rounded-xl font-bold shadow-sm flex justify-between items-center active:scale-95 transition-all text-[14px] hover:bg-slate-100"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"><i class="fas fa-coins text-slate-600 text-base"></i></div><span>แชร์เฉพาะออมเงิน</span></div><i class="fas fa-chevron-right text-xs text-slate-400"></i></button></div><div class="w-full text-left"><button onclick="closePopup('installmentShareModal'); openGenericShareModal('installmentAll')" class="w-full bg-blue-50 text-blue-800 border border-blue-200 p-3.5 rounded-xl font-bold shadow-sm flex justify-between items-center active:scale-95 transition-all text-[14px] hover:bg-blue-100"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center"><i class="fas fa-file-invoice text-blue-600 text-base"></i></div><span>แชร์สรุปทั้งหมด</span></div><i class="fas fa-chevron-right text-xs text-blue-400"></i></button></div></div><button onclick="closePopup('installmentShareModal')" class="mt-5 text-slate-400 hover:text-slate-600 text-xs font-medium">ยกเลิก</button></div></div>
-    
     <!-- 1. รายได้จากเคสนี้ (Case Income Modal) - REDESIGNED -->
     <div id="caseIncomeModal" class="modal-overlay hidden">
         <div class="modal-content-card p-5 bg-[#f8fafc]">
@@ -1317,5 +1365,15 @@
     <script src="js/parser.js?v=1"></script>
     <script src="js/ui.js?v=5"></script>
     <script src="js/share.js?v=5"></script>
+    <script>
+        window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey) {
+                if (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P') { e.preventDefault(); return false; }
+                if (e.shiftKey && (e.key === 'i' || e.key === 'I' || e.key === 'j' || e.key === 'J' || e.key === 'c' || e.key === 'C')) { e.preventDefault(); return false; }
+            }
+        }, false);
+    </script>
 </body>
 </html>
