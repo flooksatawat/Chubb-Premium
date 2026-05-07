@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Chubb-Premium/</title>
+    <!-- โหลดไลบรารีภายนอก -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+  <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
+<style>
+/* Glassmorphism utility */
+.glass-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+/* Truncate text utility */
+.truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
+/* Infinity scroll container */
+.infinity-scroll-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -ms-overflow-style: none; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.infinity-scroll-container::-webkit-scrollbar { display: none; }
+.infinity-scroll-container > div { scroll-snap-align: center; flex: 0 0 auto; }
+</style>
+<style>
+/* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+#planListContainer {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding-top: 50px; /* เพิ่มพื้นที่ด้านบนให้การ์ดกลางจอเด่นขึ้น */
+    padding-bottom: 120px; 
+}
+
+/* 💥 ลบ Transition ออก เพื่อให้ JS ทำงานแบบ 60FPS ได้ลื่นไหลที่สุด */
+.card-3d-container {
+    transform-style: preserve-3d;
+    will-change: transform, opacity, z-index;
+    transform-origin: center center; 
+}
+/* เพิ่มเงาที่ลึกและฟุ้ง (Deep Shadow) */
+.deep-glass-shadow {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2), 
+                0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* แอนิเมชัน Shimmer ให้แสงวิ่งจางๆ */
+.shimmer-bg::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(30deg);
+    animation: shimmer 6s infinite linear;
+    pointer-events: none;
+}
+@keyframes shimmer {
+    0% { transform: rotate(30deg) translate(-100%, -100%); }
+    100% { transform: rotate(30deg) translate(100%, 100%); }
+}
+/* ปุ่มไมโครโฟน — สถานะกำลังฟัง */
+.listening-active {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 0 0 4px rgba(239,68,68,0.3), 0 0 20px rgba(239,68,68,0.5) !important;
+    animation: mic-pulse 1s ease-in-out infinite !important;
+}
+@keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(239,68,68,0.3), 0 0 20px rgba(239,68,68,0.5); }
+    50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0.15), 0 0 30px rgba(239,68,68,0.7); }
+}
+</style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Ambient Glow Elements -->
+        <div class="ambient-bg">
+            <div class="ambient-glow-1"></div>
+            <div class="ambient-glow-2"></div>
+        </div>
+        
+        <!-- ==================== VIEW 1: MAIN FORM ==================== -->
+        <div id="mainView" class="flex flex-col flex-1 overflow-hidden w-full relative">
+            
+            <!-- App Header -->
+            <div class="w-full z-20 pt-safe px-4 pb-0 shrink-0 relative mt-1.5">
+                <button id="mainHeaderBtn" onclick="handleHeaderClick(event)" class="w-full bg-gradient-to-br from-[#243c94] via-[#2a45a3] to-[#1e327a] rounded-[24px] py-4 px-4 flex flex-col items-center justify-center shadow-[0_10px_25px_rgba(36,60,148,0.3)] border border-[#60a5fa]/30 active:scale-[0.97] transition-all relative overflow-hidden group select-none cursor-pointer">
+                    <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[24px]"></div>
+                    <h1 class="text-[20px] font-normal text-white leading-none tracking-wide mb-1.5 relative z-10 drop-shadow-md flex items-center justify-center gap-1.5">
+                        <span id="headerTitleText">CI Extra Plus</span>
+                        <i class="fas fa-chevron-down text-[14px] opacity-70 mt-0.5"></i>
+                    </h1>
+                    <div class="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 w-full relative z-10 px-1 pointer-events-none">
+                        <span id="headerDescText" class="text-[10px] font-medium text-blue-100/95 whitespace-nowrap drop-shadow-sm">ออมเงิน : ชดเชยโรคร้าย+วงเงินพิเศษ</span>
+                        <div class="flex items-center gap-1 opacity-90 bg-white/10 px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm shadow-inner">
+                            <i class="fas fa-hand-pointer text-[8px] text-white"></i>
+                            <span class="text-[9px] font-medium text-white tracking-wide">กดค้างดูเงื่อนไข</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <!-- ขยาย pb เพื่อแก้ปัญหาเมนูบังหน้าจอตอนเลื่อน -->
+            <div class="content-area pt-4 no-scrollbar relative z-10 scrollable-view" id="manualInputs">
+                <div class="w-full flex flex-col flex-1 min-h-0 gap-3 pb-[100px]">
+                    
+                    <!-- Top Toggles -->
+                    <div class="flex flex-col gap-3 shrink-0">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[50px]">
+                                <div id="genderBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none" style="left: 4px; width: calc(50% - 4px);"></div>
+                                <button onclick="setGender('male')" id="btnMale" class="flex-1 relative z-10 rounded-[10px] text-[15px] font-bold text-blue-700 transition-all duration-300">ชาย</button>
+                                <button onclick="setGender('female')" id="btnFemale" class="flex-1 relative z-10 rounded-[10px] text-[15px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">หญิง</button>
+                            </div>
+                            <div class="premium-card !p-1.5 flex items-center justify-between h-[50px]">
+                                <button onclick="adjustAge(-1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-minus text-[14px]"></i></button>
+                                <input type="number" id="ageInput" value="0" min="0" max="65" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)">
+                                <button onclick="adjustAge(1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-plus text-[14px]"></i></button>
+                            </div>
+                        </div>
+                        <div id="planSelectionWrapper" class="shrink-0">
+                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[50px]" id="planSelectionContainer">
+                                <div id="planBg" class="absolute top-1 bottom-1 left-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none"></div>
+                                <button onclick="setPlan('10CX')" id="btnPlan1" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300">10CX</button>
+                                <button onclick="setPlan('20CX')" id="btnPlan2" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">20CX</button>
+                                <button onclick="setPlan('60')" id="btnPlan3" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">60</button>
+                                <button onclick="setPlan('90')" id="btnPlan4" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">90</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sum Insured Card -->
+                    <div class="premium-card shrink-0" id="sumInsuredContainer">
+                        <div class="flex justify-between items-center mb-3">
+                            <p id="sumInsuredLabel" class="text-slate-600 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-shield-halved text-emerald-500"></i> วงเงินคุ้มครอง (บาท)</p>
+                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200">คำนวณจากทุน</span>
+                        </div>
+                        <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 mb-3 h-[42px]" id="sumPillWrapper">
+                            <div id="sumPillBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none opacity-0"></div>
+                            <button id="sumPill1" onclick="setQuickSum(500000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">5 แสน</button>
+                            <button id="sumPill2" onclick="setQuickSum(1000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">1 ล้าน</button>
+                            <button id="sumPill3" onclick="setQuickSum(3000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">3 ล้าน</button>
+                            <button id="sumPill4" onclick="setQuickSum(5000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">5 ล้าน</button>
+                            <button id="sumPill5" onclick="setQuickSum(10000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">10 ล้าน</button>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
+                            <input type="text" id="sumInsuredInput" value="500,000" class="input-box-rounded pl-8" oninput="handleSumInput(this)">
+                        </div>
+                    </div>
+
+                    <!-- 3D Health Excellence: Room Rate Container -->
+                    <div class="premium-card shrink-0 hidden" id="hxRoomRateContainer">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <p class="text-teal-700 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-procedures text-teal-500"></i> แผนความคุ้มครองสุขภาพ (ค่าห้อง)</p>
+                        </div>
+                        <button onclick="openPopup('hxPlanModal')" class="w-full bg-gradient-to-r from-teal-50/50 to-white border border-teal-200 rounded-[16px] p-2.5 shadow-[0_2px_8px_rgba(20,184,166,0.06)] hover:shadow-md hover:border-teal-300 transition-all flex items-center justify-between group active:scale-[0.98]">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center shadow-sm border border-teal-100 group-hover:scale-105 transition-transform text-teal-500">
+                                    <i class="fas fa-bed text-[16px]"></i>
+                                </div>
+                                <div class="text-left flex flex-col justify-center">
+                                    <span id="hxPlanDisplayTitle" class="text-[14px] font-bold text-teal-900 leading-tight">HX15</span>
+                                    <span id="hxPlanDisplayDesc" class="text-[11px] text-teal-600 font-medium leading-tight mt-0.5">ค่าห้อง 1,500 / เหมาจ่าย 1 ล้าน</span>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-teal-400 group-hover:text-teal-600 group-hover:bg-teal-50 transition-colors mr-1">
+                                <i class="fas fa-chevron-down text-[12px]"></i>
+                            </div>
+                        </button>
+                        <input type="hidden" id="hxPlanSelect" value="HX15">
+                        <!-- 🎙️ 🌟 MAIN SCREEN BOTTOM BAR (Floating on Home) 🌟 🎙️ -->
+<div id="mainBottomBar" class="absolute bottom-[72px] left-4 right-4 z-[60] transition-all duration-500">
+    <div class="relative bg-[#2a2f3a] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[32px] p-2 flex items-center gap-2 overflow-hidden">
+        <!-- shimmer overlay -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-[32px]" style="background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.04) 50%,transparent 60%);animation:shimmer 6s infinite linear;"></div>
+        <!-- input -->
+        <div class="flex-1 relative flex items-center min-w-0">
+            <div class="absolute left-1.5 w-10 h-10 rounded-[20px] bg-white/5 flex items-center justify-center text-blue-300 pointer-events-none">
+                <i class="fas fa-sparkles text-[15px]"></i>
+            </div>
+            <input type="text" id="aiCalcInput"
+                   class="w-full bg-transparent border-none text-white rounded-[20px] py-3.5 pl-[3.25rem] pr-2 focus:outline-none text-[14px] font-medium placeholder:text-slate-400/80"
+                   placeholder="เช่น cx ชาย 30 ทุน 1 ล้าน 10 ปี..."
+                   onkeydown="handleQuickCalc(event)">
+        </div>
+        <!-- ปุ่มส่ง -->
+        <button id="sendBtn"
+                onclick="var v=document.getElementById('aiCalcInput').value.trim(); if(v){submitQuickCalc(v); document.getElementById('aiCalcInput').value='';}else{document.getElementById('aiCalcInput').focus();}"
+                class="w-[48px] h-[48px] shrink-0 rounded-[20px] bg-emerald-500 flex items-center justify-center text-white active:scale-90 transition-all z-10">
+            <i class="fas fa-paper-plane text-[16px]"></i>
+        </button>
+        <!-- ปุ่มเสียง -->
+        <button id="voiceBtn"
+                onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}"
+                class="w-[48px] h-[48px] shrink-0 rounded-[20px] bg-blue-600 flex items-center justify-center text-white active:scale-90 transition-all z-10">
+            <i class="fas fa-microphone text-[17px]" id="mainVoiceIcon"></i>
+        </button>
+    </div>
+</div>
+
+
+
+
+                    </div>
+
+
+<!-- 💥 จบ: ส่วนความคุ้มครองเสริม 💥 -->
+
+                    <!-- 3D Health Excellence: Extra Options (rendered dynamically by render3DOptionsUI) -->
+                    <div id="threeDOptionsContainer" class="hidden"></div>
+
+                    <!-- Premium Card -->
+                    <div class="premium-card shrink-0" id="premiumContainer">
+                        <div class="flex justify-between items-center mb-3">
+                            <p id="premiumLabel" class="text-slate-600 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-wallet text-blue-500"></i> ออมเงิน (บาท/ปี)</p>
+                            <span id="premiumSubLabel" class="text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200">คำนวณจากเบี้ย</span>
+                        </div>
+                        <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 mb-3 h-[42px]" id="premiumPillContainer">
+                            <div id="premPillBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none opacity-0"></div>
+                            <button id="premPill1" onclick="setQuickPremium(12000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">12,000</button>
+                            <button id="premPill2" onclick="setQuickPremium(24000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">24,000</button>
+                            <button id="premPill3" onclick="setQuickPremium(36000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">36,000</button>
+                            <button id="premPill4" onclick="setQuickPremium(48000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">48,000</button>
+                            <button id="premPill5" onclick="setQuickPremium(60000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">60,000</button>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
+                            <input type="text" id="premiumInput" class="input-box-rounded pl-8 text-blue-700" value="0" oninput="handlePremiumInput(this)">
+                        </div>
+                    </div>
+
+                    <!-- Cash Flow Container -->
+                    <div class="premium-card shrink-0 hidden border-emerald-200 bg-emerald-50/30" id="cashFlowContainer">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <p class="text-emerald-700 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-money-bill-trend-up"></i> กระแสเงินสด (รับเงินคืน)</p>
+                            <span class="text-[9px] bg-white text-emerald-600 px-2 py-0.5 rounded-full font-bold shadow-sm border border-emerald-100">คำนวณย้อนกลับได้</span>
+                        </div>
+                        <!-- Single Box (ทั่วไป) -->
+                        <div id="singleCashFlowBox" class="hidden">
+                            <div class="flex p-1 bg-emerald-100/60 rounded-[14px] relative shadow-inner border border-emerald-200/50 mb-3 h-[42px]">
+                                <div id="cashPillBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(16,185,129,0.2)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-emerald-100 pointer-events-none opacity-0"></div>
+                                <button id="cashPill1" onclick="setQuickCashFlow(10000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">1 หมื่น</button>
+                                <button id="cashPill2" onclick="setQuickCashFlow(50000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">5 หมื่น</button>
+                                <button id="cashPill3" onclick="setQuickCashFlow(100000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">1 แสน</button>
+                                <button id="cashPill4" onclick="setQuickCashFlow(300000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">3 แสน</button>
+                                <button id="cashPill5" onclick="setQuickCashFlow(500000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">5 แสน</button>
+                            </div>
+                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-white focus:ring-emerald-500" oninput="handleCashFlowInput(this, 0)"></div>
+                        </div>
+            
+                        <!-- Dual Box (WXN) -->
+                        <div id="dualCashFlowBox" class="hidden flex-col gap-3">
+                            <div class="bg-white p-3 rounded-[20px] border border-emerald-100 shadow-sm relative">
+                                <p class="text-[12px] font-bold text-emerald-600 mb-2 flex justify-between items-center"><span><i class="fas fa-coins mr-1"></i> อายุ 31 วัน - 60 ปี</span><span class="bg-emerald-100 px-2 py-0.5 rounded-lg text-emerald-700">รับ 2.25%</span></p>
+                                <div class="flex p-1 bg-emerald-50/80 rounded-[14px] relative shadow-inner border border-emerald-100/60 mb-3 h-[42px]">
+                                    <div id="wxnCash1Bg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(16,185,129,0.2)] transition-all duration-300 border border-emerald-100 opacity-0 pointer-events-none"></div>
+                                    <button id="wxnC1Pill1" onclick="setWXNQuickCashFlow(10000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">1 หมื่น</button>
+                                    <button id="wxnC1Pill2" onclick="setWXNQuickCashFlow(30000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">3 หมื่น</button>
+                                    <button id="wxnC1Pill3" onclick="setWXNQuickCashFlow(50000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">5 หมื่น</button>
+                                    <button id="wxnC1Pill4" onclick="setWXNQuickCashFlow(100000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">1 แสน</button>
+                                    <button id="wxnC1Pill5" onclick="setWXNQuickCashFlow(200000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">2 แสน</button>
+                                </div>
+                                <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput1" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-emerald-50/30 focus:ring-emerald-500 focus:bg-white border-emerald-100" oninput="handleCashFlowInput(this, 1)"></div>
+                            </div>
+                            <div class="bg-white p-3 rounded-[20px] border border-emerald-100 shadow-sm relative">
+                                <p class="text-[12px] font-bold text-emerald-600 mb-2 flex justify-between items-center"><span><i class="fas fa-coins mr-1"></i> อายุ 61 ปีขึ้นไป</span><span class="bg-emerald-100 px-2 py-0.5 rounded-lg text-emerald-700">รับ 10%+</span></p>
+                                <div class="flex p-1 bg-emerald-50/80 rounded-[14px] relative shadow-inner border border-emerald-100/60 mb-3 h-[42px]">
+                                    <div id="wxnCash2Bg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(16,185,129,0.2)] transition-all duration-300 border border-emerald-100 opacity-0 pointer-events-none"></div>
+                                    <button id="wxnC2Pill1" onclick="setWXNQuickCashFlow(50000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">5 หมื่น</button>
+                                    <button id="wxnC2Pill2" onclick="setWXNQuickCashFlow(100000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">1 แสน</button>
+                                    <button id="wxnC2Pill3" onclick="setWXNQuickCashFlow(200000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">2 แสน</button>
+                                    <button id="wxnC2Pill4" onclick="setWXNQuickCashFlow(300000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">3 แสน</button>
+                                    <button id="wxnC2Pill5" onclick="setWXNQuickCashFlow(500000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">5 แสน</button>
+                                </div>
+                                <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput2" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-emerald-50/30 focus:ring-emerald-500 focus:bg-white border-emerald-100" oninput="handleCashFlowInput(this, 2)"></div>
+                            </div>
+                        </div>
+                     </div>                            
+
+                    <!-- Action Buttons -->
+                    <div id="mainActionsGroup" class="pb-2 shrink-0 flex flex-col gap-3 mt-1 transition-all duration-300">
+                        <!-- Medical Fund shortcut: visible only for 24TX, Elite, WXN -->
+                        <div id="medicalFundBtnContainer" class="hidden">
+                            <button onclick="selectAppPlan('Medical Fund')" class="w-full h-[48px] bg-gradient-to-br from-sky-400 to-cyan-600 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(14,165,233,0.3)] border border-sky-300/50 active:scale-[0.97] transition-all relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none rounded-t-[16px]"></div>
+                                <i class="fas fa-hospital text-[18px] relative z-10"></i>
+                                <span class="relative z-10 tracking-wide">Medical Fund</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3">
+                            <button id="mainActionBtn" onclick="manualTriggerPopup()" class="col-span-3 w-full btn-primary h-[54px] font-bold flex justify-center items-center gap-2 text-[16px]">
+                                <i class="fas fa-file-alt text-lg"></i> ดูรายละเอียด
+                            </button>
+                            <button onclick="openGenericShareModal('all')" class="col-span-1 w-full h-[54px] bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-[16px] font-bold flex flex-col justify-center items-center gap-1 text-[12px] shadow-[0_8px_15px_rgba(16,185,129,0.3)] border border-emerald-300/50 active:scale-[0.95] transition-all relative overflow-hidden group">
+                                <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/30 to-transparent pointer-events-none rounded-t-[16px]"></div>
+                                <i class="fas fa-share-nodes text-[20px] relative z-10 drop-shadow-sm group-hover:scale-110 transition-transform -mb-0.5"></i>
+                                <span class="relative z-10 drop-shadow-sm tracking-wide">แชร์</span>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="openPopup('installmentModal')" class="w-full bg-white border border-slate-200 text-slate-700 h-[48px] rounded-[16px] text-[14px] font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all">
+                                <i class="fas fa-credit-card text-blue-500"></i> ตัวเลือกชำระ
+                            </button>
+                            <button onclick="openPopup('paymentModal')" class="w-full bg-white border border-slate-200 text-slate-700 h-[48px] rounded-[16px] text-[14px] font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all">
+                                <i class="fas fa-building-columns text-emerald-500"></i> บัญชีโอนเงิน
+                            </button>
+                        </div>
+                        <button onclick="openPopup('eSubQniModal')" class="w-full bg-white border border-rose-100 text-rose-700 h-[48px] rounded-[16px] text-[14px] font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:bg-rose-50 active:scale-95 transition-all">
+                            <i class="fas fa-laptop-code"></i> E-Submission & QNI <i class="fas fa-chevron-right text-[10px] ml-1 opacity-50"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ==================== VIEW 2: TABLE ==================== -->
+        <div id="tableView" class="hidden flex flex-col flex-1 overflow-hidden w-full relative z-10">
+            <div class="glass-header flex justify-between items-center px-4 pt-safe pb-3 shrink-0 relative z-20 border-b border-slate-200 mt-1">
+                <h3 id="tableHeaderTitle" class="text-[15px] font-black text-slate-800 leading-tight flex items-center gap-2 truncate w-[75%]"></h3>
+                <button onclick="exportTableToPDF()" class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm shrink-0"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
+            </div>
+            <div class="flex flex-col border-b border-slate-200 bg-white/80 backdrop-blur-md shrink-0 relative z-10 shadow-sm">
+                <div class="flex items-center justify-between px-5 py-3"><span class="text-[13px] font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-chart-line text-emerald-500"></i> แสดงจุดคุ้มทุน</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div></label></div>
+                <div id="breakevenSummary" class="hidden px-4 pb-3 text-center transition-all"></div>
+                <div id="surrenderContainer" class="hidden px-4 pb-3 transition-all"></div>
+            </div>
+            <div class="flex-1 min-h-0 flex flex-col bg-white/60 backdrop-blur-sm">
+                <div class="overflow-y-auto flex-1 custom-scrollbar policy-table-wrapper relative pb-[180px] scrollable-view" id="pdfTableTarget">
+                    <table class="w-full text-[12px] sm:text-[13px] text-center border-collapse"><thead class="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-md shadow-sm" id="policyTableHead"></thead><tbody id="policyTableBody"></tbody></table>
+                </div>
+            </div>
+        </div>
+        <!-- ==================== VIEW 3: CASH ==================== -->
+        <div id="cashView" class="hidden flex flex-col flex-1 overflow-hidden w-full relative z-10">
+            <div class="w-full z-20 pt-safe px-4 pb-1 shrink-0 relative mt-2">
+                <div class="w-full bg-gradient-to-br from-[#243c94] via-[#2a45a3] to-[#1e327a] rounded-[24px] py-5 px-4 flex flex-col items-center justify-center shadow-[0_12px_30px_rgba(36,60,148,0.3)] border border-[#60a5fa]/30 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[24px]"></div>
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-400/15 rounded-full blur-[20px] pointer-events-none"></div>
+                    
+                    <h3 class="text-[26px] font-black text-shine-gold tracking-wide leading-none mb-1.5 relative z-10 drop-shadow-md">CASH</h3>
+                    
+                    <div class="flex items-center justify-center gap-2 relative z-10 w-full px-2">
+                        <div class="h-[1px] w-6 bg-gradient-to-r from-transparent to-amber-200/60"></div>
+                        <p class="text-[9.5px] text-amber-100/95 font-bold uppercase tracking-[0.2em] drop-shadow-sm whitespace-nowrap">Chubb Agency Success Howto</p>
+                        <div class="h-[1px] w-6 bg-gradient-to-l from-transparent to-amber-200/60"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 px-4 py-3 min-h-0 flex flex-col overflow-y-auto custom-scrollbar pb-[110px] scrollable-view">
+                <div class="flex flex-col gap-3.5 w-full max-w-sm mx-auto mt-2 px-1">
+                    
+                    <button onclick="openPopup('caseIncomeModal')" class="w-full p-4 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all hover:shadow-[0_6px_25px_rgba(0,0,0,0.06)] group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-[48px] h-[48px] rounded-[16px] bg-emerald-50/80 text-emerald-500 flex items-center justify-center text-[20px] group-hover:scale-105 transition-transform border border-emerald-100/30"><i class="fas fa-wallet"></i></div>
+                            <div class="text-left">
+                                <h4 class="text-[16px] font-medium text-slate-700 tracking-wide">รายได้จากเคสนี้</h4>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <i class="fas fa-chevron-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </button>
+                    <button onclick="openPopup('comModal')" class="w-full p-4 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all hover:shadow-[0_6px_25px_rgba(0,0,0,0.06)] group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-[48px] h-[48px] rounded-[16px] bg-amber-50/80 text-amber-500 flex items-center justify-center text-[20px] group-hover:scale-105 transition-transform border border-amber-100/30"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="text-left">
+                                <h4 class="text-[16px] font-medium text-slate-700 tracking-wide">คอมมิชชัน</h4>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+                            <i class="fas fa-chevron-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </button>
+                    <button onclick="openPopup('mbModal')" class="w-full p-4 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all hover:shadow-[0_6px_25px_rgba(0,0,0,0.06)] group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-[48px] h-[48px] rounded-[16px] bg-blue-50/80 text-blue-500 flex items-center justify-center text-[20px] group-hover:scale-105 transition-transform border border-blue-100/30"><i class="fas fa-gift"></i></div>
+                            <div class="text-left">
+                                <h4 class="text-[16px] font-medium text-slate-700 tracking-wide">โบนัสรายเดือน MB</h4>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                            <i class="fas fa-chevron-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </button>
+                    <button onclick="openPopup('mybModal')" class="w-full p-4 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all hover:shadow-[0_6px_25px_rgba(0,0,0,0.06)] group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-[48px] h-[48px] rounded-[16px] bg-purple-50/80 text-purple-500 flex items-center justify-center text-[20px] group-hover:scale-105 transition-transform border border-purple-100/30"><i class="fas fa-calendar-check"></i></div>
+                            <div class="text-left">
+                                <h4 class="text-[16px] font-medium text-slate-700 tracking-wide">โบนัสครึ่งปี MYB</h4>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                            <i class="fas fa-chevron-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </button>
+                    <button onclick="openPopup('nabModal')" class="w-full p-4 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all hover:shadow-[0_6px_25px_rgba(0,0,0,0.06)] group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-[48px] h-[48px] rounded-[16px] bg-cyan-50/80 text-cyan-500 flex items-center justify-center text-[20px] group-hover:scale-105 transition-transform border border-cyan-100/30"><i class="fas fa-star"></i></div>
+                            <div class="text-left">
+                                <h4 class="text-[16px] font-medium text-slate-700 tracking-wide">โบนัสตัวแทนใหม่ NAB</h4>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-cyan-50 group-hover:text-cyan-600 transition-colors">
+                            <i class="fas fa-chevron-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- ==================== BOTTOM NAVIGATION & FOOTER ==================== -->
+        <div id="bottomNavContainer" class="absolute bottom-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none pt-12 pb-safe bg-gradient-to-t from-[#f4f7fb] via-[#f4f7fb]/95 to-transparent transition-all duration-300 ease-in-out">
+            <div class="glass-nav rounded-[20px] shadow-[0_15px_40px_rgba(15,23,42,0.12)] flex justify-around items-center px-2 py-1.5 pointer-events-auto w-[calc(100%-2rem)] max-w-[400px] mb-3 border border-white/60">
+                <button id="navMainBtn" class="nav-item active flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="switchView('main')">
+                    <i class="fas fa-calculator text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">คำนวณ</span>
+                </button>
+                <button id="navTableBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="switchView('table')">
+                    <i class="fas fa-table-list text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">ตาราง</span>
+                </button>
+                <button class="nav-item flex flex-col items-center justify-center w-1/5 text-slate-400 -mt-5 pointer-events-auto hover:scale-105 transition-transform" onclick="startVoiceRecognition()">
+                    <div class="w-[48px] h-[48px] rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(225,29,72,0.4)] border-[3px] border-white/90 active:scale-95 transition-transform">
+                        <i class="fas fa-microphone text-[18px]" id="navVoiceIcon"></i>
+                    </div>
+                </button>
+                <button id="navCashBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="switchView('cash')">
+                    <i class="fas fa-money-bill-trend-up text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">CASH</span>
+                </button>
+                <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="openPopup('aiMenuModal')">
+                    <i class="fas fa-circle-nodes text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">AI</span>
+                </button>
+            </div>
+            <div class="absolute w-full text-center font-bold text-[8.5px] text-slate-400/80 tracking-[0.15em] uppercase pointer-events-auto" style="bottom: max(env(safe-area-inset-bottom), 6px);">&copy; SATAWAT BUTTRAKAS</div>
+        </div>
+            <!-- 🌟 THE NEW ULTRA-MODERN PLAN SELECTION MODAL 🌟 -->
+        <div id="planSelectModal" class="absolute inset-0 z-[1000] hidden bg-slate-900/60 backdrop-blur-[12px] overflow-hidden rounded-[inherit]">
+            <!-- ถอด flex ออก เปลี่ยนเป็น absolute เต็มจอ -->
+            <div id="planSelectCardWrapper" class="absolute inset-0 w-full h-full bg-[#f8fafc]/90 backdrop-blur-2xl overflow-hidden transition-all duration-500 opacity-0 translate-y-10">
+                
+                <div class="blob blob-1"></div><div class="blob blob-2"></div>
+                <div class="blob blob-3 absolute pointer-events-none"></div>
+                
+                <!-- 📜 พื้นที่เลื่อนวน (SCROLL CONTAINER) 📜 -->
+                <!-- ใส่ absolute เต็มจอ แล้วตั้ง overflow-y-auto ให้ Scroll ได้อิสระ 100% -->
+                 <div id="planListContainer" class="absolute inset-0 w-full h-full overflow-y-auto no-scrollbar px-5 pt-[140px] pb-[130px] space-y-3.5 z-10" style="-webkit-overflow-scrolling: touch;"></div>
+                <!-- JS จะใส่ข้อมูลที่นี่ -->
+                </div>
+                
+                <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-transparent pointer-events-none z-20 transition-opacity duration-500"></div>
+
+                <!-- Floating AI Bottom Bar -->
+                <div id="modalBottomBar" class="absolute bottom-6 left-4 right-4 z-30 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                    <div class="bg-slate-900/85 backdrop-blur-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] rounded-[28px] p-2 flex items-center gap-2 transform transition-all hover:bg-slate-900/95 shimmer-bg">
+                        <div class="flex-1 relative flex items-center group">
+                            <div class="absolute left-1.5 w-10 h-10 rounded-[18px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-blue-300 group-focus-within:ai-pulse transition-all"><i class="fas fa-sparkles text-[15px]"></i></div>
+                            <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)" class="w-full bg-transparent border border-white/10 text-white rounded-[20px] py-3.5 pl-[3.25rem] pr-4 focus:outline-none focus:bg-white/10 focus:border-blue-400/50 transition-all text-[13px] font-medium placeholder:text-slate-400/80" placeholder="พิมพ์เพื่อคำนวณเบี้ยประกัน...">
+                        </div>
+                       <!-- ปุ่มไมโครโฟนที่เชื่อมกับระบบเดิม -->
+                            <button id="modalVoiceBtn" 
+                            onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}" 
+                            class="w-[52px] h-[52px] shrink-0 rounded-[22px] bg-blue-600 flex items-center justify-center text-white shadow-[0_5px_15px_rgba(37,99,235,0.4)] active:scale-90 transition-all">
+                            <i class="fas fa-microphone text-[19px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== MODALS (POPUPS) ==================== -->
+    <div id="aiMenuModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 text-center">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5">
+                <h3 class="text-base font-bold text-[#1e3a8a]"><i class="fas fa-robot mr-2 text-blue-600"></i> เลือกผู้ช่วย AI</h3>
+                <button onclick="closePopup('aiMenuModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button>
+            </div>
+            <div class="space-y-2.5">
+                <button onclick="window.open('https://gemini.google.com/', '_blank'); closePopup('aiMenuModal')" class="w-full flex justify-between items-center p-3.5 bg-sky-50 border border-sky-200 rounded-xl active:bg-sky-100 transition-colors group shadow-sm hover:bg-sky-100/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-sky-600 shadow-sm"><i class="fas fa-sparkles text-base"></i></div>
+                        <div class="text-left">
+                            <span class="text-[14px] font-bold text-sky-800 block">Google Gemini</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-external-link-alt text-xs text-sky-400"></i>
+                </button>
+                <button onclick="window.open('https://notebooklm.google.com/', '_blank'); closePopup('aiMenuModal')" class="w-full flex justify-between items-center p-3.5 bg-purple-50 border border-purple-200 rounded-xl active:bg-purple-100 transition-colors group shadow-sm hover:bg-purple-100/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-purple-600 shadow-sm"><i class="fas fa-book-open text-base"></i></div>
+                        <div class="text-left">
+                            <span class="text-[14px] font-bold text-purple-800 block">Notebook LM</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-external-link-alt text-xs text-purple-400"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========================================== -->
+    <!-- 1. หน้าสรุปผลหลัก (Result Modal) ดีไซน์ใหม่ -->
+    <!-- ========================================== -->
+    <div id="resultModal" class="modal-overlay hidden">
+        <div class="modal-content-card !max-w-[24rem] !p-0 !bg-slate-50 border-none overflow-hidden rounded-[24px]">
+            <!-- Header แบบใหม่ สีน้ำเงินเข้ม -->
+            <div class="bg-[#1e3a8a] p-5 pt-8 pb-6 text-center text-white relative rounded-b-[24px] shadow-sm z-10">
+                <button onclick="closePopup('resultModal')" class="absolute top-4 right-4 text-blue-200 hover:text-white text-xl w-8 h-8 flex justify-center items-center transition-colors">&times;</button>
+                <div class="mx-auto w-12 h-12 bg-emerald-400 rounded-full flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(52,211,153,0.4)]">
+                    <i class="fas fa-check text-white text-2xl"></i>
+                </div>
+                <h3 class="text-[20px] font-bold tracking-tight">สรุปผลการคำนวณ</h3>
+            </div>
+
+            <!-- Content Area -->
+            <div class="overflow-y-auto custom-scrollbar p-4 pb-6 h-[65vh] max-h-[600px] -mt-4 pt-8">
+                
+                <!-- 3 กล่องบน (เพศ, อายุ, ระยะออม) -->
+                <div class="flex gap-2.5 mb-4">
+                    <div class="flex-1 text-center py-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">เพศ</span>
+                        <span id="modalGender" class="text-[14px] font-black text-blue-900">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">อายุ</span>
+                        <span id="modalAge" class="text-[14px] font-black text-blue-900">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">ระยะออม</span>
+                        <span id="modalYears" class="text-[14px] font-black text-blue-900">-</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- กล่องออมเงิน -->
+                    <div class="flex justify-between items-center p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                        <span class="text-[13px] text-blue-900 font-bold">ออมเงิน</span>
+                        <span class="text-[16px] font-extrabold text-blue-800"><span id="modalPremium">0</span> บาท</span>
+                    </div>
+                    
+                    <!-- กล่องทุนประกัน -->
+                    <div class="flex justify-between items-center p-4 bg-emerald-50/70 rounded-2xl border border-emerald-100">
+                        <span class="text-[13px] text-emerald-900 font-bold">ทุนประกัน</span>
+                        <span class="text-[16px] font-extrabold text-emerald-700"><span id="modalSum">0</span> บาท</span>
+                    </div>
+                    
+                    <!-- กล่อง 1 ใน 15 โรคเด็ก -->
+                    <div id="modalChildRow" class="hidden flex-col bg-blue-50/40 rounded-2xl border border-blue-100 overflow-hidden">
+                        <div class="p-4 pb-3 flex justify-between items-start border-b border-blue-100/50">
+                            <div>
+                                <span class="text-[13px] text-blue-900 font-bold block mb-1">ตรวจพบ 1 ใน 15 โรคเด็ก</span>
+                                <span class="text-[12px] text-blue-600 font-medium">จ่าย</span>
+                            </div>
+                            <span class="text-[16px] font-extrabold text-blue-700"><span id="modalChildCI">0</span> บาท</span>
+                        </div>
+                        <button onclick="openPopup('disease15Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-blue-800 font-bold hover:bg-blue-100/50 transition-colors">
+                            รายชื่อ 15 โรคเด็ก <i class="fas fa-chevron-right text-blue-400 text-[10px]"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- กล่อง 1 ใน 5 โรคร้าย -->
+                    <div id="modalExtraCIRow" class="flex-col bg-amber-50/40 rounded-2xl border border-amber-100 overflow-hidden">
+                        <div class="p-4 pb-3 flex justify-between items-start border-b border-amber-100/50">
+                            <div>
+                                <span class="text-[13px] text-amber-900 font-bold block mb-1">ตรวจพบ 1 ใน 5 โรคร้าย</span>
+                                <span class="text-[12px] text-amber-600 font-medium">จ่าย (สูงสุด 4 ครั้ง)</span>
+                            </div>
+                            <span class="text-[16px] font-extrabold text-amber-700"><span id="modalExtraCI">0</span> บาท</span>
+                        </div>
+                        <button onclick="openPopup('disease5Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
+                            รายชื่อ 5 โรคร้าย <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- กล่อง 1 ใน 45 โรคร้าย -->
+                    <div id="modalMajorCIRow" class="flex-col bg-amber-50/40 rounded-2xl border border-amber-100 overflow-hidden">
+                        <div class="p-4 pb-3 flex justify-between items-start border-b border-amber-100/50">
+                            <div>
+                                <span class="text-[13px] text-amber-900 font-bold block mb-1">ตรวจพบ 1 ใน 45 โรคร้าย (ภายหลัง)</span>
+                                <span class="text-[12px] text-amber-600 font-medium">จ่าย</span>
+                            </div>
+                            <span class="text-[16px] font-extrabold text-amber-700"><span id="modalMajorCI">0</span> บาท</span>
+                        </div>
+                        <button onclick="openPopup('extraPayConditionsModal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold border-b border-amber-100/50 hover:bg-amber-100/50 transition-colors">
+                            เงื่อนไขการจ่ายเพิ่มเติม <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
+                        </button>
+                        <button onclick="openPopup('disease45Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
+                            รายชื่อ 45 โรคร้าย <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- ปุ่มแชร์คำนิยาม -->
+                    <button onclick="openGenericShareModal('diseaseList')" class="w-full flex justify-between items-center p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-800 font-bold text-[12px] active:scale-[0.98] transition-all">
+                        <div class="flex items-center gap-2"><div class="w-7 h-7 bg-emerald-200/50 rounded-full flex items-center justify-center"><i class="fas fa-file-medical text-emerald-600"></i></div>แชร์ คำนิยามโรคร้าย</div>
+                        <i class="fas fa-share-nodes text-emerald-500"></i>
+                    </button>
+                    
+                    <!-- กล่องจากไป หรือ ครบสัญญา -->
+                    <div id="modalMaturityRow" class="flex-col bg-indigo-50/40 rounded-2xl border border-indigo-100 overflow-hidden mt-2">
+                        <div class="p-4 pb-3 flex justify-between items-start border-b border-indigo-100/50">
+                            <div>
+                                <span class="text-[13px] text-indigo-900 font-bold block mb-1">จากไปหรือครบสัญญา</span>
+                                <span class="text-[12px] text-indigo-600 font-medium">จ่าย</span>
+                            </div>
+                            <span class="text-[16px] font-extrabold text-indigo-800"><span id="modalMaturity">0</span> บาท</span>
+                        </div>
+                        <button onclick="openPopup('maturityExtraModal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-indigo-800 font-bold hover:bg-indigo-100/50 transition-colors">
+                            เงื่อนไขเพิ่มเติม <i class="fas fa-chevron-right text-indigo-400 text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ปุ่ม Action ด้านล่าง -->
+                <div id="modalActionBtnsContainer" class="mt-5 space-y-2.5 border-t border-slate-200 pt-5">
+                    <button onclick="generatePDFTable('preview')" class="w-full py-3.5 bg-fuchsia-50/50 text-fuchsia-800 font-bold rounded-2xl border border-fuchsia-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all">
+                        <div class="flex items-center gap-3"><i class="fas fa-table-list text-fuchsia-600"></i> ตารางมูลค่ากรมธรรม์</div><i class="fas fa-external-link-alt opacity-50"></i>
+                    </button>
+                    <button onclick="openGenericShareModal('premium')" class="w-full py-3.5 bg-blue-50 text-blue-700 font-bold rounded-2xl border border-blue-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all">
+                        <div class="flex items-center gap-3"><i class="fas fa-coins text-blue-500"></i> แชร์เฉพาะเบี้ยประกัน</div><i class="fas fa-share-nodes opacity-50"></i>
+                    </button>
+                    <button onclick="openGenericShareModal('all')" class="w-full py-3.5 bg-[#1e3a8a] text-white font-bold rounded-2xl shadow-md flex justify-between items-center px-5 active:scale-[0.98] transition-all">
+                        <div class="flex items-center gap-3"><i class="fas fa-file-invoice text-blue-300"></i> แชร์สรุปทั้งหมด</div><i class="fas fa-share-nodes text-blue-300"></i>
+                    </button>
+                    <button onclick="closePopup('resultModal')" class="w-full py-3.5 bg-slate-100 text-slate-600 font-bold rounded-2xl border border-slate-200 mt-2 hover:bg-slate-200 transition-colors">
+                        ปิดหน้าต่าง
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. หน้าต่างรายชื่อโรคและเงื่อนไข (Sub-Modals) -->
+    <!-- ========================================== -->
+
+    <!-- รายชื่อ 15 โรคเด็ก -->
+    <div id="disease15Modal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-white border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-slate-50">
+                <h3 class="text-[16px] font-bold text-blue-900 flex items-center gap-2"><i class="fas fa-child text-blue-500"></i> รายชื่อ 15 โรคเด็ก</h3>
+                <button onclick="closePopup('disease15Modal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200">&times;</button>
+            </div>
+            <div class="overflow-y-auto custom-scrollbar p-5 h-[50vh] space-y-4">
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800 flex items-start gap-1"><span class="text-blue-500 mt-0.5"><i class="fas fa-info-circle text-[10px]"></i></span> 1) โรคไข้รูมาติกที่มีอาการลิ้นหัวใจบกพร่อง</p><p class="text-[10px] text-slate-500 mt-1 ml-4">(Rheumatic Fever with Valvular Impairment)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800 flex items-start gap-1"><span class="text-blue-500 mt-0.5"><i class="fas fa-info-circle text-[10px]"></i></span> 2) โรคคาวาซากิที่มีอาการแทรกซ้อนทางหัวใจ</p><p class="text-[10px] text-slate-500 mt-1 ml-4">(Kawasaki Disease with Heart Complications)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800 flex items-start gap-1"><span class="text-blue-500 mt-0.5"><i class="fas fa-info-circle text-[10px]"></i></span> 3) โรคเบาหวานชนิดที่ 1 / เบาหวานชนิดพึ่งอินซูลิน</p><p class="text-[10px] text-slate-500 mt-1 ml-4">(Type 1 Diabetes / Insulin Dependent Diabetes Mellitus)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800 flex items-start gap-1"><span class="text-blue-500 mt-0.5"><i class="fas fa-info-circle text-[10px]"></i></span> 4) โรคหอบหืดขั้นรุนแรง</p><p class="text-[10px] text-slate-500 mt-1 ml-4">(Severe Asthma)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">5) โรคเลือดไหลไม่หยุด ชนิดเอและบี</p><p class="text-[10px] text-slate-500 mt-1">(Hemophilia A and B)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">6) โรคกระดูกเปราะพันธุกรรม</p><p class="text-[10px] text-slate-500 mt-1">(Osteogenesis Imperfecta)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">7) โรคมือ เท้า ปาก ที่มีอาการแทรกซ้อนรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Hand, Foot and Mouth Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">8) โรคไตรั่ว ชนิดมีอาการโปรตีนรั่วในปัสสาวะ</p><p class="text-[10px] text-slate-500 mt-1">(Nephrotic Syndrome with Proteinuria)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">9) โรคสติลล์</p><p class="text-[10px] text-slate-500 mt-1">(Still's Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">10) โรคบาดทะยัก</p><p class="text-[10px] text-slate-500 mt-1">(Tetanus)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">11) โรคลมชักรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Epilepsy)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">12) โรคกล้ามเนื้อลีบจากไขสันหลังเสื่อม ชนิดที่หนึ่ง</p><p class="text-[10px] text-slate-500 mt-1">(Spinal Muscular Atrophy Type 1)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">13) โรคพิษสุนัขบ้า</p><p class="text-[10px] text-slate-500 mt-1">(Rabies)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">14) โรคติดเชื้อของเยื่อบุหัวใจ ลิ้นหัวใจ และหลอดเลือด</p><p class="text-[10px] text-slate-500 mt-1">(Infective Endocarditis)</p></div>
+                <div class="pb-3"><p class="text-[13px] font-bold text-slate-800">15) กลุ่มอาการไอเซนเมนเกอร์ขั้นรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Eisenmenger's Syndrome)</p></div>
+            </div>
+            <div class="p-5 border-t border-slate-50">
+                <button onclick="closePopup('disease15Modal')" class="w-full py-3.5 bg-blue-50 text-blue-800 font-bold rounded-xl border border-blue-200 transition-colors hover:bg-blue-100">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- รายชื่อ 5 โรคร้าย -->
+    <div id="disease5Modal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-white border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-slate-50">
+                <h3 class="text-[16px] font-bold text-amber-900 flex items-center gap-2"><i class="fas fa-virus text-amber-600"></i> รายชื่อ 5 โรคร้าย</h3>
+                <button onclick="closePopup('disease5Modal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200">&times;</button>
+            </div>
+            <div class="overflow-y-auto custom-scrollbar p-5 space-y-4">
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">1) โรคหลอดเลือดหัวใจตีบที่รักษาด้วยการสวนหลอดเลือดหัวใจ</p><p class="text-[10px] text-slate-500 mt-1">(Coronary Artery Disease Requiring Angioplasty)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">2) โรคหลอดเลือดสมองที่ได้รับการผ่าตัดลอกหลอดเลือดแดงคาโรติด</p><p class="text-[10px] text-slate-500 mt-1">(Surgery to Carotid Artery)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">3) โรคมะเร็งระยะไม่ลุกลาม</p><p class="text-[10px] text-slate-500 mt-1">(Carcinoma in Situ / Early Stage Cancer)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">4) โรคหลอดเลือดสมองโป่งพองที่รักษาโดยใช้ขดลวดผ่านสายสวนทางหลอดเลือด</p><p class="text-[10px] text-slate-500 mt-1">(Cerebral Aneurysm Requiring Endovascular Coiling)</p></div>
+                <div class="pb-3"><p class="text-[13px] font-bold text-slate-800">5) โรคหลอดเลือดสมองที่ได้รับการรักษาโดยวิธีใส่สายสวนเส้นเลือดแดงบริเวณคอ</p><p class="text-[10px] text-slate-500 mt-1">(Endovascular Treatment for Carotid Artery Disease)</p></div>
+            </div>
+            <div class="p-5 border-t border-slate-50">
+                <button onclick="closePopup('disease5Modal')" class="w-full py-3.5 bg-amber-50 text-amber-800 font-bold rounded-xl border border-amber-200 transition-colors hover:bg-amber-100">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- รายชื่อ 45 โรคร้ายแรง -->
+    <div id="disease45Modal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-white border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-slate-50">
+                <h3 class="text-[16px] font-bold text-amber-900 flex items-center gap-2"><i class="fas fa-ribbon text-amber-600"></i> รายชื่อ 45 โรคร้ายแรง</h3>
+                <button onclick="closePopup('disease45Modal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200">&times;</button>
+            </div>
+            <div class="overflow-y-auto custom-scrollbar p-5 h-[50vh] space-y-4">
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">1) โรคสมองเสื่อมชนิดอัลไซเมอร์</p><p class="text-[10px] text-slate-500 mt-1">(Alzheimer’s Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">2) โรคโลหิตจางจากไขกระดูกไม่สร้างเม็ดโลหิต</p><p class="text-[10px] text-slate-500 mt-1">(Aplastic Anemia)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">3) โรคเยื่อหุ้มสมองและไขสันหลังอักเสบจากเชื้อแบคทีเรีย</p><p class="text-[10px] text-slate-500 mt-1">(Bacterial Meningitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">4) เนื้องอกในสมองชนิดที่ไม่ใช่มะเร็ง</p><p class="text-[10px] text-slate-500 mt-1">(Benign Brain Tumor)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">5) ตาบอด</p><p class="text-[10px] text-slate-500 mt-1">(Blindness)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">6) โรคมะเร็งระยะลุกลาม</p><p class="text-[10px] text-slate-500 mt-1">(Invasive Cancer)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">7) โรคกล้ามเนื้อหัวใจ</p><p class="text-[10px] text-slate-500 mt-1">(Cardiomyopathy)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">8) ตับวาย</p><p class="text-[10px] text-slate-500 mt-1">(Chronic Liver Disease / End-stage Liver Disease / Liver Failure)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">9) โรคหลอดลมปอดอุดกั้นเรื้อรังขั้นรุนแรง/โรคปอดระยะสุดท้าย</p><p class="text-[10px] text-slate-500 mt-1">(Severe Chronic Obstructive Pulmonary Disease / End-stage Lung Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">10) ภาวะโคม่า</p><p class="text-[10px] text-slate-500 mt-1">(Coma)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">11) การผ่าตัดเส้นเลือดเลี้ยงกล้ามเนื้อหัวใจ</p><p class="text-[10px] text-slate-500 mt-1">(Coronary Artery By-pass Surgery)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">12) กล้ามเนื้อหัวใจตายเฉียบพลันจากการขาดเลือด</p><p class="text-[10px] text-slate-500 mt-1">(Acute Heart Attack)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">13) การผ่าตัดลิ้นหัวใจโดยวิธีการเปิดหัวใจ</p><p class="text-[10px] text-slate-500 mt-1">(Open Heart Surgery for the Heart Valve)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">14) ไตวายเรื้อรัง</p><p class="text-[10px] text-slate-500 mt-1">(Chronic Kidney Failure)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">15) การสูญเสียการได้ยิน</p><p class="text-[10px] text-slate-500 mt-1">(Loss of Hearing)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">16) การสูญเสียการดำรงชีพอย่างอิสระ</p><p class="text-[10px] text-slate-500 mt-1">(Loss of Independent Living)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">17) การทุพพลภาพถาวรสิ้นเชิง</p><p class="text-[10px] text-slate-500 mt-1">(Total Permanent Disability)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">18) การสูญเสียความสามารถในการพูด</p><p class="text-[10px] text-slate-500 mt-1">(Loss of Speech)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">19) แผลไหม้ฉกรรจ์</p><p class="text-[10px] text-slate-500 mt-1">(Major Burn)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">20) การบาดเจ็บที่ศีรษะอย่างรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Major Head Trauma)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">21) การผ่าตัดเปลี่ยนอวัยวะหรือปลูกถ่ายไขกระดูก</p><p class="text-[10px] text-slate-500 mt-1">(Major Organs Transplantation or Bone Marrow Transplantation)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">22) โรคของเซลล์ประสาทควบคุมการเคลื่อนไหว</p><p class="text-[10px] text-slate-500 mt-1">(Motor Neurone Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">23) โรคระบบประสาทมัลติเพิล สะเคลอโรสิส</p><p class="text-[10px] text-slate-500 mt-1">(Multiple Sclerosis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">24) โรคกล้ามเนื้อเสื่อม</p><p class="text-[10px] text-slate-500 mt-1">(Muscular Dystrophy)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">25) โรคไวรัสตับอักเสบขั้นรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Viral Hepatitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">26) โรคเส้นเลือดหัวใจตีบ</p><p class="text-[10px] text-slate-500 mt-1">(Other Coronary Artery Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">27) อัมพาตของกล้ามเนื้อแขนหรือขา</p><p class="text-[10px] text-slate-500 mt-1">(Paralysis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">28) โรคพาร์กินสัน</p><p class="text-[10px] text-slate-500 mt-1">(Parkinson’s Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">29) โรคแรงดันในหลอดเลือดแดงปอดสูงแบบปฐมภูมิ</p><p class="text-[10px] text-slate-500 mt-1">(Primary Pulmonary Arterial Hypertension)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">30) ภาวะข้ออักเสบรูมาตอยด์ชนิดรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Rheumatoid Arthritis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">31) โรคหลอดเลือดสมองแตกหรืออุดตัน</p><p class="text-[10px] text-slate-500 mt-1">(Stroke)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">32) การผ่าตัดเส้นเลือดแดงใหญ่ เอออร์ต้า</p><p class="text-[10px] text-slate-500 mt-1">(Surgery to Aorta)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">33) ไตอักเสบลูปูส จากโรคซิสเต็มมิค ลูปูส อิริเธมาโตซูส</p><p class="text-[10px] text-slate-500 mt-1">(Lupus Nephritis from Systemic Lupus Erythematosus)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">34) สมองอักเสบจากเชื้อไวรัส</p><p class="text-[10px] text-slate-500 mt-1">(Viral Encephalitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">35) ภาวะอะแพลลิก</p><p class="text-[10px] text-slate-500 mt-1">(Apallic Syndrome)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">36) โรคหลอดเลือดสมองโป่งพองที่ต้องรักษาโดยการผ่าตัด</p><p class="text-[10px] text-slate-500 mt-1">(Cerebral Aneurysm Requiring Brain Surgery)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">37) การฉีกขาดของรากประสาทต้นแขน</p><p class="text-[10px] text-slate-500 mt-1">(Severance of Brachial Plexus)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">38) โรคโปลิโอ</p><p class="text-[10px] text-slate-500 mt-1">(Poliomyelitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">39) การผ่าตัดกระดูกสันหลังคดที่ไม่ทราบสาเหตุ</p><p class="text-[10px] text-slate-500 mt-1">(Idiopathic Scoliosis Surgery)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">40) ภาวะตับอ่อนอักเสบที่กลับเป็นซ้ำและเรื้อรัง</p><p class="text-[10px] text-slate-500 mt-1">(Chronic Relapsing Pancreatitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">41) โรคเท้าช้าง</p><p class="text-[10px] text-slate-500 mt-1">(Elephantiasis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">42) โรคถุงน้ำในไต</p><p class="text-[10px] text-slate-500 mt-1">(Medullary Cystic Disease)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">43) โรคเนื้อเยื่อพังผืดอักเสบติดเชื้อและเป็นเนื้อตาย</p><p class="text-[10px] text-slate-500 mt-1">(Necrotizing Fasciitis)</p></div>
+                <div class="border-b border-slate-100 pb-3"><p class="text-[13px] font-bold text-slate-800">44) โรคหนังแข็งชนิดลุกลาม</p><p class="text-[10px] text-slate-500 mt-1">(Systemic Scleroderma)</p></div>
+                <div class="pb-3"><p class="text-[13px] font-bold text-slate-800">45) โรคลำไส้อักเสบเป็นแผลรุนแรง</p><p class="text-[10px] text-slate-500 mt-1">(Severe Ulcerative Colitis)</p></div>
+            </div>
+            <div class="p-5 border-t border-slate-50">
+                <button onclick="closePopup('disease45Modal')" class="w-full py-3.5 bg-amber-50 text-amber-800 font-bold rounded-2xl transition-colors hover:bg-amber-100">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- เงื่อนไขการจ่ายเพิ่มเติม (สำหรับ 45 โรคร้าย) -->
+    <div id="extraPayConditionsModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-white border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-slate-50">
+                <h3 class="text-[16px] font-bold text-amber-900 flex items-center gap-2"><i class="fas fa-clipboard-list text-amber-600"></i> เงื่อนไขการจ่ายเพิ่มเติม</h3>
+                <button onclick="closePopup('extraPayConditionsModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-200">
+                    <p class="text-[14px] font-bold text-amber-900 mb-2">1. ยกเว้นการออมเงินในครั้งถัดไป</p>
+                    <p class="text-[12px] text-amber-700 leading-relaxed font-medium">หากตรวจพบโรคร้ายแรงระดับรุนแรง บริษัทจะยกเว้นการชำระเบี้ยประกันภัยในงวดต่อไปทั้งหมด แต่ยังคงให้ความคุ้มครองต่อเนื่องจนครบสัญญา</p>
+                </div>
+                <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-200">
+                    <p class="text-[14px] font-bold text-amber-900 mb-2">2. พร้อมดูแลค่ารักษาเพิ่มเติม</p>
+                    <p class="text-[12px] text-amber-700 leading-relaxed font-medium mb-4">มอบวงเงินพิเศษ <span class="font-bold underline text-[13px]"><span id="modalMedExtra1Popup">0</span> บาท</span> สำหรับการรักษาและฟื้นฟู</p>
+                    <button onclick="showMedExtraDef()" class="w-full py-2.5 bg-white border border-amber-200 text-amber-600 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 hover:bg-amber-100 shadow-sm"><i class="fas fa-info-circle"></i> ดูรายละเอียดค่ารักษาเพิ่มเติม</button>
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-50">
+                <button onclick="closePopup('extraPayConditionsModal')" class="w-full py-3.5 bg-amber-100 text-amber-800 font-bold rounded-xl transition-colors hover:bg-amber-200">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- รายการค่ารักษาพยาบาลเพิ่มเติม (เปิดจากปุ่ม ดูรายละเอียดค่ารักษา) -->
+    <div id="medExtraDefModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-slate-50 border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-start">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg shadow-sm"><i class="fas fa-book-medical"></i></div>
+                <button onclick="closePopup('medExtraDefModal')" class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-300">&times;</button>
+            </div>
+            <div class="px-5 pb-2">
+                <h3 class="text-[16px] font-bold text-blue-900 mb-1">รายการค่ารักษาพยาบาลเพิ่มเติม</h3>
+                <div class="w-10 h-1 bg-blue-500 rounded-full mb-4"></div>
+                <div class="space-y-2 text-[13px] font-bold text-slate-700 pb-4">
+                    <p>1. ค่ารักษาพยาบาลโรคร้ายแรง</p>
+                    <p>2. ค่าเวชศาสตร์ฟื้นฟู</p>
+                    <p>3. ค่ารักษาความงามและศัลยกรรมตกแต่ง</p>
+                    <p>4. ค่ารักษาแพทย์ทางเลือก</p>
+                </div>
+            </div>
+            <div class="p-5 pt-3">
+                <button onclick="closePopup('medExtraDefModal')" class="w-full py-3.5 bg-[#1e3a8a] text-white font-bold rounded-xl shadow-md transition-colors hover:bg-blue-800">ปิดหน้าต่างนี้</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- เงื่อนไขจากไปหรือครบสัญญา -->
+    <div id="maturityExtraModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-0 !bg-white border-none rounded-[28px] overflow-hidden !max-w-[22rem]">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-slate-50">
+                <h3 class="text-[16px] font-bold text-indigo-900 flex items-center gap-2"><i class="fas fa-info-circle text-indigo-600"></i> เงื่อนไขเพิ่มเติม</h3>
+                <button onclick="closePopup('maturityExtraModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100">
+                    <p class="text-[14px] font-bold text-indigo-900 mb-2">กรณีพบโรคร้ายระดับรุนแรงก่อน</p>
+                    <p class="text-[12px] text-indigo-700 leading-relaxed font-medium mb-4">บริษัทจะจ่ายเงินเพิ่มเติมให้ <span class="font-bold">5% ของทุนประกัน</span> เมื่อผู้เอาประกันภัยจากไป หรืออยู่จนครบกำหนดสัญญา</p>
+                    
+                    <div class="bg-white px-4 py-3 rounded-xl shadow-sm border border-indigo-50 flex justify-between items-center">
+                        <span class="text-[12px] font-bold text-indigo-900">ยอดเงินเพิ่มเติม</span>
+                        <span class="text-[14px] font-extrabold text-blue-700"><span id="modalMaturityExtraPopup">0</span> บาท</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-50">
+                <button onclick="closePopup('maturityExtraModal')" class="w-full py-3.5 bg-indigo-100 text-indigo-800 font-bold rounded-xl border border-indigo-200 transition-colors hover:bg-indigo-200">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="slbResultModal" class="modal-overlay hidden">
+        <div class="modal-content-card !max-w-[22rem]">
+            <div class="bg-gradient-to-br from-[#d97706] to-[#f59e0b] p-5 pt-6 text-center text-white flex-shrink-0 relative">
+                <button onclick="closePopup('slbResultModal')" class="absolute top-3 right-4 text-amber-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10 backdrop-blur-sm">&times;</button>
+                <h3 class="text-[20px] font-bold tracking-tight drop-shadow-md">สรุปผล Signature Legacy</h3>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar p-4 pb-5 bg-white">
+                <div class="flex gap-2.5 mb-3.5">
+                    <div class="flex-1 text-center py-2.5 bg-slate-50 rounded-[14px] border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">เพศ</span>
+                        <span id="modalSLBGender" class="text-[15px] font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-2.5 bg-slate-50 rounded-[14px] border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">อายุ</span>
+                        <span id="modalSLBAge" class="text-[15px] font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-2.5 bg-slate-50 rounded-[14px] border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">ระยะชำระ</span>
+                        <span id="modalSLBYears" class="text-[15px] font-bold text-slate-800">-</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3.5 bg-blue-50/70 rounded-[14px] border border-blue-100 border-l-[6px] border-l-blue-500">
+                        <span class="text-[13px] text-blue-900 font-bold flex items-center gap-2"><i class="fas fa-wallet text-blue-500"></i> เบี้ยประกัน</span>
+                        <span id="modalSLBPremium" class="text-[18px] font-extrabold text-blue-700">0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3.5 bg-amber-50/70 rounded-[14px] border border-amber-100 border-l-[6px] border-l-amber-500">
+                        <span class="text-[13px] text-amber-900 font-bold flex items-center gap-2"><i class="fas fa-crown text-amber-500"></i> ทุนชีวิต (มรดก)</span>
+                        <span id="modalSLBSum" class="text-[18px] font-extrabold text-amber-700">0</span>
+                    </div>
+                    
+                    <div class="flex flex-col p-3.5 bg-rose-50/70 rounded-[14px] border border-rose-100">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <div class="flex flex-col">
+                                <span class="text-[12px] text-rose-900 font-bold">1. เสียชีวิตจากอุบัติเหตุ</span>
+                                <span class="text-[10px] text-rose-600 font-medium">+1 เท่าของทุน (สูงสุด 100 ล้าน)</span>
+                            </div>
+                            <div class="text-right flex flex-col">
+                                <span class="text-[10px] text-slate-500 font-medium">รับรวมทันที</span>
+                                <span id="modalSLBAccident" class="text-[16px] font-extrabold text-rose-700 leading-none">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col p-3.5 bg-orange-50/70 rounded-[14px] border border-orange-100">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex flex-col">
+                                <span class="text-[12px] text-orange-900 font-bold">2. ตรวจพบ 5 โรคมะเร็ง</span>
+                                <span class="text-[10px] text-orange-600 font-medium">จ่าย 30% (สูงสุด 30 ล้าน)</span>
+                            </div>
+                            <span id="modalSLBCancer" class="text-[16px] font-extrabold text-orange-700">0</span>
+                        </div>
+                        <button onclick="openPopup('slbDiseaseModal')" class="text-[11px] text-orange-800 bg-orange-100 py-1.5 rounded-xl font-bold hover:bg-orange-200 transition-colors w-full">ดูรายชื่อ 5 โรคมะเร็ง</button>
+                    </div>
+                    
+                    <div class="flex flex-col p-3.5 bg-indigo-50/70 rounded-[14px] border border-indigo-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[12px] text-indigo-900 font-bold">3. เจ็บป่วยระยะสุดท้าย</span>
+                                <span class="text-[10px] text-indigo-600 font-medium">จ่าย 90% ของทุน</span>
+                            </div>
+                            <span id="modalSLBTerminal" class="text-[16px] font-extrabold text-indigo-700">0</span>
+                        </div>
+                        <p id="modalSLBTerminalNote" class="text-[10px] text-indigo-600 font-medium leading-tight mt-1">* หากรับเงินก้อนมะเร็ง 30% ไปแล้ว จะหักออกจากยอดนี้ (สูงสุดไม่เกิน 100 ล้านบาท)</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button onclick="openGenericShareModal('slb')" class="w-full bg-[#d97706] hover:bg-[#b45309] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(217,119,6,0.3)] active:scale-95 transition-all">
+                        <i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุป SLB
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="slbDiseaseModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 text-center">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5">
+                <h3 class="text-base font-bold text-orange-900"><i class="fas fa-virus mr-2 text-orange-600"></i> 5 โรคมะเร็งที่คุ้มครอง</h3>
+                <button onclick="closePopup('slbDiseaseModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 text-left custom-scrollbar pr-2 pb-1">
+                <div class="divide-y divide-slate-100 px-1 mb-3">
+                    <div class="py-2.5"><div class="text-[12px] font-bold text-slate-800">1) โรคมะเร็งปอด (Lung Cancer)</div></div>
+                    <div class="py-2.5"><div class="text-[12px] font-bold text-slate-800">2) โรคมะเร็งตับ (Liver Cancer)</div></div>
+                    <div class="py-2.5"><div class="text-[12px] font-bold text-slate-800">3) โรคมะเร็งตับอ่อน (Pancreatic Cancer)</div></div>
+                    <div class="py-2.5"><div class="text-[12px] font-bold text-slate-800">4) โรคมะเร็งทางเดินน้ำดี (Bile Duct Cancer)</div></div>
+                    <div class="py-2.5"><div class="text-[12px] font-bold text-slate-800">5) โรคมะเร็งหลอดอาหารส่วนปลาย (Distal Esophageal Cancer)</div></div>
+                </div>
+            </div>
+            <button onclick="closePopup('slbDiseaseModal')" class="mt-3 w-full py-3 bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold rounded-xl border border-orange-200 transition-colors text-sm">ปิดหน้าต่าง</button>
+        </div>
+    </div>
+    
+    <!-- WXN Result Modal -->
+    <div id="wxnResultModal" class="modal-overlay hidden">
+        <div class="modal-content-card !max-w-[22rem]">
+            <div class="bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] p-5 pt-6 text-center text-white flex-shrink-0 relative">
+                <button onclick="closePopup('wxnResultModal')" class="absolute top-3 right-4 text-purple-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10 backdrop-blur-sm">&times;</button>
+                <h3 class="text-[20px] font-bold tracking-tight drop-shadow-md">สรุปผล Whole Life Extra</h3>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar p-4 pb-5 bg-white">
+                <div class="flex gap-2.5 mb-3.5">
+                    <div class="flex-1 text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold block mb-0.5">แผน</span><span id="modalWXNPlan" class="text-[14px] font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold block mb-0.5">เพศ</span><span id="modalWXNGender" class="text-[14px] font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex-1 text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-[10px] text-slate-500 font-bold block mb-0.5">อายุ</span><span id="modalWXNAge" class="text-[14px] font-bold text-slate-800">-</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3.5 bg-blue-50/70 rounded-[14px] border border-blue-100 border-l-[6px] border-l-blue-500">
+                        <span class="text-[13px] text-blue-900 font-bold flex items-center gap-2"><i class="fas fa-wallet text-blue-500"></i> ออมเงิน/ปี</span>
+                        <span id="modalWXNPremium" class="text-[18px] font-extrabold text-blue-700">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3.5 bg-emerald-50/70 rounded-[14px] border border-emerald-100 border-l-[6px] border-l-emerald-500">
+                        <span class="text-[13px] text-emerald-900 font-bold flex items-center gap-2"><i class="fas fa-shield-halved text-emerald-500"></i> ทุนประกัน (อ้างอิง)</span>
+                        <span id="modalWXNSum" class="text-[18px] font-extrabold text-emerald-700">0</span>
+                    </div>
+                    <div class="flex flex-col p-3.5 bg-purple-50/70 rounded-[14px] border border-purple-100">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[12px] text-purple-900 font-bold">💵 คืนเงิน อายุ 0-60 (2.25%)</span>
+                            <span id="modalWXNCF1" class="text-[15px] font-extrabold text-purple-700">0</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[12px] text-purple-900 font-bold">💵 คืนเงิน อายุ 61 (10%)</span>
+                            <span id="modalWXNCF2" class="text-[15px] font-extrabold text-purple-700">0</span>
+                        </div>
+                        <p class="text-[10px] text-purple-600 font-medium leading-tight mb-2">* อายุ 62-89 ปี รับเพิ่มขึ้นปีละ 0.5% (สูงสุด 24%)</p>
+                        <div class="flex justify-between items-center pt-2 border-t border-purple-200/50">
+                            <span class="text-[12px] text-purple-900 font-bold">ครบอายุ 90 ปี รับ 100%</span>
+                            <span id="modalWXNCF90" class="text-[15px] font-extrabold text-purple-700">0</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col p-3.5 bg-rose-50/70 rounded-[14px] border border-rose-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[12px] text-rose-900 font-bold">🕊️ กรณีเสียชีวิต (สูงสุด)</span>
+                            <span id="modalWXNDeath" class="text-[15px] font-extrabold text-rose-700">0</span>
+                        </div>
+                        <p class="text-[10px] text-rose-600 font-medium leading-tight mt-1">* จ่ายจำนวนที่มากกว่าระหว่าง 200% ของทุน, มูลค่าเวนคืน หรือเบี้ยที่ชำระมาแล้ว</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button onclick="openGenericShareModal('wxn')" class="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(124,58,237,0.3)] active:scale-95 transition-all">
+                        <i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุป WXN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>  
+
+    <!-- Medical Fund Plan Modal (MF กองทุนสุขภาพ) -->
+    <div id="mfPlanModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-indigo-800"><i class="fas fa-notes-medical text-indigo-600 mr-2"></i> เลือก กองทุนสุขภาพ (MF)</h3><button onclick="closePopup('mfPlanModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="space-y-2.5"><button onclick="setMFPlan('ไม่เลือก')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-indigo-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-indigo-800">ไม่เลือกเพิ่มเติม</span></button><button onclick="setMFPlan('MF1')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-indigo-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-indigo-800">MF แผน 1</span></button><button onclick="setMFPlan('MF2')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-indigo-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-indigo-800">MF แผน 2</span></button></div></div></div>
+    
+    <div id="installmentModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-[#1e3a8a]"><i class="fas fa-credit-card mr-2 text-blue-600"></i> ตัวเลือกการชำระเงิน</h3><button onclick="closePopup('installmentModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="space-y-2.5"><button onclick="triggerInstallmentShare('monthly')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-blue-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-blue-800">รายเดือน</span><span id="sumMonthlyPopup" class="text-base font-black text-[#1e3a8a]">0</span></button><button onclick="triggerInstallmentShare('3month')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-blue-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-blue-800">ราย 3 เดือน</span><span id="sum3MonthPopup" class="text-base font-black text-[#1e3a8a]">0</span></button><button onclick="triggerInstallmentShare('6month')" class="w-full flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl active:bg-blue-50 transition-colors group"><span class="text-xs font-bold text-slate-600 group-hover:text-blue-800">ราย 6 เดือน</span><span id="sum6MonthPopup" class="text-base font-black text-[#1e3a8a]">0</span></button></div><p class="text-[9px] text-slate-400 mt-3"><i class="fas fa-hand-pointer mr-1"></i> แตะที่ยอดเพื่อเลือกแชร์</p></div></div>
+    
+    <div id="paymentModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-emerald-800"><i class="fas fa-money-bill-transfer mr-2 text-emerald-600"></i> บัญชีโอนเงิน</h3><button onclick="closePopup('paymentModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="overflow-y-auto flex-1 custom-scrollbar pr-1 space-y-2.5 pb-2"><div onclick="openGenericShareModal('scb'); closePopup('paymentModal')" class="list-row flex justify-between items-center bg-white border-l-4 border-l-purple-500 p-3 rounded-xl cursor-pointer hover:bg-purple-50 shadow-sm border border-slate-100"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-black text-[10px] shadow-sm">SCB</div><div class="text-left"><p class="text-[11px] font-bold text-slate-500">ธ.ไทยพาณิชย์ <span class="font-normal text-slate-400 ml-1 text-[9px]">สาขาถนนวิทยุ</span></p><p class="text-[15px] font-black text-purple-800 tracking-wider mt-0.5">049-416-6866</p></div></div><i class="fas fa-share-nodes text-slate-300 text-sm"></i></div><div onclick="openGenericShareModal('bbl'); closePopup('paymentModal')" class="list-row flex justify-between items-center bg-white border-l-4 border-l-blue-500 p-3 rounded-xl cursor-pointer hover:bg-blue-50 shadow-sm border border-slate-100"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black text-[10px] shadow-sm">BBL</div><div class="text-left"><p class="text-[11px] font-bold text-slate-500">ธ.กรุงเทพ <span class="font-normal text-slate-400 ml-1 text-[9px]">สาขาสุรวงศ์</span></p><p class="text-[15px] font-black text-blue-800 tracking-wider mt-0.5">147-312-5357</p></div></div><i class="fas fa-share-nodes text-slate-300 text-sm"></i></div><div onclick="openGenericShareModal('bay'); closePopup('paymentModal')" class="list-row flex justify-between items-center bg-white border-l-4 border-l-amber-500 p-3 rounded-xl cursor-pointer hover:bg-amber-50 shadow-sm border border-slate-100"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-black text-[10px] shadow-sm">BAY</div><div class="text-left"><p class="text-[11px] font-bold text-slate-500">ธ.กรุงศรี <span class="font-normal text-slate-400 ml-1 text-[9px]">สาขาเพลินจิต</span></p><p class="text-[15px] font-black text-amber-800 tracking-wider mt-0.5">001-016-4329</p></div></div><i class="fas fa-share-nodes text-slate-300 text-sm"></i></div><div onclick="openGenericShareModal('kbank'); closePopup('paymentModal')" class="list-row flex justify-between items-center bg-white border-l-4 border-l-green-500 p-3 rounded-xl cursor-pointer hover:bg-green-50 shadow-sm border border-slate-100"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-black text-[10px] shadow-sm">KBANK</div><div class="text-left"><p class="text-[11px] font-bold text-slate-500">ธ.กสิกร <span class="font-normal text-slate-400 ml-1 text-[9px]">สาขาพหลโยธิน</span></p><p class="text-[15px] font-black text-green-800 tracking-wider mt-0.5">099-132-6065</p></div></div><i class="fas fa-share-nodes text-slate-300 text-sm"></i></div></div><p class="text-[9px] text-slate-400 mt-2"><i class="fas fa-hand-pointer mr-1"></i> แตะที่บัญชีเพื่อแชร์</p></div></div>
+    
+    <div id="eSubQniModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-[#9d174d]"><i class="fas fa-laptop-code mr-2 text-pink-500"></i> เลือกระบบงาน</h3><button onclick="closePopup('eSubQniModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="space-y-2.5"><button onclick="window.open('https://esales.cl-agency.in.th/prospects', '_blank')" class="w-full flex justify-between items-center p-3.5 bg-orange-50 border border-orange-200 rounded-xl active:bg-orange-100 transition-colors group shadow-sm hover:bg-orange-100/50"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-orange-600 shadow-sm"><i class="fas fa-file-signature text-base"></i></div><div class="text-left"><span class="text-[14px] font-bold text-orange-800 block">E-Submission</span></div></div><i class="fas fa-external-link-alt text-xs text-orange-400"></i></button><button onclick="window.open('https://esmart.chubblife-agency.in.th/chubb-life-qni/en/home?return=%2Fen%2Fhome', '_blank')" class="w-full flex justify-between items-center p-3.5 bg-sky-50 border border-sky-200 rounded-xl active:bg-sky-100 transition-colors group shadow-sm hover:bg-sky-100/50"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-sky-600 shadow-sm"><i class="fas fa-file-signature text-base"></i></div><div class="text-left"><span class="text-[14px] font-bold text-sky-800 block">QNI</span></div></div><i class="fas fa-external-link-alt text-xs text-sky-400"></i></button></div></div></div>
+    
+    <div id="insuranceConditionsModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-[#1e3a8a]"><i class="fas fa-info-circle mr-2 text-blue-600"></i> เงื่อนไขการรับประกัน</h3><button onclick="closePopup('insuranceConditionsModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="text-left overflow-y-auto max-h-[60vh] space-y-2.5 text-xs text-slate-700 font-medium"><div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100"><i class="fas fa-check text-blue-500 mr-2"></i>กำลังโหลดข้อมูล...</div></div><button onclick="closePopup('insuranceConditionsModal')" class="mt-5 w-full py-3 bg-[#243c94] hover:bg-[#1e327a] text-white font-bold rounded-xl transition-colors text-sm">ตกลง</button></div></div>
+    
+    <div id="pdfOptionsModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-file-pdf text-2xl"></i></div><h3 class="text-lg font-bold text-slate-800 mb-4">ดำเนินการกับข้อมูล</h3><div class="grid grid-cols-3 gap-2.5 mb-3"><button onclick="exportTableToPDF('line'); closePopup('pdfOptionsModal')" class="w-full flex flex-col justify-center items-center gap-1.5 p-2.5 bg-[#00B900]/10 rounded-xl border border-[#00B900]/20 active:scale-95 transition-all shadow-sm hover:bg-[#00B900]/20"><i class="fab fa-line text-[#00B900] text-xl"></i><span class="text-[9px] font-bold text-[#00B900] uppercase tracking-wider mt-1">ส่ง LINE</span></button><button onclick="exportTableToPDF('messenger'); closePopup('pdfOptionsModal')" class="w-full flex flex-col justify-center items-center gap-1.5 p-2.5 bg-[#0084FF]/10 rounded-xl border border-[#0084FF]/20 active:scale-95 transition-all shadow-sm hover:bg-[#0084FF]/20"><i class="fab fa-facebook-messenger text-[#0084FF] text-xl"></i><span class="text-[9px] font-bold text-[#0084FF] uppercase tracking-wider mt-1">ส่ง Messenger</span></button><button onclick="exportTableToPDF('print'); closePopup('pdfOptionsModal')" class="w-full flex flex-col justify-center items-center gap-1.5 p-2.5 bg-slate-100 rounded-xl border border-slate-200 active:scale-95 transition-all shadow-sm hover:bg-slate-200"><i class="fas fa-print text-slate-600 text-xl"></i><span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mt-1">พิมพ์ PDF</span></button></div><button onclick="exportTableToPDF('save'); closePopup('pdfOptionsModal')" class="w-full bg-red-600 text-white p-3.5 rounded-xl font-bold shadow-md flex justify-between items-center active:scale-95 transition-all text-[13px] hover:bg-red-700"><div class="flex items-center gap-2"><i class="fas fa-download text-base"></i><span>บันทึก PDF ลงในเครื่อง</span></div><i class="fas fa-chevron-right text-xs opacity-50"></i></button><button onclick="closePopup('pdfOptionsModal')" class="mt-4 text-slate-400 hover:text-slate-600 text-xs font-medium w-full py-2">ยกเลิก</button></div></div>
+    
+    <div id="genericShareModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" id="genericShareIconBg"><i id="genericShareIcon" class="fas fa-share-nodes text-2xl"></i></div><h3 id="genericShareTitle" class="text-lg font-bold text-slate-800 mb-4">เลือกช่องทางการแชร์</h3><div class="grid grid-cols-3 gap-2.5"><button onclick="handleGenericShare('line')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-[#00B900]/10 rounded-xl border border-[#00B900]/20 active:scale-95 transition-all shadow-sm hover:bg-[#00B900]/20"><i class="fab fa-line text-[#00B900] text-2xl"></i><span class="text-[10px] font-bold text-[#00B900] uppercase tracking-wider mt-1">LINE</span></button><button onclick="handleGenericShare('messenger')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-[#0084FF]/10 rounded-xl border border-[#0084FF]/20 active:scale-95 transition-all shadow-sm hover:bg-[#0084FF]/20"><i class="fab fa-facebook-messenger text-[#0084FF] text-xl"></i><span class="text-[10px] font-bold text-[#0084FF] uppercase tracking-wider mt-1">Messenger</span></button><button onclick="handleGenericShare('copy')" class="w-full flex flex-col justify-center items-center gap-1.5 p-3 bg-slate-100 rounded-xl border border-slate-200 active:scale-95 transition-all shadow-sm hover:bg-slate-200"><i class="fas fa-copy text-slate-600 text-2xl"></i><span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mt-1">คัดลอก</span></button></div><button onclick="closePopup('genericShareModal')" class="mt-5 text-slate-400 hover:text-slate-600 text-xs font-medium w-full py-2">ยกเลิก</button></div></div>
+    
+    <div id="installmentShareModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-share-nodes text-2xl"></i></div><h3 id="installmentShareTitle" class="text-lg font-bold text-[#1e3a8a] mb-4">เลือกรูปแบบการแชร์</h3><div class="space-y-2.5"><div class="w-full text-left"><button onclick="closePopup('installmentShareModal'); openGenericShareModal('installmentPrem')" class="w-full bg-slate-50 text-slate-700 border border-slate-200 p-3.5 rounded-xl font-bold shadow-sm flex justify-between items-center active:scale-95 transition-all text-[14px] hover:bg-slate-100"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"><i class="fas fa-coins text-slate-600 text-base"></i></div><span>แชร์เฉพาะออมเงิน</span></div><i class="fas fa-chevron-right text-xs text-slate-400"></i></button></div><div class="w-full text-left"><button onclick="closePopup('installmentShareModal'); openGenericShareModal('installmentAll')" class="w-full bg-blue-50 text-blue-800 border border-blue-200 p-3.5 rounded-xl font-bold shadow-sm flex justify-between items-center active:scale-95 transition-all text-[14px] hover:bg-blue-100"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center"><i class="fas fa-file-invoice text-blue-600 text-base"></i></div><span>แชร์สรุปทั้งหมด</span></div><i class="fas fa-chevron-right text-xs text-blue-400"></i></button></div></div><button onclick="closePopup('installmentShareModal')" class="mt-5 text-slate-400 hover:text-slate-600 text-xs font-medium">ยกเลิก</button></div></div>
+    
+    <!-- 1. รายได้จากเคสนี้ (Case Income Modal) - REDESIGNED -->
+    <div id="caseIncomeModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2.5">
+                    <h3 class="text-[17px] font-semibold text-slate-800 tracking-wide"><i class="fas fa-wallet text-emerald-500 mr-2 opacity-80"></i>รายได้จากเคสนี้</h3>
+                </div>
+                <button onclick="closePopup('caseIncomeModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="flex flex-col w-full text-left mt-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
+                <div class="bg-gradient-to-br from-[#059669] to-[#10b981] p-5 rounded-[24px] shadow-[0_10px_25px_rgba(16,185,129,0.3)] text-white text-center relative overflow-hidden mb-5">
+                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNykiLz48L3N2Zz4=')] opacity-50"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                    <p class="text-[12px] font-bold opacity-90 tracking-wide mb-1 uppercase relative z-10">รายได้สุทธิโดยประมาณ</p>
+                    <h2 class="text-[32px] font-black leading-tight drop-shadow-md relative z-10"><span id="caseIncomeTotal">0</span> <span class="text-xl font-bold">฿</span></h2>
+                    <div class="inline-flex items-center gap-1.5 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm mt-3 border border-white/30 relative z-10 shadow-inner">
+                        <i class="fas fa-chart-pie text-[11px]"></i>
+                        <span class="text-[11px] font-bold tracking-wide">สัดส่วนรายได้ <span id="caseIncomePercent" class="ml-1">0%</span></span>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shadow-inner"><i class="fas fa-coins"></i></div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-700">คอมมิชชันปีที่ 1</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p id="caseIncomeComm" class="text-[15px] font-black text-slate-800">0</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg shadow-inner"><i class="fas fa-calendar-alt"></i></div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-700">โบนัสรายเดือน</p>
+                                <p id="caseIncomeBonusCalc" class="text-[10px] font-medium text-slate-400 mt-0.5 tracking-wide"></p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p id="caseIncomeBonus" class="text-[15px] font-black text-slate-800">0</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-lg shadow-inner"><i class="fas fa-award"></i></div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-700">โบนัสครึ่งปี</p>
+                                <p id="caseIncomeMYBonusCalc" class="text-[10px] font-medium text-slate-400 mt-0.5 tracking-wide"></p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p id="caseIncomeMYBonus" class="text-[15px] font-black text-slate-800">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 2. คอมมิชชัน (COM Modal) -->
+    <div id="comModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-base shadow-sm shrink-0 border border-amber-100/50"><i class="fas fa-hand-holding-usd"></i></div>
+                    <h3 class="text-[17px] font-semibold text-slate-800 tracking-wide">คอมมิชชัน</h3>
+                </div>
+                <button onclick="closePopup('comModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar pr-1 pb-1">
+                <div id="comList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 3. โบนัสรายเดือน (MB Modal) -->
+    <div id="mbModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-base shadow-sm shrink-0 border border-blue-100/50"><i class="fas fa-gift"></i></div>
+                    <h3 class="text-[17px] font-semibold text-slate-800 tracking-wide">โบนัสรายเดือน</h3>
+                </div>
+                <button onclick="closePopup('mbModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar pr-2 pb-1 text-left">
+                <p class="text-[12px] font-bold text-[#1e3a8a] mb-2 text-center tracking-wide">ระบุยอดสะสมเดิมในเดือนนี้ (บาท)</p>
+                <input type="text" inputmode="numeric" id="existingFYCInput" value="0" class="w-full border-none rounded-[14px] text-center outline-none transition-all bg-white color-[#1e293b] font-bold text-[18px] h-[44px] shadow-sm mb-4 focus:ring-2 focus:ring-blue-400" oninput="handleMBInput(this)">
+                <div id="mbTierList" class="flex flex-col mb-4"></div>
+                <div class="bg-[#eff6ff] p-4 rounded-[20px] shadow-sm text-[12px] space-y-1">
+                    <div class="flex justify-between items-center py-1 border-b border-blue-100 text-[#475569]">
+                        <span>FYC เคสปัจจุบัน</span><span id="mbCaseFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-blue-100 text-[#475569]">
+                        <span>FYC สะสมเดิม</span><span id="mbExistingFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-blue-200 text-[#1e3a8a]">
+                        <span class="font-bold">FYC รวม</span><span id="mbTotalFYCDisplay" class="font-black text-[13px]">0</span>
+                    </div>
+                    <div class="pt-2 flex flex-col items-center mt-1">
+                        <span class="font-bold text-[#1e3a8a] text-[12px] mb-0.5">โบนัสที่ได้รับ</span>
+                        <span id="mbCalculatedBonus" class="text-[22px] font-black text-[#2563eb] leading-none mb-1">0 บาท</span>
+                        <div id="mbBonusCalcMethod" class="text-[10px] text-[#60a5fa] font-bold"></div>
+                    </div>
+                </div>
+                <div id="mbAdvice" class="bg-white p-3.5 rounded-[16px] shadow-sm mt-3 text-[12px] text-slate-700 flex items-start gap-2.5 border border-slate-100">
+                    <i class="fas fa-lightbulb text-amber-500 text-base mt-0.5"></i>
+                    <div id="mbAdviceText" class="flex-1 leading-relaxed">กำลังประมวลผลคำแนะนำ...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 4. โบนัสครึ่งปี (MYB Modal) -->
+    <div id="mybModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-base shadow-sm shrink-0 border border-purple-100/50"><i class="fas fa-calendar-check"></i></div>
+                    <h3 class="text-[17px] font-semibold text-slate-800 tracking-wide">โบนัสครึ่งปี</h3>
+                </div>
+                <button onclick="closePopup('mybModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar pr-2 pb-1 text-left">
+                <p class="text-[12px] font-bold text-[#4c1d95] mb-2 text-center tracking-wide">ระบุยอดสะสมเดือนก่อนหน้า (บาท)</p>
+                <input type="text" inputmode="numeric" id="existingHalfYearFYCInput" value="0" class="w-full border-none rounded-[14px] text-center outline-none transition-all bg-white color-[#1e293b] font-bold text-[18px] h-[44px] shadow-sm mb-4 focus:ring-2 focus:ring-purple-400" oninput="handleMYBInput(this)">
+                <div id="mybTierList" class="flex flex-col mb-4"></div>
+                <div class="bg-[#f5f3ff] p-4 rounded-[20px] shadow-sm text-[12px] space-y-1">
+                    <div class="flex justify-between items-center py-1 border-b border-purple-100 text-[#475569]">
+                        <span>FYC เคสปัจจุบัน</span><span id="mybCaseFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-purple-100 text-[#475569]">
+                        <span>FYC สะสมเดิม</span><span id="mybMBFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-purple-200 text-[#4c1d95]">
+                        <span class="font-bold">FYC รวมครึ่งปี</span><span id="mybTotalFYCDisplay" class="font-black text-[13px]">0</span>
+                    </div>
+                    <div class="pt-2 flex flex-col items-center mt-1">
+                        <span class="font-bold text-[#4c1d95] text-[12px] mb-0.5">โบนัสที่ได้รับ</span>
+                        <span id="mybCalculatedBonus" class="text-[22px] font-black text-[#7c3aed] leading-none mb-1">0 บาท</span>
+                        <div id="mybBonusCalcMethod" class="text-[10px] text-[#a78bfa] font-bold"></div>
+                    </div>
+                </div>
+                <div id="mybAdvice" class="bg-white p-3.5 rounded-[16px] shadow-sm mt-3 text-[12px] text-slate-700 flex items-start gap-2.5 border border-slate-100">
+                    <i class="fas fa-chart-line text-purple-500 text-base mt-0.5"></i>
+                    <div id="mybAdviceText" class="flex-1 leading-relaxed">กำลังประมวลผลคำแนะนำ...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 5. โบนัสตัวแทนใหม่ (NAB Modal) -->
+    <div id="nabModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center text-base shadow-sm shrink-0 border border-cyan-100/50"><i class="fas fa-star"></i></div>
+                    <h3 class="text-[17px] font-semibold text-slate-800 tracking-wide">โบนัสตัวแทนใหม่</h3>
+                </div>
+                <button onclick="closePopup('nabModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar pr-2 pb-1 text-left">
+                <div class="flex p-1 bg-slate-100/80 rounded-[14px] mb-4 relative shadow-inner border border-slate-200/60">
+                    <input type="hidden" id="nabPhaseSelect" value="p1">
+                    <div id="nabPhaseBg" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-white rounded-[10px] shadow-[0_2px_8px_rgba(8,145,178,0.15)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-cyan-100/80"></div>
+                    <button onclick="setNABPhase('p1')" id="btnNabP1" class="flex-1 relative z-10 py-2.5 text-[13px] font-bold text-cyan-700 transition-all duration-300">เดือนที่ 1 - 3</button>
+                    <button onclick="setNABPhase('p2')" id="btnNabP2" class="flex-1 relative z-10 py-2.5 text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">เดือนที่ 4 - 6</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-[11px] font-bold text-[#164e63] mb-1.5 text-center tracking-wide">FYC สะสมเดิม</p>
+                        <input type="text" inputmode="numeric" id="existingNABFYCInput" value="0" class="w-full border-none rounded-[14px] text-center outline-none transition-all bg-white color-[#1e293b] font-bold text-[16px] h-[44px] shadow-sm focus:ring-2 focus:ring-cyan-400" oninput="handleNABFYCInput(this)">
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-bold text-[#164e63] mb-1.5 text-center tracking-wide">จำนวนรายสะสมเดิม</p>
+                        <input type="text" inputmode="numeric" id="existingNABCases" value="0" class="w-full border-none rounded-[14px] text-center outline-none transition-all bg-white color-[#1e293b] font-bold text-[16px] h-[44px] shadow-sm focus:ring-2 focus:ring-cyan-400" oninput="this.value = this.value.replace(/[^0-9]/g, ''); refreshAllDisplays()">
+                    </div>
+                </div>
+                <div id="nabTierList" class="flex flex-col mb-4"></div>
+                <div class="bg-[#ecfeff] p-4 rounded-[20px] shadow-sm text-[12px] space-y-1">
+                    <div class="flex justify-between items-center py-1 border-b border-cyan-100 text-[#475569]">
+                        <span>FYC เคสปัจจุบัน</span><span id="nabCaseFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-cyan-100 text-[#475569]">
+                        <span>FYC สะสมเดิม</span><span id="nabExistingFYCDisplay" class="font-black text-[#1e293b]">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-cyan-200 text-[#164e63]">
+                        <span class="font-bold">FYC รวม (รวมเคสนี้)</span><span id="nabTotalFYCDisplay" class="font-black text-[13px]">0</span>
+                    </div>
+                    <div class="pt-2 flex flex-col items-center mt-1">
+                        <span class="font-bold text-[#164e63] text-[12px] mb-0.5 uppercase tracking-wide">โบนัสพิเศษ</span>
+                        <span id="nabCalculatedBonus" class="text-[22px] font-black text-[#0891b2] leading-none mb-1 drop-shadow-sm">0 บาท</span>
+                    </div>
+                </div>
+                <div id="nabAdvice" class="bg-white p-3.5 rounded-[16px] shadow-sm mt-3 text-[12px] text-slate-700 flex items-start gap-2.5 border border-slate-100">
+                    <i class="fas fa-lightbulb text-cyan-500 text-base mt-0.5"></i>
+                    <div id="nabAdviceText" class="flex-1 leading-relaxed font-medium">กำลังประมวลผลคำแนะนำ...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="extraPayConditionsModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-amber-900"><i class="fas fa-clipboard-list mr-2 text-amber-600"></i> เงื่อนไขเพิ่มเติม</h3><button onclick="closePopup('extraPayConditionsModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="text-left space-y-3"><div class="bg-amber-50 p-3.5 rounded-[14px] border border-amber-200"><p class="text-[13px] font-bold text-amber-800 mb-1.5">1. ยกเว้นการออม</p><p class="text-[11px] text-amber-700 leading-relaxed">หากตรวจพบโรคร้ายแรงระดับรุนแรง บริษัทจะยกเว้นการชำระในงวดต่อไปทั้งหมด แต่ยังคงให้ความคุ้มครองต่อเนื่องจนครบสัญญา</p></div><div class="bg-amber-50 p-3.5 rounded-[14px] border border-amber-200"><p class="text-[13px] font-bold text-amber-800 mb-1.5">2. พร้อมดูแลค่ารักษา</p><p class="text-[11px] text-amber-700 leading-relaxed mb-2">มอบวงเงินพิเศษ <span class="whitespace-nowrap"><span id="modalMedExtra1Popup" class="font-bold underline text-amber-900">0.00</span> บาท</span> สำหรับการรักษาและฟื้นฟู</p><button onclick="showMedExtraDef()" class="text-[9px] bg-white border border-amber-300 text-amber-700 px-2.5 py-1.5 rounded-lg active:bg-amber-100 transition-colors w-full"><i class="fas fa-info-circle mr-1"></i> ดูรายละเอียดค่ารักษาเพิ่มเติม</button></div></div><button onclick="closePopup('extraPayConditionsModal')" class="mt-4 w-full py-3 bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold rounded-xl transition-colors border border-amber-300 text-sm">ปิด</button></div></div>
+    
+    <div id="disease15Modal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-blue-900"><i class="fas fa-child mr-2 text-blue-600"></i> รายชื่อ 15 โรคเด็ก</h3><button onclick="closePopup('disease15Modal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="overflow-y-auto flex-1 text-left custom-scrollbar pr-2 pb-1"><div class="divide-y divide-slate-100 px-1 mb-3"><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">1) โรคไข้รูมาติกที่มีอาการลิ้นหัวใจบกพร่อง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">2) โรคคาวาซากิที่มีอาการแทรกซ้อนทางหัวใจ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">3) โรเบาหวานชนิดที่ 1</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">4) โรคหอบหืดขั้นรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">5) โรคเลือดไหลไม่หยุด ชนิดเอและบี</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">6) โรกระดูกเปราะพันธุกรรม</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">7) โรคมือ เท้า ปาก ที่มีอาการแทรกซ้อนรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">8) โรคไตรั่ว ชนิดมีอาการโปรตีนรั่วในปัสสาวะ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">9) โรคสติลล์</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">10) โรคบาดทะยัก</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">11) โรคลมชักรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">12) โรคกล้ามเนื้อลีบจากไขสันหลังเสื่อม ชนิดที่หนึ่ง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">13) โรคพิษสุนัขบ้า</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">14) โรคติดเชื้อของเยื่อบุหัวใจ ลิ้นหัวใจ และหลอดเลือด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">15) กลุ่มอาการไอเซนเมนเกอร์ขั้นรุนแรง</div></div></div></div><button onclick="closePopup('disease15Modal')" class="mt-3 w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl border border-blue-200 transition-colors text-sm">ปิดหน้าต่าง</button></div></div>
+    
+    <div id="disease5Modal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-amber-900"><i class="fas fa-virus mr-2 text-amber-600"></i> รายชื่อ 5 โรคร้าย</h3><button onclick="closePopup('disease5Modal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="overflow-y-auto flex-1 text-left custom-scrollbar pr-2 pb-1"><div class="divide-y divide-slate-100 px-1 mb-3"><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">1) โรคหลอดเลือดหัวใจตีบที่รักษาด้วยการสวนหลอดเลือดหัวใจ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">2) โรคหลอดเลือดสมองที่ได้รับการผ่าตัดลอกหลอดเลือดแดงคาโรติด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">3) โรคมะเร็งระยะไม่ลุกลาม</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">4) โรหลอดเลือดสมองโป่งพองที่รักษาโดยใช้ขดลวดผ่านสายสวนทางหลอดเลือด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">5) โรคหลอดเลือดสมองที่ได้รับการรักษาโดยวิธีใส่สายสวนเส้นเลือดแดงบริเวณคอ</div></div></div></div><button onclick="closePopup('disease5Modal')" class="mt-3 w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-xl border border-amber-200 transition-colors text-sm">ปิดหน้าต่าง</button></div></div>
+    
+    <div id="disease45Modal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-amber-900"><i class="fas fa-ribbon mr-2 text-amber-600"></i> รายชื่อ 45 โรคร้ายแรง</h3><button onclick="closePopup('disease45Modal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button></div><div class="overflow-y-auto flex-1 text-left custom-scrollbar pr-2 pb-1"><div class="divide-y divide-slate-100 px-1 mb-3"><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">1) โรคสมองเสื่อมชนิดอัลไซเมอร์</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">2) โรคโลหิตจางจากไขกระดูกไม่สร้างเม็ดโลหิต</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">3) โรคเยื่อหุ้มสมองและไขสันหลังอักเสบจากเชื้อแบคทีเรีย</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">4) เนื้องอกในสมองชนิดที่ไม่ใช่มะเร็ง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">5) ตาบอด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">6) โรคมะเร็งระยะลุกลาม</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">7) โรคกล้ามเนื้อหัวใจ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">8) ตับวาย</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">9) โรหลอดลมปอดอุดกั้นเรื้อรังขั้นรุนแรง / โรคปอดระยะสุดท้าย</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">10) ภาวะโคม่า</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">11) การผ่าตัดเส้นเลือดเลี้ยงกล้ามเนื้อหัวใจ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">12) กล้ามเนื้อหัวใจตายเฉียบพลันจากการขาดเลือด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">13) การผ่าตัดลิ้นหัวใจโดยวิธีการเปิดหัวใจ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">14) ไตวายเรื้อรัง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">15) การสูญเสียการได้ยิน</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">16) การสูญเสียการดำรงชีพอย่างอิสระ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">17) การทุพพลภาพถาวรสิ้นเชิง (ก่อนอายุครบ 70 ปี)</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">18) การสูญเสียความสามารถในการพูด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">19) แผลไหม้ฉกรรจ์</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">20) การบาดเจ็บที่ศีรษะอย่างรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">21) การผ่าตัดเปลี่ยนอวัยวะหรือปลูกถ่ายไขกระดูก</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">22) โรคของเซลล์ประสาทควบคุมการเคลื่อนไหว</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">23) โรคระบบประสาทมัลติเพิล สะเคลอโรสิส</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">24) โรคกล้ามเนื้อเสื่อ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">25) โรคไวรัสตับอักเสบขั้นรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">26) โรคเส้นเลือดหัวใจตีบ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">27) อัมพาตของกล้ามเนื้อแขนหรือขา</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">28) โรคพาร์กินสัน</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">29) โรคแรงดันในหลอดเลือดแดงปอดสูงแบบปฐมภูมิ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">30) ภาวะข้ออักเสบรูมาตอยด์ชนิดรุนแรง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">31) โรหลอดเลือดสมองแตกหรืออุดตัน</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">32) การผ่าตัดเส้นเลือดแดงใหญ่ เอออร์ต้า</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">33) ไตอักเสบลูปูส จากโรคซิสเต็มมิค ลูปูส อิริเธมาโตซูส</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">34) สมองอักเสบจากเชื้อไวรัส</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">35) ภาวะอะแพลลิก</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">36) โรคหลอดเลือดสมองโป่งพองที่ต้องรักษาโดยการผ่าตัด</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">37) การฉีกขาดของรากประสาทต้นแขน</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">38) โรคโปลิโอ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">39) การผ่าตัดกระดูกสันหลังคดที่ไม่ทราบสาเหตุ</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">40) ภาวะตับอ่อนอักเสบที่กลับเป็นซ้ำและเรื้อรัง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">41) โรคเท้าช้าง</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">42) โรถุงน้ำในไต</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">43) โรคเนื้อเยื่อพังผืดอักเสบติดเชื้อและเป็นเนื้อตาย</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">44) โรคหนังแข็งชนิดลุกลาม</div></div><div class="py-2.5"><div class="text-[11px] font-bold text-slate-800">45) โรคลำไส้อักเสบเป็นแผลรุนแรง</div></div></div></div><button onclick="closePopup('disease45Modal')" class="mt-3 w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-xl border border-amber-200 transition-colors text-sm">ปิดหน้าต่าง</button></div></div>
+    
+    <div id="definitionModal" class="modal-overlay hidden"><div class="modal-content-card p-5 bg-white/95 backdrop-blur-md rounded-[28px]"><div class="pb-0 flex justify-between items-start"><div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl shrink-0"><i class="fas fa-book-medical"></i></div><button onclick="closePopup('definitionModal')" class="text-slate-400 hover:text-slate-600 text-2xl w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 leading-none">&times;</button></div><div class="pt-3 overflow-y-auto flex-1 custom-scrollbar"><h3 id="defTitle" class="text-base font-bold text-[#1e3a8a] mb-1.5 leading-tight"></h3><div class="w-12 h-1 bg-blue-500 rounded-full mb-3"></div><div id="defDescription" class="text-[12px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap pb-3"></div></div><button onclick="closePopup('definitionModal')" class="w-full py-3 bg-[#243c94] hover:bg-[#1e327a] text-white font-bold rounded-xl active:scale-95 transition-transform shadow-lg mt-3 text-sm">ปิดหน้าต่างนี้</button></div></div>
+    
+    <!-- 3D Health Excellence - Room Rate Plan Modal -->
+    <div id="hxPlanModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5 bg-[#f8fafc]">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-[14px] bg-teal-50 text-teal-600 flex items-center justify-center text-lg shadow-inner border border-white"><i class="fas fa-bed"></i></div>
+                    <div class="text-left">
+                        <h3 class="text-[17px] font-semibold text-slate-800 tracking-tight leading-none">ค่าห้อง & เหมาจ่าย</h3>
+                        <p class="text-[10px] text-slate-500 font-medium mt-1">เลือกแผนความคุ้มครองสุขภาพ 3D</p>
+                    </div>
+                </div>
+                <button onclick="closePopup('hxPlanModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 text-slate-500 hover:bg-slate-300 transition-colors text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scrollbar pr-1 pb-2 space-y-2">
+                <button onclick="handleHXPlanSelect('HX15', 'HX15', 'ค่าห้อง 1,500 / เหมาจ่าย 1 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX15</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 1,500 / เหมาจ่าย 1 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+                <button onclick="handleHXPlanSelect('HX20', 'HX20', 'ค่าห้อง 2,000 / เหมาจ่าย 3 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX20</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 2,000 / เหมาจ่าย 3 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+                <button onclick="handleHXPlanSelect('HX40', 'HX40', 'ค่าห้อง 4,000 / เหมาจ่าย 5 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX40</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 4,000 / เหมาจ่าย 5 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+                <button onclick="handleHXPlanSelect('HX60', 'HX60', 'ค่าห้อง 6,000 / เหมาจ่าย 10 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX60</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 6,000 / เหมาจ่าย 10 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+                <button onclick="handleHXPlanSelect('HX150', 'HX150', 'ค่าห้อง 15,000 / เหมาจ่าย 60 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX150</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 15,000 / เหมาจ่าย 60 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+                <button onclick="handleHXPlanSelect('HX300', 'HX300', 'ค่าห้อง 30,000 / เหมาจ่าย 120 ล้าน')" class="w-full flex items-center justify-between p-3.5 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 active:scale-[0.98] hover:border-teal-300 hover:bg-teal-50/50 transition-all group">
+                    <div class="flex flex-col text-left">
+                        <span class="text-[15px] font-bold text-slate-800 group-hover:text-teal-700">HX300</span>
+                        <span class="text-[12px] font-medium text-slate-500 mt-0.5 group-hover:text-teal-600">ค่าห้อง 30,000 / เหมาจ่าย 120 ล้าน</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors">
+                        <i class="fas fa-check text-[12px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================== PDF VIEWER MODAL (LIFF-compatible) ==================== -->
+    <div id="pdfViewerModal" class="hidden" style="position:fixed;inset:0;z-index:9990;background:#1e293b;display:flex;flex-direction:column;max-height:100dvh;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#243c94,#1e327a);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding-top:max(14px,env(safe-area-inset-top));">
+            <div style="display:flex;align-items:center;gap:10px;overflow:hidden;">
+                <div style="width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-file-pdf" style="color:white;font-size:14px;"></i>
+                </div>
+                <span id="pdfViewerTitle" style="color:white;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ตารางมูลค่า</span>
+            </div>
+            <button onclick="closePdfViewer()" style="width:36px;height:36px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                <i class="fas fa-times" style="color:white;font-size:16px;"></i>
+            </button>
+        </div>
+        <!-- Canvas area -->
+        <div id="pdfViewerCanvas" style="flex:1;overflow-y:auto;background:#334155;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;">
+            <div style="text-align:center;padding:40px 16px;color:#94a3b8;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:12px;"></i>
+                <span style="font-size:13px;">กำลังโหลด PDF...</span>
+            </div>
+        </div>
+        <!-- Footer actions -->
+        <div style="background:#1e293b;border-top:1px solid #334155;padding:12px 16px;display:flex;gap:10px;flex-shrink:0;padding-bottom:max(12px,env(safe-area-inset-bottom));">
+            <a id="pdfSaveLink" href="#" download="" 
+               style="flex:1;background:#dc2626;color:white;padding:13px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;-webkit-tap-highlight-color:transparent;"
+               onclick="handlePdfSaveLinkClick(event)">
+                <i class="fas fa-download"></i> บันทึก PDF
+            </a>
+            <button id="pdfShareBtn" onclick="handlePdfShare()"
+               style="flex:1;background:#059669;color:white;padding:13px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;">
+                <i class="fas fa-share-nodes"></i> แชร์
+            </button>
+        </div>
+    </div>
+    <script src="js/calculator.js?v=5"></script>
+    <script src="js/parser.js?v=1"></script>
+    <script src="js/ui.js?v=5"></script>
+    <script src="js/share.js?v=5"></script>
+</body>
+</html>

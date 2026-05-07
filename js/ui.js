@@ -1,0 +1,2393 @@
+// ==================== PRODUCT CONDITIONS LOADER ====================
+window.PRODUCT_CONDITIONS = {};
+
+// โหลดไฟล์ JSON ทั้งหมด
+const PRODUCT_FILES = ['cx.json', 'slb.json', '3d.json', 'cl.json', 'elite.json', 'hbf.json', 'lp.json', 'slpa.json', 'tla.json', 'tx.json', 'wxn.json']; 
+
+async function loadAllProductConditions() {
+    for (const file of PRODUCT_FILES) {
+        try {
+            const response = await fetch(`data/product/${file}`);
+            if (response.ok) {
+                const data = await response.json();
+                window.PRODUCT_CONDITIONS[data.name] = data; 
+            }
+        } catch (e) { }
+    }
+}
+
+// ==================== UI HELPERS & NOTIFICATIONS ====================
+// ฟังก์ชันสำหรับเปิดหน้าต่าง ค่ารักษาพิเศษ ซ้อนขึ้นมา
+function showMedExtraDef() { openPopup('medExtraDefModal'); }
+function openPopup(id) { const modal = document.getElementById(id); if (modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.add('show'); }, 10); } }
+function closePopup(id) { const modal = document.getElementById(id); if (modal) { modal.classList.remove('show'); setTimeout(() => { modal.classList.add('hidden'); }, 300); } }
+function handleModalClick(e, modalId) { if (e.target.closest('button, input, select, textarea, a, .list-row, .interactive-btn, .prevent-close')) return; closePopup(modalId); }
+
+function showCustomError(msg) {
+    const toast = document.createElement('div'); toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all";
+    toast.style.backgroundColor = '#fefce8';
+    toast.style.color = '#854d0e';
+    toast.style.border = '1px solid #fde68a';
+    toast.innerHTML = `<i class='fas fa-exclamation-triangle mb-3 block text-3xl' style="color:#eab308;"></i><span class="whitespace-nowrap">${msg}</span><div style="margin-top:14px;"><button onclick="this.closest('div.fixed').remove()" style="background:#eab308;color:#fff;border:none;padding:8px 22px;border-radius:9999px;font-weight:700;font-size:13px;cursor:pointer;">ตกลง</button></div>`;
+    document.body.appendChild(toast); setTimeout(() => { if(toast.parentNode){ toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300);} }, 2500);
+}
+
+function validateInputMinimum(inputElement, fieldType) {
+    if (!inputElement) return;
+    let value = parseInt(inputElement.value.replace(/,/g, '')) || 0;
+    let minValue = 4000;
+    let errorMsg = '';
+
+    if (fieldType === 'premium') {
+        if (currentAppPlan === 'Whole Life Extra' || currentAppPlan === '868 / 818 Elite Saving' || currentAppPlan === '24 TX') {
+            minValue = 50000;
+        }
+        if (value < minValue) {
+            errorMsg = `เบี้ยประกันขั้นต่ำ ต้องไม่น้อยกว่า ${minValue.toLocaleString()} บาท`;
+            showCustomError(errorMsg);
+            inputElement.value = minValue.toLocaleString();
+        }
+    } else if (fieldType === 'sum') {
+        if (currentAppPlan === 'Signature Legacy' && value > 0 && value < 5000000) {
+            Swal.fire({ icon: 'warning', title: 'ทุนประกันไม่ถึงเกณฑ์', text: 'แผน Signature Legacy บังคับทุนประกันขั้นต่ำที่ 5,000,000 บาท', confirmButtonColor: '#3085d6', confirmButtonText: 'ตกลง' });
+            inputElement.value = '5,000,000';
+            return;
+        }
+        minValue = currentAppPlan === 'CI Extra Plus' ? 500000 : (PLAN_CONFIG[currentAppPlan]?.minSum || 100000);
+        if (value < minValue) {
+            errorMsg = `ทุนประกันขั้นต่ำ ต้องไม่น้อยกว่า ${minValue.toLocaleString()} บาท`;
+            showCustomError(errorMsg);
+            inputElement.value = minValue.toLocaleString();
+        }
+    }
+}
+
+let hasShownCongratsMB = false, hasShownCongratsMYB = false, hasShownCongratsNAB = false;
+function showCongratsToast(msg) {
+    const cashView = document.getElementById('cashView'); if (cashView && cashView.classList.contains('hidden')) return;
+    const toast = document.createElement('div'); toast.className = "fixed top-16 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-4 rounded-[24px] z-[9999] shadow-[0_10px_30px_rgba(16,185,129,0.4)] text-center transition-all duration-500 flex items-center gap-3.5 transform -translate-y-10 opacity-0 scale-90 w-[90%] max-w-[340px]"; 
+    toast.innerHTML = `<i class='fas fa-trophy text-3xl text-yellow-300 drop-shadow-md animate-bounce' style="animation-duration: 2s;"></i><div class="text-left"><p class="text-[16px] font-black leading-tight tracking-wide">🎉 ยินดีด้วย!</p><p class="text-[12px] font-medium opacity-95 mt-0.5 leading-snug">${msg}</p></div>`; 
+    document.body.appendChild(toast); setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0', 'scale-90'); toast.classList.add('translate-y-0', 'opacity-100', 'scale-100'); }, 10);
+    setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0', 'scale-90'); setTimeout(() => toast.remove(), 500); }, 3500); 
+}
+
+let isLongPressActive = false;
+/**
+ * 🌟 Smart Quick Calc (เพิ่มฟังก์ชันใหม่)
+ * รองรับ: "ชาย 30 ออม 50,000", "หญิง 25 ทุน 1,000,000", หรือแค่ตัวเลข "1M"
+ */
+/**
+ * 🌟 Smart Quick Calc (Updated)
+ * รองรับ: "CX ชาย 30 ออม 3 หมื่น 10 ปี", "หญิง 25 ทุน 2 ล้าน", "5 แสน"
+ */
+/**
+ * Text Input handler — กด Enter หรือกดปุ่มส่ง
+ * แสดงผลทันที ไม่ต้องเปิดหน้าคำนวณ
+ */
+function handleQuickCalc(event) {
+    if (event.key === 'Enter') {
+        const input = event.target;
+        const rawValue = input.value.trim();
+        if (rawValue === '') return;
+        submitQuickCalc(rawValue);
+        input.value = '';
+        input.blur();
+    }
+}
+
+function submitQuickCalc(rawValue) {
+    if (!rawValue || rawValue.trim() === '') return;
+    const parsed = (typeof parseCommand === 'function') ? parseCommand(rawValue) : null;
+    if (!parsed) { if(typeof showCustomError==='function') showCustomError('ไม่เข้าใจคำสั่ง กรุณาลองใหม่'); return; }
+
+    // แผนที่ต้องระบุระยะเวลา
+    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','3D Health Excellence','Whole Life Extra'];
+    const targetPlan = parsed.plan || currentAppPlan;
+    if (PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
+        const planMap = {
+            'CI Extra Plus':       'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 20 ปี',
+            'Signature Legacy':    'ต้องระบุระยะเวลา เช่น 5 ปี หรือ 10 ปี',
+            'Century Life':        'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
+            '3D Health Excellence':'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
+            'Whole Life Extra':    'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 15 ปี',
+        };
+        if(typeof showCustomError==='function') showCustomError(`${targetPlan}
+${planMap[targetPlan]}`);
+        return;
+    }
+
+    // เปลี่ยนแผนถ้าจำเป็น (ไม่ต้องเปิด modal)
+    if (parsed.plan && parsed.plan !== currentAppPlan) {
+        selectAppPlan(parsed.plan);
+    }
+
+    // คำนวณและแสดงผล popup ทันที
+    executeCommand(parsed, true);
+}
+
+function handleHeaderClick(e) { if (isLongPressActive) { e.preventDefault(); isLongPressActive = false; return; } openPlanModal(); }
+
+// ==================== HIGHLIGHT PILLS (ปุ่มลัดหลัก) ====================
+function highlightActivePills(fSum, fPrem, fCashFlow) {
+    setTimeout(() => {
+        // 1. ดึงค่าสำรองจาก Input ตรงๆ ป้องกันแถบสีอื่นหายตอนพิมพ์ Real-time
+        let sInput = document.getElementById('sumInsuredInput');
+        let pInput = document.getElementById('premiumInput');
+        fSum = (fSum !== undefined && !isNaN(parseInt(fSum))) ? parseInt(fSum) : (sInput ? parseInt(sInput.value.replace(/\D/g, '')) || 0 : 0);
+        fPrem = (fPrem !== undefined && !isNaN(parseInt(fPrem))) ? parseInt(fPrem) : (pInput ? parseInt(pInput.value.replace(/\D/g, '')) || 0 : 0);
+
+        // --- 1. ไฮไลต์ ทุน ---
+        let sumMatched = false; const sumBg = document.getElementById('sumPillBg');
+        for(let i=1; i<=5; i++) { 
+            let el = document.getElementById('sumPill'+i); 
+            if(el) { 
+                let attr = el.getAttribute('onclick') || ''; 
+                let match = attr.match(/\d+/); 
+                if(match && parseInt(match[0]) === fSum && fSum > 0) { 
+                    el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-bold text-blue-700 transition-all duration-300'; 
+                    if(sumBg) { sumBg.style.display = 'block'; sumBg.style.opacity = '1'; sumBg.style.width = (el.offsetWidth || 60) + 'px'; sumBg.style.left = el.offsetLeft + 'px'; } 
+                    sumMatched = true; 
+                } else { el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300'; } 
+            } 
+        }
+        if(!sumMatched && sumBg) sumBg.style.opacity = '0';
+        
+        // --- 2. ไฮไลต์ เบี้ย ---
+        let premMatched = false; const premBg = document.getElementById('premPillBg');
+        for(let i=1; i<=5; i++) { 
+            let el = document.getElementById('premPill'+i); 
+            if(el) { 
+                let attr = el.getAttribute('onclick') || ''; 
+                let match = attr.match(/\d+/); 
+                if(match && parseInt(match[0]) === fPrem && fPrem > 0) { 
+                    el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-bold text-blue-700 transition-all duration-300'; 
+                    if(premBg) { premBg.style.display = 'block'; premBg.style.opacity = '1'; premBg.style.width = (el.offsetWidth || 60) + 'px'; premBg.style.left = el.offsetLeft + 'px'; } 
+                    premMatched = true; 
+                } else { el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300'; } 
+            } 
+        }
+        if(!premMatched && premBg) premBg.style.opacity = '0';
+        
+        // --- 3. ไฮไลต์ กระแสเงินสด ---
+        // เช็คจาก DOM ตรงๆ เลยว่ากล่องแบบ 2 แถว (WXN) โชว์อยู่หรือไม่ (ตัดปัญหาเช็คชื่อแผนผิดพลาด)
+        let dualBox = document.getElementById('dualCashFlowBox');
+        let isWXN = dualBox && !dualBox.classList.contains('hidden');
+
+        if (isWXN) {
+            // 🟢 WXN Cashflow 1 (แถว 1)
+            let input1 = document.getElementById('cashFlowInput1');
+            let cf1 = input1 && input1.value ? parseInt(input1.value.replace(/\D/g, '')) : 0;
+            const w1Vals = [24000, 36000, 48000, 60000, 100000];
+            let c1Matched = false; const c1Bg = document.getElementById('wxnCash1Bg');
+
+            for(let i=1; i<=5; i++) { 
+                let el = document.getElementById('wxnC1Pill'+i); 
+                if(el) { 
+                    if(cf1 === w1Vals[i-1] && cf1 > 0) { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-bold text-emerald-700 transition-all duration-300'; 
+                        if(c1Bg) { c1Bg.style.display = 'block'; c1Bg.style.opacity = '1'; c1Bg.style.width = (el.offsetWidth || 60) + 'px'; c1Bg.style.left = el.offsetLeft + 'px'; } 
+                        c1Matched = true; 
+                    } else { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300'; 
+                    } 
+                } 
+            }
+            if(!c1Matched && c1Bg) c1Bg.style.opacity = '0';
+
+            // 🟢 WXN Cashflow 2 (แถว 2)
+            let input2 = document.getElementById('cashFlowInput2');
+            let cf2 = input2 && input2.value ? parseInt(input2.value.replace(/\D/g, '')) : 0;
+            const w2Vals = [120000, 240000, 360000, 480000, 600000];
+            let c2Matched = false; const c2Bg = document.getElementById('wxnCash2Bg');
+
+            for(let i=1; i<=5; i++) { 
+                let el = document.getElementById('wxnC2Pill'+i); 
+                if(el) { 
+                    if(cf2 === w2Vals[i-1] && cf2 > 0) { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-bold text-emerald-700 transition-all duration-300'; 
+                        if(c2Bg) { c2Bg.style.display = 'block'; c2Bg.style.opacity = '1'; c2Bg.style.width = (el.offsetWidth || 60) + 'px'; c2Bg.style.left = el.offsetLeft + 'px'; } 
+                        c2Matched = true; 
+                    } else { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300'; 
+                    } 
+                } 
+            }
+            if(!c2Matched && c2Bg) c2Bg.style.opacity = '0';
+
+        } else {
+            // โซนแบบ 1 แถว (Elite, 24 TX และอื่นๆ) ทำงานปกติ
+            let input = document.getElementById('cashFlowInput');
+            let cf = input && input.value ? parseInt(input.value.replace(/\D/g, '')) : 0;
+            
+            let planName = String(window.currentAppPlan || window.currentPlan || '').trim();
+            let targetCf = cf;
+            if (['868 / 818 Elite Saving', '24 TX'].includes(planName)) {
+                if (cf === 0 || isNaN(cf)) targetCf = 24000;
+            } else if (cf === 0 || isNaN(cf)) {
+                targetCf = fCashFlow || 0;
+            }
+
+            let cashMatched = false; const cashBg = document.getElementById('cashPillBg');
+            for(let i=1; i<=5; i++) { 
+                let el = document.getElementById('cashPill'+i); 
+                if(el) { 
+                    let attr = el.getAttribute('onclick') || ''; 
+                    let match = attr.match(/\d+/); 
+                    let btnVal = match ? parseInt(match[0]) : 0;
+                    
+                    if(btnVal === targetCf && btnVal > 0) { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-bold text-emerald-700 transition-all duration-300'; 
+                        if(cashBg) { cashBg.style.display = 'block'; cashBg.style.opacity = '1'; cashBg.style.width = (el.offsetWidth || 60) + 'px'; cashBg.style.left = el.offsetLeft + 'px'; } 
+                        cashMatched = true; 
+                    } else { 
+                        el.className = 'flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300'; 
+                    } 
+                } 
+            }
+            if(!cashMatched && cashBg) cashBg.style.opacity = '0';
+        }
+    }, 100);
+}
+
+// ==================== DYNAMIC THEME ====================
+function applyDayColorTheme() {
+    const day = new Date().getDay(); 
+    const themes = {
+        0: 'bg-gradient-to-br from-[#E24634] to-[#C12516] border-[#E24634]/30 shadow-[0_10px_25px_rgba(226,70,52,0.35)]', 
+        1: 'bg-gradient-to-br from-[#FBBF24] to-[#F59E0B] border-[#FBBF24]/30 shadow-[0_10px_25px_rgba(251,191,36,0.35)]',
+        2: 'bg-gradient-to-br from-[#E73994] to-[#C11871] border-[#E73994]/30 shadow-[0_10px_25px_rgba(231,57,148,0.35)]', 
+        3: 'bg-gradient-to-br from-[#93CD47] to-[#71A825] border-[#93CD47]/30 shadow-[0_10px_25px_rgba(147,205,71,0.35)]', 
+        4: 'bg-gradient-to-br from-[#EF702B] to-[#C94E0C] border-[#EF702B]/30 shadow-[0_10px_25px_rgba(239,112,43,0.35)]', 
+        5: 'bg-gradient-to-br from-[#53B9D6] to-[#2C95B3] border-[#53B9D6]/30 shadow-[0_10px_25px_rgba(83,185,214,0.35)]', 
+        6: 'bg-gradient-to-br from-[#7D3CB9] to-[#592091] border-[#7D3CB9]/30 shadow-[0_10px_25px_rgba(125,60,185,0.35)]'  
+    };
+
+    const mainHeader = document.getElementById('mainHeaderBtn');
+    if (mainHeader) {
+        const baseClassesMain = "w-full rounded-[24px] py-4 px-4 flex flex-col items-center justify-center active:scale-[0.97] transition-all relative overflow-hidden group select-none cursor-pointer border";
+        mainHeader.className = `${baseClassesMain} ${themes[day]}`;
+    }
+
+    const cashHeader = document.querySelector('#cashView > div > div.bg-gradient-to-br');
+    if (cashHeader) {
+        const baseClassesCash = "w-full rounded-[24px] py-5 px-4 flex flex-col items-center justify-center relative overflow-hidden border";
+        const cashShadow = themes[day].replace('shadow-[0_10px_25px', 'shadow-[0_12px_30px'); 
+        cashHeader.className = `${baseClassesCash} ${cashShadow}`;
+    }
+}
+
+function openInstallmentModal() {
+    if (typeof calculate === 'function') calculate(currentMode, true);
+    if (!lastCalculationData || lastCalculationData.premium === 0) {
+        showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");
+        return;
+    }
+
+    const p = lastCalculationData.premium;
+    const m1 = Math.round(p * 0.09);
+    const m3 = Math.round(p * 0.27);
+    const m6 = Math.round(p * 0.52);
+
+    setText('sumMonthlyPopup', m1.toLocaleString());
+    setText('sum3MonthPopup', m3.toLocaleString());
+    setText('sum6MonthPopup', m6.toLocaleString());
+
+    openPopup('installmentModal');
+}
+
+// ==================== APP ROUTING & PLAN SELECTION ====================
+function getPlanAbbr(planName) {
+    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite" };
+    return abbrMap[planName] || planName;
+}
+
+function switchView(targetView) {
+    if (targetView === 'table' || targetView === 'cash') {
+        if (typeof calculate === 'function') calculate(currentMode, true);
+        if (!lastCalculationData || lastCalculationData.premium === 0) { 
+            showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน"); 
+            return; 
+        }
+    }
+
+    const views = { 'main': document.getElementById('mainView'), 'table': document.getElementById('tableView'), 'cash': document.getElementById('cashView') };
+    const navBtns = { 'main': document.getElementById('navMainBtn'), 'table': document.getElementById('navTableBtn'), 'cash': document.getElementById('navCashBtn') };
+    
+    if (targetView === 'table') generatePolicyTableData();
+    if (targetView === 'cash') refreshAllDisplays();
+    
+    Object.values(views).forEach(view => { if (view) view.classList.add('hidden'); });
+    Object.values(navBtns).forEach(btn => { if (btn) btn.classList.remove('active'); });
+    
+    if (views[targetView]) views[targetView].classList.remove('hidden');
+    if (navBtns[targetView]) navBtns[targetView].classList.add('active');
+}
+
+// ============================================================================
+// 🌟 THE NEW ULTRA-MODERN 3D PLAN LOGIC & INFINITE SCROLL 🌟
+// ============================================================================
+
+const modernPlansData = [
+    { name: 'CI Extra Plus', desc: 'ออมเงิน : ชดเชยโรคร้าย+วงเงินพิเศษ', icon: 'fas fa-shield-heart', isHighlight: false, bg: 'bg-gradient-to-br from-[#ff007f] to-[#ff5e62]', text: 'text-white', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-rose-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-rose-100 group-hover:text-rose-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/30 shadow-inner shadow-black/20' },
+    { name: 'Life Protector 20', desc: 'เปลี่ยนทุนประกัน เป็นบำนาญ', icon: 'fas fa-piggy-bank', isHighlight: false, bg: 'bg-gradient-to-br from-emerald-100 to-emerald-200', text: 'text-emerald-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-emerald-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Supreme Life Protector', desc: 'เปลี่ยนทุนประกัน เป็นบำนาญ', icon: 'fas fa-hand-holding-medical', isHighlight: false, bg: 'bg-gradient-to-br from-teal-100 to-teal-200', text: 'text-teal-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-teal-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Signature Legacy', desc: 'แผนมรดก ลูกค้ามูลค่าสูง', icon: 'fas fa-crown', isHighlight: false, bg: 'bg-gradient-to-br from-amber-100 to-amber-200', text: 'text-amber-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-amber-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-amber-100 group-hover:text-amber-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Convertable Term', desc: 'จองสิทธิ เปลี่ยนแบบประกันได้', icon: 'fas fa-umbrella', isHighlight: false, bg: 'bg-gradient-to-br from-indigo-100 to-indigo-200', text: 'text-indigo-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-indigo-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Century Life', desc: 'แผนคุ้มครองตลอดชีพ', icon: 'far fa-gem', isHighlight: false, bg: 'bg-gradient-to-br from-purple-100 to-purple-200', text: 'text-purple-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-purple-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-purple-100 group-hover:text-purple-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: '3D Health Excellence', desc: 'ประกันสุขภาพ ที่เข้าใจทุกช่วงชีวิต', icon: 'fas fa-hand-holding-medical', isHighlight: false, bg: 'bg-gradient-to-br from-cyan-100 to-cyan-200', text: 'text-cyan-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-cyan-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-cyan-100 group-hover:text-cyan-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Whole Life Extra', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-trend-up', isHighlight: false, bg: 'bg-gradient-to-br from-blue-100 to-blue-200', text: 'text-blue-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-blue-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: '24 TX', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-transfer', isHighlight: false, bg: 'bg-gradient-to-br from-violet-100 to-violet-200', text: 'text-violet-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-violet-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-violet-100 group-hover:text-violet-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: '868 / 818 Elite Saving', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-sack-dollar', isHighlight: false, bg: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200', text: 'text-fuchsia-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-fuchsia-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Medical Fund', desc: 'อยู่ระหว่างการพัฒนา', icon: 'fas fa-hospital', isHighlight: false, bg: 'bg-gradient-to-br from-sky-100 to-sky-200', text: 'text-sky-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-sky-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' }
+];
+
+let isModernSearchActive = false;
+let isAppendingCards = false; // ตัวล็อคป้องกันบัคโหลดการ์ดซ้อน
+
+function openPlanModal() {
+    renderModernCards(modernPlansData, true);
+    const modal = document.getElementById('planSelectModal');
+    if (modal) modal.classList.remove('hidden');
+    
+    setTimeout(() => {
+        const cardWrapper = document.getElementById('planSelectCardWrapper');
+        if(cardWrapper) {
+            cardWrapper.classList.remove('translate-y-10', 'opacity-0');
+            cardWrapper.classList.add('translate-y-0', 'opacity-100');
+        }
+    }, 50);
+
+    initModernScrollInteractions();
+}
+
+function closePlanModal() {
+    const cardWrapper = document.getElementById('planSelectCardWrapper');
+    if(cardWrapper) {
+        cardWrapper.classList.remove('translate-y-0', 'opacity-100');
+        cardWrapper.classList.add('translate-y-10', 'opacity-0');
+    }
+    setTimeout(() => {
+        const modal = document.getElementById('planSelectModal');
+        if (modal) modal.classList.add('hidden');
+    }, 400); 
+}
+
+function renderModernCards(dataList, isInitialLoad = false) {
+    const container = document.getElementById('planListContainer');
+    if (!container) return;
+    let html = '';
+    
+    dataList.forEach((plan, i) => {
+        const delay = isInitialLoad ? (i + 1) * 0.04 : 0;
+        const animClass = isInitialLoad ? 'stagger-enter show-anim' : '';
+        const animStyle = isInitialLoad ? `animation-delay: ${delay}s;` : '';
+
+        // ผูก Event ฝั่งเดิม (กดแล้วเลือกแผน แล้วปิดหน้าต่าง)
+        const onClickAction = `if(typeof selectAppPlan==='function'){ selectAppPlan('${plan.name}'); } closePlanModal();`;
+
+        // Active only when a plan is explicitly chosen and matches this card
+        const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
+
+        if (isActive) {
+            html += `
+            <div class="card-3d-container ${animClass}" style="${animStyle}">
+                <button onclick="${onClickAction}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
+                    <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <i class="${plan.icon} drop-shadow-md"></i>
+                    </div>
+                    <div class="flex-1 relative z-10 min-w-0 overflow-hidden">
+                        <h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide truncate">${plan.name}</h4>
+                        <p class="text-[12px] text-blue-600/80 font-semibold leading-tight truncate">${plan.desc}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform">
+                        <i class="fas fa-check text-[13px]"></i>
+                    </div>
+                </button>
+            </div>`;
+        } else {
+            html += `
+            <div class="card-3d-container ${animClass}" style="${animStyle}">
+                <button onclick="${onClickAction}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] ${plan.border} ${plan.cardBg} ${plan.shadow} group">
+                    <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
+                        <i class="${plan.icon}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0 overflow-hidden">
+                        <h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors truncate">${plan.name}</h4>
+                        <p class="text-[12px] ${plan.sub} font-medium leading-tight truncate">${plan.desc}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1">
+                        <i class="fas fa-arrow-right text-[11px]"></i>
+                    </div>
+                </button>
+            </div>`;
+        }
+    });
+
+    if (isInitialLoad) {
+        container.innerHTML = html;
+        container.scrollTop = 0;
+    } else {
+        container.insertAdjacentHTML('beforeend', html);
+    }
+}
+
+// 🌟 ระบบจับการ Scroll (คลีนสุดๆ ไม่กวนสเปคเครื่อง) 🌟
+function initModernScrollInteractions() {
+    const container = document.getElementById('planListContainer');
+    const header = document.getElementById('modalHeader');
+    const bottomBar = document.getElementById('modalBottomBar');
+    const fadeOverlay = document.getElementById('bottomFadeOverlay');
+    
+    if(!container) return;
+    
+    let lastScrollTop = 0;
+    container.onscroll = () => {
+        const scrollTop = container.scrollTop;
+        
+        // 1. ซ่อน/แสดงเมนู
+        if (scrollTop > lastScrollTop && scrollTop > 60) {
+            if(header) { header.style.transform = 'translateY(-100%)'; header.style.opacity = '0'; }
+            if(bottomBar) { bottomBar.style.transform = 'translateY(150%)'; bottomBar.style.opacity = '0'; }
+            if(fadeOverlay) fadeOverlay.style.opacity = '0';
+        } else {
+            if(header) { header.style.transform = 'translateY(0)'; header.style.opacity = '1'; }
+            if(bottomBar) { bottomBar.style.transform = 'translateY(0)'; bottomBar.style.opacity = '1'; }
+            if(fadeOverlay) fadeOverlay.style.opacity = '1';
+        }
+
+        // 2. ⚡ Infinite Scroll (เลื่อนวนไร้รอยต่อ) ⚡
+        const distanceToBottom = container.scrollHeight - scrollTop - container.clientHeight;
+        if (!isModernSearchActive && distanceToBottom <= 200 && !isAppendingCards) {
+            isAppendingCards = true;
+            renderModernCards(modernPlansData, false); 
+            setTimeout(() => { isAppendingCards = false; }, 100);
+        }
+
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    };
+}
+
+// 🌟 ระบบค้นหา
+function handleUnifiedPlanSearch() {
+    const input = document.getElementById('unifiedPlanSearchInput');
+    if(!input) return;
+    const query = input.value.toLowerCase().trim();
+    
+    if (query === '') {
+        isModernSearchActive = false;
+        renderModernCards(modernPlansData, true); 
+    } else {
+        isModernSearchActive = true; 
+        const filtered = modernPlansData.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+        renderModernCards(filtered, true); 
+    }
+}
+
+function updateQuickPills(planName) {
+    if (typeof window.calculate === 'function' && !window.calculate.hasUIHook) {
+        const originalCalculate = window.calculate;
+        window.calculate = function(...args) {
+            originalCalculate.apply(this, args);
+            setTimeout(() => {
+                if (window.lastCalculationData) {
+                    highlightActivePills(window.lastCalculationData.sum, window.lastCalculationData.premium, window.lastCalculationData.cashFlow || 0);
+                }
+            }, 50);
+        };
+        window.calculate.hasUIHook = true;
+    }
+
+    const sumPillWrapper = document.getElementById('sumPillWrapper');
+    const premPillContainer = document.getElementById('premiumPillContainer');
+    if (!sumPillWrapper || !premPillContainer) return;
+
+    const sumBgHtml = `<div id="sumPillBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 pointer-events-none opacity-0"></div>`;
+    const premBgHtml = `<div id="premPillBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 pointer-events-none opacity-0"></div>`;
+    const inactiveClass = `flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300 plan-pill`;
+
+    if (planName === 'CI Extra Plus') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill2" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(12000)" class="${inactiveClass}">12,000</button><button id="premPill2" onclick="setQuickPremium(24000)" class="${inactiveClass}">24,000</button><button id="premPill3" onclick="setQuickPremium(36000)" class="${inactiveClass}">36,000</button><button id="premPill4" onclick="setQuickPremium(48000)" class="${inactiveClass}">48,000</button><button id="premPill5" onclick="setQuickPremium(60000)" class="${inactiveClass}">60,000</button>`;
+    } else if (planName === 'Signature Legacy') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill2" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button><button id="sumPill3" onclick="setQuickSum(20000000)" class="${inactiveClass}">20 ล้าน</button><button id="sumPill4" onclick="setQuickSum(50000000)" class="${inactiveClass}">50 ล้าน</button><button id="sumPill5" onclick="setQuickSum(100000000)" class="${inactiveClass}">100 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button><button id="premPill2" onclick="setQuickPremium(300000)" class="${inactiveClass}">3 แสน</button><button id="premPill3" onclick="setQuickPremium(500000)" class="${inactiveClass}">5 แสน</button><button id="premPill4" onclick="setQuickPremium(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="premPill5" onclick="setQuickPremium(2000000)" class="${inactiveClass}">2 ล้าน</button>`;
+    } else if (planName === 'Whole Life Extra') {
+        sumPillWrapper.innerHTML = '';
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
+    } else if (['868 / 818 Elite Saving', '24 TX'].includes(planName)) {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
+    } else if (['Life Protector 20', 'Supreme Life Protector'].includes(planName)) {
+        const amounts = [120000, 240000, 360000, 480000, 600000];
+        const labels = ['1.2 แสน', '2.4 แสน', '3.6 แสน', '4.8 แสน', '6 แสน'];
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(100000)" class="${inactiveClass}">1 แสน</button><button id="sumPill2" onclick="setQuickSum(300000)" class="${inactiveClass}">3 แสน</button><button id="sumPill3" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill4" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill5" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + amounts.map((a, i) => `<button id="premPill${i+1}" onclick="setQuickPremium(${a})" class="${inactiveClass}">${labels[i]}</button>`).join('');
+    } else {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(100000)" class="${inactiveClass}">1 แสน</button><button id="sumPill2" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill3" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill4" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill5" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(12000)" class="${inactiveClass}">12,000</button><button id="premPill2" onclick="setQuickPremium(24000)" class="${inactiveClass}">24,000</button><button id="premPill3" onclick="setQuickPremium(36000)" class="${inactiveClass}">36,000</button><button id="premPill4" onclick="setQuickPremium(48000)" class="${inactiveClass}">48,000</button><button id="premPill5" onclick="setQuickPremium(60000)" class="${inactiveClass}">60,000</button>`;
+    }
+
+    // 🟢 อัปเดตตัวเลือกปุ่มกระแสเงินสด WXN ตามตัวเลขใหม่ที่สั่ง
+    if (planName === 'Whole Life Extra') {
+        // แถวที่ 1: 24,000 / 36,000 / 48,000 / 60,000 / 100,000
+        const wxnOpts1 = [
+            { label: '2.4 หมื่น', val: 24000 }, 
+            { label: '3.6 หมื่น', val: 36000 }, 
+            { label: '4.8 หมื่น', val: 48000 }, 
+            { label: '6 หมื่น', val: 60000 }, 
+            { label: '1 แสน', val: 100000 }
+        ];
+        wxnOpts1.forEach((opt, index) => {
+            let btn = document.getElementById('wxnC1Pill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setWXNQuickCashFlow(${opt.val}, 1)`);
+            }
+        });
+
+        // แถวที่ 2: 120,000 / 240,000 / 360,000 / 480,000 / 600,000
+        const wxnOpts2 = [
+            { label: '1.2 แสน', val: 120000 }, 
+            { label: '2.4 แสน', val: 240000 }, 
+            { label: '3.6 แสน', val: 360000 }, 
+            { label: '4.8 แสน', val: 480000 }, 
+            { label: '6 แสน', val: 600000 }
+        ];
+        wxnOpts2.forEach((opt, index) => {
+            let btn = document.getElementById('wxnC2Pill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setWXNQuickCashFlow(${opt.val}, 2)`);
+            }
+        });
+
+    } else if (['868 / 818 Elite Saving', '24 TX'].includes(planName)) {
+        const newOpts = [
+            { label: '2.4 หมื่น', val: 24000 }, 
+            { label: '3.6 หมื่น', val: 36000 }, 
+            { label: '4.8 หมื่น', val: 48000 }, 
+            { label: '6 หมื่น', val: 60000 }, 
+            { label: '1 แสน', val: 100000 }
+        ];
+        newOpts.forEach((opt, index) => {
+            let btn = document.getElementById('cashPill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`);
+            }
+        });
+    }
+
+    setTimeout(() => {
+        if (window.lastCalculationData) highlightActivePills(window.lastCalculationData.sum, window.lastCalculationData.premium, window.lastCalculationData.cashFlow || 0);
+    }, 50);
+}
+
+// ==================== ระบบ 3D Health Options แบบ Side-menu (Pills) ====================
+window.handle3DClick = function(type, val) {
+    if (type === 'HX') {
+        window.currentHX = val;
+        if (!window.currentHXO) window.currentHXO = 'ไม่เลือก';
+        if (!window.currentHBF) window.currentHBF = 'ไม่เลือก';
+    } else if (type === 'HXO') {
+        window.currentHXO = val;
+        if (val === 'ไม่เลือก') window.currentHXD = 'ไม่เลือก';
+    } else if (type === 'HXD') {
+        window.currentHXD = val;
+    } else if (type === 'HBF') {
+        window.currentHBF = val;
+    }
+    
+    window.render3DOptionsUI();
+    if (typeof calculate === 'function') calculate('sum', true);
+};
+
+window.render3DOptionsUI = function() {
+    const container = document.getElementById('threeDOptionsContainer');
+    if (!container) return;
+    container.className = 'flex flex-col shrink-0 mt-2 w-full';
+    container.innerHTML = '';
+
+    let hxVal = window.currentHX || '';
+    let hxoVal = window.currentHXO || '';
+    let hxdVal = window.currentHXD || '';
+    let hbfVal = window.currentHBF || '';
+
+    const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
+    const hxoOpts = ['ไม่เลือก', 'HXO10', 'HXO20', 'HXO30', 'HXO50'];
+                const hxdOpts = ['ไม่เลือก', 'HXD100', 'HXD200', 'HXD500', 'HXD1000'];
+                const hbfOpts = ['ไม่เลือก', 'HBF500', 'HBF1000', 'HBF3000', 'HBF5000'];
+
+                const displayLabels = {
+                  'HXO10': '1,000', 'HXO20': '2,000', 'HXO30': '3,000', 'HXO50': '5,000',
+                  'HXD100': '10,000', 'HXD200': '20,000', 'HXD500': '50,000', 'HXD1000': '100,000',
+                  'HBF500': '500', 'HBF1000': '1,000', 'HBF3000': '3,000', 'HBF5000': '5,000'
+                };
+
+    let html = '';
+
+    html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-slate-200/50"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-bed text-teal-500"></i> ค่าห้อง (HX)</p>`;
+    html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-3 gap-1 w-full">`;
+    hxOpts.forEach(opt => {
+        let isSel = (opt === hxVal);
+        let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-indigo-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-indigo-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
+        html += `<button onclick="window.handle3DClick('HX', '${opt}')" class="${btnClass}">${opt}</button>`;
+    });
+    html += `</div></div></div>`;
+
+    if (hxVal && hxOpts.includes(hxVal)) {
+        html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
+        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
+        hxoOpts.forEach(opt => {
+            let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
+            let isSel = (opt === hxoVal);
+            let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-blue-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-blue-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
+            html += `<button onclick="window.handle3DClick('HXO', '${opt}')" class="${btnClass}">${displayText}</button>`;
+        });
+        html += `</div></div></div>`;
+
+        if (hxoVal && hxoVal !== 'ไม่เลือก') {
+            html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-indigo-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-star text-indigo-500"></i> ADVANCE (HXD)</p>`;
+            html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
+            hxdOpts.forEach(opt => {
+                let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
+                let isSel = (opt === hxdVal);
+                let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-indigo-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-indigo-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
+                html += `<button onclick="window.handle3DClick('HXD', '${opt}')" class="${btnClass}">${displayText}</button>`;
+            });
+            html += `</div></div></div>`;
+        }
+
+        html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
+        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
+        hbfOpts.forEach(opt => {
+            let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
+            let isSel = (opt === hbfVal);
+            let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-rose-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-rose-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
+            html += `<button onclick="window.handle3DClick('HBF', '${opt}')" class="${btnClass}">${displayText}</button>`;
+        });
+        html += `</div></div></div>`;
+    }
+
+    container.insertAdjacentHTML('beforeend', html);
+
+    setTimeout(() => {
+        const customInput = document.getElementById('hbf-custom-amount');
+        if (customInput) {
+            if(hbfVal && hbfVal.startsWith('CUSTOM:')) customInput.value = hbfVal.split(':')[1];
+            customInput.addEventListener('change', function() {
+                const val = parseInt(this.value);
+                if (!isNaN(val) && val >= 100 && val <= 5000) window.handle3DClick('HBF', 'CUSTOM:' + val);
+            });
+        }
+    }, 10);
+};
+
+window.setHX = function(val) { window.currentHX = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
+window.setHXO = function(val) { window.currentHXO = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
+window.setHXD = function(val) {
+    if (val !== 'ไม่เลือก' && window.currentHXO === 'ไม่เลือก') { window.currentHXO = 'HXO10'; }
+    window.currentHXD = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true);
+};
+window.setHBF = function(val) { window.currentHBF = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
+window.setMFPlan = function(val) { window.currentMF = val; closePopup('mfPlanModal'); if(typeof calculate === 'function') calculate('sum', true); };
+
+// ==================== ระบบดึงเงื่อนไข (เพื่อแสดงใน Popup กดค้าง) ====================
+function getConditionsHTML(planName) {
+    if (planName === '868 / 818 Elite Saving' || planName.includes('Elite')) {
+        let ageInput = parseInt(document.getElementById('ageInput')?.value) || 0;
+        let pType = (window.currentPlan === 'S868' || ageInput <= 50) ? 'S868' : 'S818';
+        let ageTxt = pType === 'S868' ? '31 วัน - 50 ปี' : '51 - 65 ปี';
+        let minSaTxt = pType === 'S868' ? '50,000 บาท' : '70,000 บาท';
+        let periodTxt = pType === 'S868' ? 'คุ้มครอง 18 ปี / ออม 8 ปี' : 'คุ้มครองถึงอายุ 68 / ออม 8 ปี';
+        
+        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
+        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${ageTxt}</p></div></div>`;
+        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">${periodTxt}</p></div></div>`;
+        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSaTxt}</p></div></div>`;
+        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1: 100%<br>ปีที่ 2: 200%<br>...เพิ่มขึ้น 100% ทุกปี<br>ปีที่ 8 ขึ้นไป: 800%</p></div></div>`;
+        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-car-burst text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองอุบัติเหตุ</p><p class="text-[12px] font-bold text-amber-800 leading-tight">เสียชีวิตจากอุบัติเหตุทั่วไป 100%<br>เสียชีวิตจากอุบัติเหตุสาธารณะ 200%<br>ICU จากอุบัติเหตุ 20%</p></div></div>`;
+        html += '</div></div>';
+        return html;
+    }
+
+    let issueAge = 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
+    let minSA = 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
+    let planData = null;
+
+    const exactMapping = {
+        'Life Protector 20': '20LPB',
+        'Supreme Life Protector': 'Supreme_Life_Protector_90_20'
+    };
+    
+    let searchKey = exactMapping[planName] || planName;
+    for (let i = 0; i < allInsurancePlans.length; i++) {
+        if (allInsurancePlans[i].name === planName || getPlanAbbr(allInsurancePlans[i].name) === searchKey) {
+            planData = allInsurancePlans[i]; break;
+        }
+    }
+    
+    let config = PLAN_CONFIG[planName] || PLAN_CONFIG[planData?.name];
+    if (config) {
+        issueAge = config.minAge === 0 ? `1 เดือน - ${config.maxAge} ปี` : `${config.minAge} - ${config.maxAge} ปี`;
+        minSA = config.minSum ? `${config.minSum.toLocaleString()} บาท` : minSA;
+    }
+    
+    let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
+    html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${issueAge}</p></div></div>`;
+    html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSA}</p></div></div>`;
+    html += '</div></div>';
+    
+    return html;
+}
+
+function updateConditionsModal(planName) {
+    const el = document.querySelector('#insuranceConditionsModal .text-left');
+    if (el) el.innerHTML = getConditionsHTML(planName); 
+}
+
+function replacePercentWithAmount(text, sum, premium) {
+    return text.replace(/(\d+(?:\.\d+)?)%\s*ของทุน(?:ประกัน)?/g, (match, p1) => {
+        let percent = parseFloat(p1); let amount = sum * (percent / 100); return `<span class="font-bold text-slate-800">${formatNum(amount)} บาท</span>`;
+    }).replace(/(\d+(?:\.\d+)?)%\s*ของเบี้ย(?:ประกัน)?/g, (match, p1) => {
+        let percent = parseFloat(p1); let amount = premium * (percent / 100); return `<span class="font-bold text-slate-800">${formatNum(amount)} บาท</span>`;
+    });
+}
+
+function selectAppPlan(planName) {
+    if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
+
+    closePopup('planSelectModal'); 
+    currentAppPlan = planName; 
+    currentMode = 'sum'; 
+    
+    const config = PLAN_CONFIG[planName] || PLAN_CONFIG["CI Extra Plus"];
+    const inputAge = document.getElementById('ageInput');
+    inputAge.value = config.minAge !== undefined ? config.minAge : 0;
+    
+    document.getElementById('headerTitleText').innerText = planName;
+    const planInfo = allInsurancePlans.find(p => p.name === planName);
+    if (planInfo) setText('headerDescText', planInfo.desc);
+    
+    currentPlanOptions = config.options || [];
+    let ageInputVal = parseInt(inputAge.value) || 0;
+    if (planName === '868 / 818 Elite Saving') {
+        currentPlan = ageInputVal <= 50 ? 'S868' : 'S818';
+    } else {
+        currentPlan = currentPlanOptions[0] || ''; 
+    }
+    
+    const planSelectionWrapper = document.getElementById('planSelectionWrapper');
+    if(planSelectionWrapper) { 
+        if ((config.options && config.options.length <= 1) || planName === '868 / 818 Elite Saving') {
+            planSelectionWrapper.classList.add('hidden');
+        } else {
+            planSelectionWrapper.classList.remove('hidden');
+        }
+    }
+    
+    const pLabel = document.getElementById('premiumLabel'); 
+    const pPills = document.getElementById('premiumPillContainer');
+    const premiumContainer = document.getElementById('premiumContainer');
+    const premiumInput = document.getElementById('premiumInput');
+    const cashFlowContainer = document.getElementById('cashFlowContainer');
+    const sumInsuredContainer = document.getElementById('sumInsuredContainer');
+    const extraOptions = document.getElementById('threeDOptionsContainer');
+    const hxRoomRateContainer = document.getElementById('hxRoomRateContainer');
+    const mainActionBtn = document.getElementById('mainActionBtn');
+    const globalMFContainer = document.getElementById('globalMFContainer'); 
+    
+    premiumInput.readOnly = false;
+
+    if (planName === 'Whole Life Extra') {
+        currentMode = 'premium'; 
+        document.getElementById('premiumInput').value = "120,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden'); 
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            document.getElementById('singleCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('flex');
+        }
+    } else if (planName === '868 / 818 Elite Saving') {
+        currentMode = 'premium'; 
+        document.getElementById('premiumInput').value = "120,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden'); 
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            document.getElementById('singleCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('flex');
+        }
+    } else if (planName === '24 TX') {
+        currentMode = 'premium'; 
+        document.getElementById('premiumInput').value = "120,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden'); 
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            document.getElementById('singleCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('flex');
+        }
+    } else if (planName === 'Life Protector 20' || planName === 'Supreme Life Protector' || planName === 'Century Life') {
+        currentMode = 'sum';
+        document.getElementById('sumInsuredInput').value = "500,000";
+        document.getElementById('premiumInput').value = (planName === 'Century Life') ? "12,000" : "120,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
+    } else if (planName === 'Convertable Term') {
+        currentMode = 'sum';
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
+    } else {
+        const defaultSum = (planName === 'CI Extra Plus') ? 500000 : (config.minSum || 100000);
+        document.getElementById('sumInsuredInput').value = defaultSum.toLocaleString();
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            if (config.hasCashFlow) {
+                cashFlowContainer.classList.remove('hidden');
+                document.getElementById('singleCashFlowBox').classList.remove('hidden');
+                document.getElementById('dualCashFlowBox').classList.add('hidden');
+                document.getElementById('dualCashFlowBox').classList.remove('flex');
+            } else {
+                cashFlowContainer.classList.add('hidden');
+            }
+        }
+    }
+    
+    if (planName === '3D Health Excellence') {
+        window.currentHX = 'ไม่เลือก'; window.currentHXO = 'ไม่เลือก'; window.currentHXD = 'ไม่เลือก'; window.currentHBF = 'ไม่เลือก';
+        if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
+        if(extraOptions) { extraOptions.classList.remove('hidden'); render3DOptionsUI(); } 
+        if(pPills) pPills.classList.add('hidden');
+        premiumInput.readOnly = true;
+        if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; 
+    } else {
+        if(extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
+        if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
+    }
+
+    if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', '3D Health Excellence'].includes(planName)) {
+        if (globalMFContainer) globalMFContainer.classList.remove('hidden');
+    } else {
+        if (globalMFContainer) globalMFContainer.classList.add('hidden');
+    }
+
+    if (['Signature Legacy', 'Convertable Term'].includes(planName)) {
+        if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; if(pPills) pPills.classList.add('hidden'); 
+    } else if (planName !== '3D Health Excellence') {
+        if(pLabel) pLabel.innerText = "ออมเงิน (บาท/ปี)"; if(pPills) pPills.classList.remove('hidden');
+    }
+    
+    const medFundBtnContainer = document.getElementById('medicalFundBtnContainer');
+    if (medFundBtnContainer) {
+        if (['24 TX', '868 / 818 Elite Saving', 'Whole Life Extra', '3D Health Excellence'].includes(planName)) {
+            medFundBtnContainer.classList.remove('hidden');
+        } else {
+            medFundBtnContainer.classList.add('hidden');
+        }
+    }
+
+    if (mainActionBtn) {
+        // ให้แผนพวกนี้แสดงปุ่มตารางมูลค่า (และดูรายละเอียดในตัว) นอกนั้นโชว์ดูรายละเอียด
+        if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
+            mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ตารางมูลค่า`;
+            mainActionBtn.onclick = function() { switchView('table'); };
+        } else {
+            mainActionBtn.innerHTML = `<i class="fas fa-file-alt text-lg"></i> ดูรายละเอียด`;
+            mainActionBtn.onclick = function() { manualTriggerPopup(); };
+        }
+    }
+    
+    updateConditionsModal(planName); 
+    setPlan(currentPlan);
+    updateQuickPills(planName);
+}
+
+function setPlan(plan) { 
+    currentPlan = plan; 
+    const btns = [document.getElementById('btnPlan1'), document.getElementById('btnPlan2'), document.getElementById('btnPlan3'), document.getElementById('btnPlan4')];
+    let activeBtn = null;
+    btns.forEach((btn, idx) => {
+        if (!btn) return;
+        if (idx < currentPlanOptions.length) {
+            let displayLabel = currentPlanOptions[idx];
+            if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
+                displayLabel = displayLabel.replace('CL', ''); 
+            }
+            btn.innerText = displayLabel;
+            btn.classList.remove('hidden');
+            btn.onclick = () => setPlan(currentPlanOptions[idx]);
+            const isTarget = plan === currentPlanOptions[idx];
+            if (isTarget) { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300 plan-pill'; activeBtn = btn; } 
+            else { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300 plan-pill'; }
+        } else { btn.classList.add('hidden'); }
+    });
+    
+    const planBg = document.getElementById('planBg');
+    if (planBg && activeBtn) { setTimeout(() => { planBg.style.width = activeBtn.offsetWidth + 'px'; planBg.style.left = activeBtn.offsetLeft + 'px'; }, 10); }
+    
+    calculate(currentMode, true);
+}
+
+// ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
+function manualTriggerPopup() { 
+    try {
+        calculate(currentMode, true); 
+        const calcData = lastCalculationData;
+        
+        if (!calcData || calcData.premium === 0) {
+            showCustomError("กรุณากรอกข้อมูลและคำนวณเบี้ยให้ครบถ้วนก่อน");
+            return;
+        }
+
+        if (currentAppPlan === 'Medical Fund') {
+            showCustomError(`ระบบดูรายละเอียดของ ${currentAppPlan} อยู่ระหว่างการพัฒนา`);
+            return;
+        }
+        
+        openUniversalModal(calcData);
+        
+    } catch(e) {
+        showCustomError("เกิดข้อผิดพลาดในการดึงข้อมูลรายละเอียด");
+    }
+}
+
+// สร้าง Modal Maturity สำหรับ CX
+function injectMaturityModal() {
+    if (!document.getElementById('maturityExtraModal')) {
+        const mHtml = `<div id="maturityExtraModal" class="modal-overlay hidden"><div class="modal-content-card p-5 text-center"><div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5"><h3 class="text-base font-bold text-indigo-900"><i class="fas fa-info-circle mr-2 text-indigo-600"></i> เงื่อนไขจากไปหรือครบสัญญา</h3><button onclick="closePopup('maturityExtraModal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-[16px] font-bold shadow-sm">&times;</button></div><div class="text-left text-xs font-medium text-slate-700 space-y-2"><p class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">รับ 105% ของทุนประกัน หากไม่เคยเคลมโรคร้ายแรงระยะรุนแรง</p><p class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-rose-700">*หากเคยเคลมโรคร้ายระยะเริ่มต้น (25%) หรือรุนแรง (100%) บริษัทจะหักออกจาก 105% นี้ และจ่ายส่วนต่างให้ (ถ้ามี)</p></div></div></div>`;
+        document.body.insertAdjacentHTML('beforeend', mHtml);
+    }
+}
+
+// รวมศูนย์เปิด Modal (รองรับทุกแผน)
+function openUniversalModal(d) {
+    if(!d) return;
+    injectMaturityModal();
+    
+    if (currentAppPlan === '868 / 818 Elite Saving') {
+        setText('modalGender', d.gender); 
+        setText('modalAge', d.age + " ปี"); 
+        setText('modalYears', "8 ปี"); 
+        setText('modalPremium', Math.round(d.premium).toLocaleString()); 
+        setText('modalSum', formatNum(d.sum)); 
+        
+        // ซ่อนกล่องเงื่อนไขของ CX ทิ้งไป
+        const childRow = document.getElementById('modalChildRow'); 
+        if (childRow) { childRow.classList.add('hidden'); childRow.classList.remove('flex'); }
+        const extraCIRow = document.getElementById('modalExtraCIRow');
+        const majorCIRow = document.getElementById('modalMajorCIRow');
+        const maturityRow = document.getElementById('modalMaturityRow');
+        if (extraCIRow) { extraCIRow.classList.remove('flex'); extraCIRow.classList.add('hidden'); }
+        if (majorCIRow) { majorCIRow.classList.remove('flex'); majorCIRow.classList.add('hidden'); }
+        if (maturityRow) { maturityRow.classList.remove('flex'); maturityRow.classList.add('hidden'); }
+        
+        let dynamicContainer = document.getElementById('modalDynamicBenefits');
+        if (!dynamicContainer) {
+            const scrollArea = document.querySelector('#resultModal .overflow-y-auto');
+            if (scrollArea) {
+                dynamicContainer = document.createElement('div');
+                dynamicContainer.id = 'modalDynamicBenefits';
+                dynamicContainer.className = 'space-y-3 mt-4';
+                const shareBtn = scrollArea.querySelector('.mt-4:last-child'); 
+                if (shareBtn) scrollArea.insertBefore(dynamicContainer, shareBtn);
+                else scrollArea.appendChild(dynamicContainer);
+            }
+        }
+        
+        if (dynamicContainer) {
+            dynamicContainer.classList.remove('hidden');
+            
+            // คำนวณผลประโยชน์ Elite ตามประกาศ[cite: 5]
+            let cashFlowTotal = Math.round(d.sum * 0.12);
+            let maturityTotal = Math.round(d.sum * 7.20);
+            let deathTotal = Math.round(d.sum * 8.00); 
+            
+            let maturityText = window.currentPlan === 'S868' ? 'ครบกำหนดสัญญา ปีที่ 18' : 'ครบกำหนดสัญญา อายุ 68 ปี';
+            
+            let html = `
+                <div class="flex flex-col p-3.5 bg-indigo-50/70 rounded-[14px] border border-indigo-100 mb-3">
+                    <div class="flex justify-between items-center gap-2 mb-2 border-b border-indigo-100/50 pb-2">
+                        <span class="text-[12px] text-indigo-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-hand-holding-usd text-indigo-500"></i> เงินคืนรายปี (12%)</span>
+                        <span class="text-[13px] font-extrabold text-indigo-700 text-right shrink-0">${cashFlowTotal.toLocaleString()} ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2 mb-2 border-b border-indigo-100/50 pb-2">
+                        <span class="text-[12px] text-indigo-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-gift text-indigo-500"></i> ${maturityText} (720%)</span>
+                        <span class="text-[13px] font-extrabold text-indigo-700 text-right shrink-0">${maturityTotal.toLocaleString()} ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-[12px] text-rose-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-heartbeat text-rose-500"></i> กรณีเสียชีวิตสูงสุด (800%)</span>
+                        <span class="text-[13px] font-extrabold text-rose-700 text-right shrink-0">${deathTotal.toLocaleString()} ฿</span>
+                    </div>
+                </div>`;
+            dynamicContainer.innerHTML = html;
+        }
+        
+        const actionContainer = document.getElementById('modalActionBtnsContainer');
+        if (actionContainer) {
+            actionContainer.innerHTML = `
+            <button onclick="openTableFromModal()" class="w-full py-3.5 bg-fuchsia-50/50 text-fuchsia-800 font-bold rounded-2xl border border-fuchsia-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-fuchsia-100">
+                <div class="flex items-center gap-3"><i class="fas fa-table-list text-fuchsia-600"></i> ตารางมูลค่ากรมธรรม์</div><i class="fas fa-chevron-right opacity-50"></i>
+            </button>
+            <button onclick="openGenericShareModal('all')" class="w-full mt-2 bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
+        }
+        openPopup('resultModal');
+    }
+    else if (currentAppPlan === 'Signature Legacy') {
+        setText('modalSLBGender', d.gender); setText('modalSLBAge', d.age + " ปี"); setText('modalSLBYears', d.years + " ปี"); 
+        setText('modalSLBPremium', Math.round(d.premium).toLocaleString()); setText('modalSLBSum', formatNum(d.sum)); 
+        let accidentalTotal = d.sum + Math.min(d.sum, 100000000); setText('modalSLBAccident', formatNum(accidentalTotal));
+        setText('modalSLBCancer', formatNum(Math.min(d.sum * 0.30, 30000000))); let terminalMaxCap = (d.age >= 60 && d.age <= 70) ? 50000000 : 100000000;
+        setText('modalSLBTerminal', formatNum(Math.min(d.sum * 0.90, terminalMaxCap))); setText('modalSLBTerminalNote', `* หากรับเงินก้อนมะเร็ง 30% ไปแล้ว จะหักออกจากยอดนี้`);
+        openPopup('slbResultModal'); 
+    } 
+    else if (currentAppPlan === 'CI Extra Plus') {
+        setText('modalGender', d.gender); 
+        setText('modalAge', d.age + " ปี"); 
+        setText('modalYears', d.years + " ปี"); 
+        setText('modalPremium', Math.round(d.premium).toLocaleString()); 
+        setText('modalSum', formatNum(d.sum)); 
+        
+        const childRow = document.getElementById('modalChildRow'); 
+        if (childRow) {
+            if (d.age >= 0 && d.age <= 15) { 
+                childRow.classList.remove('hidden'); childRow.classList.add('flex'); 
+                setText('modalChildCI', formatNum(d.sum)); 
+            } else { 
+                childRow.classList.add('hidden'); childRow.classList.remove('flex'); 
+            } 
+        }
+        
+        const extraCIRow = document.getElementById('modalExtraCIRow');
+        if (extraCIRow) { 
+            extraCIRow.classList.remove('hidden'); extraCIRow.classList.add('flex'); 
+            setText('modalExtraCI', formatNum(d.sum * 0.25)); 
+        }
+
+        const majorCIRow = document.getElementById('modalMajorCIRow');
+        if (majorCIRow) { 
+            majorCIRow.classList.remove('hidden'); majorCIRow.classList.add('flex'); 
+            setText('modalMajorCI', formatNum(d.sum * 0.75)); 
+            setText('modalMedExtra1Popup', formatNum(d.sum * 0.10)); 
+        }
+
+        const maturityRow = document.getElementById('modalMaturityRow');
+        if (maturityRow) { 
+            maturityRow.classList.remove('hidden'); maturityRow.classList.add('flex'); 
+            setText('modalMaturity', formatNum(d.sum * 1.05)); 
+            // 💡 เพิ่มบรรทัดนี้ เพื่อส่งตัวเลข 5% เข้าไปใน Popup เงื่อนไข
+            setText('modalMaturityExtraPopup', formatNum(d.sum * 0.05)); 
+        }
+
+        const actionContainer = document.getElementById('modalActionBtnsContainer');
+        if (actionContainer) {
+            actionContainer.innerHTML = `
+                <button onclick="openTableFromModal()" class="w-full py-3.5 bg-fuchsia-50/50 text-fuchsia-800 font-bold rounded-2xl border border-fuchsia-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-fuchsia-100">
+                    <div class="flex items-center gap-3"><i class="fas fa-table-list text-fuchsia-600"></i> ตารางมูลค่ากรมธรรม์</div><i class="fas fa-chevron-right opacity-50"></i>
+                </button>
+                <button onclick="openGenericShareModal('premium')" class="w-full py-3.5 bg-blue-50 text-blue-700 font-bold rounded-2xl border border-blue-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-blue-100">
+                    <div class="flex items-center gap-3"><i class="fas fa-coins text-blue-500"></i> แชร์เฉพาะเบี้ยประกัน</div><i class="fas fa-share-nodes opacity-50"></i>
+                </button>
+                <button onclick="openGenericShareModal('all')" class="w-full py-3.5 bg-[#1e3a8a] text-white font-bold rounded-2xl shadow-md flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-blue-900">
+                    <div class="flex items-center gap-3"><i class="fas fa-file-invoice text-blue-300"></i> แชร์สรุปทั้งหมด</div><i class="fas fa-share-nodes text-blue-300"></i>
+                </button>
+                <button onclick="closePopup('resultModal')" class="w-full py-3.5 bg-slate-100 text-slate-600 font-bold rounded-2xl border border-slate-200 mt-2 hover:bg-slate-200 transition-colors">
+                    ปิดหน้าต่าง
+                </button>`;
+        }
+        
+        const dynamicContainer = document.getElementById('modalDynamicBenefits');
+        if (dynamicContainer) dynamicContainer.classList.add('hidden');
+
+        openPopup('resultModal');
+    }
+    else {
+        setText('modalGender', d.gender); setText('modalAge', d.age + " ปี"); setText('modalYears', d.years + " ปี"); 
+        setText('modalPremium', Math.round(d.premium).toLocaleString()); setText('modalSum', formatNum(d.sum)); 
+        
+        const childRow = document.getElementById('modalChildRow'); 
+        if (childRow) { childRow.classList.add('hidden'); childRow.classList.remove('flex'); }
+        
+        const extraCIRow = document.getElementById('modalExtraCIRow');
+        const majorCIRow = document.getElementById('modalMajorCIRow');
+        const maturityRow = document.getElementById('modalMaturityRow');
+
+        if (extraCIRow) { extraCIRow.classList.remove('flex'); extraCIRow.classList.add('hidden'); }
+        if (majorCIRow) { majorCIRow.classList.remove('flex'); majorCIRow.classList.add('hidden'); }
+        if (maturityRow) { maturityRow.classList.remove('flex'); maturityRow.classList.add('hidden'); }
+        
+        let dynamicContainer = document.getElementById('modalDynamicBenefits');
+        if (!dynamicContainer) {
+            const scrollArea = document.querySelector('#resultModal .overflow-y-auto');
+            if (scrollArea) {
+                dynamicContainer = document.createElement('div');
+                dynamicContainer.id = 'modalDynamicBenefits';
+                dynamicContainer.className = 'space-y-3 mt-4';
+                const shareBtn = scrollArea.querySelector('.mt-4:last-child'); 
+                if (shareBtn) scrollArea.insertBefore(dynamicContainer, shareBtn);
+                else scrollArea.appendChild(dynamicContainer);
+            }
+        }
+        
+        if (dynamicContainer) {
+            dynamicContainer.classList.remove('hidden');
+            let html = '';
+            const pd = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[currentAppPlan];
+            
+            if (pd && pd.benefits && pd.benefits.length > 0) {
+                pd.benefits.forEach((b) => {
+                    let calcB = replacePercentWithAmount(b, d.sum, d.premium);
+                    let emojiMatch = calcB.match(/^([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/);
+                    let emoji = emojiMatch ? emojiMatch[0] : '🔹';
+                    let textClean = calcB.replace(/^([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])\s*/, '');
+                    
+                    let title = textClean; let valStr = '';
+                    if (textClean.includes(':')) {
+                        let parts = textClean.split(':');
+                        title = parts[0]; valStr = parts.slice(1).join(':').trim();
+                    }
+
+                    html += `<div class="flex flex-col p-3.5 bg-blue-50/70 rounded-[14px] border border-blue-100 mb-3">
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="text-[12px] text-blue-900 font-bold flex items-center gap-1.5 leading-tight">${emoji} ${title}</span>
+                                    ${valStr ? `<span class="text-[13px] font-extrabold text-blue-700 text-right shrink-0">${valStr}</span>` : ''}
+                                </div>
+                            </div>`;
+                });
+            } else {
+                html += `<div class="flex flex-col p-3.5 bg-slate-50 rounded-[14px] border border-slate-200 text-center"><p class="text-[12px] text-slate-500 font-bold">กรุณาดูรายละเอียดในตารางมูลค่าหรือเอกสารเสนอขาย</p></div>`;
+            }
+            
+            if (pd && pd.remark) {
+                 html += `<div class="bg-slate-50 p-2.5 rounded-[12px] border border-slate-100 mt-2"><p class="text-[10px] text-slate-500 italic font-medium leading-relaxed">${pd.remark.replace(/\n/g, '<br>')}</p></div>`;
+            }
+            if (currentAppPlan === '3D Health Excellence') {
+                html += `<div class="mt-3 space-y-2">
+                    <details class="bg-teal-50 border border-teal-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-teal-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-th-list mr-1.5"></i> ความคุ้มครองหลัก 19 หมวด</span><i class="fas fa-chevron-down text-teal-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-teal-700 font-medium space-y-1"><p>1.ค่าห้องและค่าอาหาร 2.ค่าบริการพยาบาล 3.ค่าผ่าตัด 4.ค่าวิสัญญีแพทย์ 5.ค่าห้องผ่าตัด 6.ค่าตรวจวินิจฉัย 7.ค่ายาและวัสดุทางการแพทย์ 8.ค่าเลือด 9.ค่าบริการทางการแพทย์อื่นๆ 10.ค่ารักษาพยาบาลผู้ป่วยนอก 11.ค่าทำคลอด 12.ค่าทันตกรรม 13.ค่ากายภาพบำบัด 14.ค่ารักษาจิตเวช 15.ค่าฉุกเฉิน 16.ค่าดูแลสุขภาพเชิงป้องกัน 17.ค่ารักษาโรคเรื้อรัง 18.ค่ารักษาโรคมะเร็ง 19.ค่ารักษาโรคไตวาย</p></div></details>
+                    <details class="bg-blue-50 border border-blue-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-blue-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-percent mr-1.5"></i> เงื่อนไข Copayment มาตรฐานใหม่</span><i class="fas fa-chevron-down text-blue-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-blue-700 font-medium space-y-1"><p>• ผู้เอาประกันรับภาระ Copayment 20% ของค่ารักษาส่วนเกิน OPD สูงสุด 5,000 บาท/ครั้ง</p><p>• IPD: ไม่มี Copayment หากใช้ห้องตามสิทธิ์</p><p>• OPD: Copayment เมื่อค่ารักษาเกินวงเงินต่อครั้ง</p></div></details>
+                    <details class="bg-indigo-50 border border-indigo-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-indigo-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-file-contract mr-1.5"></i> บันทึกสลักหลัง HXO &amp; HXD</span><i class="fas fa-chevron-down text-indigo-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-indigo-700 font-medium space-y-1"><p>• HXO: คุ้มครอง OPD ฉุกเฉิน และ OPD ทั่วไปตามวงเงิน</p><p>• HXD: คุ้มครองค่าใช้จ่ายสูงพิเศษ เช่น ผ่าตัดซับซ้อน รักษามะเร็ง</p><p>• ต้องมี HXO ก่อนจึงจะสมัคร HXD ได้</p></div></details>
+                    <details class="bg-rose-50 border border-rose-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-rose-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-heartbeat mr-1.5"></i> ชดเชยรายวัน HBF</span><i class="fas fa-chevron-down text-rose-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-rose-700 font-medium space-y-1"><p>• จ่ายชดเชยรายวันเมื่อนอนโรงพยาบาล (IPD) ตามวงเงินที่เลือก</p><p>• สูงสุด 5,000 บาท/วัน ไม่เกิน 365 วัน/ปี</p><p>• ไม่ขึ้นกับค่าใช้จ่ายจริง จ่ายตามจำนวนวันนอน</p></div></details>
+                </div>`;
+            }
+            dynamicContainer.innerHTML = html;
+        }
+        
+        const actionContainer = document.getElementById('modalActionBtnsContainer');
+        if (actionContainer) {
+            actionContainer.innerHTML = `<button onclick="openGenericShareModal('all')" class="w-full bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
+        }
+        openPopup('resultModal');
+    }
+}
+
+// ==================== CASH MODULE DISPLAYS ====================
+function getComRateArray(planKey) {
+    if (typeof COM_RATES === 'undefined') return [];
+    let planData = COM_RATES[planKey];
+    if (!planData) return [];
+    if (Array.isArray(planData)) return planData;
+
+    let age = 0;
+    if (typeof lastCalculationData !== 'undefined' && lastCalculationData && lastCalculationData.age !== undefined) {
+        age = lastCalculationData.age;
+    } else {
+        const ageInput = document.getElementById('ageInput');
+        age = ageInput ? (parseInt(ageInput.value) || 0) : 0;
+    }
+
+    for (let key in planData) {
+        if (key.includes('-')) {
+            let parts = key.split('-');
+            let min = parseInt(parts[0], 10);
+            let max = parseInt(parts[1], 10);
+            if (age >= min && age <= max) {
+                let rateData = planData[key];
+                if (typeof rateData === 'string') {
+                    let mainRateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+                    return getComRateArray(mainRateKey);
+                }
+                return Array.isArray(rateData) ? rateData : [];
+            }
+        }
+    }
+
+    for (let key in planData) {
+        if (Array.isArray(planData[key])) return planData[key];
+    }
+    return [];
+}
+
+function updateMBDisplay() { 
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    const rateArr = getComRateArray(effectivePlan);
+    if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
+    
+    const p = lastCalculationData.premium || 0;
+    const fycFromCase = Math.round(p * (rateArr[0] || 0)) || 0; 
+    
+    const existingFYC = getSafeValue('existingFYCInput'); 
+    const totalFYC = fycFromCase + existingFYC; 
+    const tiers = [{min:8000, max: 16000, rate:0.20}, {min:16001, max: 32000, rate:0.25}, {min:32001, max: 64000, rate:0.30}, {min:64001, max: Infinity, rate:0.35}]; 
+    let curIdx = -1; tiers.forEach((t, i) => { if (totalFYC >= t.min) curIdx = i; }); 
+    const currentRate = curIdx >= 0 ? tiers[curIdx].rate : 0; 
+    setText('mbCalculatedBonus', Math.round(totalFYC * currentRate).toLocaleString() + " บาท"); 
+    setText('mbTotalFYCDisplay', totalFYC.toLocaleString());
+    
+    let tierHtml = '';
+    tiers.forEach((t, i) => {
+        const isActive = (curIdx === i);
+        tierHtml += `<div class="flex justify-between items-center p-3 rounded-[16px] border ${isActive ? 'border-[#10b981] bg-[#ecfdf5]' : 'border-slate-100 bg-white'} mb-2 shadow-sm"><span class="text-[14px] font-bold ${isActive ? 'text-[#065f46]' : 'text-slate-600'}">${t.min.toLocaleString()} - ${t.max === Infinity ? 'ขึ้นไป' : t.max.toLocaleString()}</span><span class="text-[14px] font-black px-4 py-1.5 rounded-xl ${isActive ? 'bg-[#10b981]/20 text-[#047857]' : 'text-slate-800'}">${formatPct(t.rate * 100)}</span></div>`;
+    });
+    document.getElementById('mbTierList').innerHTML = tierHtml;
+    setText('mbCaseFYCDisplay', fycFromCase.toLocaleString()); setText('mbExistingFYCDisplay', existingFYC.toLocaleString());
+    setText('mbBonusCalcMethod', `(${totalFYC.toLocaleString()} x ${formatPct(currentRate * 100)})`);
+    
+    if (document.getElementById('caseIncomeBonusCalc')) {
+        document.getElementById('caseIncomeBonusCalc').innerText = `(${fycFromCase.toLocaleString()} x ${formatPct(currentRate * 100)})`;
+    }
+
+    window.currentMBBonus = Math.round(fycFromCase * currentRate);
+    const adviceBox = document.getElementById('mbAdviceText'); 
+    if (adviceBox) { 
+        if (curIdx < tiers.length - 1) { 
+            const next = tiers[curIdx + 1]; 
+            adviceBox.innerHTML = `<strong>เพิ่มอีก <span class="whitespace-nowrap text-amber-600">${(Math.max(0, next.min - totalFYC)).toLocaleString()} บาท</span></strong><br><span class="text-slate-500">เพื่อรับโบนัสระดับถัดไป ${formatPct(next.rate * 100)}</span>`; 
+            hasShownCongratsMB = false;
+        } else { 
+            adviceBox.innerHTML = `<strong class="text-emerald-600">🎉 ยินดีด้วย!</strong><br><span class="text-slate-600">คุณได้รับโบนัสระดับสูงสุด ${formatPct(tiers[curIdx].rate * 100)} แล้ว</span>`; 
+            if (!hasShownCongratsMB) { showCongratsToast(`ทะลุเป้าหมาย MB สูงสุด ${formatPct(tiers[curIdx].rate * 100)} แล้ว`); hasShownCongratsMB = true; }
+        } 
+    }
+}
+
+window.toggleMYBTiers = function() {
+    const hiddenTiers = document.querySelectorAll('.myb-tier-hidden');
+    hiddenTiers.forEach(el => el.classList.toggle('hidden'));
+    const btn = document.getElementById('mybToggleBtn');
+    if (btn) {
+        if (btn.innerText.includes('ดูเพิ่มเติม')) {
+            btn.innerHTML = 'ย่อตาราง <i class="fas fa-chevron-up ml-1"></i>';
+        } else {
+            btn.innerHTML = 'ดูตารางเพิ่มเติม <i class="fas fa-chevron-down ml-1"></i>';
+        }
+    }
+};
+
+function updateMYBDisplay() { 
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    const rateArr = getComRateArray(effectivePlan);
+    if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
+    
+    const p = lastCalculationData.premium || 0;
+    const fycFromCase = Math.round(p * (rateArr[0] || 0)) || 0; 
+    
+    const existingHalfYearFYC = getSafeValue('existingHalfYearFYCInput'); 
+    const totalFYC = fycFromCase + existingHalfYearFYC; 
+    const tiers = [{min:40000, max: 60000, rate:0.175}, {min:60001, max: 100000, rate:0.20}, {min:100001, max: 150000, rate:0.225}, {min:150001, max: 200000, rate:0.25}, {min:200001, max: 250000, rate:0.275}, {min:250001, max: 300000, rate:0.30}, {min:300001, max: 400000, rate:0.325}, {min:400001, max: Infinity, rate:0.35}]; 
+    let curIdx = -1; tiers.forEach((t, i) => { if (totalFYC >= t.min) curIdx = i; }); 
+    const currentRate = curIdx >= 0 ? tiers[curIdx].rate : 0; 
+    
+    let tierHtml = '';
+    tiers.forEach((t, i) => {
+        const isActive = (curIdx === i);
+        const hiddenClass = i >= 4 ? 'myb-tier-hidden hidden' : '';
+        tierHtml += `<div class="${hiddenClass} flex justify-between items-center p-3 rounded-[16px] border ${isActive ? 'border-[#8b5cf6] bg-[#f5f3ff]' : 'border-slate-100 bg-white'} mb-2 shadow-sm"><span class="text-[14px] font-bold ${isActive ? 'text-[#5b21b6]' : 'text-slate-600'}">${t.min.toLocaleString()} - ${t.max === Infinity ? 'ขึ้นไป' : t.max.toLocaleString()}</span><span class="text-[14px] font-black px-4 py-1.5 rounded-xl ${isActive ? 'bg-[#8b5cf6]/20 text-[#6d28d9]' : 'text-slate-800'}">${formatPct(t.rate * 100)}</span></div>`;
+    });
+    if (tiers.length > 4) {
+        tierHtml += `<button id="mybToggleBtn" onclick="toggleMYBTiers()" class="w-full text-center text-[11px] font-bold text-purple-600 bg-purple-50 py-2 rounded-xl mt-1 hover:bg-purple-100 transition-colors">ดูตารางเพิ่มเติม <i class="fas fa-chevron-down ml-1"></i></button>`;
+    }
+
+    document.getElementById('mybTierList').innerHTML = tierHtml;
+    setText('mybCalculatedBonus', Math.round(totalFYC * currentRate).toLocaleString() + " บาท"); 
+    setText('mybCaseFYCDisplay', fycFromCase.toLocaleString()); setText('mybMBFYCDisplay', existingHalfYearFYC.toLocaleString());
+    setText('mybTotalFYCDisplay', totalFYC.toLocaleString()); setText('mybBonusCalcMethod', `(${totalFYC.toLocaleString()} x ${formatPct(currentRate * 100)})`);
+    
+    if (document.getElementById('caseIncomeMYBonusCalc')) {
+        document.getElementById('caseIncomeMYBonusCalc').innerText = `(${fycFromCase.toLocaleString()} x ${formatPct(currentRate * 100)})`;
+    }
+
+    window.currentMYBBonus = Math.round(fycFromCase * currentRate);
+    const adviceBox = document.getElementById('mybAdviceText'); 
+    if (adviceBox) { 
+        if (curIdx < tiers.length - 1) { 
+            const next = tiers[curIdx + 1]; 
+            adviceBox.innerHTML = `<strong>เพิ่มอีก <span class="whitespace-nowrap text-amber-600">${(Math.max(0, next.min - totalFYC)).toLocaleString()} บาท</span></strong><br><span class="text-slate-500">เพื่อรับโบนัสระดับถัดไป ${formatPct(next.rate * 100)}</span>`; 
+            hasShownCongratsMYB = false;
+        } else { 
+            adviceBox.innerHTML = `<strong class="text-emerald-600">🎉 ยินดีด้วย!</strong><br><span class="text-slate-600">คุณได้รับโบนัสครึ่งปีเกินเกณฑ์ขั้นที่ 4 แล้ว</span>`; 
+            if (!hasShownCongratsMYB) { showCongratsToast(`ทะลุเป้าหมาย MYB แล้ว`); hasShownCongratsMYB = true; }
+        } 
+    }
+}
+
+function updateNABDisplay() { 
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    const rateArr = getComRateArray(effectivePlan);
+    if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
+    
+    const p = lastCalculationData.premium || 0;
+    const fycFromCase = Math.round(p * (rateArr[0] || 0)) || 0; 
+    
+    const existingNABFYC = getSafeValue('existingNABFYCInput'); 
+    const existingCases = parseInt(document.getElementById('existingNABCases')?.value) || 0; 
+    const phase = document.getElementById('nabPhaseSelect')?.value || 'p1'; 
+    
+    const totalFYC = fycFromCase + existingNABFYC; const totalCases = 1 + existingCases; 
+    let tiers = phase === 'p1' ? [{ minFYC: 20000, minCases: 3, bonus: 6000, label: "≥ 20,000 และ 3 ราย" },{ minFYC: 50000, minCases: 5, bonus: 15000, label: "≥ 50,000 และ 5 ราย" }] : [{ minFYC: 40000, minCases: 5, bonus: 10000, label: "≥ 40,000 และ 5 ราย" },{ minFYC: 100000, minCases: 10, bonus: 25000, label: "≥ 100,000 และ 10 ราย" }]; 
+    let nabBonus = 0; let currentTierIdx = -1; 
+    tiers.forEach((t, i) => { if (totalFYC >= t.minFYC && totalCases >= t.minCases) { nabBonus = t.bonus; currentTierIdx = i; } }); 
+    
+    let tierHtml = '';
+    tiers.forEach((t, i) => {
+        const isActive = (currentTierIdx === i);
+        const activeClass = isActive ? 'border-[#06b6d4] bg-[#ecfeff]' : 'border-slate-100 bg-white';
+        const fycIcon = (totalFYC >= t.minFYC) ? '<i class="fas fa-check-circle text-[#10b981]"></i>' : '<i class="far fa-circle text-slate-300"></i>';
+        const casesIcon = (totalCases >= t.minCases) ? '<i class="fas fa-check-circle text-[#10b981]"></i>' : '<i class="far fa-circle text-slate-300"></i>';
+        tierHtml += `<div class="flex justify-between items-center p-3 rounded-[16px] border ${activeClass} mb-2 shadow-sm"><div class="flex flex-col gap-1"><span class="text-[14px] font-bold text-slate-800">${t.label}</span><div class="text-[11px] text-slate-500 flex flex-col mt-0.5"><span class="flex items-center gap-1.5">${fycIcon} FYC: ${totalFYC.toLocaleString()} / ${t.minFYC.toLocaleString()}</span><span class="flex items-center gap-1.5">${casesIcon} ราย: ${totalCases} / ${t.minCases}</span></div></div><span class="text-[16px] font-black text-[#0891b2]">${t.bonus.toLocaleString()}</span></div>`;
+    });
+    document.getElementById('nabTierList').innerHTML = tierHtml;
+    window.currentNABBonus = nabBonus; 
+    setText('nabCaseFYCDisplay', fycFromCase.toLocaleString()); setText('nabExistingFYCDisplay', existingNABFYC.toLocaleString()); 
+    setText('nabTotalFYCDisplay', totalFYC.toLocaleString()); setText('nabCalculatedBonus', nabBonus.toLocaleString() + " บาท"); 
+    
+    const adviceBox = document.getElementById('nabAdviceText'); 
+    if (adviceBox) { 
+        if (currentTierIdx < tiers.length - 1) { 
+            const nextTier = tiers[currentTierIdx + 1]; const fycNeed = Math.max(0, nextTier.minFYC - totalFYC); const casesNeed = Math.max(0, nextTier.minCases - totalCases); 
+            let adviceText = "<strong>เพิ่มอีก "; if (fycNeed > 0) adviceText += `<span class="whitespace-nowrap text-amber-600">${fycNeed.toLocaleString()} FYC</span> `; if (fycNeed > 0 && casesNeed > 0) adviceText += "และ "; if (casesNeed > 0) adviceText += `<span class="whitespace-nowrap text-amber-600">${casesNeed} ราย</span>`; adviceText += `</strong><br><span class="text-slate-500">เพื่อรับโบนัส <span class="whitespace-nowrap">${nextTier.bonus.toLocaleString()} บาท</span></span>`; 
+            adviceBox.innerHTML = adviceText; hasShownCongratsNAB = false;
+        } else { 
+            adviceBox.innerHTML = `<strong class="text-emerald-600">🎉 ยินดีด้วย!</strong><br><span class="text-slate-600">คุณได้รับโบนัสสูงสุด <span class="whitespace-nowrap">${nabBonus.toLocaleString()} บาท</span> แล้ว</span>`; 
+            if (!hasShownCongratsNAB && nabBonus > 0) { showCongratsToast(`ทะลุเป้าหมาย NAB รับโบนัส ${nabBonus.toLocaleString()} บาท`); hasShownCongratsNAB = true; }
+        } 
+    } 
+}
+
+function handleMBInput(el) { let v = el.value.replace(/,/g, '').split('.')[0]; if (!isNaN(v) && v !== '') el.value = Number(v).toLocaleString(); refreshAllDisplays(); }
+function handleMYBInput(el) { let v = el.value.replace(/,/g, '').split('.')[0]; if (!isNaN(v) && v !== '') el.value = Number(v).toLocaleString(); refreshAllDisplays(); }
+function handleNABFYCInput(el) { let v = el.value.replace(/,/g, '').split('.')[0]; if (!isNaN(v) && v !== '') el.value = Number(v).toLocaleString(); refreshAllDisplays(); }
+
+function setNABPhase(phase) {
+    document.getElementById('nabPhaseSelect').value = phase;
+    const bg = document.getElementById('nabPhaseBg'); const btnP1 = document.getElementById('btnNabP1'); const btnP2 = document.getElementById('btnNabP2');
+    if (phase === 'p1') {
+        bg.style.transform = 'translateX(0)';
+        btnP1.classList.remove('font-medium', 'text-slate-500', 'hover:text-slate-700'); btnP1.classList.add('font-bold', 'text-cyan-700');
+        btnP2.classList.remove('font-bold', 'text-cyan-700'); btnP2.classList.add('font-medium', 'text-slate-500', 'hover:text-slate-700');
+    } else {
+        bg.style.transform = 'translateX(100%)';
+        btnP2.classList.remove('font-medium', 'text-slate-500', 'hover:text-slate-700'); btnP2.classList.add('font-bold', 'text-cyan-700');
+        btnP1.classList.remove('font-bold', 'text-cyan-700'); btnP1.classList.add('font-medium', 'text-slate-500', 'hover:text-slate-700');
+    }
+    refreshAllDisplays();
+}
+
+window.toggleComTiers = function() {
+    const hiddenTiers = document.querySelectorAll('.com-tier-hidden');
+    hiddenTiers.forEach(el => el.classList.toggle('hidden'));
+    const btn = document.getElementById('comToggleBtn');
+    if (btn) {
+        if (btn.innerText.includes('ดูปีที่ 6')) {
+            btn.innerHTML = 'ย่อตาราง <i class="fas fa-chevron-up ml-1"></i>';
+        } else {
+            btn.innerHTML = `ดูปีที่ 6-${window.lastTotalComYears} <i class="fas fa-chevron-down ml-1"></i>`;
+        }
+    }
+};
+
+function refreshAllDisplays() { 
+    if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return; 
+    const p = lastCalculationData.premium || 0; 
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    
+    const rateArr = getComRateArray(effectivePlan);
+    const fyc = Math.round(p * (rateArr[0] || 0)) || 0; 
+    
+    if(document.getElementById('caseIncomeComm')) {
+        document.getElementById('caseIncomeComm').innerText = fyc.toLocaleString() + " ฿"; 
+    }
+    
+    let comH = `<h4 class="text-[13px] font-black text-slate-800 text-center mb-4">ประมาณการคอมมิชชันรายปี</h4>`; 
+    let totalComAmt = 0; let totalComPct = 0;
+    
+    if (rateArr && rateArr.length > 0) {
+        window.lastTotalComYears = rateArr.length;
+        rateArr.forEach((r, i) => { 
+            const annualAmt = Math.round(p * r) || 0; 
+            totalComAmt += annualAmt; totalComPct += r;
+            const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
+            comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
+                <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
+                <span class="text-[14px] font-black text-amber-600 text-center flex-1">${formatPct(r*100)}</span>
+                <span class="text-[14px] font-black text-slate-800 text-right w-20">${annualAmt.toLocaleString()}</span>
+            </div>`; 
+        });
+        
+        if (rateArr.length > 5) {
+            comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${rateArr.length} <i class="fas fa-chevron-down ml-1"></i></button>`;
+        }
+        
+        comH += `<div class="mt-4 pt-3.5 border-t border-slate-100 flex justify-between items-end">
+            <div class="text-left">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">PERCENT รวม</div>
+                <div class="text-[18px] font-black text-amber-500">${formatPct(totalComPct * 100)}</div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">คอมมิชชันรวมตลอดสัญญา</div>
+                <div class="text-[20px] font-black text-amber-600">${totalComAmt.toLocaleString()} <span class="text-sm">฿</span></div>
+            </div>
+        </div>`;
+    } else {
+        comH += `<div class="text-center text-slate-500 py-4"><i class="fas fa-exclamation-triangle text-amber-400 text-2xl mb-2"></i><br>ไม่พบข้อมูลคอมมิชชันในขณะนี้</div>`;
+    }
+    
+    if(document.getElementById('comList')) {
+        document.getElementById('comList').innerHTML = comH;
+    }
+    
+    updateMBDisplay(); 
+    updateMYBDisplay(); 
+    updateNABDisplay();
+    
+    if(document.getElementById('caseIncomeBonus')) {
+        document.getElementById('caseIncomeBonus').innerText = (window.currentMBBonus || 0).toLocaleString() + " ฿"; 
+    }
+    if(document.getElementById('caseIncomeMYBonus')) {
+        document.getElementById('caseIncomeMYBonus').innerText = (window.currentMYBBonus || 0).toLocaleString() + " ฿";
+    }
+    
+    const caseTotal = Math.round(fyc + (window.currentMBBonus || 0) + (window.currentMYBBonus || 0)); 
+    if(document.getElementById('caseIncomeTotal')) {
+        document.getElementById('caseIncomeTotal').innerText = caseTotal.toLocaleString(); 
+    }
+    
+    const pctVal = p > 0 ? ((caseTotal / p) * 100) : 0;
+    if(document.getElementById('caseIncomePercent')) {
+        document.getElementById('caseIncomePercent').innerText = formatPct(pctVal); 
+    }
+}  
+
+// ==================== TABLE MODULE (100% EXCEL MATH & COMPACT NUMBERS) ====================
+
+// 💥 ฟังก์ชันตัวช่วยสำหรับย่อตัวเลข (เช่น 1,000,000 -> 1 ล้าน)
+function formatThaiMillion(num) {
+    if (!num || num === 0) return "-";
+    if (num >= 1000000) {
+        const million = num / 1000000;
+        // ถ้าเป็นเลขลงตัว เช่น 1 ล้าน, 5 ล้าน
+        if (num % 1000000 === 0) return million + " ล้าน";
+        // ถ้ามีเศษ เช่น 1.5 ล้าน
+        return million.toFixed(1) + " ล้าน";
+    }
+    return num.toLocaleString(); // ต่ำกว่าล้านแสดงเลขปกติ
+}
+
+function generatePolicyTableData() {
+    if (!lastCalculationData) return;
+    const d = lastCalculationData;
+    
+    const planName = (currentAppPlan || "").toUpperCase();
+    const planAbbr = getPlanAbbr(currentAppPlan).toUpperCase();
+    
+    const isSLB = planAbbr === "SLB" || planName.includes("SLB") || planName.includes("SUPREME LIFE BASE");
+    const isSLPA = planAbbr === "SLPA" || planName.includes("SLPA") || planName.includes("SUPREME LIFE PROTECTOR");
+    const isLPB = planAbbr === "LPB" || planName.includes("LPB") || planName.includes("LIFE PROTECTOR");
+    const isWXN = planAbbr === "WXN" || planName.includes("WXN") || planName.includes("WHOLE LIFE EXTRA");
+    const isElite = planName.includes('ELITE') || planName.includes('868') || planName.includes('818');
+    const isTX = planName.includes('24 TX') || planAbbr === 'TX';
+    const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
+    
+    const hasSurrenderMenu = isLPB || isSLPA;
+    
+    // --- 1. UI Control Menu ---
+    const surrenderContainer = document.getElementById('surrenderContainer');
+    const oldToggle = document.getElementById('toggleBreakeven');
+    
+    if (oldToggle && !oldToggle.classList.contains('new-ux-toggle')) {
+        const oldContainer = oldToggle.closest('.flex');
+        if (oldContainer) oldContainer.style.display = 'none'; 
+        oldToggle.id = 'toggleBreakeven_old';
+    }
+
+    if (surrenderContainer) {
+        let currentMenuType = currentAppPlan; 
+        let menuContainer = document.getElementById('uxMenuContainer');
+        
+        if (menuContainer && menuContainer.dataset.menuType !== currentMenuType) {
+            surrenderContainer.innerHTML = ''; 
+            menuContainer = null;
+        }
+
+        if (!menuContainer) {
+            let rightMenuHTML = '';
+            let inputsHTML = '';
+
+            if (hasSurrenderMenu) {
+                rightMenuHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-hand-holding-usd text-blue-500 text-[16px] w-5 text-center"></i>
+                        <span class="text-[13px] font-bold text-slate-700">ทยอยเวนคืน</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleSurrender" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
+                    </label>
+                `;
+                inputsHTML = `
+                    <div id="surrenderInputs" class="hidden px-5 pb-6 flex gap-4 bg-white transition-all duration-300 rounded-b-xl border-t border-slate-50">
+                        <div class="flex-1">
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block pl-1">เริ่มรับเงิน (อายุ)</label>
+                            <input type="number" id="startSurrenderAge" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors" value="61">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block pl-1">รับเงินถึง (อายุ)</label>
+                            <input type="number" id="endSurrenderAge" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors" value="70">
+                        </div>
+                    </div>
+                `;
+            } else if (isWXN || isElite || isTX || isCL) {
+                rightMenuHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-rose-500 text-[16px] w-5 text-center"></i>
+                        <span class="text-[13px] font-bold text-slate-700">แสดงทุนประกัน</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleShowSA" class="sr-only peer" onchange="generatePolicyTableData();">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
+                    </label>
+                `;
+            }
+
+            let leftMenuClass = rightMenuHTML ? "w-1/2 pr-4 border-r border-slate-200 justify-between" : "w-full justify-center gap-8";
+
+            surrenderContainer.innerHTML = `
+                <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-4 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm ${inputsHTML === '' ? 'rounded-b-xl' : ''}">
+                    <div class="${leftMenuClass} flex items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center"></i>
+                            <span class="text-[13px] font-bold text-slate-700">แสดงจุดคุ้มทุน</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+                    ${rightMenuHTML ? `<div class="w-1/2 pl-4 flex items-center justify-between">${rightMenuHTML}</div>` : ''}
+                </div>
+                ${inputsHTML}
+            `;
+            surrenderContainer.classList.remove('hidden');
+
+            if (hasSurrenderMenu) {
+                document.getElementById('toggleSurrender').addEventListener('change', (e) => {
+                    document.getElementById('surrenderInputs').classList.toggle('hidden', !e.target.checked);
+                    generatePolicyTableData();
+                });
+                document.getElementById('startSurrenderAge').addEventListener('input', generatePolicyTableData);
+                document.getElementById('endSurrenderAge').addEventListener('input', generatePolicyTableData);
+            }
+        }
+    }
+
+    // --- 2. Variables ---
+    const isSurrenderActive = document.getElementById('toggleSurrender')?.checked || false;
+    const isBreakevenActive = isTX ? false : (document.getElementById('toggleBreakeven')?.checked || false);
+    const isShowSAActive = document.getElementById('toggleShowSA')?.checked || false;
+    
+    let startAge = parseInt(document.getElementById('startSurrenderAge')?.value) || 61;
+    let endAge = parseInt(document.getElementById('endSurrenderAge')?.value) || 70;
+    if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
+
+    const showCashFlowBase = isWXN || isElite || isTX;
+    const forceShowCashFlow = isSurrenderActive || showCashFlowBase;
+    const showSAColumn = hasSurrenderMenu || isSLB || isTX || ((isWXN || isElite || isCL) && isShowSAActive);
+    const showAccidentColumn = isSLB;
+
+    // --- 3. Header ---
+    const initialSA = Math.round(d.sum); 
+    const sumDisplay = formatThaiMillion(initialSA); // 💥 ใช้ฟังก์ชันย่อตัวเลขตรงหัวตาราง
+
+    const initialPrem = Math.round(d.premium);
+    const planPeriod = currentPlan.includes('10CX') ? '10' : (parseInt(d.years) || 20).toString();
+    const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
+    
+    document.getElementById('tableHeaderTitle').innerHTML = `<div class="text-[10px] min-[380px]:text-[11px] font-bold text-slate-800 leading-tight pr-1 whitespace-normal break-words">${headerTitle}</div>`;
+    
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-slate-600 shadow-sm text-[10px] min-[380px]:text-[11px] sm:text-[12px]">
+        <th class="py-3 px-1 font-bold bg-[#f8fafc] border-b border-slate-200 text-center">อายุ</th>
+        <th class="py-3 px-1 font-bold bg-[#f8fafc] border-b border-slate-200 text-right">ออมเงิน</th>
+        <th class="py-3 px-1 font-bold bg-[#f8fafc] text-slate-800 border-b border-slate-200 text-right">ออมสะสม</th>
+        ${forceShowCashFlow ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-blue-600 border-b border-slate-200 text-right">กระแสเงินสด</th><th class="py-3 px-1 font-bold bg-[#f8fafc] text-indigo-600 border-b border-slate-200 text-right">รวมรับเงิน</th>` : ''}
+        <th class="py-3 px-1 font-bold bg-[#f8fafc] text-slate-800 border-b border-slate-200 text-right">เงินสดพร้อมใช้</th>
+        ${showSAColumn ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-rose-600 border-b border-slate-200 text-right">ทุนประกัน</th>` : ''}
+        ${showAccidentColumn ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-rose-600 border-b border-slate-200 text-right">อุบัติเหตุ</th>` : ''}
+    </tr>`;
+    
+    // --- 4. Main Loop ---
+    // เปลี่ยนจาก const เป็น let เพื่อให้แก้ไขค่าตามแผนประกันได้
+    let payYears = parseInt(d.years) || 20; 
+    let maxYear = 90 - d.age; 
+    
+    // ตรวจสอบแผน Elite (S868 / S818)
+    const checkEliteName = String(currentAppPlan || "").toUpperCase();
+    const isElitePlan = checkEliteName.includes('ELITE') || checkEliteName.includes('868') || checkEliteName.includes('818');
+
+    // บังคับเงื่อนไข Elite ให้ถูกต้องตามเอกสาร
+    if (isElitePlan) {
+        payYears = 8; // ออม 8 ปีเสมอ
+        if (d.age <= 50) {
+            maxYear = 68 - d.age; // แผน S868 คุ้มครองถึงอายุ 68
+        } else {
+            maxYear = 18; // แผน S818 คุ้มครอง 18 ปี
+        }
+    } else if (isTX) {
+        payYears = 24;
+        maxYear = 90 - d.age;
+    }
+
+    let html = ''; 
+    let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
+    let currentSA = initialSA;
+    let accCashFlow = 0;
+    let saReductionPerYear = 0;
+
+    if (isSurrenderActive) {
+        const years = endAge - startAge + 1;
+        if (years > 0) {
+            let targetSA = initialSA > 100000 ? 100000 : 0;
+            saReductionPerYear = Math.floor((initialSA - targetSA) / years); 
+        }
+    }
+
+    const cvData = window.cvDataLookup || {};
+
+    for (let y = 1; y <= maxYear; y++) {
+        let currentAge = d.age + y;
+        
+        // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
+        let annualSaving = 0; 
+        if (isElitePlan) {
+            if (y <= 8) {
+                annualSaving = d.premium;
+                totalSaving += annualSaving;
+            }
+        } else if (y <= payYears && currentSA > 0) { 
+            annualSaving = Math.round((currentSA / initialSA) * initialPrem); 
+            totalSaving += annualSaving; 
+        }
+
+        // 2. ดึงค่า CV Rate
+        let cvRate = 0;
+        if (cvData[currentPlan] && cvData[currentPlan][currentGender]) {
+            const ageData = cvData[currentPlan][currentGender][d.age.toString()];
+            if (ageData && ageData[y.toString()] !== undefined) cvRate = ageData[y.toString()]; 
+        }
+        
+        let cashFlowAmt = 0;
+        
+        // 3. ผลประโยชน์เงินคืน (Cash Flow): คืน 12% และปีสุดท้าย 720%
+        if (!isSurrenderActive && showCashFlowBase) {
+            if (isElitePlan) {
+                if (y < maxYear) {
+                    cashFlowAmt = Math.round(currentSA * 0.12);
+                } else {
+                    cashFlowAmt = Math.round(currentSA * 7.20); 
+                }
+            } else if (isTX) {
+                if (y % 3 === 0 && y <= 24) cashFlowAmt = Math.round(currentSA * 0.05); 
+                else if (y === 25) cashFlowAmt = Math.round(currentSA * 0.70); 
+                else if (y >= 26 && currentAge < 90) cashFlowAmt = Math.round(currentSA * 0.08); 
+                else if (currentAge === 90) cashFlowAmt = Math.round(currentSA); 
+            } else if (isWXN) {
+                if (currentAge <= 60) cashFlowAmt = Math.round(currentSA * 0.0225);
+                else if (currentAge == 61) cashFlowAmt = Math.round(currentSA * 0.10);
+                else if (currentAge > 61 && currentAge < 90) cashFlowAmt = Math.round(currentSA * (0.10 + ((currentAge - 61) * 0.005)));
+                else if (currentAge == 90) cashFlowAmt = Math.round(currentSA);
+            }
+        } 
+        else if (isSurrenderActive && currentAge >= startAge && currentAge <= endAge && currentSA > 0) {
+            let actualReduction = Math.round(saReductionPerYear);
+            if (currentAge === endAge || (currentSA - actualReduction) <= 100000) {
+                let targetSA = initialSA > 100000 ? 100000 : 0;
+                actualReduction = currentSA - targetSA;
+            }
+            if (actualReduction > 0 && cvRate > 0) {
+                cashFlowAmt = Math.round((actualReduction * cvRate) / 1000);
+                currentSA -= actualReduction;
+            }
+        }
+        
+        let cvTotal = Math.round((currentSA * cvRate) / 1000);
+        if (currentSA <= 0) cvTotal = 0; 
+
+        let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt;
+        
+        // 4. จุดคุ้มทุน
+        if (!foundBreakeven && totalSaving > 0) {
+            let breakevenValue = (isElitePlan || isTX || isWXN) ? surrenderTotal : cvTotal;
+            if (breakevenValue >= totalSaving) {
+                foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
+            }
+        }
+
+        // 5. ความคุ้มครองชีวิต
+        let deathBenefit = currentSA;
+        if (isElitePlan && currentSA > 0) {
+            let eliteMultiplier = Math.min(y, 8) * 1.0; 
+            deathBenefit = Math.max(Math.round(currentSA * eliteMultiplier), cvTotal, totalSaving);
+        }
+
+        accCashFlow += cashFlowAmt; 
+
+        // 6. สร้างแถวตาราง
+        const saCompact = formatThaiMillion(deathBenefit);
+        const accidentCompact = formatThaiMillion(isSLB ? Math.min(deathBenefit * 2, 100000000) : 0);
+
+        let trClass = "border-b border-slate-100 hover:bg-slate-50";
+        let rowIdStr = (isBreakevenActive && y === beYear) ? `id="breakevenRow"` : "";
+        if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
+        
+        html += `<tr ${rowIdStr} class="${trClass}">
+            <td class="py-3 px-1 text-slate-700 font-medium text-center">${currentAge}</td>
+            <td class="py-3 px-1 text-slate-700 text-right">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>
+            <td class="py-3 px-1 text-slate-800 font-bold text-right">${totalSaving.toLocaleString()}</td>
+            ${forceShowCashFlow ? `<td class="py-3 px-1 text-blue-600 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="py-3 px-1 text-indigo-600 font-bold text-right">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
+            <td class="py-3 px-1 ${isBreakevenActive && y === beYear ? 'text-emerald-700 text-[13px]' : 'text-slate-800'} font-bold text-right">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>`;
+            
+        if (showSAColumn) html += `<td class="py-3 px-1 text-rose-600 font-bold text-right">${saCompact}</td>`;
+        if (showAccidentColumn) html += `<td class="py-3 px-1 text-rose-600 font-bold text-right">${accidentCompact}</td>`;
+        html += `</tr>`;
+
+        if (y >= maxYear) break;
+    }
+    document.getElementById('policyTableBody').innerHTML = html;
+    
+    // --- 5. Summary Text ---
+    if (foundBreakeven) {
+        document.getElementById('breakevenSummary').innerHTML = `
+            <div class="bg-emerald-100 border border-emerald-300 rounded-xl py-3 px-4 m-3 text-[14px] text-emerald-800 font-bold shadow-sm flex items-center justify-center gap-2">
+                <i class="fas fa-bullseye text-emerald-600 text-lg"></i>
+                <span>จุดคุ้มทุน : อายุ <span class="text-emerald-800">${beAge}</span> ปี / <span class="text-emerald-800">${beAmount.toLocaleString()}</span> บาท</span>
+            </div>`;
+    } else {
+        document.getElementById('breakevenSummary').innerHTML = `<div class="bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 m-3 text-[13px] text-slate-500 font-bold flex items-center justify-center gap-2"><i class="fas fa-info-circle text-slate-400 text-lg"></i> ไม่พบจุดคุ้มทุนก่อนครบกำหนดสัญญา</div>`;
+    }
+    if (isBreakevenActive && foundBreakeven) {
+        setTimeout(() => document.getElementById('breakevenRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+    }
+
+    // ซ่อนแถบเมนู (จุดคุ้มทุน/ทุนประกัน) และข้อความสรุปจุดคุ้มทุน สำหรับ 24 TX
+    if (isTX) {
+        const surrenderContainer = document.getElementById('surrenderContainer');
+        if (surrenderContainer) surrenderContainer.classList.add('hidden');
+        const summary = document.getElementById('breakevenSummary');
+        if (summary) summary.classList.add('hidden');
+    } else {
+        // ดึงกลับมาแสดงปกติสำหรับแผนอื่นๆ (หากมีการติ๊กจุดคุ้มทุนค้างไว้)
+        if (isBreakevenActive) {
+            const summary = document.getElementById('breakevenSummary');
+            if (summary) summary.classList.remove('hidden');
+        }
+    }
+}
+
+function toggleBreakevenDisplay(smoothScroll = true) {
+    const tableBody = document.getElementById('policyTableBody'); 
+    const summary = document.getElementById('breakevenSummary'); 
+    const isChecked = document.getElementById('toggleBreakeven')?.checked;
+    
+    if (!tableBody) return;
+    
+    if (isChecked) {
+        tableBody.classList.add('show-breakeven'); 
+        if (summary) summary.classList.remove('hidden');
+        if (smoothScroll) { 
+            setTimeout(() => { 
+                const beRow = tableBody.querySelector('.breakeven-target'); 
+                const pdfTableTarget = document.getElementById('pdfTableTarget'); 
+                if (beRow && pdfTableTarget) { 
+                    const targetPos = beRow.offsetTop - (pdfTableTarget.clientHeight / 2) + 30; 
+                    pdfTableTarget.scrollTo({ top: targetPos, behavior: 'smooth' }); 
+                } 
+            }, 100); 
+        }
+    } else { 
+        tableBody.classList.remove('show-breakeven'); 
+        if (summary) summary.classList.add('hidden'); 
+    }
+}
+
+// ===== PDF & SHARE UTILITIES =====
+
+/** ตรวจสอบว่ากำลังเปิดอยู่ใน LINE in-app browser หรือไม่ */
+function isInLineApp() {
+    if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) return true;
+    return /Line\//i.test(navigator.userAgent);
+}
+
+/** ลบ emoji ออกจากข้อความ (ใช้แทน regex ซ้ำๆ ใน exportTableToPDF) */
+function stripEmoji(str) {
+    if (!str) return '';
+    return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
+}
+
+/** แสดง modal แนะนำให้เปิดใน external browser (fallback สำหรับ LINE iOS) */
+function showLineInAppModal() {
+    let modal = document.getElementById('lineInAppModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'lineInAppModal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content-card p-6 text-center">
+                <div class="w-14 h-14 bg-[#00B900]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fab fa-line text-[#00B900] text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">ใช้งานผ่านแอป LINE</h3>
+                <p class="text-sm text-slate-500 mb-5 leading-relaxed">
+                    แอป LINE ไม่อนุญาตให้ดาวน์โหลดไฟล์ PDF โดยตรง<br><br>
+                    กรุณากดที่ไอคอน <strong class="text-slate-700">3 จุด (⋮)</strong> หรือ <strong class="text-slate-700">(···)</strong> มุมขวาบน<br>
+                    แล้วเลือก <strong class="text-slate-700">"เปิดในเบราว์เซอร์เริ่มต้น"</strong><br>
+                    (Open in Browser) เพื่อดาวน์โหลด
+                </p>
+                <button onclick="document.getElementById('lineInAppModal').classList.add('hidden')"
+                    class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 py-3.5 rounded-xl font-bold transition-all text-sm">
+                    เข้าใจแล้ว
+                </button>
+            </div>`;
+        document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+}
+
+/** พยายามแชร์ไฟล์ผ่าน Web Share API — return true ถ้าสำเร็จหรือ user กดยกเลิก */
+async function tryShareFile(file, title, text) {
+    if (!navigator.share) return false;
+    try {
+        await navigator.share({ files: [file], title, text });
+        return true;
+    } catch (err) {
+        if (err.name === 'AbortError') return true; // user กดยกเลิก — ไม่ใช่ error
+        return false;
+    }
+}
+
+// ===== PDF VIEWER STATE =====
+let _pdfViewerBlob = null;
+let _pdfViewerFilename = '';
+
+function closePdfViewer() {
+    const modal = document.getElementById('pdfViewerModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+    const canvasArea = document.getElementById('pdfViewerCanvas');
+    if (canvasArea) canvasArea.innerHTML = '';
+    _pdfViewerBlob = null;
+}
+
+function handlePdfSaveLinkClick(e) {
+    // ถ้า <a download> ไม่ทำงาน (เช่น บาง WebView) ให้ลอง navigator.share แทน
+    const link = e.currentTarget;
+    if (!link.href || link.href === window.location.href + '#') {
+        e.preventDefault();
+        handlePdfShare();
+    }
+}
+
+function handlePdfShare() {
+    if (!_pdfViewerBlob || !_pdfViewerFilename) return;
+    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename).then(shared => {
+        if (!shared) {
+            // Fallback: กระตุ้น download link
+            const link = document.getElementById('pdfSaveLink');
+            if (link && link.href && link.href !== '#') link.click();
+        }
+    });
+}
+
+async function showPdfViewer(pdfBlob, filename, planLabel) {
+    _pdfViewerBlob = pdfBlob;
+    _pdfViewerFilename = filename;
+
+    // ลบ modal เก่าออกเสมอ แล้วสร้างใหม่ fresh — ไม่พึ่ง DOM เดิม
+    const old = document.getElementById('pdfViewerModal');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'pdfViewerModal';
+
+    // ใช้ Object.assign แทน cssText — reliable กว่าใน WebView
+    Object.assign(modal.style, {
+        position: 'fixed',
+        top: '0', left: '0', right: '0', bottom: '0',
+        zIndex: '99999',
+        background: '#1e293b',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Kanit, sans-serif'
+    });
+
+    // Blob URL สำหรับ download link
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg,#243c94,#1e327a);padding:14px 16px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:8px;overflow:hidden;">
+                <i class="fas fa-file-pdf" style="color:#fca5a5;font-size:16px;flex-shrink:0;"></i>
+                <span style="color:white;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${planLabel || filename}</span>
+            </div>
+            <button id="_pdfCloseBtn" style="background:rgba(255,255,255,0.15);border:none;color:white;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">&times;</button>
+        </div>
+
+        <div id="_pdfCanvasArea" style="flex:1;overflow-y:auto;background:#334155;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;">
+            <div style="text-align:center;padding:32px 16px;color:#94a3b8;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:10px;"></i>
+                <div style="font-size:13px;">กำลังเตรียม PDF...</div>
+            </div>
+        </div>
+
+        <div style="background:#0f172a;padding:12px 16px;display:flex;gap:10px;flex-shrink:0;">
+            <a id="_pdfDlLink" href="${blobUrl}" download="${filename}"
+               style="flex:1;background:#dc2626;color:white;padding:14px 8px;border-radius:14px;font-weight:700;font-size:13px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                <i class="fas fa-download"></i> บันทึก PDF
+            </a>
+            <button id="_pdfShareBtn"
+               style="flex:1;background:#059669;color:white;padding:14px 8px;border-radius:14px;font-weight:700;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                <i class="fas fa-share-nodes"></i> แชร์
+            </button>
+        </div>`;
+
+    document.body.appendChild(modal);
+
+    // Event listeners — direct reference ไม่พึ่ง global function
+    document.getElementById('_pdfCloseBtn').addEventListener('click', () => {
+        modal.remove();
+        _pdfViewerBlob = null;
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    document.getElementById('_pdfShareBtn').addEventListener('click', () => {
+        if (!_pdfViewerBlob) return;
+        const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+        tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename).then(shared => {
+            if (!shared) {
+                const dl = document.getElementById('_pdfDlLink');
+                if (dl) dl.click();
+            }
+        });
+    });
+
+    // Render PDF.js ถ้ามี — เป็น enhancement เท่านั้น ถ้าไม่มีก็ยังมีปุ่ม Download
+    const canvasArea = document.getElementById('_pdfCanvasArea');
+    if (canvasArea && typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        try {
+            const ab = await pdfBlob.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+            canvasArea.innerHTML = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const dpr = window.devicePixelRatio || 1;
+                const vw = page.getViewport({ scale: 1 });
+                const scale = ((canvasArea.clientWidth || 300) / vw.width) * dpr;
+                const vp = page.getViewport({ scale });
+                const canvas = document.createElement('canvas');
+                canvas.width = vp.width;
+                canvas.height = vp.height;
+                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white' });
+                canvasArea.appendChild(canvas);
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+            }
+        } catch {
+            canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+                PDF พร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึก PDF</strong> ด้านล่าง</div>`;
+        }
+    } else if (canvasArea) {
+        canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+            PDF พร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึก PDF</strong> ด้านล่าง</div>`;
+    }
+}
+
+// ===== FONT CACHE =====
+let thaiFontBase64 = null;
+let thaiFontBoldBase64 = null;
+
+async function loadThaiFont() { 
+    if (thaiFontBase64) return thaiFontBase64; 
+    try { 
+        const response = await fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf'); 
+        const blob = await response.blob(); 
+        return new Promise((resolve) => { 
+            const reader = new FileReader(); 
+            reader.onloadend = () => { 
+                thaiFontBase64 = reader.result.split(',')[1]; 
+                resolve(thaiFontBase64); 
+            }; 
+            reader.readAsDataURL(blob); 
+        }); 
+    } catch (e) { 
+        return null; 
+    } 
+}
+
+async function loadThaiFontBold() {
+    if (thaiFontBoldBase64) return thaiFontBoldBase64;
+    try {
+        const response = await fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Bold.ttf');
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                thaiFontBoldBase64 = reader.result.split(',')[1];
+                resolve(thaiFontBoldBase64);
+            };
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        return null;
+    }
+}
+
+async function exportTableToPDF(actionType = 'preview') { 
+    if (!lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");
+    
+    const toast = document.createElement('div'); 
+    toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-900 text-white px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all"; 
+    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างเอกสาร PDF...</span>`; 
+    document.body.appendChild(toast); 
+    
+    try {
+        // โหลด Regular + Bold พร้อมกันเพื่อลด latency
+        const [fontBase64, fontBoldBase64] = await Promise.all([
+            typeof loadThaiFont === 'function' ? loadThaiFont() : Promise.resolve(null),
+            typeof loadThaiFontBold === 'function' ? loadThaiFontBold() : Promise.resolve(null)
+        ]);
+        
+        // 1. ตรวจสอบการโหลด jsPDF เพื่อป้องกัน TypeError
+        if (!window.jspdf && !window.jsPDF) throw new Error("ไม่พบไลบรารี jsPDF ในหน้าเว็บ");
+        const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF; 
+        const doc = new jsPDF('p', 'mm', 'a4'); 
+        
+        // ตรวจสอบว่าโหลดปลั๊กอิน autoTable มาแล้วหรือไม่
+        if (typeof doc.autoTable !== 'function') throw new Error("ไม่พบไลบรารี jspdf-autotable");
+
+        let fontName = 'helvetica'; 
+        
+        if (fontBase64) { 
+            try { 
+                doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64); 
+                doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+                // แก้: ใช้ไฟล์ Bold แยก ไม่ใช่ Regular ซ้ำ
+                if (fontBoldBase64) {
+                    doc.addFileToVFS('Sarabun-Bold.ttf', fontBoldBase64);
+                    doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold');
+                } else {
+                    doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'bold'); // fallback
+                }
+                fontName = 'Sarabun'; 
+            } catch (e) {
+                console.warn("ไม่สามารถโหลดฟอนต์ได้:", e);
+            } 
+        }
+        
+        const d = lastCalculationData; 
+        const tableRows = []; 
+        const trs = document.querySelectorAll('#policyTableBody tr'); 
+        const toggleBreakeven = document.getElementById('toggleBreakeven');
+        const showBreakeven = toggleBreakeven ? toggleBreakeven.checked : false; 
+        
+        let beRowIndex = -1; 
+        let beAgeStr = '', beYearStr = '', beCVStr = ''; 
+        
+        // 2. ป้องกัน ReferenceError เช็คตัวแปร Global ว่ามีอยู่จริงก่อนใช้งาน
+        const isShowCashFlowBase = typeof showCashFlowBase !== 'undefined' ? showCashFlowBase : false;
+        const isShowSAColumn = typeof showSAColumn !== 'undefined' ? showSAColumn : true; 
+        const isShowAccidentColumn = typeof showAccidentColumn !== 'undefined' ? showAccidentColumn : false;
+        const currentPlan = typeof currentAppPlan !== 'undefined' ? currentAppPlan : "";
+
+        const showCashFlow = ["Whole Life Extra", "24 TX", "868 / 818 Elite Saving"].includes(currentPlan); 
+        const isProtector = ["Life Protector 20", "Supreme Life Protector"].includes(currentPlan);
+        
+        // สร้าง Header ของตาราง
+        let headRow = ['อายุ', 'ออมเงิน', 'ออมสะสม']; 
+        if (isShowCashFlowBase) {
+            headRow.push('กระแสเงินสด'); 
+            headRow.push('รวมรับเงิน'); 
+        }
+        headRow.push('เงินสดพร้อมใช้'); 
+        if (isShowSAColumn) headRow.push('ทุนประกัน'); 
+        if (isShowAccidentColumn) headRow.push('อุบัติเหตุ');
+        
+        // เตรียมข้อมูล Body
+        trs.forEach((tr, index) => { 
+            const tds = tr.querySelectorAll('td'); 
+            const rowData = []; 
+            tds.forEach(td => rowData.push(td.innerText.trim())); 
+            
+            // 3. แก้ไขบั๊กคอลัมน์เกิน: เติมคอลัมน์เพิ่มเฉพาะเมื่อจำนวนข้อมูลน้อยกว่า Header เท่านั้น
+            if(!isProtector && rowData.length < headRow.length) { 
+                rowData.push(typeof formatNum === 'function' ? formatNum(d.sum) : d.sum); 
+            } 
+            
+            tableRows.push(rowData); 
+            
+            if (tr.classList.contains('breakeven-target')) { 
+                beRowIndex = index; 
+                beAgeStr = rowData[0]; 
+                beYearStr = parseInt(beAgeStr) - parseInt(d.age || 0); 
+                beCVStr = rowData[showCashFlow ? 4 : 3] || ''; 
+            } 
+        });
+        
+        doc.autoTable({ 
+            startY: (showBreakeven && beRowIndex !== -1) ? 40 : 34, 
+            head: [headRow], 
+            body: tableRows, 
+            theme: 'plain', 
+            margin: { top: 34, bottom: 15, left: 15, right: 15 }, 
+            styles: { font: fontName, fontSize: 12, halign: 'center', valign: 'middle', cellPadding: 1.5, minCellHeight: 4.8 }, 
+            headStyles: { fillColor: [248, 250, 252], textColor: [100, 116, 139], fontStyle: 'bold', lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 }, lineColor: [226, 232, 240] }, 
+            bodyStyles: { textColor: [71, 85, 105], lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 }, lineColor: [241, 245, 249] }, 
+            didDrawPage: function (data) { 
+                doc.setFillColor(36, 60, 148); 
+                doc.rect(0, 0, 210, 20, 'F'); 
+                doc.setFont(fontName, 'normal'); doc.setFontSize(18); doc.setTextColor(255, 255, 255); 
+                doc.text(currentPlan, 105, 13, { align: 'center' }); 
+                
+                const formatN = typeof formatNum === 'function' ? formatNum : (n) => n;
+                let sumDisplay = (d.sum >= 1000000 && d.sum % 1000000 === 0) ? (d.sum/1000000)+' ล้านบาท' : (d.sum >= 100000 && d.sum % 100000 === 0) ? (d.sum/100000)+' แสนบาท' : formatN(d.sum)+' บาท'; 
+                
+                const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentPlan) : currentPlan;
+                doc.setFontSize(14); doc.setTextColor(30, 58, 138); 
+                doc.text(`${planAbbr} ${d.gender || ''} ${d.age || ''} ทุน ${sumDisplay}`, 105, 28, { align: 'center' }); 
+                
+                if (data.pageNumber === 1 && showBreakeven && beRowIndex !== -1) { 
+                    doc.setFont(fontName, 'normal'); doc.setFontSize(13); doc.setTextColor(6, 95, 70); 
+                    doc.text(`● จุดคุ้มทุน: ปีที่ ${beYearStr} (อายุ ${beAgeStr} ปี) | เงินสดพร้อมใช้: ${beCVStr} บาท`, 105, 35, { align: 'center' }); 
+                } 
+            } 
+        });
+        
+        // === แทรกข้อมูลเงื่อนไขเป็นหน้าสุดท้ายใน PDF ===
+        const pd = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[currentPlan];
+        if (pd && (pd.benefits || pd.disease_list)) {
+            doc.addPage();
+            doc.setFillColor(36, 60, 148);
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(16); doc.setTextColor(255, 255, 255);
+            doc.text('รายละเอียดและความคุ้มครอง', 105, 13, { align: 'center' });
+            
+            let currentY = 30;
+            const checkPageBreak = (heightNeeded) => {
+                if (currentY + heightNeeded > 280) { doc.addPage(); currentY = 20; }
+            };
+
+            const drawBulletText = (textArray, colorRGB) => {
+                doc.setFont(fontName, 'normal'); doc.setFontSize(11); doc.setTextColor(71, 85, 105);
+                textArray.forEach(txt => {
+                    let textClean = stripEmoji(txt);
+                    if (typeof replacePercentWithAmount === 'function') {
+                        textClean = replacePercentWithAmount(textClean, d.sum, d.premium);
+                    }
+                    textClean = textClean.replace(/<[^>]*>?/gm, ''); 
+                    
+                    let lines = doc.splitTextToSize(textClean, 175);
+                    checkPageBreak(lines.length * 6 + 2);
+                    doc.setFillColor(colorRGB[0], colorRGB[1], colorRGB[2]);
+                    doc.circle(17, currentY - 1.2, 1, 'F');
+                    doc.text(lines, 21, currentY); 
+                    currentY += (lines.length * 6) + 2;
+                });
+                currentY += 4;
+            };
+
+            if (pd.benefits && pd.benefits.length > 0) {
+                checkPageBreak(15);
+                doc.setFont(fontName, 'bold'); doc.setFontSize(14); doc.setTextColor(6, 95, 70);
+                doc.text('ความคุ้มครองและผลประโยชน์', 15, currentY); currentY += 8;
+                drawBulletText(pd.benefits, [16, 185, 129]); 
+            }
+
+            if (pd.disease_list) {
+                Object.values(pd.disease_list).forEach(g => {
+                    checkPageBreak(20);
+                    doc.setFont(fontName, 'bold'); doc.setFontSize(13); doc.setTextColor(159, 18, 57);
+                    let titleClean = stripEmoji(g.title);
+                    doc.text(titleClean, 15, currentY); currentY += 7;
+
+                    if (g.diseases && Array.isArray(g.diseases)) {
+                        g.diseases.forEach(disease => {
+                            let dNameClean = stripEmoji(disease.name);
+                            let dDefClean = stripEmoji(disease.definition);
+                            
+                            let nameLines = doc.splitTextToSize(dNameClean, 180);
+                            let defLines = doc.splitTextToSize(`- ${dDefClean}`, 175);
+                            
+                            checkPageBreak((nameLines.length * 6) + (defLines.length * 5) + 4);
+                            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(30, 41, 59);
+                            doc.text(nameLines, 15, currentY); currentY += (nameLines.length * 6);
+                            doc.setFont(fontName, 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+                            doc.text(defLines, 20, currentY); currentY += (defLines.length * 5) + 3;
+                        });
+                    }
+                    currentY += 4;
+                });
+            }
+
+            if (pd.remark) {
+                checkPageBreak(20);
+                doc.setFont(fontName, 'normal'); doc.setFontSize(10); doc.setTextColor(148, 163, 184);
+                let remarkClean = stripEmoji(pd.remark);
+                let lines = doc.splitTextToSize(remarkClean, 180);
+                doc.text(lines, 15, currentY); 
+            }
+        }
+
+        const pageCount = doc.internal.getNumberOfPages(); 
+        doc.setFont(fontName, 'normal'); doc.setFontSize(10);
+        for (let i = 1; i <= pageCount; i++) { 
+            doc.setPage(i); 
+            doc.setDrawColor(226, 232, 240); doc.line(15, 285, 195, 285); 
+            doc.setTextColor(148, 163, 184); doc.text(`หน้า ${i} / ${pageCount}`, 195, 290, { align: 'right' }); 
+        }
+
+        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentPlan) : currentPlan;
+        const pdfFileName = `${planAbbr}_ตารางมูลค่า_อายุ${d.age}.pdf`;
+        
+        // ===== ACTION HANDLING =====
+        // LIFF/LINE in-app: ใช้ inline PDF viewer (PDF.js) — ไม่ต้องออก app เลย
+        // External browser: window.open / doc.save() ตามปกติ
+
+        const pdfBlob = doc.output('blob');
+        const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
+        const inLine = isInLineApp();
+        const shareTitle = `ตารางมูลค่า ${planAbbr}`;
+        const planLabel = `${planAbbr} ${d.gender || ''} ${d.age || ''}`.trim();
+
+        if (actionType === 'preview') {
+            // ใช้ inline viewer ทุก device — ไม่ติดปัญหา popup blocker หรือ blob URL
+            await showPdfViewer(pdfBlob, pdfFileName, planLabel);
+
+        } else if (actionType === 'save') {
+            // ลอง share ก่อน (ทำงานได้ดีทั้ง LIFF และ mobile ทั่วไป)
+            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+            if (!shared) {
+                if (inLine) {
+                    // LIFF: เปิด viewer ให้ user กดบันทึกเอง
+                    await showPdfViewer(pdfBlob, pdfFileName, planLabel);
+                } else {
+                    // Desktop / mobile browser ทั่วไป: download ตรง
+                    doc.save(pdfFileName);
+                }
+            }
+
+        } else if (actionType === 'print') {
+            if (inLine) {
+                showLineInAppModal();
+            } else {
+                doc.autoPrint();
+                window.open(doc.output('bloburl'), '_blank');
+            }
+
+        } else if (actionType === 'line' || actionType === 'messenger') {
+            // ลอง share ก่อน — ถ้าได้ user เลือก app เองจาก share sheet
+            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+            if (!shared) {
+                if (inLine) {
+                    // Fallback: แสดง viewer + ปุ่มแชร์
+                    await showPdfViewer(pdfBlob, pdfFileName, planLabel);
+                } else {
+                    window.open(doc.output('bloburl'), '_blank');
+                }
+            }
+        }
+    } catch (error) { 
+        // 4. แสดง Error ที่แท้จริงออกมาในหน้าต่าง (และ Console)
+        console.error("PDF Generation Error details:", error);
+        if(typeof showCustomError === 'function') {
+            // เพิ่มการพิมพ์ error.message ต่อท้าย เพื่อให้รู้ว่าพังที่บรรทัดไหน/เรื่องอะไร
+            showCustomError(`เกิดข้อผิดพลาดในการสร้าง PDF: ${error.message}`); 
+        }
+    } finally { 
+        if (toast && toast.parentNode) toast.remove(); 
+    }
+}
+
+// ============================================================================
+// 🌟 ONLOAD INITIALIZATION (เชื่อมระบบเดิมทั้งหมด + เปิดหน้าแรก) 🌟
+// ============================================================================
+window.onload = async () => {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+    if (typeof applyDayColorTheme === 'function') applyDayColorTheme();
+    
+    document.querySelectorAll('button[onclick^="closePopup"]').forEach(btn => {
+        const card = btn.closest('.modal-content-card');
+        if (card) {
+            card.classList.add('relative');
+            btn.className = `absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full transition-all text-[16px] font-bold shadow-md active:scale-90 z-[100] bg-red-100 text-red-600 border border-red-200 hover:bg-red-200`;
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+        }
+    });
+    
+    const installBtn = document.querySelector('button[onclick*="installmentModal"]');
+    if (installBtn) {
+        installBtn.removeAttribute('onclick');
+        installBtn.addEventListener('click', typeof openInstallmentModal === 'function' ? openInstallmentModal : null);
+    }
+    
+    const sumInput = document.getElementById('sumInsuredInput');
+    if (sumInput) sumInput.addEventListener('blur', () => { validateInputMinimum(sumInput, 'sum'); calculate('sum', true); });
+    const premInput = document.getElementById('premiumInput');
+    if (premInput) premInput.addEventListener('blur', () => { validateInputMinimum(premInput, 'premium'); calculate('premium', true); });
+    const cfInput = document.getElementById('cashFlowInput');
+    if (cfInput) cfInput.addEventListener('blur', () => calculate('cashflow', true));
+    const cfInput1 = document.getElementById('cashFlowInput1');
+    if (cfInput1) cfInput1.addEventListener('blur', () => calculate('cashflow1', true));
+    const cfInput2 = document.getElementById('cashFlowInput2');
+    if (cfInput2) cfInput2.addEventListener('blur', () => calculate('cashflow2', true));
+    const ageInput = document.getElementById('ageInput');
+    if (ageInput) ageInput.addEventListener('blur', () => forceAgeValidation());
+
+    if (typeof setupLongPress === 'function') setupLongPress(); 
+    if (typeof setupScrollHideNav === 'function') setupScrollHideNav();
+
+    if (typeof loadAllProductConditions === 'function') await loadAllProductConditions();
+    if (typeof loadAllRates === 'function') await loadAllRates();
+
+    if (typeof setGender === 'function') setGender('male');
+    if (typeof openPlanModal === 'function') openPlanModal();
+};
+
+document.addEventListener('input', function(e) {
+    if(e.target.id === 'cashFlowInput1' || e.target.id === 'cashFlowInput2' || e.target.id === 'cashFlowInput') {
+        if(typeof highlightActivePills === 'function') highlightActivePills();
+    }
+});
+
+window.openTableFromModal = function() {
+    if (typeof closePopup === 'function') closePopup('resultModal');
+    setTimeout(() => {
+        if (typeof switchView === 'function') switchView('table');
+    }, 300);
+};
+
+function sharePlan() { if (typeof openGenericShareModal === 'function') openGenericShareModal('all'); }
+function openBankModal() { if (typeof openPopup === 'function') openPopup('paymentModal'); }
+function openEsubModal() { if (typeof openPopup === 'function') openPopup('eSubQniModal'); }
