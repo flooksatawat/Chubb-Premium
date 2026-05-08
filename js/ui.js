@@ -16,6 +16,55 @@ async function loadAllProductConditions() {
     }
 }
 
+// ==================== 3D HEALTH EXCELLENCE: COVERAGE DATA ====================
+const CRITICAL_ILLNESSES = [
+    "โรคมะเร็งระยะลุกลาม (Invasive Cancer)",
+    "โรคเยื่อหุ้มสมองและไขสันหลังอักเสบจากเชื้อแบคทีเรีย",
+    "ไตวายเรื้อรัง (Chronic Kidney Failure)",
+    "ตับวาย (Chronic Liver Failure)",
+    "กล้ามเนื้อหัวใจตายเฉียบพลันจากการขาดเลือด",
+    "โรคหลอดเลือดสมองแตกหรืออุดตัน (Major Stroke)",
+    "การผ่าตัดเส้นเลือดแดงใหญ่ เออร์ต้า",
+    "การผ่าตัดเส้นเลือดเลี้ยงกล้ามเนื้อหัวใจ",
+    "การผ่าตัดลิ้นหัวใจโดยวิธีการเปิดหัวใจ",
+    "การผ่าตัดเปลี่ยนอวัยวะหรือปลูกถ่ายไขกระดูก"
+];
+
+const SECTION_DATA = {
+    m14: { title: "หมวด 14: อวัยวะเทียม และการศัลยกรรมตกแต่ง", desc: "ค่ารักษาพยาบาลสำหรับอวัยวะเทียมและการผ่าตัดเพื่อการศัลยกรรมตกแต่งเสริมสร้างเพื่อแก้ไขความบกพร่องจากโรคร้ายแรง หรืออุบัติเหตุร้ายแรง", items: ["การใส่ตาเทียม", "การสร้างเต้านมใหม่หลังผ่าตัดมะเร็ง", "วิกผม/ผมปลอม"], cond: "ระยะเวลารอคอย 120 วัน, จ่ายสูงสุด 1 ครั้ง/โรคตลอดชีวิต" },
+    m15: { title: "หมวด 15: การรักษาด้านสุขภาพจิต", desc: "ความคุ้มครองโรคเครียดภายหลังภยันตราย (PTSD) จากเหตุการณ์รุนแรง หรือเจ็บป่วยโรคร้ายแรง ครอบคลุมทั้ง IPD และ OPD ต่อเนื่อง", items: ["รักษาอาการ PTSD", "เยียวยาจิตใจหลังอุบัติเหตุ", "ปรึกษาแพทย์ต่อเนื่อง 90 วัน"], cond: "ระยะเวลารอคอย 180 วัน, สูงสุด 3 ครั้ง/เหตุการณ์" },
+    m16: { title: "หมวด 16: พยาบาลเฝ้าไข้พิเศษที่บ้าน", desc: "ค่าบริการพยาบาลวิชาชีพดูแลที่บ้านหลังจากออกจากการรักษาเป็นผู้ป่วยในภายใน 90 วัน", items: ["พยาบาลวิชาชีพดูแล 24 ชม.", "การฟื้นฟูหลังผ่าตัดใหญ่"], cond: "สูงสุด 15 วัน/ปี, ระยะเวลารอคอย 120 วัน" },
+    m17: { title: "หมวด 17: การเก็บรักษาเซลล์ไข่หรืออสุจิ", desc: "บริษัทจะจ่ายผลประโยชน์สำหรับค่าเก็บรักษาด้วยวิธีแช่แข็งเซลล์ไข่หรืออสุจิ สำหรับผู้เอาประกันภัยที่ได้รับการวินิจฉัยว่าเป็นโรคมะเร็ง", items: ["การเก็บรักษาเซลล์ไข่หรืออสุจิด้วยวิธีแช่แข็ง", "ใช้สำหรับกรณีที่จำเป็นต้องเข้ารับการรักษาด้วยเคมีบำบัด", "ใช้สำหรับกรณีที่จำเป็นต้องเข้ารับการรักษาด้วยรังสีบำบัด", "คุ้มครองเมื่อการรักษานั้นมีผลกระทบต่อภาวะเจริญพันธุ์"], cond: "ระยะเวลารอคอย 120 วัน" },
+    m18: { title: "หมวด 18: การผ่าตัดช่องปากและใบหน้าขากรรไกร", desc: "บริษัทจะจ่ายผลประโยชน์สำหรับค่ารักษาพยาบาลสำหรับการผ่าตัดช่องปากและขากรรไกร ทั้งกรณีผู้ป่วยนอก (OPD) และกรณีผู้ป่วยใน (IPD)", items: ["การผ่าตัดถอนฟันที่ฝังหรือฟันที่ไม่ขึ้น (เช่น ฟันคุด)", "การผ่าตัดถอนรากฟันที่ฝังอยู่ในกระดูกและมีความซับซ้อน", "การผ่าตัดซีสต์ในขากรรไกร", "การรักษามะเร็งและเนื้องอก", "การรักษาที่จำเป็นสำหรับข้อต่อขากรรไกร (TMJ)"], cond: "ระยะเวลารอคอย 180 วัน, ยกเว้นการทำกายภาพบำบัด" },
+    m19: { title: "หมวด 19: การตั้งครรภ์ และคลอดบุตร", desc: "นิยามสิทธิประโยชน์ (หมายเหตุ: แผน HX15-60 ไม่คุ้มครองในหมวดนี้)", items: ["การฝากครรภ์", "การคลอดบุตร", "ภาวะแทรกซ้อน"], cond: "ระยะเวลารอคอย 365 วัน, อายุระหว่าง 18-45 ปี" }
+};
+
+// ==================== 3D HEALTH EXCELLENCE: PLAN & CATEGORY DATA ====================
+const HX_BASE_CATEGORIES = [
+    { num: '01', icon: 'fa-bed',            col: 'teal',    title: 'ค่าห้องพักและค่าอาหาร',                    limit: 'ตามแผน/คืน'      },
+    { num: '02', icon: 'fa-heart-pulse',    col: 'red',     title: 'ค่าห้องผู้ป่วยวิกฤต (ICU/CCU)',            limit: '≤ 2× ค่าห้อง'    },
+    { num: '03', icon: 'fa-user-nurse',     col: 'blue',    title: 'ค่าบริการพยาบาลและโรงพยาบาล',              limit: 'เหมาจ่าย'         },
+    { num: '04', icon: 'fa-stethoscope',    col: 'indigo',  title: 'ค่าแพทย์เยี่ยมไข้ (ผู้ป่วยใน)',           limit: 'เหมาจ่าย'         },
+    { num: '05', icon: 'fa-scissors',       col: 'violet',  title: 'ค่าผ่าตัดและหัตถการ',                     limit: 'เหมาจ่าย'         },
+    { num: '06', icon: 'fa-syringe',        col: 'purple',  title: 'ค่าวิสัญญีแพทย์',                         limit: 'เหมาจ่าย'         },
+    { num: '07', icon: 'fa-hospital',       col: 'sky',     title: 'ค่าห้องผ่าตัดและอุปกรณ์',                 limit: 'เหมาจ่าย'         },
+    { num: '08', icon: 'fa-clipboard-list', col: 'cyan',    title: 'ค่ารักษาพยาบาลเบ็ดเตล็ด',                limit: 'เหมาจ่าย'         },
+    { num: '09', icon: 'fa-pills',          col: 'emerald', title: 'ค่ายาและเวชภัณฑ์',                        limit: 'เหมาจ่าย'         },
+    { num: '10', icon: 'fa-flask',          col: 'amber',   title: 'ค่าตรวจห้องปฏิบัติการและรังสีวิทยา',     limit: 'เหมาจ่าย'         },
+    { num: '11', icon: 'fa-truck-medical',  col: 'orange',  title: 'ค่ารักษาฉุกเฉิน (OPD อุบัติเหตุ)',       limit: 'ภายใน 24 ชม.'    },
+    { num: '12', icon: 'fa-radiation',      col: 'rose',    title: 'การรักษาโรคมะเร็ง (เคมี/รังสีบำบัด)',    limit: 'เหมาจ่าย'         },
+    { num: '13', icon: 'fa-droplet',        col: 'blue',    title: 'การฟอกไต / ล้างไตผ่านช่องท้อง',          limit: 'เหมาจ่าย'         },
+];
+
+const HX_PLAN_INFO = {
+    'HX15':  { room: '1,500',  lump: '1 ล้าน',   tier: 'base' },
+    'HX20':  { room: '2,000',  lump: '3 ล้าน',   tier: 'base' },
+    'HX40':  { room: '4,000',  lump: '5 ล้าน',   tier: 'mid'  },
+    'HX60':  { room: '6,000',  lump: '10 ล้าน',  tier: 'mid'  },
+    'HX150': { room: '15,000', lump: '60 ล้าน',  tier: 'full' },
+    'HX300': { room: '30,000', lump: '120 ล้าน', tier: 'full' },
+};
+
 // ==================== UI HELPERS & NOTIFICATIONS ====================
 // ฟังก์ชันสำหรับเปิดหน้าต่าง ค่ารักษาพิเศษ ซ้อนขึ้นมา
 function showMedExtraDef() { openPopup('medExtraDefModal'); }
@@ -53,7 +102,7 @@ function validateInputMinimum(inputElement, fieldType) {
             inputElement.value = '5,000,000';
             return;
         }
-        minValue = currentAppPlan === 'CI Extra Plus' ? 500000 : (PLAN_CONFIG[currentAppPlan]?.minSum || 100000);
+        minValue = currentAppPlan === 'CI Extra Plus' ? 500000 : getCLMinSum();
         if (value < minValue) {
             errorMsg = `ทุนประกันขั้นต่ำ ต้องไม่น้อยกว่า ${minValue.toLocaleString()} บาท`;
             showCustomError(errorMsg);
@@ -552,12 +601,18 @@ function updateQuickPills(planName) {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
     } else if (['Life Protector 20', 'Supreme Life Protector'].includes(planName)) {
-        const amounts = [120000, 240000, 360000, 480000, 600000];
-        const labels = ['1.2 แสน', '2.4 แสน', '3.6 แสน', '4.8 แสน', '6 แสน'];
-        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(100000)" class="${inactiveClass}">1 แสน</button><button id="sumPill2" onclick="setQuickSum(300000)" class="${inactiveClass}">3 แสน</button><button id="sumPill3" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill4" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill5" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button>`;
-        premPillContainer.innerHTML = premBgHtml + amounts.map((a, i) => `<button id="premPill${i+1}" onclick="setQuickPremium(${a})" class="${inactiveClass}">${labels[i]}</button>`).join('');
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(4000000)" class="${inactiveClass}">4 ล้าน</button><button id="sumPill5" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button>`;
+        const lpAmts = [120000, 240000, 360000, 480000, 600000];
+        const lpLabels = ['1.2 แสน', '2.4 แสน', '3.6 แสน', '4.8 แสน', '6 แสน'];
+        premPillContainer.innerHTML = premBgHtml + lpAmts.map((a, i) => `<button id="premPill${i+1}" onclick="setQuickPremium(${a})" class="${inactiveClass}">${lpLabels[i]}</button>`).join('');
+    } else if (planName === 'Century Life' || planName === '3D Health Excellence') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(100000)" class="${inactiveClass}">1 แสน</button><button id="sumPill2" onclick="setQuickSum(150000)" class="${inactiveClass}">1.5 แสน</button><button id="sumPill3" onclick="setQuickSum(200000)" class="${inactiveClass}">2 แสน</button><button id="sumPill4" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill5" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(12000)" class="${inactiveClass}">12,000</button><button id="premPill2" onclick="setQuickPremium(24000)" class="${inactiveClass}">24,000</button><button id="premPill3" onclick="setQuickPremium(36000)" class="${inactiveClass}">36,000</button><button id="premPill4" onclick="setQuickPremium(48000)" class="${inactiveClass}">48,000</button><button id="premPill5" onclick="setQuickPremium(60000)" class="${inactiveClass}">60,000</button>`;
+    } else if (planName === 'Convertable Term') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(4000000)" class="${inactiveClass}">4 ล้าน</button><button id="sumPill5" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(12000)" class="${inactiveClass}">12,000</button><button id="premPill2" onclick="setQuickPremium(24000)" class="${inactiveClass}">24,000</button><button id="premPill3" onclick="setQuickPremium(36000)" class="${inactiveClass}">36,000</button><button id="premPill4" onclick="setQuickPremium(48000)" class="${inactiveClass}">48,000</button><button id="premPill5" onclick="setQuickPremium(60000)" class="${inactiveClass}">60,000</button>`;
     } else {
-        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(100000)" class="${inactiveClass}">1 แสน</button><button id="sumPill2" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill3" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill4" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill5" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button>`;
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill2" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(12000)" class="${inactiveClass}">12,000</button><button id="premPill2" onclick="setQuickPremium(24000)" class="${inactiveClass}">24,000</button><button id="premPill3" onclick="setQuickPremium(36000)" class="${inactiveClass}">36,000</button><button id="premPill4" onclick="setQuickPremium(48000)" class="${inactiveClass}">48,000</button><button id="premPill5" onclick="setQuickPremium(60000)" class="${inactiveClass}">60,000</button>`;
     }
 
@@ -670,7 +725,7 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
-        html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
+        html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
         html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
         hxoOpts.forEach(opt => {
             let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
@@ -681,7 +736,7 @@ window.render3DOptionsUI = function() {
         html += `</div></div></div>`;
 
         if (hxoVal && hxoVal !== 'ไม่เลือก') {
-            html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-indigo-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-star text-indigo-500"></i> ADVANCE (HXD)</p>`;
+            html += `<div id="rider-hxd" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-indigo-100"><button onclick="window.closeRiderSection('rider-hxd', 'currentHXD')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXD"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-star text-indigo-500"></i> ADVANCE (HXD)</p>`;
             html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
             hxdOpts.forEach(opt => {
                 let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
@@ -692,7 +747,7 @@ window.render3DOptionsUI = function() {
             html += `</div></div></div>`;
         }
 
-        html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
+        html += `<div id="rider-hbf" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100"><button onclick="window.closeRiderSection('rider-hbf', 'currentHBF')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HBF"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
         html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
         hbfOpts.forEach(opt => {
             let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
@@ -715,6 +770,81 @@ window.render3DOptionsUI = function() {
             });
         }
     }, 10);
+};
+
+// Close a rider section, reset its state, and recalculate
+window.closeRiderSection = function(containerId, stateVarName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Force hide via inline style — overrides any Tailwind flex/grid display classes
+    container.style.display = 'none';
+
+    // Reset the named global state variable
+    if (stateVarName && typeof window[stateVarName] !== 'undefined') {
+        window[stateVarName] = 'ไม่เลือก';
+    }
+
+    // HXO cascade: HXD is only shown when HXO is active, so close HXD too
+    if (stateVarName === 'currentHXO') {
+        window.currentHXD = 'ไม่เลือก';
+        const hxdContainer = document.getElementById('rider-hxd');
+        if (hxdContainer) hxdContainer.style.display = 'none';
+    }
+
+    // Recalculate totals — do NOT call render3DOptionsUI() as it rebuilds the DOM
+    // and would re-stamp the hidden containers back into view
+    if (typeof calculate === 'function') {
+        calculate();
+    }
+};
+
+// ── D3 Quick-Action Pills: shared state toggle + context-aware callback ──────
+window.d3RiderAction = function(rider, ctx) {
+    const hxOpts = ['HX15','HX20','HX40','HX60','HX150','HX300'];
+    if (rider === 'MF') {
+        if (ctx === 'accordion') closePopup('threeDDetailsModal');
+        if (typeof selectAppPlan === 'function') selectAppPlan('Medical Fund');
+        return;
+    }
+    if (rider === 'HX') {
+        const cur = window.currentHX || 'HX15';
+        window.currentHX = hxOpts[(hxOpts.indexOf(cur) + 1) % hxOpts.length];
+    } else if (rider === 'HXO') {
+        const next = (window.currentHXO || 'ไม่เลือก') === 'ไม่เลือก' ? 'HXO10' : 'ไม่เลือก';
+        window.currentHXO = next;
+        if (next === 'ไม่เลือก') window.currentHXD = 'ไม่เลือก';
+    } else if (rider === 'HXD') {
+        if ((window.currentHXO || 'ไม่เลือก') === 'ไม่เลือก') window.currentHXO = 'HXO10';
+        window.currentHXD = (window.currentHXD || 'ไม่เลือก') === 'ไม่เลือก' ? 'HXD100' : 'ไม่เลือก';
+    } else if (rider === 'HBF') {
+        window.currentHBF = (window.currentHBF || 'ไม่เลือก') === 'ไม่เลือก' ? 'HBF1000' : 'ไม่เลือก';
+    }
+    if (ctx === 'accordion') {
+        if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+        window.render3DDetailsAccordion();
+    } else {
+        if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+        if (typeof calculate === 'function') calculate('sum', true);
+        const d = typeof lastCalculationData !== 'undefined' ? lastCalculationData : null;
+        if (d && typeof openUniversalModal === 'function') openUniversalModal(d);
+    }
+};
+
+// Renders a 5-pill quick-action bar (ตาราง / แชร์ / ชำระ / บัญชี / e-sub)
+window.renderD3QuickPills = function(ctx) {
+    const btnCls = 'bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-[11px] font-bold text-slate-700 flex flex-col items-center gap-1 hover:bg-white/30 transition-all active:scale-95';
+    const pills = [
+        { icon: 'fa-table',          label: 'ตาราง', action: 'window.openTableFromModal()' },
+        { icon: 'fa-share-nodes',    label: 'แชร์',  action: 'sharePlan()' },
+        { icon: 'fa-credit-card',    label: 'ชำระ',  action: "openPopup('paymentModal')" },
+        { icon: 'fa-university',     label: 'บัญชี', action: 'openBankModal()' },
+        { icon: 'fa-file-signature', label: 'e-sub', action: 'openEsubModal()' },
+    ];
+    const btns = pills.map(p =>
+        `<button onclick="${p.action}" class="${btnCls}"><i class="fas ${p.icon} text-[14px]"></i><span>${p.label}</span></button>`
+    ).join('');
+    return `<div class="grid grid-cols-5 gap-1.5">${btns}</div>`;
 };
 
 window.setHX = function(val) { window.currentHX = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
@@ -899,12 +1029,14 @@ function selectAppPlan(planName) {
     if (planName === '3D Health Excellence') {
         window.currentHX = 'ไม่เลือก'; window.currentHXO = 'ไม่เลือก'; window.currentHXD = 'ไม่เลือก'; window.currentHBF = 'ไม่เลือก';
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
-        if(extraOptions) { extraOptions.classList.remove('hidden'); render3DOptionsUI(); } 
+        if(extraOptions) { extraOptions.classList.remove('hidden'); render3DOptionsUI(); }
+        const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.remove('hidden');
         if(pPills) pPills.classList.add('hidden');
         premiumInput.readOnly = true;
         if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; 
     } else {
         if(extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
+        const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.add('hidden');
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
     }
 
@@ -945,8 +1077,19 @@ function selectAppPlan(planName) {
     updateQuickPills(planName);
 }
 
-function setPlan(plan) { 
-    currentPlan = plan; 
+function setPlan(plan) {
+    currentPlan = plan;
+    // CL60 has max entry age 55 — clamp and warn if needed
+    if (currentAppPlan === 'Century Life' && plan === '60CL') {
+        const ageInp = document.getElementById('ageInput');
+        if (ageInp && parseInt(ageInp.value) > 55) {
+            ageInp.value = 55;
+            showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+        }
+    }
+    // Refresh sum pills when switching sub-plans (CL/3D share the same pill set)
+    if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') updateQuickPills(currentAppPlan);
+
     const btns = [document.getElementById('btnPlan1'), document.getElementById('btnPlan2'), document.getElementById('btnPlan3'), document.getElementById('btnPlan4')];
     let activeBtn = null;
     btns.forEach((btn, idx) => {
@@ -1006,6 +1149,8 @@ function injectMaturityModal() {
 function openUniversalModal(d) {
     if(!d) return;
     injectMaturityModal();
+    const _diseaseBtn = document.getElementById('shareDiseaseListBtn');
+    if (_diseaseBtn) _diseaseBtn.classList.add('hidden');
     
     if (currentAppPlan === '868 / 818 Elite Saving') {
         setText('modalGender', d.gender); 
@@ -1114,12 +1259,13 @@ function openUniversalModal(d) {
         }
 
         const maturityRow = document.getElementById('modalMaturityRow');
-        if (maturityRow) { 
-            maturityRow.classList.remove('hidden'); maturityRow.classList.add('flex'); 
-            setText('modalMaturity', formatNum(d.sum * 1.05)); 
-            // 💡 เพิ่มบรรทัดนี้ เพื่อส่งตัวเลข 5% เข้าไปใน Popup เงื่อนไข
-            setText('modalMaturityExtraPopup', formatNum(d.sum * 0.05)); 
+        if (maturityRow) {
+            maturityRow.classList.remove('hidden'); maturityRow.classList.add('flex');
+            setText('modalMaturity', formatNum(d.sum * 1.05));
+            setText('modalMaturityExtraPopup', formatNum(d.sum * 0.05));
         }
+
+        if (_diseaseBtn) _diseaseBtn.classList.remove('hidden');
 
         const actionContainer = document.getElementById('modalActionBtnsContainer');
         if (actionContainer) {
@@ -1196,20 +1342,17 @@ function openUniversalModal(d) {
                                 </div>
                             </div>`;
                 });
-            } else {
-                html += `<div class="flex flex-col p-3.5 bg-slate-50 rounded-[14px] border border-slate-200 text-center"><p class="text-[12px] text-slate-500 font-bold">กรุณาดูรายละเอียดในตารางมูลค่าหรือเอกสารเสนอขาย</p></div>`;
             }
             
-            if (pd && pd.remark) {
+            if (pd && pd.remark && currentAppPlan !== '3D Health Excellence') {
                  html += `<div class="bg-slate-50 p-2.5 rounded-[12px] border border-slate-100 mt-2"><p class="text-[10px] text-slate-500 italic font-medium leading-relaxed">${pd.remark.replace(/\n/g, '<br>')}</p></div>`;
             }
             if (currentAppPlan === '3D Health Excellence') {
-                html += `<div class="mt-3 space-y-2">
-                    <details class="bg-teal-50 border border-teal-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-teal-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-th-list mr-1.5"></i> ความคุ้มครองหลัก 19 หมวด</span><i class="fas fa-chevron-down text-teal-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-teal-700 font-medium space-y-1"><p>1.ค่าห้องและค่าอาหาร 2.ค่าบริการพยาบาล 3.ค่าผ่าตัด 4.ค่าวิสัญญีแพทย์ 5.ค่าห้องผ่าตัด 6.ค่าตรวจวินิจฉัย 7.ค่ายาและวัสดุทางการแพทย์ 8.ค่าเลือด 9.ค่าบริการทางการแพทย์อื่นๆ 10.ค่ารักษาพยาบาลผู้ป่วยนอก 11.ค่าทำคลอด 12.ค่าทันตกรรม 13.ค่ากายภาพบำบัด 14.ค่ารักษาจิตเวช 15.ค่าฉุกเฉิน 16.ค่าดูแลสุขภาพเชิงป้องกัน 17.ค่ารักษาโรคเรื้อรัง 18.ค่ารักษาโรคมะเร็ง 19.ค่ารักษาโรคไตวาย</p></div></details>
-                    <details class="bg-blue-50 border border-blue-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-blue-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-percent mr-1.5"></i> เงื่อนไข Copayment มาตรฐานใหม่</span><i class="fas fa-chevron-down text-blue-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-blue-700 font-medium space-y-1"><p>• ผู้เอาประกันรับภาระ Copayment 20% ของค่ารักษาส่วนเกิน OPD สูงสุด 5,000 บาท/ครั้ง</p><p>• IPD: ไม่มี Copayment หากใช้ห้องตามสิทธิ์</p><p>• OPD: Copayment เมื่อค่ารักษาเกินวงเงินต่อครั้ง</p></div></details>
-                    <details class="bg-indigo-50 border border-indigo-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-indigo-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-file-contract mr-1.5"></i> บันทึกสลักหลัง HXO &amp; HXD</span><i class="fas fa-chevron-down text-indigo-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-indigo-700 font-medium space-y-1"><p>• HXO: คุ้มครอง OPD ฉุกเฉิน และ OPD ทั่วไปตามวงเงิน</p><p>• HXD: คุ้มครองค่าใช้จ่ายสูงพิเศษ เช่น ผ่าตัดซับซ้อน รักษามะเร็ง</p><p>• ต้องมี HXO ก่อนจึงจะสมัคร HXD ได้</p></div></details>
-                    <details class="bg-rose-50 border border-rose-100 rounded-xl overflow-hidden"><summary class="p-3 font-bold text-[12px] text-rose-800 cursor-pointer list-none flex justify-between items-center"><span><i class="fas fa-heartbeat mr-1.5"></i> ชดเชยรายวัน HBF</span><i class="fas fa-chevron-down text-rose-400 text-[10px]"></i></summary><div class="px-3 pb-3 text-[11px] text-rose-700 font-medium space-y-1"><p>• จ่ายชดเชยรายวันเมื่อนอนโรงพยาบาล (IPD) ตามวงเงินที่เลือก</p><p>• สูงสุด 5,000 บาท/วัน ไม่เกิน 365 วัน/ปี</p><p>• ไม่ขึ้นกับค่าใช้จ่ายจริง จ่ายตามจำนวนวันนอน</p></div></details>
-                </div>`;
+                html += `<button onclick="openPopup('threeDDetailsModal'); window.render3DDetailsAccordion();" class="w-full mt-3 flex items-center justify-between p-3.5 bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/70 rounded-[14px] hover:shadow-md active:scale-[0.98] transition-all group">
+                    <span class="flex items-center gap-2 text-[13px] font-bold text-teal-800"><i class="fas fa-shield-heart text-teal-500"></i> ดูรายละเอียดความคุ้มครอง 19 หมวด</span>
+                    <i class="fas fa-chevron-right text-teal-400 text-[11px] group-hover:text-teal-600 transition-colors"></i>
+                </button>`;
+                html += '<div class="mt-3 pt-3 border-t border-slate-100">' + window.renderD3QuickPills('resultModal') + '</div>';
             }
             dynamicContainer.innerHTML = html;
         }
@@ -2152,21 +2295,23 @@ async function exportTableToPDF(actionType = 'preview') {
         
         // 2. ป้องกัน ReferenceError เช็คตัวแปร Global ว่ามีอยู่จริงก่อนใช้งาน
         const isShowCashFlowBase = typeof showCashFlowBase !== 'undefined' ? showCashFlowBase : false;
-        const isShowSAColumn = typeof showSAColumn !== 'undefined' ? showSAColumn : true; 
+        const isSurrenderActive = document.getElementById('toggleSurrender')?.checked || false;
+        // ต้องตรงกับ forceShowCashFlow ใน generatePolicyTableData() เสมอ
+        const forceShowCashFlow = isShowCashFlowBase || isSurrenderActive;
+        const isShowSAColumn = typeof showSAColumn !== 'undefined' ? showSAColumn : true;
         const isShowAccidentColumn = typeof showAccidentColumn !== 'undefined' ? showAccidentColumn : false;
         const currentPlan = typeof currentAppPlan !== 'undefined' ? currentAppPlan : "";
 
-        const showCashFlow = ["Whole Life Extra", "24 TX", "868 / 818 Elite Saving"].includes(currentPlan); 
         const isProtector = ["Life Protector 20", "Supreme Life Protector"].includes(currentPlan);
-        
-        // สร้าง Header ของตาราง
-        let headRow = ['อายุ', 'ออมเงิน', 'ออมสะสม']; 
-        if (isShowCashFlowBase) {
-            headRow.push('กระแสเงินสด'); 
-            headRow.push('รวมรับเงิน'); 
+
+        // สร้าง Header ของตาราง — ต้องสะท้อน DOM thead ใน generatePolicyTableData() ทุกเงื่อนไข
+        let headRow = ['อายุ', 'ออมเงิน', 'ออมสะสม'];
+        if (forceShowCashFlow) {
+            headRow.push('กระแสเงินสด');
+            headRow.push('รวมรับเงิน');
         }
-        headRow.push('เงินสดพร้อมใช้'); 
-        if (isShowSAColumn) headRow.push('ทุนประกัน'); 
+        headRow.push('เงินสดพร้อมใช้');
+        if (isShowSAColumn) headRow.push('ทุนประกัน');
         if (isShowAccidentColumn) headRow.push('อุบัติเหตุ');
         
         // เตรียมข้อมูล Body
@@ -2186,7 +2331,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 beRowIndex = index; 
                 beAgeStr = rowData[0]; 
                 beYearStr = parseInt(beAgeStr) - parseInt(d.age || 0); 
-                beCVStr = rowData[showCashFlow ? 4 : 3] || ''; 
+                beCVStr = rowData[forceShowCashFlow ? 4 : 3] || '';
             } 
         });
         
@@ -2425,3 +2570,141 @@ window.openTableFromModal = function() {
 function sharePlan() { if (typeof openGenericShareModal === 'function') openGenericShareModal('all'); }
 function openBankModal() { if (typeof openPopup === 'function') openPopup('paymentModal'); }
 function openEsubModal() { if (typeof openPopup === 'function') openPopup('eSubQniModal'); }
+
+// ==================== 3D Health Excellence: Coverage Detail View ====================
+window.render3DDetailsAccordion = function() {
+    const body = document.getElementById('threeDDetailsAccordionBody');
+    if (!body) return;
+
+    const hxVal  = window.currentHX  || '';
+    const hxoVal = window.currentHXO || 'ไม่เลือก';
+    const hxdVal = window.currentHXD || 'ไม่เลือก';
+    const hbfVal = window.currentHBF || 'ไม่เลือก';
+
+    const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
+
+    const DL = {
+        'HXO10': '1,000', 'HXO20': '2,000', 'HXO30': '3,000', 'HXO50': '5,000',
+        'HXD100': '10,000', 'HXD200': '20,000', 'HXD500': '50,000', 'HXD1000': '100,000',
+        'HBF500': '500', 'HBF1000': '1,000', 'HBF3000': '3,000', 'HBF5000': '5,000',
+    };
+
+    // ── 1. Plan selection pills (sticky sub-header) ───────────────────────
+    let pillHtml = `<div class="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-slate-100 px-3 pt-3 pb-2.5">
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">เลือกแผนค่าห้อง (HX)</p>
+        <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-3 gap-1">`;
+    hxOpts.forEach(opt => {
+        const isSel = opt === hxVal;
+        const cls = isSel
+            ? 'py-1.5 text-[12px] font-bold text-teal-700 bg-white shadow rounded-xl border border-teal-200/60'
+            : 'py-1.5 text-[12px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
+        pillHtml += `<button onclick="window.currentHX='${opt}'; window.render3DDetailsAccordion();" class="${cls}">${opt}</button>`;
+    });
+    pillHtml += `</div></div>`;
+
+    // ── 2. Content area ───────────────────────────────────────────────────
+    let contentHtml = '';
+
+    if (!hxVal || hxVal === 'ไม่เลือก') {
+        contentHtml = `<div class="flex flex-col items-center justify-center py-16 text-center gap-3">
+            <i class="fas fa-bed text-4xl text-slate-200 mb-1"></i>
+            <p class="text-[13px] font-semibold text-slate-400">กรุณาเลือกแผน HX ด้านบน</p>
+            <p class="text-[11px] text-slate-300">แตะปุ่มแผนเพื่อดูรายละเอียดความคุ้มครอง</p>
+        </div>`;
+    } else {
+        const planInfo = HX_PLAN_INFO[hxVal] || { room: '-', lump: '-', tier: 'base' };
+        const tier = planInfo.tier;
+
+        const catRow = (cat) =>
+            `<div class="border-b border-slate-100 py-3 flex items-start gap-3 text-sm text-slate-700">
+                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
+                <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 block">หมวด ${cat.num}</span>
+                    <span class="font-medium leading-snug">${cat.title}</span>
+                </div>
+                <span class="text-[11px] text-slate-400 shrink-0 self-center font-medium">${cat.limit}</span>
+            </div>`;
+
+        const SNUM = { m14:'14', m15:'15', m16:'16', m17:'17', m18:'18', m19:'19' };
+        const sectionRow = (key) => {
+            const sec = SECTION_DATA[key]; if (!sec) return '';
+            const cleanTitle = sec.title.replace(/^หมวด \d+:\s*/, '');
+            const subItems = sec.items.map(i => `<p class="text-[11px] text-slate-400 leading-snug">· ${i}</p>`).join('');
+            const condNote = sec.cond ? `<p class="text-[10px] text-slate-400 italic mt-1">${sec.cond}</p>` : '';
+            return `<div class="border-b border-slate-100 py-3 flex items-start gap-3">
+                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
+                <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 block">หมวด ${SNUM[key]}</span>
+                    <span class="text-sm font-medium text-slate-700 leading-snug">${cleanTitle}</span>
+                    <div class="mt-1 space-y-0.5">${subItems}</div>
+                    ${condNote}
+                </div>
+            </div>`;
+        };
+
+        const riderRow = (icon, iconCls, label, sublabel, value, unit) =>
+            `<div class="border-b border-slate-100 py-3 flex items-center gap-3">
+                <i class="fas ${icon} ${iconCls} shrink-0 text-base"></i>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-slate-700">${label}</span>
+                    <p class="text-[11px] text-slate-400">${sublabel}</p>
+                </div>
+                <span class="text-sm font-bold text-slate-700 shrink-0">${value}
+                    <span class="text-[11px] font-normal text-slate-400">${unit}</span>
+                </span>
+            </div>`;
+
+        contentHtml += `<div class="px-3 pt-3 pb-6">`;
+
+        // Plan info bar + CI highlight
+        contentHtml += `<div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+            <span class="text-sm font-bold text-slate-700"><i class="fas fa-bed text-teal-500 mr-1.5"></i>${hxVal}</span>
+            <span class="text-[11px] text-slate-400 font-medium">${planInfo.room} บ./คืน · ${planInfo.lump} บ.</span>
+        </div>`;
+        contentHtml += `<div class="bg-rose-50 text-rose-700 p-3 rounded-lg flex items-center gap-2 font-bold mb-4">
+            <i class="fas fa-heart-pulse text-rose-500 shrink-0"></i>
+            <span class="text-[13px]">โรคร้ายแรงรับวงเงิน 2 เท่า</span>
+        </div>`;
+
+        // Categories 1–13 (all plans)
+        contentHtml += HX_BASE_CATEGORIES.map(catRow).join('');
+
+        // Categories 14–18 (HX40 / HX60 / HX150 / HX300)
+        if (tier === 'mid' || tier === 'full') {
+            contentHtml += ['m14','m15','m16','m17','m18'].map(sectionRow).join('');
+        }
+
+        // Category 19 (HX150 / HX300 only)
+        if (tier === 'full') {
+            contentHtml += sectionRow('m19');
+        }
+
+        // Riders — only if at least one is active
+        const hasRider = (hxoVal !== 'ไม่เลือก') || (hxdVal !== 'ไม่เลือก') || (hbfVal !== 'ไม่เลือก');
+        if (hasRider) {
+            contentHtml += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-4 pb-1">ส่วนเสริม (Riders)</p>`;
+            if (hxoVal !== 'ไม่เลือก')
+                contentHtml += riderRow('fa-plus-circle', 'text-blue-400',
+                    'OPD Extra (HXO)', 'วงเงินค่ารักษาผู้ป่วยนอก',
+                    DL[hxoVal] || hxoVal, 'บาท/ครั้ง');
+            if (hxdVal !== 'ไม่เลือก')
+                contentHtml += riderRow('fa-shield-alt', 'text-indigo-400',
+                    'Advance Deductible (HXD)', 'วงเงิน Deductible / รอบปีกรมธรรม์',
+                    DL[hxdVal] || hxdVal, 'บาท/รอบ');
+            if (hbfVal !== 'ไม่เลือก') {
+                const hbfDisplay = hbfVal.startsWith('CUSTOM:')
+                    ? parseInt(hbfVal.split(':')[1]).toLocaleString()
+                    : (DL[hbfVal] || hbfVal);
+                contentHtml += riderRow('fa-heartbeat', 'text-rose-400',
+                    'ชดเชยรายวัน (HBF)', 'เงินชดเชยกรณีนอนโรงพยาบาล',
+                    hbfDisplay, 'บาท/วัน');
+            }
+        }
+
+        contentHtml += `</div>`;
+
+        contentHtml += '<div class="sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t border-slate-100 px-3 py-2.5">' + window.renderD3QuickPills('accordion') + '</div>';
+    }
+
+    body.innerHTML = pillHtml + contentHtml;
+};

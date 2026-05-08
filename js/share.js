@@ -18,7 +18,7 @@ function triggerInstallmentShare(type) {
                          .replace(/(\d+(?:\.\d+)?)%\s*ของเบี้ย(?:ประกัน)?/g, (match, p1) => { return `${formatNum(d.premium * (parseFloat(p1) / 100))} บาท`; });
             allText += `- ${calcB}\n`;
         });
-        if(pd.remark) allText += `\nหมายเหตุ: ${pd.remark}\n`;
+        if(pd.remark && currentAppPlan === 'CI Extra Plus') allText += `\nหมายเหตุ: ${pd.remark}\n`;
     }
 
     pendingInstallmentData = { premOnly: premOnlyText, allText: allText, label: label };
@@ -58,7 +58,7 @@ function generateResultText(type) {
                          .replace(/(\d+(?:\.\d+)?)%\s*ของเบี้ย(?:ประกัน)?/g, (match, p1) => { return `${formatNum(d.premium * (parseFloat(p1) / 100))} บาท`; });
             text += `- ${calcB}\n`;
         });
-        if(pd.remark) text += `\nหมายเหตุ: ${pd.remark}\n`;
+        if(pd.remark && currentAppPlan === 'CI Extra Plus') text += `\nหมายเหตุ: ${pd.remark}\n`;
     }
     return text;
 }
@@ -170,8 +170,9 @@ function showVoiceResultPopup(d) {
         if (!m) return null;
         const n = parseInt(m[0]);
         if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
-            if (n >= 90) return 'คุ้มครองถึงอายุ 90 ปี';
-            if (n >= 60) return 'คุ้มครองถึงอายุ 60 ปี';
+            if (n >= 100) return 'คุ้มครองถึงอายุ 100 ปี';
+            if (n >= 90)  return 'คุ้มครองถึงอายุ 90 ปี';
+            if (n >= 60)  return 'คุ้มครองถึงอายุ 60 ปี';
         }
         return `${n} ปี`;
     })();

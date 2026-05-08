@@ -31,8 +31,8 @@ const PLAN_CONFIG = {
     "Whole Life Extra": { abbr: "WXN", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['WXN10', 'WXN15'], hasCashFlow: true },
     "24 TX": { abbr: "TX", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['24TX'], hasCashFlow: true },
     "868 / 818 Elite Saving": { abbr: "Elite", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['S868', 'S818'], hasCashFlow: true },
-    "Century Life": { abbr: "CL", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL'], hasCashFlow: false },
-    "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 65, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL'], hasCashFlow: false },
+    "Century Life": { abbr: "CL", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
+    "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 150000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false }
 };
 
@@ -176,16 +176,23 @@ function validateAndCapHBF(hbfVal, age, status, occupation, nationality, baseSum
     return 'ไม่เลือก';
 }
 
+function getCLMinSum() {
+    if (currentAppPlan !== 'Century Life') return PLAN_CONFIG[currentAppPlan]?.minSum || 100000;
+    return ['60CL', '90CL', '100CL'].includes(currentPlan) ? 150000 : 100000;
+}
+
 function getPlanAgeLimit(planName, appPlanName) {
-    const config = PLAN_CONFIG[appPlanName] || { maxAge: 65, minAge: 0 };
-    return { min: config.minAge !== undefined ? config.minAge : 0, max: config.maxAge }; 
+    const config = PLAN_CONFIG[appPlanName] || { maxAge: 75, minAge: 11 };
+    let max = config.maxAge;
+    if (appPlanName === 'Century Life' && planName === '60CL') max = 55;
+    return { min: config.minAge !== undefined ? config.minAge : 11, max };
 }
 
 function forceAgeValidation() {
-    const input = document.getElementById('ageInput'); 
-    let val = parseInt(input.value) || 0; 
+    const input = document.getElementById('ageInput');
+    let val = parseInt(input.value) || 0;
     const limits = getPlanAgeLimit(currentPlan, currentAppPlan);
-    
+
     if (currentAppPlan === 'Whole Life Extra') {
         if (currentPlan === 'WXN10' && val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
         else if (currentPlan === 'WXN15') {
@@ -193,28 +200,36 @@ function forceAgeValidation() {
             if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
         }
     }
-    if (val < limits.min) val = limits.min; 
-    if (val > limits.max) val = limits.max; 
-    input.value = val; 
+    if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
+        val = 55;
+        showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    }
+    if (val < limits.min) val = limits.min;
+    if (val > limits.max) val = limits.max;
+    input.value = val;
     calculate(currentMode, true);
 }
 
-function adjustAge(delta) { 
-    const input = document.getElementById('ageInput'); 
-    let val = parseInt(input.value) + delta; 
+function adjustAge(delta) {
+    const input = document.getElementById('ageInput');
+    let val = parseInt(input.value) + delta;
     const limits = getPlanAgeLimit(currentPlan, currentAppPlan);
-    
+
     if (currentAppPlan === 'Whole Life Extra') {
-        if (currentPlan === 'WXN10' && val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); } 
+        if (currentPlan === 'WXN10' && val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
         else if (currentPlan === 'WXN15') {
             if (val < 11) { val = 11; showCustomError("แผน WXN15 รับประกันตั้งแต่อายุ 11 ปี"); }
             if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
         }
     }
-    if (val < limits.min) val = limits.min; 
-    if (val > limits.max) val = limits.max; 
-    input.value = val; 
-    calculate(currentMode, true); 
+    if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
+        val = 55;
+        showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    }
+    if (val < limits.min) val = limits.min;
+    if (val > limits.max) val = limits.max;
+    input.value = val;
+    calculate(currentMode, true);
 }
 
 function setGender(gender) { 
@@ -250,7 +265,7 @@ function getDiscount(sum, plan) {
     }
 
     // ส่วนลดสำหรับแผน Century Life + TPD (CL)
-    if (plan === '10CL' || plan === '20CL' || plan === '60CL' || plan === '90CL') {
+    if (plan === '10CL' || plan === '20CL' || plan === '60CL' || plan === '90CL' || plan === '100CL') {
         if (sum >= 1000000) return 2.0;
         if (sum >= 500000) return 1.0;
         return 0;
@@ -298,11 +313,11 @@ function handleSumInput(el) {
         calculate('sum', false);
         clearTimeout(_realtimeValidateTimer);
         _realtimeValidateTimer = setTimeout(() => {
-            const cfg = PLAN_CONFIG[currentAppPlan] || { minSum: 100000 };
+            const effectiveMinSum = getCLMinSum();
             const val = getSafeValue('sumInsuredInput');
-            if (val > 0 && val < cfg.minSum) {
-                showCustomError(`ทุนประกันขั้นต่ำ ต้องไม่น้อยกว่า ${cfg.minSum.toLocaleString()} บาท`);
-                el.value = cfg.minSum.toLocaleString();
+            if (val > 0 && val < effectiveMinSum) {
+                showCustomError(`ทุนประกันขั้นต่ำ ต้องไม่น้อยกว่า ${effectiveMinSum.toLocaleString()} บาท`);
+                el.value = effectiveMinSum.toLocaleString();
                 calculate('sum', true);
             }
         }, 600);
@@ -336,14 +351,14 @@ function calculate(source, enforceMin = false) {
         const config = PLAN_CONFIG[currentAppPlan] || { minSum: 100000, minPrem: 4000 };
         
         const limits = getPlanAgeLimit(currentPlan, currentAppPlan);
-        if (age < limits.min) { age = limits.min; ageInput.value = age; }
-        if (age > limits.max) { age = limits.max; ageInput.value = age; }
+        if (age < limits.min) age = limits.min;
+        if (age > limits.max) age = limits.max;
 
         if (currentAppPlan === 'Whole Life Extra') {
-            if (currentPlan === 'WXN10' && age > 50) { age = 50; ageInput.value = age; }
+            if (currentPlan === 'WXN10' && age > 50) age = 50;
             if (currentPlan === 'WXN15') {
-                if (age < 11) { age = 11; ageInput.value = age; }
-                if (age > 45) { age = 45; ageInput.value = age; }
+                if (age < 11) age = 11;
+                if (age > 45) age = 45;
             }
         }
         
@@ -519,6 +534,7 @@ function calculate(source, enforceMin = false) {
         else if (currentAppPlan === '3D Health Excellence') {
             let clPlan = currentPlan;
             if (!clPlan.includes('CL')) clPlan = '20CL';
+            if (clPlan === '100CL') clPlan = '90CL'; // no separate 100CL rate table
             let clRate = LIFE_RATES[clPlan]?.[currentGender]?.[age] || 0;
 
             let hxVal = window.currentHX || 'HX15';
@@ -585,45 +601,56 @@ function calculate(source, enforceMin = false) {
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
             }
         }
-        // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB) ----------------
+        // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB, CL) ----------------
         else {
             let rateKey = currentPlan === 'TLA' ? 'TLA_RATES' : currentPlan;
-            
+            // 100CL shares 90CL rates (no separate rate table exists)
+            if (rateKey === '100CL') rateKey = '90CL';
+
             // ดึงค่า LIFE_RATES จาก Object ตามอายุ (ใช้ index ของ array)
             const lifeRateArr = LIFE_RATES[rateKey]?.[currentGender];
             const lifeRate = (lifeRateArr && lifeRateArr[age] !== undefined) ? lifeRateArr[age] : 0;
-            
+
             // ดึงค่า CI_RATES จาก Object ตามอายุ (ใช้ index ของ array)
             const ciRateArr = CI_RATES[rateKey]?.[currentGender];
             const ciRate = (ciRateArr && ciRateArr[age] !== undefined) ? ciRateArr[age] : 0;
-            
+
             // รวมเรททั้งสองส่วนเข้าด้วยกัน
-            const totalRate = lifeRate + ciRate; 
-            
+            const totalRate = lifeRate + ciRate;
+
             let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
-            
+
             if (totalRate > 0) {
-                if (source === 'sum') { 
+                const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
+                if (source === 'sum') {
+                    if (enforceMin && fSum < _minS) {
+                        fSum = _minS;
+                        document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                    }
                     // คำนวณเบี้ยจากทุน: (ทุน/1000) * (เรทรวม - ส่วนลด)
                     let basePrem = (fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan));
-                    fPrem = Math.round(basePrem) + mfPrem; 
-                    
-                    document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString(); 
-                } else { 
+                    fPrem = Math.round(basePrem) + mfPrem;
+                    document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                } else {
                     // คำนวณทุนจากเบี้ย (ย้อนกลับ)
                     fPrem = getSafeValue('premiumInput') || 0;
                     let basePrem = fPrem - mfPrem;
                     if(basePrem < 0) basePrem = 0;
-                    
-                    let baseDiscountArray = [3, 2, 1.5, 1, 0.5, 0];
-                    for (let d_val of baseDiscountArray) { 
-                        let s = (basePrem * 1000) / (totalRate - d_val); 
-                        if (getDiscount(s, currentPlan) === d_val) { fSum = s; break; } 
-                    } 
-                    if (fSum === 0) fSum = (basePrem * 1000) / totalRate; 
 
-                    document.getElementById('sumInsuredInput').value = formatNum(fSum); 
-                } 
+                    let baseDiscountArray = [3, 2, 1.5, 1, 0.5, 0];
+                    for (let d_val of baseDiscountArray) {
+                        let s = (basePrem * 1000) / (totalRate - d_val);
+                        if (getDiscount(s, currentPlan) === d_val) { fSum = s; break; }
+                    }
+                    if (fSum === 0) fSum = (basePrem * 1000) / totalRate;
+
+                    if (enforceMin && fSum < _minS) {
+                        fSum = _minS;
+                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem;
+                        document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                    }
+                    document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                }
             }
         }
         

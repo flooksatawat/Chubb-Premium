@@ -215,11 +215,11 @@ function extractAmount(t) {
 // ------------------------------------------------------------------
 function extractYears(t, age) {
     // หาตัวเลข + ปี (ไม่ใช้ \b เพราะไม่ทำงานกับภาษาไทย)
-    const all = [...t.matchAll(/(\d{1,2})\s*ปี/g)];
+    const all = [...t.matchAll(/(\d{1,3})\s*ปี/g)];
     for (const m of all) {
         const v = parseInt(m[1]);
-        if (v === age) continue;           // ข้ามถ้าเป็นตัวเดียวกับอายุ
-        if (v >= 5 && v <= 99) return v;   // valid plan years
+        if (v === age) continue;            // ข้ามถ้าเป็นตัวเดียวกับอายุ
+        if (v >= 5 && v <= 100) return v;   // valid plan years (รองรับ 100 ปี)
     }
     return null;
 }
@@ -231,8 +231,8 @@ function parseCommand(rawText) {
     if (!rawText) return {};
     let text = rawText.toLowerCase();
     text = text.replace(/cf/gi, 'กระแสเงินสด');
-    text = text.replace(/(\d+)\s*หมื่น/g, (match, p1) => p1 + '0000');
-    text = text.replace(/(\d+)\s*แสน/g, (match, p1) => p1 + '00000');
+    text = text.replace(/([\d]+(?:\.[\d]+)?)\s*หมื่น/g, (m, p1) => Math.round(parseFloat(p1) * 10000).toString());
+    text = text.replace(/([\d]+(?:\.[\d]+)?)\s*แสน/g, (m, p1) => Math.round(parseFloat(p1) * 100000).toString());
     text = text.replace(/ก่อน\s*60/g, 'อายุ 31-60');
     text = text.replace(/หลัง\s*60/g, 'อายุ 60 ขึ้นไป');
     const t = text.replace(/\s+/g, ' ').trim();
@@ -245,6 +245,8 @@ function parseCommand(rawText) {
         amountType: null,
         years: null,
         hxRoom: null,
+        hxo: null,
+        hbf: null,
         raw: rawText,
     };
 
@@ -266,6 +268,33 @@ function parseCommand(rawText) {
 
     // 7.5 Years
     result.years = extractYears(t, result.age);
+
+    // 7.6 3D standalone: default to 100-year (whole life) coverage
+    if (result.plan === '3D Health Excellence' && result.years === null) {
+        result.years = 100;
+    }
+
+    // 7.7 HXO: "OPD" keyword — map nearest amount to HXO tier
+    if (result.plan === '3D Health Excellence') {
+        const opdM = t.match(/(?:opd|โอพีดี|ผู้ป่วยนอก)\s*([\d,]+)?/i);
+        if (opdM) {
+            const v = opdM[1] ? parseInt(opdM[1].replace(/,/g, '')) : NaN;
+            const hxoMap = [[1000,'HXO10'],[2000,'HXO20'],[3000,'HXO30'],[5000,'HXO50']];
+            result.hxo = !isNaN(v) && v > 0
+                ? hxoMap.reduce((p,c) => Math.abs(c[0]-v) < Math.abs(p[0]-v) ? c : p)[1]
+                : 'HXO10';
+        }
+
+        // 7.8 HBF: "ชดเชย" keyword — map nearest amount to HBF tier
+        const hbfM = t.match(/(?:ชดเชย|ชดเชยรายวัน|รายวัน)\s*([\d,]+)?/);
+        if (hbfM) {
+            const v = hbfM[1] ? parseInt(hbfM[1].replace(/,/g, '')) : NaN;
+            const hbfMap = [[500,'HBF500'],[1000,'HBF1000'],[3000,'HBF3000'],[5000,'HBF5000']];
+            result.hbf = !isNaN(v) && v > 0
+                ? hbfMap.reduce((p,c) => Math.abs(c[0]-v) < Math.abs(p[0]-v) ? c : p)[1]
+                : 'HBF1000';
+        }
+    }
 
     return result;
 }
@@ -298,10 +327,11 @@ function executeCommand(parsed, showPopup = true) {
             case 'Signature Legacy':     setPlan(y <= 5  ? '5SLB'  : '10SLB'); break;
             case 'Century Life':
             case '3D Health Excellence':
-                if (y <= 10)      setPlan('10CL');
-                else if (y <= 20) setPlan('20CL');
-                else if (y <= 60) setPlan('60CL');
-                else              setPlan('90CL');
+                if (y <= 10)       setPlan('10CL');
+                else if (y <= 20)  setPlan('20CL');
+                else if (y <= 60)  setPlan('60CL');
+                else if (y < 100)  setPlan('90CL');
+                else               setPlan('100CL');
                 break;
             case 'Whole Life Extra':     setPlan(y <= 10 ? 'WXN10' : 'WXN15'); break;
         }
@@ -310,10 +340,26 @@ function executeCommand(parsed, showPopup = true) {
     // 8.5 Amount + Calculate
     const plan = currentAppPlan;
 
-    if (plan === '3D Health Excellence' && parsed.hxRoom) {
-        const rMap = [[1500,'HX15'],[2000,'HX20'],[4000,'HX40'],[6000,'HX60'],[15000,'HX150'],[30000,'HX300']];
-        const hxKey = rMap.reduce((p,c) => Math.abs(c[0]-parsed.hxRoom) < Math.abs(p[0]-parsed.hxRoom) ? c : p)[1];
-        if (typeof window.handle3DClick === 'function') window.handle3DClick('HX', hxKey);
+    if (plan === '3D Health Excellence') {
+        if (parsed.hxRoom) {
+            const rMap = [[1500,'HX15'],[2000,'HX20'],[4000,'HX40'],[6000,'HX60'],[15000,'HX150'],[30000,'HX300']];
+            const hxKey = rMap.reduce((p,c) => Math.abs(c[0]-parsed.hxRoom) < Math.abs(p[0]-parsed.hxRoom) ? c : p)[1];
+            if (typeof window.handle3DClick === 'function') window.handle3DClick('HX', hxKey);
+        } else if (!window.currentHX || window.currentHX === 'ไม่เลือก') {
+            // 3D always needs a base HX plan — default to HX15 when none selected
+            if (typeof window.handle3DClick === 'function') window.handle3DClick('HX', 'HX15');
+        }
+        if (parsed.hxo && typeof window.handle3DClick === 'function') window.handle3DClick('HXO', parsed.hxo);
+        if (parsed.hbf && typeof window.handle3DClick === 'function') window.handle3DClick('HBF', parsed.hbf);
+        if (parsed.amountType === 'sum' && parsed.amount > 0) {
+            const el = document.getElementById('sumInsuredInput');
+            if (el) el.value = parsed.amount.toLocaleString();
+        } else {
+            // default sum 150,000 when no amount specified for 3D
+            const el = document.getElementById('sumInsuredInput');
+            const cur = parseInt((el?.value || '').replace(/,/g, '')) || 0;
+            if (el && cur < 150000) el.value = '150,000';
+        }
         if (typeof calculate === 'function') calculate('sum', true);
     } else if (['24 TX','868 / 818 Elite Saving','Whole Life Extra'].includes(plan)) {
         if (parsed.amountType === 'premium' && parsed.amount > 0) {
@@ -393,14 +439,14 @@ function processVoiceCommand(transcript) {
     if (typeof parseCommand !== 'function') return;
     const parsed = parseCommand(transcript);
 
-    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','3D Health Excellence','Whole Life Extra'];
+    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','Whole Life Extra'];
     const targetPlan = parsed.plan || (typeof currentAppPlan !== 'undefined' ? currentAppPlan : '');
     if (PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
         const hint = {
             'CI Extra Plus':        '10 หรือ 20 ปี',
             'Signature Legacy':     '5 หรือ 10 ปี',
-            'Century Life':         '10, 20, 60 หรือ 90 ปี',
-            '3D Health Excellence': '10, 20, 60 หรือ 90 ปี',
+            'Century Life':         '10, 20, 60, 90 หรือ 100 ปี',
+            '3D Health Excellence': '10, 20, 60, 90 หรือ 100 ปี',
             'Whole Life Extra':     '10 หรือ 15 ปี',
         };
         if (typeof showCustomError === 'function')
