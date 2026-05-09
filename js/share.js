@@ -25,17 +25,25 @@ function triggerInstallmentShare(type) {
     currentShareType = 'installment';
     closePopup('installmentModal');
     Swal.fire({
-        html: `<div class="flex flex-col items-center mt-2 px-1">
-            <i class="fas fa-share-nodes text-3xl text-slate-800 mb-3"></i>
-            <h3 class="text-lg font-bold text-slate-700 mb-5">แชร์ยอดชำระ${label}</h3>
+        html: `<div class="flex flex-col items-center pt-1 pb-1">
+            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                <i class="fas fa-share-nodes text-lg text-slate-500"></i>
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์ยอดชำระ${label}</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#Edfced] rounded-2xl border border-[#b6e3b4] active:scale-95 transition-transform"><i class="fab fa-line text-4xl text-[#00B900] mb-2"></i><span class="text-[10px] font-bold text-[#00B900]">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#e6f2ff] rounded-2xl border border-[#b8daff] active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-4xl text-[#0084FF] mb-2"></i><span class="text-[10px] font-bold text-[#0084FF]">MESSENGER</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#f8f9fa] rounded-2xl border border-[#dee2e6] active:scale-95 transition-transform"><i class="fas fa-copy text-4xl text-slate-600 mb-2"></i><span class="text-[10px] font-bold text-slate-600">คัดลอก</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
         showConfirmButton: false,
         showCloseButton: true,
+        width: 'min(90vw, 320px)',
+        padding: '1.25rem',
+        customClass: {
+            popup: '!rounded-3xl !shadow-2xl',
+            closeButton: '!text-slate-400 hover:!text-red-500',
+        },
     });
 }
 
@@ -69,17 +77,25 @@ function openGenericShareModal(type) {
     if (type === 'all' && !lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อนแชร์");
     currentShareType = type;
     Swal.fire({
-        html: `<div class="flex flex-col items-center mt-2 px-1">
-            <i class="fas fa-share-nodes text-3xl text-slate-800 mb-3"></i>
-            <h3 class="text-lg font-bold text-slate-700 mb-5">เลือกช่องทางการแชร์</h3>
+        html: `<div class="flex flex-col items-center pt-1 pb-1">
+            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                <i class="fas fa-share-nodes text-lg text-slate-500"></i>
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">เลือกช่องทางการแชร์</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#Edfced] rounded-2xl border border-[#b6e3b4] active:scale-95 transition-transform"><i class="fab fa-line text-4xl text-[#00B900] mb-2"></i><span class="text-[10px] font-bold text-[#00B900]">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#e6f2ff] rounded-2xl border border-[#b8daff] active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-4xl text-[#0084FF] mb-2"></i><span class="text-[10px] font-bold text-[#0084FF]">MESSENGER</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-5 bg-[#f8f9fa] rounded-2xl border border-[#dee2e6] active:scale-95 transition-transform"><i class="fas fa-copy text-4xl text-slate-600 mb-2"></i><span class="text-[10px] font-bold text-slate-600">คัดลอก</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
         showConfirmButton: false,
         showCloseButton: true,
+        width: 'min(90vw, 320px)',
+        padding: '1.25rem',
+        customClass: {
+            popup: '!rounded-3xl !shadow-2xl',
+            closeButton: '!text-slate-400 hover:!text-red-500',
+        },
     });
 }
 
@@ -124,7 +140,7 @@ function executeShare(text, platform) {
     else if (platform === 'messenger') { window.open('fb-messenger://share/?link=' + encodeURIComponent(text), '_blank'); }
 }
 
-let voiceRecog = null; let isVoiceListening = false;
+let voiceRecog = null; let isVoiceListening = false; let _voiceAnalyzing = false;
 
 function startVoiceRecognition() {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
@@ -134,21 +150,60 @@ function startVoiceRecognition() {
         voiceRecog = new SpeechRecognition();
         voiceRecog.lang = 'th-TH';
         voiceRecog.continuous = false;
-        voiceRecog.interimResults = false;
+        voiceRecog.interimResults = true;
         const _setListening = (on) => {
             isVoiceListening = on;
+            if (!on && _voiceAnalyzing) return; // keep overlay alive during analyzing pause
+            const overlay = document.getElementById('voiceOverlay');
+            if (overlay) overlay.classList.toggle('active', on);
             ['navVoiceIcon','mainVoiceIcon'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.parentElement.classList.toggle('listening-active', on);
             });
         };
-        voiceRecog.onstart = () => { _setListening(true); document.querySelectorAll('.fa-microphone').forEach(icon => icon.classList.add('text-red-500', 'animate-pulse')); };
-        voiceRecog.onend   = () => { _setListening(false); document.querySelectorAll('.fa-microphone').forEach(icon => icon.classList.remove('text-red-500', 'animate-pulse')); };
-        voiceRecog.onerror = () => { _setListening(false); document.querySelectorAll('.fa-microphone').forEach(icon => icon.classList.remove('text-red-500', 'animate-pulse')); };
+        voiceRecog.onstart = () => {
+            _voiceAnalyzing = false;
+            _setListening(true);
+            const lt = document.getElementById('voiceLiveText');
+            if (lt) { lt.className = 'interim'; lt.textContent = 'กำลังฟัง...'; }
+            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.add('text-red-500', 'animate-pulse'));
+        };
+        voiceRecog.onend = () => {
+            _setListening(false);
+            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+        };
+        voiceRecog.onerror = () => {
+            _voiceAnalyzing = false;
+            _setListening(false);
+            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+        };
         voiceRecog.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            document.querySelectorAll('.fa-microphone').forEach(icon => icon.classList.remove('text-red-500', 'animate-pulse'));
-            processVoiceCommand(transcript);
+            const lt = document.getElementById('voiceLiveText');
+            let interim = '', final = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                else interim += event.results[i][0].transcript;
+            }
+            if (lt) {
+                if (final) {
+                    lt.className = '';
+                    lt.textContent = final;
+                } else if (interim) {
+                    lt.className = 'interim';
+                    lt.textContent = interim;
+                }
+            }
+            if (final) {
+                _voiceAnalyzing = true;
+                document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+                if (lt) { lt.insertAdjacentHTML('afterend', '<br><span id="voiceAnalyzingLabel" style="color:#00A651;font-size:12px;opacity:0.8;">กำลังวิเคราะห์...</span>'); }
+                setTimeout(() => {
+                    _voiceAnalyzing = false;
+                    const overlay = document.getElementById('voiceOverlay');
+                    if (overlay) overlay.classList.remove('active');
+                    processVoiceCommand(final);
+                }, 800);
+            }
         };
     }
     try { voiceRecog.start(); } catch(e) {}
@@ -191,14 +246,21 @@ function showVoiceResultPopup(d) {
     } else {
         rows += `<div class="flex justify-between items-center p-3 bg-rose-50 rounded-xl border border-rose-100 mb-2"><span class="text-[13px] font-bold text-slate-600">เบี้ยประกัน</span><span class="text-[13px] font-black text-rose-700">${Math.round(d.premium).toLocaleString()} บาท/ปี</span></div>`;
         rows += `<div class="flex justify-between items-center p-3 bg-rose-50 rounded-xl border border-rose-100 mb-2"><span class="text-[13px] font-bold text-slate-600">ทุนประกันชีวิต</span><span class="text-[13px] font-black text-rose-700">${fmtNum(d.sum)} บาท</span></div>`;
-        rows += `<div class="grid grid-cols-5 gap-2 mt-4 mb-2 px-1">
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openTableFromModal === 'function') openTableFromModal(); }, 200);" class="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-200 active:bg-blue-50 transition-colors"><i class="fas fa-table text-blue-500 mb-1"></i><span class="text-[9px] font-medium text-slate-600">ตาราง</span></button>
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof sharePlan === 'function') sharePlan(); }, 200);" class="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-200 active:bg-blue-50 transition-colors"><i class="fas fa-share-nodes text-green-500 mb-1"></i><span class="text-[9px] font-medium text-slate-600">แชร์</span></button>
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openInstallmentModal === 'function') openInstallmentModal(); }, 200);" class="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-200 active:bg-blue-50 transition-colors"><i class="fas fa-credit-card text-purple-500 mb-1"></i><span class="text-[9px] font-medium text-slate-600">ชำระ</span></button>
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openBankModal === 'function') openBankModal(); }, 200);" class="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-200 active:bg-blue-50 transition-colors"><i class="fas fa-money-bill-transfer text-orange-500 mb-1"></i><span class="text-[9px] font-medium text-slate-600">บัญชี</span></button>
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openEsubModal === 'function') openEsubModal(); }, 200);" class="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-200 active:bg-blue-50 transition-colors"><i class="fas fa-laptop-medical text-teal-500 mb-1"></i><span class="text-[9px] font-medium text-slate-600">E-sub</span></button>
+        const _pillBtn = "w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all";
+        rows += `<div class="flex flex-col gap-3 mt-4 mb-2">
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openTableFromModal === 'function') openTableFromModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-table text-lg text-blue-500"></i><span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span></button>
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof sharePlan === 'function') sharePlan(); }, 200);" class="${_pillBtn}"><i class="fas fa-share-nodes text-lg text-[#00A651]"></i><span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span></button>
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openInstallmentModal === 'function') openInstallmentModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-credit-card text-lg text-purple-500"></i><span class="text-slate-700 font-medium">ตัวเลือกชำระ</span></button>
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openBankModal === 'function') openBankModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openEsubModal === 'function') openEsubModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
 </div>`;
         rows += `<button onclick="manualTriggerPopup(); closePopup('voiceResultModal')" class="w-full mt-3 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 text-[14px] active:scale-95 transition-transform"><i class='fas fa-file-alt'></i> ดูรายละเอียด</button>`;
+    }
+
+    // จอใหญ่: ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
+    if (window.innerWidth >= 840) {
+        if (typeof _injectToPearLCanvas === 'function') _injectToPearLCanvas(d);
+        return;
     }
 
     let modal = document.getElementById('voiceResultModal');

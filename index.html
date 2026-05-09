@@ -53,7 +53,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
     transform: skewX(-25deg);
-    animation: glassShimmer 15s infinite;
+    animation: glassShimmer 12s infinite;
 }
 @keyframes glassShimmer {
     0% { left: -150%; }
@@ -82,9 +82,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
 #planListContainer {
     overflow-y: auto;
-    scroll-behavior: smooth;
-    padding-top: 50px; /* เพิ่มพื้นที่ด้านบนให้การ์ดกลางจอเด่นขึ้น */
-    padding-bottom: 120px; 
+    scroll-behavior: auto; /* must be instant — animated jumps break the seamless loop */
+    padding-top: 50px;
+    padding-bottom: 120px;
 }
 
 /* 💥 ลบ Transition ออก เพื่อให้ JS ทำงานแบบ 60FPS ได้ลื่นไหลที่สุด */
@@ -137,10 +137,18 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     visibility: visible;
     animation: bounceInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
+@keyframes cfSlideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.cf-panel-enter {
+    animation: cfSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="command-center-layout">
+    <div class="app-container w-full min-[840px]:w-[400px] min-[840px]:min-w-[400px] min-[840px]:max-w-[400px] min-[840px]:h-screen overflow-x-hidden bg-white z-20 shadow-xl">
         <!-- Ambient Glow Elements -->
         <div class="ambient-bg">
             <div class="ambient-glow-1"></div>
@@ -154,6 +162,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="w-full z-20 pt-safe px-4 pb-0 shrink-0 relative mt-1.5">
                 <button id="mainHeaderBtn" onclick="handleHeaderClick(event)" class="w-full bg-gradient-to-br from-[#243c94] via-[#2a45a3] to-[#1e327a] rounded-[24px] py-4 px-4 flex flex-col items-center justify-center shadow-[0_10px_25px_rgba(36,60,148,0.3)] border border-[#60a5fa]/30 active:scale-[0.97] transition-all relative overflow-hidden group select-none cursor-pointer">
                     <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[24px]"></div>
+                    <div class="absolute top-2.5 right-3 flex items-center gap-1 pointer-events-none z-10">
+                        <div style="width:6px;height:6px;border-radius:50%;background:#00A651;box-shadow:0 0 8px rgba(0,166,81,0.9);"></div>
+                        <span class="text-[8px] font-bold text-white/60 tracking-[0.15em]">CHUBB</span>
+                    </div>
                     <h1 class="text-[20px] font-normal text-white leading-none tracking-wide mb-1.5 relative z-10 drop-shadow-md flex items-center justify-center gap-1.5">
                         <span id="headerTitleText">CI Extra Plus</span>
                         <i class="fas fa-chevron-down text-[14px] opacity-70 mt-0.5"></i>
@@ -385,18 +397,19 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
         <!-- ==================== VIEW 2: TABLE ==================== -->
         <div id="tableView" class="hidden flex flex-col flex-1 overflow-hidden w-full relative z-10">
-            <div class="glass-header flex justify-between items-center px-4 pt-safe pb-3 shrink-0 relative z-20 border-b border-slate-200 mt-1">
-                <h3 id="tableHeaderTitle" class="text-[15px] font-black text-slate-800 leading-tight flex items-center gap-2 truncate w-[75%]"></h3>
+            <div class="glass-header flex justify-between items-center px-4 pt-safe pb-3 shrink-0 relative z-20 border-b border-white/50 mt-1">
+                <h3 id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight overflow-hidden"></h3>
                 <button onclick="exportTableToPDF()" class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm shrink-0"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
             </div>
-            <div class="flex flex-col border-b border-slate-200 bg-white/80 backdrop-blur-md shrink-0 relative z-10 shadow-sm">
+            <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
                 <div class="flex items-center justify-between px-5 py-3"><span class="text-[13px] font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-chart-line text-emerald-500"></i> แสดงจุดคุ้มทุน</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div></label></div>
                 <div id="breakevenSummary" class="hidden px-4 pb-3 text-center transition-all"></div>
-                <div id="surrenderContainer" class="hidden px-4 pb-3 transition-all"></div>
+                <div id="surrenderContainer" class="hidden transition-all"></div>
             </div>
-            <div class="flex-1 min-h-0 flex flex-col bg-white/60 backdrop-blur-sm">
+            <div class="flex-1 min-h-0 flex flex-col bg-white/25 backdrop-blur-sm overflow-hidden">
+                <div id="cashFlowPlanContainer" class="hidden shrink-0 border-b border-slate-100"></div>
                 <div class="overflow-y-auto flex-1 custom-scrollbar policy-table-wrapper relative pb-[180px] scrollable-view" id="pdfTableTarget">
-                    <table class="w-full text-[12px] sm:text-[13px] text-center border-collapse"><thead class="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-md shadow-sm" id="policyTableHead"></thead><tbody id="policyTableBody"></tbody></table>
+                    <table class="w-full text-[12px] sm:text-[13px] text-center border-collapse"><thead class="sticky top-0 z-30 bg-slate-50" id="policyTableHead"></thead><tbody id="policyTableBody"></tbody></table>
                 </div>
             </div>
         </div>
@@ -534,8 +547,55 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
             </div>
         </div>
+    </div><!-- /app-container -->
+
+        <!-- RIGHT PANE — Result Canvas (visible ≥ 840px) -->
+        <div class="right-pane hidden min-[840px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane">
+            <div style="padding:20px 24px 14px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:16px;background:linear-gradient(135deg,#00A651,#00843F);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,166,81,0.35);flex-shrink:0;">
+                        <i class="fas fa-shield-heart" style="color:white;font-size:17px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:800;font-size:15px;color:#1e293b;line-height:1;font-family:'Kanit',sans-serif;">Chubb Premium</div>
+                        <div style="font-size:10px;color:#94a3b8;margin-top:3px;font-family:'Kanit',sans-serif;">Result Canvas · AI Powered</div>
+                    </div>
+                    <div style="margin-left:auto;" id="canvasStatusBadge">
+                        <span id="canvasStatusText" style="font-size:10px;font-weight:700;color:#00A651;background:rgba(0,166,81,0.1);border:1px solid rgba(0,166,81,0.25);padding:4px 12px;border-radius:999px;font-family:'Kanit',sans-serif;">READY</span>
+                    </div>
+                </div>
+            </div>
+            <div id="resultCanvas" class="no-scrollbar w-full h-full p-8 overflow-y-auto" style="flex:1;">
+                <div class="result-canvas-placeholder" id="canvasPlaceholder">
+                    <div class="ai-waveform" style="width:96px;height:96px;">
+                        <div class="ai-waveform-ring" style="width:48px;height:48px;"></div>
+                        <div class="ai-waveform-ring" style="width:72px;height:72px;"></div>
+                        <div class="ai-waveform-ring" style="width:96px;height:96px;"></div>
+                        <i class="fas fa-sparkles" style="color:#00A651;font-size:22px;position:relative;z-index:10;"></i>
+                    </div>
+                    <div style="color:#94a3b8;font-size:13px;text-align:center;line-height:1.75;font-family:'Kanit',sans-serif;">
+                        กดปุ่ม <strong style="color:#64748b;">ดูรายละเอียด</strong> หรือ<br>พูดคำสั่งเสียง เพื่อดูผลลัพธ์ที่นี่
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /command-center-layout -->
+
+    <!-- VOICE OVERLAY — Immersive Frosted Glass with Live Transcript -->
+    <div id="voiceOverlay" class="voice-overlay">
+        <div class="ai-waveform" style="width:110px;height:110px;">
+            <div class="ai-waveform-ring" style="width:55px;height:55px;"></div>
+            <div class="ai-waveform-ring" style="width:82px;height:82px;"></div>
+            <div class="ai-waveform-ring" style="width:110px;height:110px;"></div>
+            <i class="fas fa-microphone" style="color:#00A651;font-size:26px;position:relative;z-index:10;"></i>
+        </div>
+        <div class="live-transcript">
+            <span id="voiceLiveText" class="interim">กำลังฟัง...</span>
+        </div>
+        <div class="voice-overlay-label">AI Voice Command · Chubb Premium</div>
     </div>
-    
+
     <!-- ==================== MODALS (POPUPS) ==================== -->
     <div id="aiMenuModal" class="modal-overlay hidden">
         <div class="modal-content-card p-5 text-center">

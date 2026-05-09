@@ -1,4 +1,4 @@
-// ==================== PRODUCT CONDITIONS LOADER ====================
+﻿// ==================== PRODUCT CONDITIONS LOADER ====================
 window.PRODUCT_CONDITIONS = {};
 
 // โหลดไฟล์ JSON ทั้งหมด
@@ -391,7 +391,7 @@ const modernPlansData = [
 ];
 
 let isModernSearchActive = false;
-let isAppendingCards = false; // ตัวล็อคป้องกันบัคโหลดการ์ดซ้อน
+let _loopOneHeight = 0; // pixel height of one card-set copy, measured after render
 
 function openPlanModal() {
     renderModernCards(modernPlansData, true);
@@ -421,78 +421,83 @@ function closePlanModal() {
     }, 400); 
 }
 
+// Build the raw HTML for one full set of plan cards (no animation classes).
+// onclick uses inline string so cloned copies work without re-attaching listeners.
+function _buildOneSetHTML(dataList) {
+    let html = '';
+    dataList.forEach(plan => {
+        const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
+        const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
+        if (isActive) {
+            html += `<div class="card-3d-container"><button onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide truncate">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight truncate">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+        } else {
+            html += `<div class="card-3d-container"><button onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors truncate">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight truncate">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
+        }
+    });
+    return html;
+}
+
 function renderModernCards(dataList, isInitialLoad = false) {
     const container = document.getElementById('planListContainer');
     if (!container) return;
-    let html = '';
-    
-    dataList.forEach((plan, i) => {
-        const delay = isInitialLoad ? (i + 1) * 0.04 : 0;
-        const animClass = isInitialLoad ? 'stagger-enter show-anim' : '';
-        const animStyle = isInitialLoad ? `animation-delay: ${delay}s;` : '';
 
-        // ผูก Event ฝั่งเดิม (กดแล้วเลือกแผน แล้วปิดหน้าต่าง)
-        const onClickAction = `if(typeof selectAppPlan==='function'){ selectAppPlan('${plan.name}'); } closePlanModal();`;
-
-        // Active only when a plan is explicitly chosen and matches this card
-        const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
-
-        if (isActive) {
-            html += `
-            <div class="card-3d-container scroll-bounce-hidden ${animClass}" style="${animStyle}">
-                <button onclick="${onClickAction}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
-                    <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                        <i class="${plan.icon} drop-shadow-md"></i>
-                    </div>
-                    <div class="flex-1 relative z-10 min-w-0 overflow-hidden">
-                        <h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide truncate">${plan.name}</h4>
-                        <p class="text-[12px] text-blue-600/80 font-semibold leading-tight truncate">${plan.desc}</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform">
-                        <i class="fas fa-check text-[13px]"></i>
-                    </div>
-                </button>
-            </div>`;
-        } else {
-            html += `
-            <div class="card-3d-container scroll-bounce-hidden ${animClass}" style="${animStyle}">
-                <button onclick="${onClickAction}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group">
-                    <div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
-                        <i class="${plan.icon}"></i>
-                    </div>
-                    <div class="flex-1 min-w-0 overflow-hidden" style="transform: translateZ(10px)">
-                        <h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors truncate">${plan.name}</h4>
-                        <p class="text-[12px] ${plan.sub} font-medium leading-tight truncate">${plan.desc}</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1" style="transform: translateZ(10px)">
-                        <i class="fas fa-arrow-right text-[11px]"></i>
-                    </div>
-                </button>
-            </div>`;
-        }
-    });
-
-    if (isInitialLoad) {
-        container.innerHTML = html;
-        container.scrollTop = 0;
-    } else {
-        container.insertAdjacentHTML('beforeend', html);
+    if (!isInitialLoad) {
+        // Legacy append path — kept for compatibility but no longer triggered by scroll
+        container.insertAdjacentHTML('beforeend', _buildOneSetHTML(dataList));
+        initNeomorphicTilt();
+        return;
     }
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.remove('scroll-bounce-hidden');
-                entry.target.classList.add('scroll-bounce-visible');
-                observer.unobserve(entry.target);
+    if (isModernSearchActive) {
+        // ── Search mode: single finite list with stagger entrance ──
+        let html = '';
+        dataList.forEach((plan, i) => {
+            const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
+            const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
+            const delay = (i + 1) * 0.04;
+            if (isActive) {
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide truncate">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight truncate">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+            } else {
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors truncate">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight truncate">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+        container.innerHTML = html;
+        container.scrollTop = 0;
+        _loopOneHeight = 0;
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.remove('scroll-bounce-hidden');
+                    e.target.classList.add('scroll-bounce-visible');
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+        container.querySelectorAll('.card-3d-container.scroll-bounce-hidden').forEach(el => io.observe(el));
 
-    container.querySelectorAll('.card-3d-container.scroll-bounce-hidden').forEach(wrapper => {
-        observer.observe(wrapper);
-    });
+    } else {
+        // ── Loop mode: render 3 identical copies, anchor scroll to middle copy ──
+        // DOM stays fixed at 3×N cards — no appending, no memory growth.
+        const single = _buildOneSetHTML(dataList);
+        container.innerHTML = single + single + single;
+
+        requestAnimationFrame(() => {
+            // Measure exact pixel distance between copy-1 start and copy-2 start.
+            // getBoundingClientRect at scrollTop=0 gives accurate layout positions.
+            const cards = container.querySelectorAll('.card-3d-container');
+            const n = dataList.length;
+            if (cards.length >= 2 * n) {
+                const r0 = cards[0].getBoundingClientRect();
+                const rN = cards[n].getBoundingClientRect();
+                _loopOneHeight = Math.round(rN.top - r0.top);
+            } else {
+                _loopOneHeight = Math.round(container.scrollHeight / 3);
+            }
+            // Jump to the start of the middle copy so the user can scroll
+            // both up (into copy 1) and down (into copy 3) without hitting a wall.
+            container.scrollTop = _loopOneHeight;
+        });
+    }
 
     initNeomorphicTilt();
 }
@@ -514,39 +519,48 @@ function initNeomorphicTilt() {
     });
 }
 
-// 🌟 ระบบจับการ Scroll (คลีนสุดๆ ไม่กวนสเปคเครื่อง) 🌟
+// 🌟 ระบบ Scroll วนไร้รอยต่อ — Bidirectional Seamless Infinite Loop 🌟
 function initModernScrollInteractions() {
     const container = document.getElementById('planListContainer');
-    const header = document.getElementById('modalHeader');
     const bottomBar = document.getElementById('modalBottomBar');
     const fadeOverlay = document.getElementById('bottomFadeOverlay');
-    
-    if(!container) return;
-    
+    if (!container) return;
+
     let lastScrollTop = 0;
+    let rafPending = false;
+
     container.onscroll = () => {
-        const scrollTop = container.scrollTop;
-        
-        // 1. ซ่อน/แสดงเมนู
-        if (scrollTop > lastScrollTop && scrollTop > 60) {
-            if(header) { header.style.transform = 'translateY(-100%)'; header.style.opacity = '0'; }
-            if(bottomBar) { bottomBar.style.transform = 'translateY(150%)'; bottomBar.style.opacity = '0'; }
-            if(fadeOverlay) fadeOverlay.style.opacity = '0';
-        } else {
-            if(header) { header.style.transform = 'translateY(0)'; header.style.opacity = '1'; }
-            if(bottomBar) { bottomBar.style.transform = 'translateY(0)'; bottomBar.style.opacity = '1'; }
-            if(fadeOverlay) fadeOverlay.style.opacity = '1';
-        }
+        // Coalesce rapid scroll events into one rAF tick for performance
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(() => {
+            rafPending = false;
+            const st = container.scrollTop;
 
-        // 2. ⚡ Infinite Scroll (เลื่อนวนไร้รอยต่อ) ⚡
-        const distanceToBottom = container.scrollHeight - scrollTop - container.clientHeight;
-        if (!isModernSearchActive && distanceToBottom <= 200 && !isAppendingCards) {
-            isAppendingCards = true;
-            renderModernCards(modernPlansData, false); 
-            setTimeout(() => { isAppendingCards = false; }, 100);
-        }
+            // ① Show / hide the floating bottom bar based on scroll direction
+            if (st > lastScrollTop && st > 60) {
+                if (bottomBar) { bottomBar.style.transform = 'translateY(150%)'; bottomBar.style.opacity = '0'; }
+                if (fadeOverlay) fadeOverlay.style.opacity = '0';
+            } else {
+                if (bottomBar) { bottomBar.style.transform = 'translateY(0)'; bottomBar.style.opacity = '1'; }
+                if (fadeOverlay) fadeOverlay.style.opacity = '1';
+            }
 
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            // ② Bidirectional seamless loop (disabled while search is active)
+            //    Safe band: [0.5 × H, 1.5 × H] — one full copy above and below.
+            //    Any scroll beyond the band triggers an instant silent jump back
+            //    to the equivalent position inside the middle copy.
+            if (!isModernSearchActive && _loopOneHeight > 0) {
+                const half = Math.round(_loopOneHeight * 0.5);
+                if (st < half) {
+                    container.scrollTop = st + _loopOneHeight;
+                } else if (st > _loopOneHeight + half) {
+                    container.scrollTop = st - _loopOneHeight;
+                }
+            }
+
+            lastScrollTop = container.scrollTop;
+        });
     };
 }
 
@@ -959,9 +973,15 @@ function selectAppPlan(planName) {
     const extraOptions = document.getElementById('threeDOptionsContainer');
     const hxRoomRateContainer = document.getElementById('hxRoomRateContainer');
     const mainActionBtn = document.getElementById('mainActionBtn');
-    const globalMFContainer = document.getElementById('globalMFContainer'); 
-    
+    const globalMFContainer = document.getElementById('globalMFContainer');
+    const mainActionsGroup = document.getElementById('mainActionsGroup');
+
     premiumInput.readOnly = false;
+    if(premiumContainer) premiumContainer.style.order = '';
+    if(sumInsuredContainer) sumInsuredContainer.style.order = '';
+    if(mainActionsGroup) mainActionsGroup.style.order = '';
+    const premiumSubLabel = document.getElementById('premiumSubLabel');
+    if(premiumSubLabel) premiumSubLabel.className = 'text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200';
 
     if (planName === 'Whole Life Extra') {
         currentMode = 'premium'; 
@@ -996,10 +1016,22 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
         }
-    } else if (planName === 'Life Protector 20' || planName === 'Supreme Life Protector' || planName === 'Century Life') {
+    } else if (planName === 'Life Protector 20' || planName === 'Supreme Life Protector') {
+        currentMode = 'premium';
+        document.getElementById('premiumInput').value = "120,000";
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.style.order = '1';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
+        const premSubLbl = document.getElementById('premiumSubLabel');
+        if(premSubLbl) premSubLbl.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
+    } else if (planName === 'Century Life') {
         currentMode = 'sum';
         document.getElementById('sumInsuredInput').value = "500,000";
-        document.getElementById('premiumInput').value = (planName === 'Century Life') ? "12,000" : "120,000";
+        document.getElementById('premiumInput').value = "12,000";
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
@@ -1115,25 +1147,44 @@ function setPlan(plan) {
 }
 
 // ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
-function manualTriggerPopup() { 
+function manualTriggerPopup() {
     try {
-        calculate(currentMode, true); 
-        const calcData = lastCalculationData;
-        
-        if (!calcData || calcData.premium === 0) {
-            showCustomError("กรุณากรอกข้อมูลและคำนวณเบี้ยให้ครบถ้วนก่อน");
+        let ageInput = document.getElementById('ageInput');
+        let ageVal = parseInt(ageInput?.value);
+
+        if (!currentGender) currentGender = 'male';
+        if (!ageVal || ageVal <= 0) {
+            ageVal = 30;
+            if (ageInput) ageInput.value = "30";
+        }
+
+        let sumVal = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, ''));
+        let premVal = parseInt((document.getElementById('premiumInput')?.value || '').replace(/,/g, ''));
+
+        if ((!sumVal || sumVal <= 0) && (!premVal || premVal <= 0)) {
+            let premInput = document.getElementById('premiumInput');
+            if (premInput) premInput.value = "120,000";
+        }
+
+        let activeMode = typeof currentMode !== 'undefined' ? currentMode : 'premium';
+        if (typeof calculate === 'function') calculate(activeMode, true);
+
+        if (typeof lastCalculationData === 'undefined' || !lastCalculationData) {
+            console.error("Calculation failed: no data");
             return;
         }
 
-        if (currentAppPlan === 'Medical Fund') {
-            showCustomError(`ระบบดูรายละเอียดของ ${currentAppPlan} อยู่ระหว่างการพัฒนา`);
-            return;
+        if (window.innerWidth >= 840 && document.getElementById('rightPane')) {
+            if (typeof _injectToPearLCanvas === 'function') {
+                _injectToPearLCanvas(lastCalculationData);
+            } else {
+                console.error("Error: _injectToPearLCanvas is not defined.");
+            }
+        } else {
+            if (typeof openUniversalModal === 'function') openUniversalModal(lastCalculationData);
         }
-        
-        openUniversalModal(calcData);
-        
     } catch(e) {
-        showCustomError("เกิดข้อผิดพลาดในการดึงข้อมูลรายละเอียด");
+        console.error("manualTriggerPopup Error:", e);
     }
 }
 
@@ -1145,9 +1196,207 @@ function injectMaturityModal() {
     }
 }
 
+// ==================== PEARL LIVE CANVAS — Right Pane Injection ====================
+function _injectToPearLCanvas(d) {
+    const fmtN = (n) => typeof formatNum === 'function' ? formatNum(n) : Math.round(n).toLocaleString();
+    const fmtP = (n) => Math.round(n).toLocaleString();
+
+    const statusText = document.getElementById('canvasStatusText');
+    if (statusText) { statusText.textContent = 'LIVE'; statusText.style.color = '#00A651'; }
+
+    const cfg = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[currentAppPlan]) || {};
+    const hasCF = !!cfg.hasCashFlow;
+    const premLabel = hasCF ? 'จำนวนเงินออม' : 'เบี้ยประกัน';
+
+    const clr = { cg: 'value-cg-glow', rose: 'text-rose-600', blue: 'text-blue-600', '': 'text-slate-800' };
+    const R = (label, value, cls) =>
+        `<tr class="odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors text-slate-700">
+            <td class="py-4 px-6 text-[15px]">${label}</td>
+            <td class="py-4 px-6 text-right font-bold text-[15px] ${clr[cls] || 'text-slate-800'}">${value}</td>
+        </tr>`;
+
+    let rows = '';
+    rows += R(premLabel, fmtP(d.premium) + ' ฿ / ปี', hasCF ? 'cg' : 'rose');
+    rows += R('ทุนประกันชีวิต', fmtN(d.sum) + ' ฿', '');
+
+    if (hasCF && d.cashFlow > 0) rows += R('กระแสเงินสด / ปี', fmtP(d.cashFlow) + ' ฿', 'cg');
+
+    if (currentAppPlan === 'CI Extra Plus') {
+        rows += R('โรคร้ายแรงเริ่มต้น (25%)', fmtN(d.sum * 0.25) + ' ฿', 'blue');
+        rows += R('โรคร้ายแรงรุนแรง (75%)',   fmtN(d.sum * 0.75) + ' ฿', 'blue');
+        rows += R('ครบสัญญา (105%)',            fmtN(d.sum * 1.05) + ' ฿', 'cg');
+        if (d.age >= 0 && d.age <= 15) rows += R('โรคร้ายสำหรับเด็ก', fmtN(d.sum) + ' ฿', 'blue');
+    } else if (currentAppPlan === '868 / 818 Elite Saving') {
+        rows += R('เงินคืนรายปี (12%)',          fmtP(Math.round(d.sum * 0.12)) + ' ฿', 'cg');
+        rows += R('ครบสัญญา (720%)',             fmtP(Math.round(d.sum * 7.2))  + ' ฿', 'cg');
+        rows += R('กรณีเสียชีวิตสูงสุด (800%)', fmtP(Math.round(d.sum * 8))    + ' ฿', 'rose');
+    } else if (currentAppPlan === 'Signature Legacy') {
+        const acc = d.sum + Math.min(d.sum, 100000000);
+        const can = Math.min(d.sum * 0.30, 30000000);
+        const ter = Math.min(d.sum * 0.90, (d.age >= 60 && d.age <= 70) ? 50000000 : 100000000);
+        rows += R('กรณีอุบัติเหตุ (200%)',    fmtN(acc) + ' ฿', 'blue');
+        rows += R('มะเร็ง (30%)',              fmtN(can) + ' ฿', 'rose');
+        rows += R('โรคร้ายระยะสุดท้าย (90%)', fmtN(ter) + ' ฿', 'rose');
+    } else {
+        const pd2 = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[currentAppPlan];
+        if (pd2 && pd2.benefits) {
+            pd2.benefits.slice(0, 5).forEach(b => {
+                let plain = (typeof replacePercentWithAmount === 'function' ? replacePercentWithAmount(b, d.sum, d.premium) : b).replace(/<[^>]+>/g, '');
+                let [lbl, ...rest] = plain.split(':');
+                rows += R(lbl.replace(/^\S\s/, '').trim(), rest.join(':').trim(), '');
+            });
+        }
+    }
+
+    const period = d.years ? `${d.years} ปี` : null;
+    const premiumDisplay = `${fmtP(d.premium)} ฿ / ปี`;
+    const sumDisplay = `${fmtN(d.sum)} ฿`;
+
+    const contentHtml = `
+        <div class="max-w-4xl mx-auto p-6 sm:p-8 rounded-3xl bg-white/85 border border-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style="backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1e3a8a] to-[#2a45a3] flex items-center justify-center shrink-0 shadow-md">
+                    <i class="fas fa-shield-heart text-white text-sm"></i>
+                </div>
+                <div class="text-base font-extrabold text-slate-900">${currentAppPlan}</div>
+                <div class="ml-auto w-2 h-2 rounded-full bg-[#00A651] shrink-0" style="box-shadow:0 0 10px rgba(0,166,81,0.8);"></div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-6">
+                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: ${d.gender}</span>
+                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: ${d.age} ปี</span>
+                ${period ? `<span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: ${period}</span>` : ''}
+                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${premLabel}: <span class="font-bold text-slate-900">${premiumDisplay}</span></span>
+                <span class="px-5 py-2 rounded-full bg-[#00A651]/10 text-[#00A651] font-bold border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm mb-6">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b-2 border-slate-100 text-slate-900">
+                        <tr>
+                            <th class="py-4 px-6 font-bold whitespace-nowrap">รายการ</th>
+                            <th class="py-4 px-6 font-bold whitespace-nowrap text-right">มูลค่า (฿)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+
+        <!-- Desktop right-pane: compact 3-button layout (visible ≥840px) -->
+        <div class="hidden min-[840px]:block">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button onclick="openTableFromModal()" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/70 hover:bg-white/90 border border-white/80 text-slate-600 font-bold text-sm shadow-sm transition-colors">
+                    <i class="fas fa-table text-indigo-500"></i>ตาราง
+                </button>
+                <button onclick="openGenericShareModal('all')" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 hover:opacity-90 text-white font-bold text-sm shadow-md transition-opacity">
+                    <i class="fas fa-share-nodes"></i>แชร์
+                </button>
+            </div>
+            <button onclick="openGenericShareModal('premium')" class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-600 font-bold text-sm transition-colors">
+                <i class="fas fa-coins"></i>แชร์เฉพาะเบี้ยประกัน
+            </button>
+        </div>
+
+        <!-- Mobile Swal popup: spacious vertical Pill Column (visible <840px) -->
+        <div class="min-[840px]:hidden flex flex-col gap-3 p-4">
+            <button onclick="Swal.close(); setTimeout(() => openTableFromModal(), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+                <i class="fas fa-table text-lg text-blue-500"></i>
+                <span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span>
+            </button>
+            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('all'), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+                <i class="fas fa-share-nodes text-lg text-[#00A651]"></i>
+                <span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span>
+            </button>
+            <button onclick="Swal.close(); setTimeout(() => openInstallmentModal(), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+                <i class="fas fa-credit-card text-lg text-purple-500"></i>
+                <span class="text-slate-700 font-medium">ตัวเลือกชำระ</span>
+            </button>
+            <button onclick="Swal.close(); setTimeout(() => openBankModal(), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+                <i class="fas fa-money-bill-transfer text-lg text-orange-500"></i>
+                <span class="text-slate-700 font-medium">บัญชีโอนเงิน</span>
+            </button>
+            <button onclick="Swal.close(); setTimeout(() => openEsubModal(), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+                <i class="fas fa-laptop-medical text-lg text-teal-500"></i>
+                <span class="text-slate-700 font-medium">E-Submission</span>
+            </button>
+            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('premium'), 200);" class="w-full flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-blue-100 active:scale-[0.98] transition-all">
+                <i class="fas fa-coins text-lg text-blue-600"></i>
+                <span class="text-blue-700 font-bold">แชร์เฉพาะเบี้ยประกัน</span>
+            </button>
+        </div>
+        </div>`;
+
+    // Desktop: inject directly into the workspace; mobile/no-canvas: fall back to Swal popup.
+    const resultHtml = contentHtml;
+    if (!window.injectToWorkspace(resultHtml)) {
+        Swal.fire({
+            html: resultHtml,
+            background: 'rgba(255, 255, 255, 0.95)',
+            showConfirmButton: false,
+            showCloseButton: true
+        });
+    }
+}
+// Expose globally so share.js (loaded in same scope) can always reach it
+window._injectToPearLCanvas = _injectToPearLCanvas;
+
+// ==================== WORKSPACE DATA BRIDGE ====================
+// Force-injects HTML into the desktop right-pane. Returns false if no canvas
+// or below the 840px desktop threshold so callers can fall back to Swal.
+window.injectToWorkspace = function(html) {
+    const canvas = document.getElementById('resultCanvas');
+    if (canvas && window.innerWidth >= 840) {
+        canvas.innerHTML = html;
+        canvas.classList.remove('workspace-fade-slide-up');
+        void canvas.offsetWidth; // force reflow so the animation replays on each inject
+        canvas.classList.add('workspace-fade-slide-up');
+        if (typeof closeVoiceOverlay === 'function') closeVoiceOverlay();
+        const st = document.getElementById('canvasStatusText');
+        if (st) { st.textContent = 'LIVE'; st.style.color = '#00A651'; }
+        return true;
+    }
+    return false;
+};
+window.renderToWorkspace = window.injectToWorkspace; // legacy alias
+
+// ==================== GLOBAL DISPLAY HUB ====================
+window.displayPremiumResult = function(tableHtml, planName) {
+    planName = planName || 'ผลการคำนวณ';
+    const isDesktop = window.innerWidth >= 840;
+
+    if (isDesktop && window.renderToWorkspace(tableHtml)) {
+        return;
+    }
+
+    // Fallback: legacy selectors (presentationPane / .right-pane) if #resultCanvas isn't present
+    const rightPane = document.getElementById('presentationPane') || document.querySelector('.right-pane');
+    if (isDesktop && rightPane) {
+        rightPane.innerHTML = tableHtml;
+        rightPane.classList.remove('workspace-fade-slide-up');
+        void rightPane.offsetWidth;
+        rightPane.classList.add('workspace-fade-slide-up');
+        if (typeof closeVoiceOverlay === 'function') closeVoiceOverlay();
+    } else {
+        // มือถือ: ใช้ Popup ปกติ
+        Swal.fire({
+            html: tableHtml,
+            background: 'rgba(255, 255, 255, 0.95)',
+            showConfirmButton: false,
+            showCloseButton: true
+        });
+    }
+};
+
 // รวมศูนย์เปิด Modal (รองรับทุกแผน)
 function openUniversalModal(d) {
     if(!d) return;
+
+    // จอใหญ่: ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
+    if (window.innerWidth >= 840) {
+        _injectToPearLCanvas(d);
+        return;
+    }
+
     injectMaturityModal();
     const _diseaseBtn = document.getElementById('shareDiseaseListBtn');
     if (_diseaseBtn) _diseaseBtn.classList.add('hidden');
@@ -1709,7 +1958,6 @@ function generatePolicyTableData() {
 
         if (!menuContainer) {
             let rightMenuHTML = '';
-            let inputsHTML = '';
 
             if (hasSurrenderMenu) {
                 rightMenuHTML = `
@@ -1721,18 +1969,6 @@ function generatePolicyTableData() {
                         <input type="checkbox" id="toggleSurrender" class="sr-only peer">
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
                     </label>
-                `;
-                inputsHTML = `
-                    <div id="surrenderInputs" class="hidden px-5 pb-6 flex gap-4 bg-white transition-all duration-300 rounded-b-xl border-t border-slate-50">
-                        <div class="flex-1">
-                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block pl-1">เริ่มรับเงิน (อายุ)</label>
-                            <input type="number" id="startSurrenderAge" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors" value="61">
-                        </div>
-                        <div class="flex-1">
-                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block pl-1">รับเงินถึง (อายุ)</label>
-                            <input type="number" id="endSurrenderAge" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors" value="70">
-                        </div>
-                    </div>
                 `;
             } else if (isWXN || isElite || isTX || isCL) {
                 rightMenuHTML = `
@@ -1747,10 +1983,17 @@ function generatePolicyTableData() {
                 `;
             }
 
+            const _iN = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[12px] font-bold text-slate-700 text-center focus:border-emerald-400 focus:bg-white outline-none transition-colors';
+            const _iT = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[12px] font-bold text-slate-700 text-left focus:border-emerald-400 focus:bg-white outline-none transition-colors placeholder:font-normal placeholder:text-slate-400';
+            const _aT = 'flex-1 py-1.5 px-3 rounded-full text-[12px] font-bold bg-white shadow-sm text-slate-800 transition-all';
+            const _aF = 'flex-1 py-1.5 px-3 rounded-full text-[12px] font-bold text-slate-500 transition-all';
+            const _sT = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold bg-white shadow-sm text-emerald-700 transition-all';
+            const _sF = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold text-slate-500 transition-all';
+
             let leftMenuClass = rightMenuHTML ? "w-1/2 pr-4 border-r border-slate-200 justify-between" : "w-full justify-center gap-8";
 
             surrenderContainer.innerHTML = `
-                <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-4 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm ${inputsHTML === '' ? 'rounded-b-xl' : ''}">
+                <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-3.5 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm">
                     <div class="${leftMenuClass} flex items-center">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center"></i>
@@ -1763,17 +2006,70 @@ function generatePolicyTableData() {
                     </div>
                     ${rightMenuHTML ? `<div class="w-1/2 pl-4 flex items-center justify-between">${rightMenuHTML}</div>` : ''}
                 </div>
-                ${inputsHTML}
+                ${hasSurrenderMenu ? `
+                <div id="cfInlineControls" class="hidden bg-white border-t border-slate-100">
+                    <div class="px-4 pt-3 pb-4 space-y-3">
+                        <input type="radio" name="cfMainMode" value="continuous" checked class="sr-only" id="cfMainModeCont">
+                        <input type="radio" name="cfMainMode" value="specific" class="sr-only" id="cfMainModeSpec">
+                        <div class="bg-slate-200/50 rounded-full p-1 flex">
+                            <button id="cfModeTabCont" onclick="document.getElementById('cfMainModeCont').checked=true; setCfMainMode('continuous')" class="${_aT}">รับทุกปี</button>
+                            <button id="cfModeTabSpec" onclick="document.getElementById('cfMainModeSpec').checked=true; setCfMainMode('specific')" class="${_aF}">รับบางปี</button>
+                        </div>
+                        <div id="cfArea_continuous" class="space-y-2.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <div class="text-[9px] font-bold text-slate-500 mb-1">เริ่มรับ (อายุ)</div>
+                                    <input type="number" id="cfStartAge" value="61" min="1" max="89" oninput="generatePolicyTableData()" class="${_iN}">
+                                </div>
+                                <div>
+                                    <div class="text-[9px] font-bold text-slate-500 mb-1">รับถึง (อายุ)</div>
+                                    <input type="number" id="cfEndAge" value="70" min="1" max="89" oninput="generatePolicyTableData()" class="${_iN}">
+                                </div>
+                            </div>
+                            <input type="radio" name="cfSubMode" value="auto" checked class="sr-only" id="cfSubModeAuto">
+                            <input type="radio" name="cfSubMode" value="manual" class="sr-only" id="cfSubModeManual">
+                            <div class="bg-slate-100/70 rounded-xl p-1 flex">
+                                <button id="cfSubTabAuto" onclick="document.getElementById('cfSubModeAuto').checked=true; setCfSubMode('auto')" class="${_sT}">ระบบคำนวณสูงสุด</button>
+                                <button id="cfSubTabManual" onclick="document.getElementById('cfSubModeManual').checked=true; setCfSubMode('manual')" class="${_sF}">ระบุจำนวนเอง</button>
+                            </div>
+                            <div id="cfAmountArea" class="hidden">
+                                <div class="text-[9px] font-bold text-slate-500 mb-1">จำนวน (บาท / ปี)</div>
+                                <input type="text" id="cfContAmt" value="50,000" oninput="cfFormatNum(this); generatePolicyTableData()" class="${_iN}">
+                            </div>
+                        </div>
+                        <div id="cfArea_specific" class="hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <div class="text-[9px] font-bold text-slate-500 mb-1">อายุที่รับ (คั่น ,)</div>
+                                    <input type="text" id="cfSpecificAges" placeholder="เช่น 60,70,80" oninput="generatePolicyTableData()" class="${_iT}">
+                                </div>
+                                <div>
+                                    <div class="text-[9px] font-bold text-slate-500 mb-1">จำนวน (บาท / รอบ)</div>
+                                    <input type="text" id="cfSpecificAmt" value="50,000" oninput="cfFormatNum(this); generatePolicyTableData()" class="${_iN}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>` : ''}
             `;
             surrenderContainer.classList.remove('hidden');
 
             if (hasSurrenderMenu) {
                 document.getElementById('toggleSurrender').addEventListener('change', (e) => {
-                    document.getElementById('surrenderInputs').classList.toggle('hidden', !e.target.checked);
+                    const cfI = document.getElementById('cfInlineControls');
+                    if (e.target.checked) {
+                        if (cfI) {
+                            cfI.classList.remove('hidden');
+                            cfI.classList.add('cf-panel-enter');
+                            cfI.addEventListener('animationend', () => cfI.classList.remove('cf-panel-enter'), { once: true });
+                        }
+                    } else {
+                        if (cfI) cfI.classList.add('hidden');
+                        document.querySelectorAll('.cf-highlight-row').forEach(el =>
+                            el.classList.remove('cf-highlight-row', 'bg-amber-50', 'border-y', 'border-amber-300'));
+                    }
                     generatePolicyTableData();
                 });
-                document.getElementById('startSurrenderAge').addEventListener('input', generatePolicyTableData);
-                document.getElementById('endSurrenderAge').addEventListener('input', generatePolicyTableData);
             }
         }
     }
@@ -1783,12 +2079,24 @@ function generatePolicyTableData() {
     const isBreakevenActive = isTX ? false : (document.getElementById('toggleBreakeven')?.checked || false);
     const isShowSAActive = document.getElementById('toggleShowSA')?.checked || false;
     
-    let startAge = parseInt(document.getElementById('startSurrenderAge')?.value) || 61;
-    let endAge = parseInt(document.getElementById('endSurrenderAge')?.value) || 70;
-    if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
+    let startAge = 61, endAge = 70;
+    if (isSurrenderActive && hasSurrenderMenu) {
+        const cfModeMain = document.querySelector('input[name="cfMainMode"]:checked')?.value || 'continuous';
+        if (cfModeMain === 'continuous') {
+            startAge = parseInt(document.getElementById('cfStartAge')?.value)  || 61;
+            endAge   = parseInt(document.getElementById('cfEndAge')?.value)    || 70;
+        } else {
+            const agesStrX = document.getElementById('cfSpecificAges')?.value || '';
+            const sAgesX = agesStrX.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > d.age);
+            startAge = sAgesX.length ? Math.min(...sAgesX) : 61;
+            endAge   = sAgesX.length ? Math.max(...sAgesX) : 70;
+        }
+        if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
+    }
 
     const showCashFlowBase = isWXN || isElite || isTX;
-    const forceShowCashFlow = isSurrenderActive || showCashFlowBase;
+    const forceShowCashFlow = showCashFlowBase;
+    const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
     const showSAColumn = hasSurrenderMenu || isSLB || isTX || ((isWXN || isElite || isCL) && isShowSAActive);
     const showAccidentColumn = isSLB;
 
@@ -1800,16 +2108,25 @@ function generatePolicyTableData() {
     const planPeriod = currentPlan.includes('10CX') ? '10' : (parseInt(d.years) || 20).toString();
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
-    document.getElementById('tableHeaderTitle').innerHTML = `<div class="text-[10px] min-[380px]:text-[11px] font-bold text-slate-800 leading-tight pr-1 whitespace-normal break-words">${headerTitle}</div>`;
+    document.getElementById('tableHeaderTitle').innerHTML = `
+        <div class="flex flex-wrap gap-1.5 items-center">
+            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">เพศ: ${d.gender}</span>
+            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">อายุ: ${d.age} ปี</span>
+            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">ระยะเวลา: ${planPeriod} ปี</span>
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white text-slate-700 border border-slate-200 shadow-sm">เบี้ยประกัน: <span class="text-slate-900">${initialPrem.toLocaleString()}</span></span>
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#00A651]/10 text-[#00A651] border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white/60 text-slate-500 border border-white/50 shadow-sm">${planAbbr}</span>
+        </div>`;
     
-    document.getElementById('policyTableHead').innerHTML = `<tr class="text-slate-600 shadow-sm text-[10px] min-[380px]:text-[11px] sm:text-[12px]">
-        <th class="py-3 px-1 font-bold bg-[#f8fafc] border-b border-slate-200 text-center">อายุ</th>
-        <th class="py-3 px-1 font-bold bg-[#f8fafc] border-b border-slate-200 text-right">ออมเงิน</th>
-        <th class="py-3 px-1 font-bold bg-[#f8fafc] text-slate-800 border-b border-slate-200 text-right">ออมสะสม</th>
-        ${forceShowCashFlow ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-blue-600 border-b border-slate-200 text-right">กระแสเงินสด</th><th class="py-3 px-1 font-bold bg-[#f8fafc] text-indigo-600 border-b border-slate-200 text-right">รวมรับเงิน</th>` : ''}
-        <th class="py-3 px-1 font-bold bg-[#f8fafc] text-slate-800 border-b border-slate-200 text-right">เงินสดพร้อมใช้</th>
-        ${showSAColumn ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-rose-600 border-b border-slate-200 text-right">ทุนประกัน</th>` : ''}
-        ${showAccidentColumn ? `<th class="py-3 px-1 font-bold bg-[#f8fafc] text-rose-600 border-b border-slate-200 text-right">อุบัติเหตุ</th>` : ''}
+    document.getElementById('policyTableHead').innerHTML = `<tr class="bg-slate-50 border-b-2 border-slate-100 text-slate-900 text-[10px] min-[380px]:text-[11px] sm:text-[12px]">
+        <th class="py-4 px-3 font-bold text-center whitespace-nowrap">อายุ</th>
+        ${hideAnnualSaving ? '' : '<th class="py-4 px-3 font-bold text-right whitespace-nowrap">ออมเงิน</th>'}
+        <th class="py-4 px-3 font-bold text-right whitespace-nowrap">ออมสะสม</th>
+        ${hideAnnualSaving ? '<th class="py-4 px-3 font-bold text-amber-700 text-right whitespace-nowrap">รับเงินก้อน</th>' : ''}
+        ${forceShowCashFlow ? `<th class="py-4 px-3 font-bold text-blue-600 text-right whitespace-nowrap">กระแสเงินสด</th><th class="py-4 px-3 font-bold text-indigo-600 text-right whitespace-nowrap">รวมรับเงิน</th>` : ''}
+        <th class="py-4 px-3 font-bold text-right whitespace-nowrap">เงินสดพร้อมใช้</th>
+        ${showSAColumn ? `<th class="py-4 px-3 font-bold text-right whitespace-nowrap">ทุนประกัน</th>` : ''}
+        ${showAccidentColumn ? `<th class="py-4 px-3 font-bold text-right whitespace-nowrap">อุบัติเหตุ</th>` : ''}
     </tr>`;
     
     // --- 4. Main Loop ---
@@ -1838,19 +2155,47 @@ function generatePolicyTableData() {
     let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
     let currentSA = initialSA;
     let accCashFlow = 0;
-    let saReductionPerYear = 0;
+    let cfMainMode = 'continuous';
+    let cfWithdrawalSchedule = {};
+    let cfFirstWithdrawalYear = null;
 
-    if (isSurrenderActive) {
-        const years = endAge - startAge + 1;
-        if (years > 0) {
-            let targetSA = initialSA > 100000 ? 100000 : 0;
-            saReductionPerYear = Math.floor((initialSA - targetSA) / years); 
+    if (isSurrenderActive && hasSurrenderMenu) {
+        const planKeyW = (currentAppPlan === 'Supreme Life Protector') ? '20SLPA' : '20LPB';
+        const cfModeW = document.querySelector('input[name="cfMainMode"]:checked')?.value || 'continuous';
+        cfMainMode = cfModeW;
+        if (cfModeW === 'continuous') {
+            const cfSubModeW = document.querySelector('input[name="cfSubMode"]:checked')?.value || 'auto';
+            const cfSYear = Math.max(1, startAge - d.age);
+            const cfEYear = Math.min(maxYear, endAge - d.age);
+            if (cfSubModeW === 'auto') {
+                if (typeof _binarySearchMaxWithdrawal === 'function') {
+                    const autoAmt = _binarySearchMaxWithdrawal(d.age, currentGender, planKeyW, initialSA, cfSYear, cfEYear);
+                    if (autoAmt > 0) {
+                        for (let wy = cfSYear; wy <= cfEYear; wy++) cfWithdrawalSchedule[wy] = autoAmt;
+                    }
+                }
+            } else {
+                const cfAmtW = parseInt((document.getElementById('cfContAmt')?.value || '').replace(/,/g, '')) || 0;
+                if (cfAmtW > 0) {
+                    for (let wy = cfSYear; wy <= cfEYear; wy++) cfWithdrawalSchedule[wy] = cfAmtW;
+                }
+            }
+        } else {
+            const agesStrW = document.getElementById('cfSpecificAges')?.value || '';
+            const cfAmtW = parseInt((document.getElementById('cfSpecificAmt')?.value || '').replace(/,/g, '')) || 0;
+            if (cfAmtW > 0) {
+                agesStrW.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > d.age && n < 90)
+                    .forEach(a => { cfWithdrawalSchedule[a - d.age] = cfAmtW; });
+            }
         }
+        const sortedW = Object.keys(cfWithdrawalSchedule).map(Number).sort((a, b) => a - b);
+        if (sortedW.length > 0) cfFirstWithdrawalYear = sortedW[0];
     }
 
     const cvData = window.cvDataLookup || {};
+    const cfLoopEnd = (isSurrenderActive && hasSurrenderMenu && cfMainMode !== 'specific') ? Math.min(endAge - d.age, maxYear) : maxYear;
 
-    for (let y = 1; y <= maxYear; y++) {
+    for (let y = 1; y <= cfLoopEnd; y++) {
         let currentAge = d.age + y;
         
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
@@ -1894,15 +2239,15 @@ function generatePolicyTableData() {
                 else if (currentAge == 90) cashFlowAmt = Math.round(currentSA);
             }
         } 
-        else if (isSurrenderActive && currentAge >= startAge && currentAge <= endAge && currentSA > 0) {
-            let actualReduction = Math.round(saReductionPerYear);
-            if (currentAge === endAge || (currentSA - actualReduction) <= 100000) {
-                let targetSA = initialSA > 100000 ? 100000 : 0;
-                actualReduction = currentSA - targetSA;
-            }
-            if (actualReduction > 0 && cvRate > 0) {
-                cashFlowAmt = Math.round((actualReduction * cvRate) / 1000);
-                currentSA -= actualReduction;
+        else if (isSurrenderActive && hasSurrenderMenu && cfWithdrawalSchedule[y] !== undefined && currentSA > 0) {
+            const wAmt = cfWithdrawalSchedule[y];
+            const cvBefore = Math.round((currentSA * cvRate) / 1000);
+            if (cvBefore > 0 && wAmt < cvBefore) {
+                cashFlowAmt = wAmt;
+                currentSA = Math.round(currentSA * (1 - wAmt / cvBefore));
+            } else if (cvBefore > 0) {
+                cashFlowAmt = cvBefore;
+                currentSA = 0;
             }
         }
         
@@ -1930,27 +2275,33 @@ function generatePolicyTableData() {
 
         // 6. สร้างแถวตาราง
         const saCompact = formatThaiMillion(deathBenefit);
-        const accidentCompact = formatThaiMillion(isSLB ? Math.min(deathBenefit * 2, 100000000) : 0);
+        const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
-        let trClass = "border-b border-slate-100 hover:bg-slate-50";
-        let rowIdStr = (isBreakevenActive && y === beYear) ? `id="breakevenRow"` : "";
+        let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
+        const rowId = (isBreakevenActive && y === beYear) ? 'breakevenRow' : `policyRow_${currentAge}`;
         if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
+        else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
-        html += `<tr ${rowIdStr} class="${trClass}">
-            <td class="py-3 px-1 text-slate-700 font-medium text-center">${currentAge}</td>
-            <td class="py-3 px-1 text-slate-700 text-right">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>
-            <td class="py-3 px-1 text-slate-800 font-bold text-right">${totalSaving.toLocaleString()}</td>
-            ${forceShowCashFlow ? `<td class="py-3 px-1 text-blue-600 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="py-3 px-1 text-indigo-600 font-bold text-right">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
-            <td class="py-3 px-1 ${isBreakevenActive && y === beYear ? 'text-emerald-700 text-[13px]' : 'text-slate-800'} font-bold text-right">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>`;
-            
-        if (showSAColumn) html += `<td class="py-3 px-1 text-rose-600 font-bold text-right">${saCompact}</td>`;
-        if (showAccidentColumn) html += `<td class="py-3 px-1 text-rose-600 font-bold text-right">${accidentCompact}</td>`;
+        html += `<tr id="${rowId}" class="${trClass}">
+            <td class="py-4 px-3 text-slate-700 font-medium text-center">${currentAge}</td>
+            ${hideAnnualSaving ? '' : `<td class="py-4 px-3 text-slate-700 text-right">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
+            <td class="py-4 px-3 text-slate-800 font-bold text-right">${totalSaving.toLocaleString()}</td>
+            ${hideAnnualSaving ? `<td class="py-4 px-3 text-amber-700 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
+            ${forceShowCashFlow ? `<td class="py-4 px-3 text-blue-600 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="py-4 px-3 text-indigo-600 font-bold text-right">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
+            <td class="py-4 px-3 ${isBreakevenActive && y === beYear ? 'text-emerald-700 text-[13px]' : 'text-slate-800'} font-bold text-right">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>`;
+
+        if (showSAColumn) html += `<td class="py-4 px-3 text-rose-600 font-bold text-right">${saCompact}</td>`;
+        if (showAccidentColumn) html += `<td class="py-4 px-3 text-rose-600 font-bold text-right">${accidentCompact}</td>`;
         html += `</tr>`;
 
-        if (y >= maxYear) break;
+        if (y >= cfLoopEnd) break;
     }
     document.getElementById('policyTableBody').innerHTML = html;
-    
+    setTimeout(() => {
+        const firstHighlight = document.querySelector('.cf-highlight-row');
+        if (firstHighlight) firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
     // --- 5. Summary Text ---
     if (foundBreakeven) {
         document.getElementById('breakevenSummary').innerHTML = `
@@ -1978,32 +2329,152 @@ function generatePolicyTableData() {
             if (summary) summary.classList.remove('hidden');
         }
     }
+
+
+    const cfContainer = document.getElementById('cashFlowPlanContainer');
+    if (cfContainer) cfContainer.classList.add('hidden');
 }
 
 function toggleBreakevenDisplay(smoothScroll = true) {
-    const tableBody = document.getElementById('policyTableBody'); 
-    const summary = document.getElementById('breakevenSummary'); 
+    const tableBody = document.getElementById('policyTableBody');
+    const summary = document.getElementById('breakevenSummary');
     const isChecked = document.getElementById('toggleBreakeven')?.checked;
-    
+
     if (!tableBody) return;
-    
+
     if (isChecked) {
-        tableBody.classList.add('show-breakeven'); 
+        tableBody.classList.add('show-breakeven');
         if (summary) summary.classList.remove('hidden');
-        if (smoothScroll) { 
-            setTimeout(() => { 
-                const beRow = tableBody.querySelector('.breakeven-target'); 
-                const pdfTableTarget = document.getElementById('pdfTableTarget'); 
-                if (beRow && pdfTableTarget) { 
-                    const targetPos = beRow.offsetTop - (pdfTableTarget.clientHeight / 2) + 30; 
-                    pdfTableTarget.scrollTo({ top: targetPos, behavior: 'smooth' }); 
-                } 
-            }, 100); 
+        if (smoothScroll) {
+            setTimeout(() => {
+                const beRow = tableBody.querySelector('.breakeven-target');
+                const pdfTableTarget = document.getElementById('pdfTableTarget');
+                if (beRow && pdfTableTarget) {
+                    const targetPos = beRow.offsetTop - (pdfTableTarget.clientHeight / 2) + 30;
+                    pdfTableTarget.scrollTo({ top: targetPos, behavior: 'smooth' });
+                }
+            }, 100);
         }
-    } else { 
-        tableBody.classList.remove('show-breakeven'); 
-        if (summary) summary.classList.add('hidden'); 
+    } else {
+        tableBody.classList.remove('show-breakeven');
+        if (summary) summary.classList.add('hidden');
     }
+}
+
+// ==================== CASH FLOW PLAN UI (LPB / SLPA) ====================
+
+function closeSurrenderPanel() {
+    const toggle = document.getElementById('toggleSurrender');
+    if (toggle && toggle.checked) {
+        toggle.checked = false;
+        toggle.dispatchEvent(new Event('change'));
+    }
+}
+
+function toggleCfPlanPanel() { closeSurrenderPanel(); }
+
+function setCfMainMode(mode) {
+    const contArea     = document.getElementById('cfArea_continuous');
+    const specificArea = document.getElementById('cfArea_specific');
+    if (contArea)     contArea.classList.toggle('hidden', mode !== 'continuous');
+    if (specificArea) specificArea.classList.toggle('hidden', mode !== 'specific');
+    const aT = 'flex-1 py-1.5 px-3 rounded-full text-[12px] font-bold bg-white shadow-sm text-slate-800 transition-all';
+    const aF = 'flex-1 py-1.5 px-3 rounded-full text-[12px] font-bold text-slate-500 transition-all';
+    const tC = document.getElementById('cfModeTabCont'); if (tC) tC.className = mode === 'continuous' ? aT : aF;
+    const tS = document.getElementById('cfModeTabSpec'); if (tS) tS.className = mode === 'specific'   ? aT : aF;
+    generatePolicyTableData();
+}
+
+function setCfSubMode(subMode) {
+    const amountArea = document.getElementById('cfAmountArea');
+    if (amountArea) amountArea.classList.toggle('hidden', subMode !== 'manual');
+    const sT = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold bg-white shadow-sm text-emerald-700 transition-all';
+    const sF = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold text-slate-500 transition-all';
+    const tA = document.getElementById('cfSubTabAuto');   if (tA) tA.className = subMode === 'auto'   ? sT : sF;
+    const tM = document.getElementById('cfSubTabManual'); if (tM) tM.className = subMode === 'manual' ? sT : sF;
+    generatePolicyTableData();
+}
+
+function _buildCashFlowPlanCard() {
+    const iN  = 'w-full bg-white border border-slate-200 rounded-lg p-1.5 text-center text-[11px] font-bold text-slate-700 focus:border-emerald-400 outline-none transition-colors';
+    const iT  = 'w-full bg-white border border-slate-200 rounded-lg p-1.5 text-left text-[11px] font-bold text-slate-700 focus:border-emerald-400 outline-none transition-colors placeholder:font-normal placeholder:text-slate-400';
+    return `
+    <div class="mx-3 my-2">
+      <div class="bg-white/95 rounded-xl border border-slate-200/80 shadow-md overflow-hidden">
+
+        <!-- Slim Header -->
+        <div class="px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center gap-2 relative">
+          <i class="fas fa-piggy-bank text-white text-[12px] shrink-0"></i>
+          <span class="text-[11px] font-black text-white flex-1 min-w-0 truncate">วางแผนรับเงินก้อน (ทยอยเวนคืน)</span>
+          <button onclick="closeSurrenderPanel()" class="w-6 h-6 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/90 text-white transition-all active:scale-90 shrink-0">
+            <i class="fa-solid fa-xmark text-[11px]"></i>
+          </button>
+        </div>
+
+        <!-- Side-by-side mode panels -->
+        <div class="p-2.5 grid grid-cols-2 gap-2 items-start">
+
+          <!-- Option A: รับทุกปี -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <label class="flex items-center gap-1.5 px-2.5 py-2 bg-slate-50 cursor-pointer">
+              <input type="radio" name="cfMainMode" value="continuous" checked onchange="setCfMainMode('continuous')" class="w-3.5 h-3.5 accent-emerald-500 shrink-0">
+              <div>
+                <div class="text-[11px] font-bold text-slate-700 leading-tight">รับทุกปี</div>
+                <div class="text-[8px] text-slate-400 leading-tight">ทุกปีในช่วงที่กำหนด</div>
+              </div>
+            </label>
+            <div id="cfArea_continuous" class="px-2 pb-2 pt-1.5 border-t border-slate-100 bg-white space-y-1.5">
+              <div class="grid grid-cols-2 gap-1">
+                <div>
+                  <div class="text-[8px] font-semibold text-slate-500 mb-0.5">เริ่ม(อายุ)</div>
+                  <input type="number" id="cfStartAge" value="61" min="1" max="89" oninput="generatePolicyTableData()" class="${iN}">
+                </div>
+                <div>
+                  <div class="text-[8px] font-semibold text-slate-500 mb-0.5">ถึง(อายุ)</div>
+                  <input type="number" id="cfEndAge" value="70" min="1" max="89" oninput="generatePolicyTableData()" class="${iN}">
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="cfSubMode" value="auto" checked onchange="setCfSubMode('auto')" class="w-3 h-3 accent-emerald-500 shrink-0">
+                  <span class="text-[9px] font-semibold text-slate-600 leading-tight">ระบบคำนวณสูงสุด</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="cfSubMode" value="manual" onchange="setCfSubMode('manual')" class="w-3 h-3 accent-emerald-500 shrink-0">
+                  <span class="text-[9px] font-semibold text-slate-600 leading-tight">ระบุจำนวนเอง</span>
+                </label>
+              </div>
+              <div id="cfAmountArea" class="hidden">
+                <div class="text-[8px] font-semibold text-slate-500 mb-0.5">จำนวน (บาท/ปี)</div>
+                <input type="text" id="cfContAmt" value="50,000" oninput="cfFormatNum(this); generatePolicyTableData()" class="${iN}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Option B: รับบางปี -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <label class="flex items-center gap-1.5 px-2.5 py-2 bg-slate-50 cursor-pointer">
+              <input type="radio" name="cfMainMode" value="specific" onchange="setCfMainMode('specific')" class="w-3.5 h-3.5 accent-emerald-500 shrink-0">
+              <div>
+                <div class="text-[11px] font-bold text-slate-700 leading-tight">รับบางปี</div>
+                <div class="text-[8px] text-slate-400 leading-tight">ระบุอายุที่รับ</div>
+              </div>
+            </label>
+            <div id="cfArea_specific" class="hidden px-2 pb-2 pt-1.5 border-t border-slate-100 bg-white space-y-1.5">
+              <div>
+                <div class="text-[8px] font-semibold text-slate-500 mb-0.5">อายุที่รับ (คั่น ,)</div>
+                <input type="text" id="cfSpecificAges" placeholder="55,60,70" oninput="generatePolicyTableData()" class="${iT}">
+              </div>
+              <div>
+                <div class="text-[8px] font-semibold text-slate-500 mb-0.5">จำนวน (บาท/รอบ)</div>
+                <input type="text" id="cfSpecificAmt" value="50,000" oninput="cfFormatNum(this); generatePolicyTableData()" class="${iN}">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
 }
 
 // ===== PDF & SHARE UTILITIES =====
@@ -2297,7 +2768,7 @@ async function exportTableToPDF(actionType = 'preview') {
         const isShowCashFlowBase = typeof showCashFlowBase !== 'undefined' ? showCashFlowBase : false;
         const isSurrenderActive = document.getElementById('toggleSurrender')?.checked || false;
         // ต้องตรงกับ forceShowCashFlow ใน generatePolicyTableData() เสมอ
-        const forceShowCashFlow = isShowCashFlowBase || isSurrenderActive;
+        const forceShowCashFlow = isShowCashFlowBase;
         const isShowSAColumn = typeof showSAColumn !== 'undefined' ? showSAColumn : true;
         const isShowAccidentColumn = typeof showAccidentColumn !== 'undefined' ? showAccidentColumn : false;
         const currentPlan = typeof currentAppPlan !== 'undefined' ? currentAppPlan : "";

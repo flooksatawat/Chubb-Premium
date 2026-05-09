@@ -1,4 +1,4 @@
-// ==================== JS LOGIC & UTILITIES ====================
+﻿// ==================== JS LOGIC & UTILITIES ====================
 const setText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
 const formatNum = (num) => { const rounded = Math.round(num * 100) / 100; return Number.isInteger(rounded) ? rounded.toLocaleString() : rounded.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); };
 const formatPct = (num) => { return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + '%'; };
@@ -333,8 +333,8 @@ function handleCashFlowInput(el, type = 0) {
     } 
 }
 
-function setQuickSum(val) { document.getElementById('sumInsuredInput').value = val.toLocaleString(); calculate('sum', true); }
-function setQuickPremium(val) { document.getElementById('premiumInput').value = val.toLocaleString(); calculate('premium', true); }
+function setQuickSum(val) { document.getElementById('sumInsuredInput').value = val.toLocaleString('en-US'); calculate('sum', true); }
+function setQuickPremium(val) { document.getElementById('premiumInput').value = val.toLocaleString('en-US'); calculate('premium', true); }
 function setQuickCashFlow(val) { const el = document.getElementById('cashFlowInput'); if(el) { el.value = val.toLocaleString(); calculate('cashflow', true); } }
 function setWXNQuickCashFlow(val, type) {
     if (type === 1) { document.getElementById('cashFlowInput1').value = val.toLocaleString(); calculate('cashflow1', true); } 
@@ -662,11 +662,139 @@ function calculate(source, enforceMin = false) {
         highlightActivePills(fSum, fPrem, cashFlowVal);
         lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal }; 
         
-        if (typeof refreshAllDisplays === 'function') refreshAllDisplays(); 
-        
-        return lastCalculationData; 
+        if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
+
+        return lastCalculationData;
     } catch (err) {
         console.error("[Calculate Error]: ", err);
         return null;
     }
+}
+
+// ==================== CASH FLOW PLAN: PROPORTIONAL REDUCTION (LPB / SLPA) ====================
+// STRICT BASE RULE: initial SA is always 120,000 regardless of the calculated sum.
+// Supports 3 modes: 'auto' (binary-search max equal withdrawal), 'continuous' (startYear–endYear), 'specific' (year list).
+function _binarySearchMaxWithdrawal(age, gender, planKey, baseSA, startYear, endYear) {
+    const cvData = window.cvDataLookup || {};
+    const maxYear = 90 - age;
+    function simulate(amount) {
+        let currentSA = baseSA;
+        for (let y = 1; y <= maxYear; y++) {
+            if (y < startYear || y > endYear) continue;
+            let cvRate = 0;
+            const planData = cvData[planKey];
+            if (planData && planData[gender]) {
+                const ageData = planData[gender][age.toString()];
+                if (ageData && ageData[y.toString()] !== undefined) cvRate = ageData[y.toString()];
+            }
+            const cvBefore = Math.round((currentSA * cvRate) / 1000);
+            if (cvBefore <= 0 || amount >= cvBefore) return false;
+            currentSA = Math.round(currentSA * (1 - amount / cvBefore));
+            if (currentSA <= 0) return false;
+        }
+        return true;
+    }
+    let lo = 1, hi = 9999999, best = 0;
+    for (let i = 0; i < 30; i++) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (simulate(mid)) { best = mid; lo = mid + 1; }
+        else hi = mid - 1;
+    }
+    return best;
+}
+
+function calculatePartialSurrenderPlan(params) {
+    const BASE_SA = (lastCalculationData && lastCalculationData.sum > 0)
+        ? Math.round(lastCalculationData.sum)
+        : 120000;
+    const cvData = window.cvDataLookup || {};
+    const { age, gender, planKey, mode, startYear, endYear, amount, specificYears } = params;
+
+    const payYears = 20;
+    const maxYear  = 90 - age;
+
+    // Build withdrawal schedule: year -> amount
+    const withdrawalSchedule = {};
+    let autoAmount = 0;
+
+    if (mode === 'single') {
+        withdrawalSchedule[params.singleYear] = amount;
+    } else if (mode === 'continuous') {
+        for (let y = startYear; y <= endYear; y++) withdrawalSchedule[y] = amount;
+    } else if (mode === 'specific') {
+        (specificYears || []).forEach(y => { withdrawalSchedule[y] = amount; });
+    } else if (mode === 'auto') {
+        const sY = startYear || 1;
+        const eY = endYear   || maxYear;
+        autoAmount = _binarySearchMaxWithdrawal(age, gender, planKey, BASE_SA, sY, eY);
+        for (let y = sY; y <= eY; y++) withdrawalSchedule[y] = autoAmount;
+    }
+
+    const basePrem = (lastCalculationData && lastCalculationData.premium > 0)
+        ? Math.round(lastCalculationData.premium)
+        : 0;
+
+    let rows = [];
+    let currentSA    = BASE_SA;
+    let totalSaving  = 0;
+    let totalCashOut = 0;
+    let isLapsed     = false;
+
+    for (let y = 1; y <= maxYear; y++) {
+        const currentAge = age + y;
+
+        let cvRate = 0;
+        const planData = cvData[planKey];
+        if (planData && planData[gender]) {
+            const ageData = planData[gender][age.toString()];
+            if (ageData && ageData[y.toString()] !== undefined) cvRate = ageData[y.toString()];
+        }
+
+        let annualSaving = 0;
+        if (!isLapsed && y <= payYears) {
+            annualSaving = Math.round((currentSA / BASE_SA) * basePrem);
+            totalSaving += annualSaving;
+        }
+
+        const cvBefore = isLapsed ? 0 : Math.round((currentSA * cvRate) / 1000);
+
+        let withdrawal = 0;
+        let lapseFlag  = false;
+        let newSA      = currentSA;
+
+        if (!isLapsed && withdrawalSchedule[y] !== undefined && cvBefore > 0) {
+            const w = withdrawalSchedule[y];
+            if (w >= cvBefore) {
+                withdrawal = cvBefore;
+                newSA      = 0;
+                lapseFlag  = true;
+            } else {
+                withdrawal = w;
+                newSA      = Math.round(currentSA * (1 - w / cvBefore));
+            }
+            totalCashOut += withdrawal;
+        }
+
+        currentSA = newSA;
+        if (lapseFlag) isLapsed = true;
+
+        const cvAfter = isLapsed ? 0 : Math.round((currentSA * cvRate) / 1000);
+
+        rows.push({
+            year: y, age: currentAge,
+            annualSaving, totalSaving,
+            cvBefore, withdrawal, cvAfter,
+            deathBenefit: currentSA,
+            totalCashOut, lapseFlag
+        });
+
+        if (isLapsed) break;
+    }
+
+    return { rows, totalCashOut, finalSA: currentSA, baseSA: BASE_SA, autoAmount };
+}
+
+function cfFormatNum(el) {
+    const v = el.value.replace(/[^0-9]/g, '');
+    if (v) el.value = parseInt(v, 10).toLocaleString();
 }
