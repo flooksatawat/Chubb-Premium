@@ -385,6 +385,41 @@
             background-color: #ef4444 !important;
             color: white !important;
         }
+        /* =========================================
+   [COMPACT UI] ย่อขนาดกล่องสรุปข้อมูลด้านบน (ลดพื้นที่)
+   ========================================= */
+
+/* 1. ลดกรอบและ Padding ของกล่องสีขาวด้านบน */
+#resultCanvas > div:first-child {
+    padding: 0.75rem 1rem !important; 
+    border-radius: 0.75rem !important;
+    margin-bottom: 0 !important;
+    gap: 0.5rem !important; /* ลดระยะห่างระหว่างส่วนหัวกับเม็ดยา */
+}
+
+/* 2. ลดขนาดตัวอักษรหัวข้อ (ชื่อแผน) */
+#resultCanvas > div:first-child h3,
+#resultCanvas > div:first-child h2 {
+    font-size: 15px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* 3. บีบอัด Data Pills (เม็ดยาข้อมูล) ให้เล็กลงและชิดกัน */
+.data-pill {
+    padding: 3px 10px !important; /* ลดความพองบน-ล่าง */
+    margin: 2px 4px 2px 0 !important; /* ลดระยะห่างรอบๆ */
+    font-size: 12px !important; /* ลดขนาดฟอนต์ */
+    line-height: 1.4 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* 4. ลดขนาดไอคอนใน Data Pills */
+.data-pill i {
+    font-size: 12px !important;
+    margin-right: 4px !important;
+}
 
         /* ==================== STRICT RIGHT-PANE OVERRIDES (final) ==================== */
         #rightPane { display: flex !important; flex-direction: column !important; flex: 1 !important; height: 100vh !important; overflow: hidden !important; background-color: #f8fafc !important; }
