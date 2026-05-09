@@ -1253,22 +1253,21 @@ function _injectToPearLCanvas(d) {
     const sumDisplay = `${fmtN(d.sum)} ฿`;
 
     const contentHtml = `
-        <div class="max-w-4xl mx-auto p-6 sm:p-8 rounded-3xl bg-white/85 border border-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style="backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1e3a8a] to-[#2a45a3] flex items-center justify-center shrink-0 shadow-md">
-                    <i class="fas fa-shield-heart text-white text-sm"></i>
+            <div class="max-w-4xl mx-auto p-4 sm:p-5 rounded-2xl bg-white/85 border border-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style="backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1e3a8a] to-[#2a45a3] flex items-center justify-center shrink-0 shadow-md">
+                        <i class="fas fa-shield-heart text-white text-xs"></i>
+                    </div>
+                    <div class="text-sm font-extrabold text-slate-900">${currentAppPlan}</div>
                 </div>
-                <div class="text-base font-extrabold text-slate-900">${currentAppPlan}</div>
-                <div class="ml-auto w-2 h-2 rounded-full bg-[#00A651] shrink-0" style="box-shadow:0 0 10px rgba(0,166,81,0.8);"></div>
-            </div>
 
-            <div class="flex flex-wrap gap-3 mb-6">
-                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: ${d.gender}</span>
-                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: ${d.age} ปี</span>
-                ${period ? `<span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: ${period}</span>` : ''}
-                <span class="px-5 py-2 rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${premLabel}: <span class="font-bold text-slate-900">${premiumDisplay}</span></span>
-                <span class="px-5 py-2 rounded-full bg-[#00A651]/10 text-[#00A651] font-bold border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
-            </div>
+                <div class="flex flex-wrap gap-1.5 mb-4">
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: ${d.gender}</span>
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: ${d.age} ปี</span>
+                    ${period ? `<span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: ${period}</span>` : ''}
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${premLabel}: <span class="font-bold text-slate-900">${premiumDisplay}</span></span>
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-[#00A651]/10 text-[#00A651] font-bold border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
+                </div>
 
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm mb-6">
                 <table class="w-full text-left border-collapse">
