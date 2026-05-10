@@ -653,6 +653,65 @@
                 width: auto !important;
             }
             #rightPane { flex: 2 1 0 !important; }
+
+            /* Compact scaling สำหรับ left pane ~280-341px (7.8" screen) */
+            .app-container .content-area { padding-left: 10px !important; padding-right: 10px !important; }
+            .app-container .premium-card { padding: 10px !important; border-radius: 14px !important; }
+            .app-container .input-box-rounded { font-size: 18px !important; height: 44px !important; }
+
+            .app-container .h-\[54px\] { height: 46px !important; }
+            .app-container .h-\[50px\] { height: 40px !important; }
+            .app-container .h-\[42px\] { height: 34px !important; }
+
+            .app-container .text-\[22px\] { font-size: 18px !important; }
+            .app-container .text-\[20px\] { font-size: 16px !important; }
+            .app-container .text-\[16px\] { font-size: 14px !important; }
+            .app-container .text-\[15px\] { font-size: 13px !important; }
+            .app-container .text-\[14px\] { font-size: 12px !important; }
+            .app-container .text-\[13px\] { font-size: 12px !important; }
+            .app-container .text-\[12px\] { font-size: 11px !important; }
+            .app-container .text-\[11px\] { font-size: 10px !important; }
+            .app-container .text-\[10px\] { font-size: 9px !important; }
+            .app-container .text-\[9px\]  { font-size: 8px !important; }
+
+            .app-container .gap-3 { gap: 7px !important; }
+            .app-container .mb-3 { margin-bottom: 7px !important; }
+            .app-container .mb-2\.5 { margin-bottom: 5px !important; }
+            .app-container .mb-1\.5 { margin-bottom: 3px !important; }
+
+            .app-container .rounded-\[24px\] { border-radius: 16px !important; }
+            .app-container .rounded-\[20px\] { border-radius: 12px !important; }
+            .app-container .rounded-\[14px\] { border-radius: 10px !important; }
+
+            .app-container .glass-nav { padding-top: 7px !important; padding-bottom: 7px !important; }
+            .app-container .pb-safe { padding-bottom: 12px !important; }
+            .app-container .pt-12 { padding-top: 20px !important; }
+
+            .app-container #bottomNavContainer .w-\[48px\] { width: 36px !important; }
+            .app-container #bottomNavContainer .h-\[48px\] { height: 36px !important; }
+            .app-container #bottomNavContainer .text-\[18px\] { font-size: 14px !important; }
+            .app-container #bottomNavContainer .\-mt-5 { margin-top: -10px !important; }
+
+            #planListContainer .w-16 { width: 44px !important; height: 44px !important; }
+            #planListContainer .h-16 { height: 44px !important; }
+            #planListContainer .text-\[28px\] { font-size: 20px !important; }
+            #planListContainer .text-\[26px\] { font-size: 18px !important; }
+            #planListContainer .text-\[17px\] { font-size: 13px !important; }
+            #planListContainer .text-\[12px\] { font-size: 11px !important; }
+            #planListContainer .mr-4 { margin-right: 8px !important; }
+            #planListContainer .p-4 { padding: 10px !important; }
+            #planListContainer .w-8 { width: 26px !important; }
+            #planListContainer .h-8 { height: 26px !important; }
+            #planListContainer .rounded-\[24px\] { border-radius: 14px !important; }
+            #planListContainer .rounded-\[20px\] { border-radius: 12px !important; }
+            #planListContainer .px-5 { padding-left: 12px !important; padding-right: 12px !important; }
+
+            #modalBottomBar .w-\[52px\] { width: 38px !important; }
+            #modalBottomBar .h-\[52px\] { height: 38px !important; }
+            #modalBottomBar .py-3\.5 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
+            #modalBottomBar .rounded-\[28px\] { border-radius: 18px !important; }
+            #modalBottomBar .rounded-\[22px\] { border-radius: 14px !important; }
         }
 
         /* ==================== Notebook / Laptop (≥ 1024px) — left pane 320px fixed ====================
