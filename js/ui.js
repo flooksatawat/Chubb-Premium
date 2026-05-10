@@ -3747,6 +3747,11 @@ window.toggle3DCat = function(num) {
     else window._3dOpenCats.add(num);
     window.render3DDetailsAccordion();
 };
+window._3dSelectorOpen = (window._3dSelectorOpen !== false); // default open
+window.toggle3DSelector = function() {
+    window._3dSelectorOpen = !window._3dSelectorOpen;
+    window.render3DDetailsAccordion();
+};
 window.set3DHX = function(opt) {
     window.currentHX = opt;
     if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
@@ -3796,43 +3801,67 @@ window.render3DDetailsAccordion = function() {
     const pillDef = 'py-1.5 text-[11px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
 
     // ── 1. Sticky header: HX pills + rider pills ─────────────────────────
-    let stickyHtml = `<div class="sticky top-0 z-10 bg-white/97 backdrop-blur-sm border-b border-slate-100 px-3 pt-3 pb-2.5 space-y-2">`;
+    const selOpen = window._3dSelectorOpen !== false;
+    const hxLabel = hxVal ? hxVal : 'ยังไม่เลือก';
+    const hxoLabel = hxoVal === 'ไม่เลือก' ? '–' : (DL[hxoVal]||hxoVal)+' บ./ครั้ง';
+    const hxdLabel = hxdVal === 'ไม่เลือก' ? '–' : (DL[hxdVal]||hxdVal)+' บ./รอบ';
+    const hbfLabel = hbfVal === 'ไม่เลือก' ? '–' : ((hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])||hbfVal)+' บ./วัน';
 
-    // HX plan
-    stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">แผนค่าห้อง (HX)</p>
-        <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-6 gap-1">`;
-    hxOpts.forEach(opt => {
-        stickyHtml += `<button onclick="window.set3DHX('${opt}')" class="${opt===hxVal?pillSel:pillDef}">${opt.replace('HX','')}</button>`;
-    });
-    stickyHtml += `</div></div>`;
+    let stickyHtml = `<div class="sticky top-0 z-10 bg-white/97 backdrop-blur-sm border-b border-slate-100">`;
 
-    if (hxVal) {
-        // HXO
-        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">OPD Extra (HXO) <span class="text-teal-500">${hxoVal==='ไม่เลือก'?'ไม่เลือก':DL[hxoVal]+' บ./ครั้ง'}</span></p>
-            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
-        hxoOpts.forEach(opt => {
-            const lbl = opt==='ไม่เลือก'?'ไม่':'HXO'+opt.replace('HXO','');
-            stickyHtml += `<button onclick="window.set3DHXO('${opt}')" class="${opt===hxoVal?pillSel:pillDef}">${lbl}</button>`;
+    // Collapsed bar — always visible
+    stickyHtml += `<div class="flex items-center justify-between px-3 py-2 cursor-pointer" onclick="window.toggle3DSelector()">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-bold text-teal-600">${hxLabel}</span>
+            ${hxoVal!=='ไม่เลือก'?`<span class="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded-full font-medium">HXO ${hxoLabel}</span>`:''}
+            ${hxdVal!=='ไม่เลือก'?`<span class="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium">HXD ${hxdLabel}</span>`:''}
+            ${hbfVal!=='ไม่เลือก'?`<span class="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-full font-medium">HBF ${hbfLabel}</span>`:''}
+        </div>
+        <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1 shrink-0">
+            ${selOpen ? 'ซ่อน' : 'ตัวเลือก'}<i class="fas fa-chevron-${selOpen?'up':'down'} text-[9px]"></i>
+        </span>
+    </div>`;
+
+    if (selOpen) {
+        stickyHtml += `<div class="px-3 pb-2.5 space-y-2 border-t border-slate-100 pt-2">`;
+
+        // HX plan
+        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">แผนค่าห้อง (HX)</p>
+            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-6 gap-1">`;
+        hxOpts.forEach(opt => {
+            stickyHtml += `<button onclick="window.set3DHX('${opt}')" class="${opt===hxVal?pillSel:pillDef}">${opt.replace('HX','')}</button>`;
         });
         stickyHtml += `</div></div>`;
 
-        // HXD
-        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Deductible (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
-            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
-        hxdOpts.forEach(opt => {
-            const lbl = opt==='ไม่เลือก'?'ไม่':'HXD'+opt.replace('HXD','');
-            stickyHtml += `<button onclick="window.set3DHXD('${opt}')" class="${opt===hxdVal?pillSel:pillDef}">${lbl}</button>`;
-        });
-        stickyHtml += `</div></div>`;
+        if (hxVal) {
+            // HXO
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">OPD Extra (HXO) <span class="text-teal-500">${hxoVal==='ไม่เลือก'?'ไม่เลือก':DL[hxoVal]+' บ./ครั้ง'}</span></p>
+                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+            hxoOpts.forEach(opt => {
+                const lbl = opt==='ไม่เลือก'?'ไม่':'HXO'+opt.replace('HXO','');
+                stickyHtml += `<button onclick="window.set3DHXO('${opt}')" class="${opt===hxoVal?pillSel:pillDef}">${lbl}</button>`;
+            });
+            stickyHtml += `</div></div>`;
 
-        // HBF
-        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfVal==='ไม่เลือก'?'ไม่เลือก':(hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])+' บ./วัน'}</span></p>
-            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
-        hbfOpts.forEach(opt => {
-            const lbl = opt==='ไม่เลือก'?'ไม่':opt.replace('HBF','');
-            stickyHtml += `<button onclick="window.set3DHBF('${opt}')" class="${opt===hbfVal?pillSel:pillDef}">${lbl}</button>`;
-        });
-        stickyHtml += `</div></div>`;
+            // HXD
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Deductible (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
+                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+            hxdOpts.forEach(opt => {
+                const lbl = opt==='ไม่เลือก'?'ไม่':'HXD'+opt.replace('HXD','');
+                stickyHtml += `<button onclick="window.set3DHXD('${opt}')" class="${opt===hxdVal?pillSel:pillDef}">${lbl}</button>`;
+            });
+            stickyHtml += `</div></div>`;
+
+            // HBF
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfVal==='ไม่เลือก'?'ไม่เลือก':(hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])+' บ./วัน'}</span></p>
+                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+            hbfOpts.forEach(opt => {
+                const lbl = opt==='ไม่เลือก'?'ไม่':opt.replace('HBF','');
+                stickyHtml += `<button onclick="window.set3DHBF('${opt}')" class="${opt===hbfVal?pillSel:pillDef}">${lbl}</button>`;
+            });
+            stickyHtml += `</div></div>`;
+        }
+        stickyHtml += `</div>`;
     }
     stickyHtml += `</div>`;
 
