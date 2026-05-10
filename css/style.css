@@ -630,4 +630,19 @@
             .app-container .pb-safe { padding-bottom: 12px !important; }
             .app-container .rounded-\[24px\] { border-radius: 16px !important; }
             .app-container .rounded-\[20px\] { border-radius: 12px !important; }
+
+            /* ลดขนาด badge ข้อมูลหัวตาราง (แบบ/เพศ/อายุ/เบี้ย/ทุน) ใน right pane */
+            #tableHeaderTitle span { font-size: 11px !important; padding: 2px 6px !important; }
+            #tableHeaderTitle > div { gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; }
+        }
+
+        /* ==================== จอใหญ่กว่า 7.92" (> 850px) — ลด left pane ให้แคบลง ====================
+           เพิ่ม right pane ให้มีพื้นที่แสดงผลมากขึ้น */
+        @media (min-width: 851px) and (min-height: 600px) {
+            .app-container {
+                flex: 0 0 360px !important;
+                min-width: 360px !important;
+                max-width: 360px !important;
+                width: 360px !important;
+            }
         }
