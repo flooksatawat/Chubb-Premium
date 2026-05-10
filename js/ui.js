@@ -2542,8 +2542,8 @@ function generatePolicyTableData() {
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
     const _gThai = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-    // 7.8 นิ้ว ≈ 744 CSS px (iPad mini 6 = 7.69", 744px) — ต่ำกว่านี้ = มือถือ
-    const _isMobile = (document.documentElement.clientWidth || window.innerWidth) < 744;
+    // 6.8 นิ้ว ≈ 653 CSS px — ต่ำกว่านี้ = มือถือ (2 บรรทัด)
+    const _isMobile = (document.documentElement.clientWidth || window.innerWidth) < 653;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-1 py-0.5">
             <div class="flex flex-wrap gap-1.5 items-center">
