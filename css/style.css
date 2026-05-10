@@ -194,7 +194,7 @@
            จอในของมือถือพับ (เช่น Galaxy Z Fold ~821-893 px) ใช้สัดส่วน 1:2
            - จอใน Fold portrait (821 wide) → ซ้าย ~273 + ขวา ~547
            - จอใน Fold landscape (893 wide) → ซ้าย ~298 + ขวา ~595 */
-        @media (min-width: 700px) and (max-width: 1000px) and (min-height: 700px) {
+        @media (min-width: 700px) and (max-width: 1000px) and (min-height: 500px) and (max-height: 1050px) {
             .app-container {
                 flex: 1 1 0 !important;
                 min-width: 0 !important;
@@ -492,9 +492,21 @@
         /* ==================== FOLDABLE 1:2 OVERRIDE (ต้องอยู่หลัง #rightPane global) ====================
            ID selector ข้างบนมี specificity สูงกว่า .right-pane ใน media query
            จึงต้องใช้ #rightPane ใน media query ที่อยู่หลังกว่าเพื่อ override ได้ */
-        @media (min-width: 700px) and (max-width: 1000px) and (min-height: 700px) {
+        @media (min-width: 700px) and (max-width: 1000px) and (min-height: 500px) and (max-height: 1050px) {
+            .app-container {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                width: auto !important;
+            }
             #rightPane { flex: 2 1 0 !important; }
         }
-        @media (horizontal-viewport-segments: 2) and (min-height: 600px) {
+        @media (horizontal-viewport-segments: 2) and (min-height: 500px) {
+            .app-container {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                width: auto !important;
+            }
             #rightPane { flex: 2 1 0 !important; }
         }
