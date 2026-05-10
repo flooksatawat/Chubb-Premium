@@ -1351,12 +1351,6 @@ function _injectToPearLCanvas(d) {
     // Skip ถ้าอยู่ระหว่าง computeForPlan (กัน recursion)
     if (window.__suppressLive) return;
 
-    // Wide layout → render comparison view
-    if (window.isWideLayout && window.isWideLayout()) {
-        const html = _buildComparisonHtml(d, fmtN, fmtP);
-        if (window.injectToWorkspace(html)) return;
-    }
-
     const statusText = document.getElementById('canvasStatusText');
     if (statusText) { statusText.textContent = 'LIVE'; statusText.style.color = '#00A651'; }
 
