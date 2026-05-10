@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css?v=foldable17">
+    <link rel="stylesheet" href="css/style.css?v=foldable18">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -558,14 +558,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             </div>
             <div id="resultCanvas" class="no-scrollbar w-full h-full p-8 overflow-y-auto" style="flex:1;">
                 <div class="result-canvas-placeholder" id="canvasPlaceholder">
-                    <div class="ai-waveform" style="width:96px;height:96px;">
-                        <div class="ai-waveform-ring" style="width:48px;height:48px;"></div>
-                        <div class="ai-waveform-ring" style="width:72px;height:72px;"></div>
-                        <div class="ai-waveform-ring" style="width:96px;height:96px;"></div>
-                        <i class="fas fa-sparkles" style="color:#00A651;font-size:22px;position:relative;z-index:10;"></i>
+                    <div class="ai-waveform" style="width:150px;height:150px;">
+                        <div class="ai-waveform-ring" style="width:54px;height:54px;"></div>
+                        <div class="ai-waveform-ring" style="width:88px;height:88px;"></div>
+                        <div class="ai-waveform-ring" style="width:122px;height:122px;"></div>
+                        <div class="ai-waveform-ring" style="width:156px;height:156px;animation-delay:1.8s;"></div>
+                        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#00A651,#00843F);display:flex;align-items:center;justify-content:center;position:relative;z-index:10;box-shadow:0 8px 28px rgba(0,166,81,0.4);">
+                            <i class="fas fa-shield-heart" style="color:white;font-size:20px;"></i>
+                        </div>
                     </div>
-                    <div style="color:#94a3b8;font-size:13px;text-align:center;line-height:1.75;font-family:'Kanit',sans-serif;">
-                        กดปุ่ม <strong style="color:#64748b;">ดูรายละเอียด</strong> หรือ<br>พูดคำสั่งเสียง เพื่อดูผลลัพธ์ที่นี่
+                    <div style="text-align:center;margin-top:8px;">
+                        <div style="font-size:15px;font-weight:800;color:#334155;font-family:'Kanit',sans-serif;margin-bottom:8px;letter-spacing:0.01em;">รอการเลือกแบบประกัน</div>
+                        <div style="font-size:12px;color:#94a3b8;line-height:2;font-family:'Kanit',sans-serif;">
+                            เลือกแบบประกัน &nbsp;·&nbsp; พิมพ์คำสั่ง &nbsp;·&nbsp; หรือ พูด<br>
+                            <strong style="color:#475569;font-size:12.5px;">เพื่อคำนวณเบี้ยประกัน</strong>
+                        </div>
                     </div>
                 </div>
             </div>
