@@ -3293,6 +3293,8 @@ async function exportTableToPDF(actionType = 'preview') {
 // ============================================================================
 window.onload = async () => {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+    const oldCompare = document.getElementById('comparePanelView');
+    if (oldCompare) oldCompare.remove();
     if (typeof applyDayColorTheme === 'function') applyDayColorTheme();
     
     document.querySelectorAll('button[onclick^="closePopup"]').forEach(btn => {
