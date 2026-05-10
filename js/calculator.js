@@ -559,28 +559,30 @@ function calculate(source, enforceMin = false) {
             let hxdPrem = getHealthRate('HXD', hxdVal, age, currentGender);
             let hbfPrem = getHealthRate('HBF', hbfVal, age, currentGender);
             let mfPrem = getHealthRate('MF', mfVal, age, currentGender);
-            
+
             let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem;
+            let _3dClBasePrem = 0;
 
             if (source === 'sum') {
                 let basePrem = clRate > 0 ? (fSum / 1000) * (clRate - getDiscount(fSum, clPlan)) : 0;
+                _3dClBasePrem = basePrem;
                 fPrem = basePrem + totalHealthPrem;
                 document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
             } else {
                 fPrem = getSafeValue('premiumInput') || 0;
                 let basePrem = fPrem - totalHealthPrem;
                 if(basePrem < 0) basePrem = 0;
-                
+
                 let baseDiscountArray = [2, 1, 0];
-                for (let d_val of baseDiscountArray) { 
-                    let s = (basePrem * 1000) / (clRate - d_val); 
-                    if (getDiscount(s, clPlan) === d_val) { fSum = s; break; } 
-                } 
+                for (let d_val of baseDiscountArray) {
+                    let s = (basePrem * 1000) / (clRate - d_val);
+                    if (getDiscount(s, clPlan) === d_val) { fSum = s; break; }
+                }
                 if (fSum === 0) fSum = clRate > 0 ? (basePrem * 1000) / clRate : 0;
-                
+
                 if (enforceMin && fSum < config.minSum) {
                     fSum = config.minSum;
-                    basePrem = (fSum / 1000) * (clRate - getDiscount(fSum, clPlan)); 
+                    basePrem = (fSum / 1000) * (clRate - getDiscount(fSum, clPlan));
                     fPrem = basePrem + totalHealthPrem;
                     document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 }
@@ -589,17 +591,18 @@ function calculate(source, enforceMin = false) {
                     fPrem = config.minPrem;
                     basePrem = fPrem - totalHealthPrem;
                     fSum = 0;
-                    for (let d_val of baseDiscountArray) { 
-                        let s = (basePrem * 1000) / (clRate - d_val); 
-                        if (getDiscount(s, clPlan) === d_val) { fSum = s; break; } 
-                    } 
+                    for (let d_val of baseDiscountArray) {
+                        let s = (basePrem * 1000) / (clRate - d_val);
+                        if (getDiscount(s, clPlan) === d_val) { fSum = s; break; }
+                    }
                     if (fSum === 0) fSum = clRate > 0 ? (basePrem * 1000) / clRate : 0;
                     document.getElementById('sumInsuredInput').value = formatNum(fSum);
                     document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 }
-                
+                _3dClBasePrem = basePrem;
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
             }
+            window._3dPremData = { clBasePrem: _3dClBasePrem, hxPrem, hxoPrem, hxdPrem, hbfPrem, hxVal, hxoVal, hxdVal, hbfVal, clPlan };
         }
         // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB, CL) ----------------
         else {
@@ -660,7 +663,7 @@ function calculate(source, enforceMin = false) {
         else cashFlowVal = getSafeValue('cashFlowInput');
         
         highlightActivePills(fSum, fPrem, cashFlowVal);
-        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal }; 
+        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}) };
         
         if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
 

@@ -2231,24 +2231,67 @@ function refreshAllDisplays() {
     const _comTitle = currentAppPlan ? `${currentAppPlan}${_yearMatch ? ' ' + _yearMatch[1] + ' ปี' : ''}` : 'คอมมิชชัน';
     let comH = `<h4 class="text-[13px] font-black text-slate-800 text-center mb-4">${_comTitle}</h4>`;
     let totalComAmt = 0; let totalComPct = 0;
-    
-    if (rateArr && rateArr.length > 0) {
+
+    if (currentAppPlan === '3D Health Excellence' && lastCalculationData.clBasePrem !== undefined) {
+        const d3 = lastCalculationData;
+        const clRates = getComRateArray(d3.clPlan || currentPlan);
+
+        const hxNum = parseInt((d3.hxVal || '').replace(/\D/g, ''), 10) || 0;
+        const hxKey = hxNum >= 150 ? 'HX (150-300)' : 'HX (15-60)';
+        const hxRates  = d3.hxPrem  > 0 ? getComRateArray(hxKey)      : [];
+        const hxoRates = d3.hxoPrem > 0 ? getComRateArray('HXO')      : [];
+        const hxdRates = d3.hxdPrem > 0 ? getComRateArray('HXD')      : [];
+        const hbfRates = d3.hbfPrem > 0 ? getComRateArray('HBF')      : [];
+
+        const maxYears = Math.max(clRates.length, hxRates.length, hxoRates.length, hxdRates.length, hbfRates.length, 1);
+        window.lastTotalComYears = maxYears;
+        for (let i = 0; i < maxYears; i++) {
+            const clAmt  = i < clRates.length  ? Math.round(d3.clBasePrem * clRates[i])  : 0;
+            const hxAmt  = i < hxRates.length  ? Math.round(d3.hxPrem     * hxRates[i])  : 0;
+            const hxoAmt = i < hxoRates.length ? Math.round(d3.hxoPrem    * hxoRates[i]) : 0;
+            const hxdAmt = i < hxdRates.length ? Math.round(d3.hxdPrem    * hxdRates[i]) : 0;
+            const hbfAmt = i < hbfRates.length ? Math.round(d3.hbfPrem    * hbfRates[i]) : 0;
+            const yearAmt = clAmt + hxAmt + hxoAmt + hxdAmt + hbfAmt;
+            totalComAmt += yearAmt;
+            const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
+            comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
+                <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
+                <span class="text-[13px] font-black text-slate-500 text-center flex-1 text-left pl-2 leading-tight">${[
+                    clAmt  > 0 ? `CL ${clAmt.toLocaleString()}`   : '',
+                    hxAmt  > 0 ? `HX ${hxAmt.toLocaleString()}`   : '',
+                    hxoAmt > 0 ? `HXO ${hxoAmt.toLocaleString()}` : '',
+                    hxdAmt > 0 ? `HXD ${hxdAmt.toLocaleString()}` : '',
+                    hbfAmt > 0 ? `HBF ${hbfAmt.toLocaleString()}` : ''
+                ].filter(Boolean).join(' + ')}</span>
+                <span class="text-[14px] font-black text-amber-600 text-right w-20">${yearAmt.toLocaleString()}</span>
+            </div>`;
+        }
+        if (maxYears > 5) {
+            comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${maxYears} <i class="fas fa-chevron-down ml-1"></i></button>`;
+        }
+        comH += `<div class="mt-4 pt-3.5 border-t border-slate-100 flex justify-end items-end">
+            <div class="text-right">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">คอมมิชชันรวมตลอดสัญญา</div>
+                <div class="text-[20px] font-black text-amber-600">${totalComAmt.toLocaleString()} <span class="text-sm">฿</span></div>
+            </div>
+        </div>`;
+    } else if (rateArr && rateArr.length > 0) {
         window.lastTotalComYears = rateArr.length;
-        rateArr.forEach((r, i) => { 
-            const annualAmt = Math.round(p * r) || 0; 
+        rateArr.forEach((r, i) => {
+            const annualAmt = Math.round(p * r) || 0;
             totalComAmt += annualAmt; totalComPct += r;
             const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
             comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
                 <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
                 <span class="text-[14px] font-black text-amber-600 text-center flex-1">${formatPct(r*100)}</span>
                 <span class="text-[14px] font-black text-slate-800 text-right w-20">${annualAmt.toLocaleString()}</span>
-            </div>`; 
+            </div>`;
         });
-        
+
         if (rateArr.length > 5) {
             comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${rateArr.length} <i class="fas fa-chevron-down ml-1"></i></button>`;
         }
-        
+
         comH += `<div class="mt-4 pt-3.5 border-t border-slate-100 flex justify-between items-end">
             <div class="text-left">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">PERCENT รวม</div>
