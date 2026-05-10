@@ -1,7 +1,7 @@
 ﻿// ==================== JS LOGIC & UTILITIES ====================
 const setText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
 const formatNum = (num) => { const rounded = Math.round(num * 100) / 100; return Number.isInteger(rounded) ? rounded.toLocaleString() : rounded.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); };
-const formatPct = (num) => { return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + '%'; };
+const formatPct = (num) => { return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '%'; };
 const getSafeValue = (id) => { const el = document.getElementById(id); if (!el || !el.value) return 0; return parseFloat(el.value.toString().replace(/,/g, '')) || 0; };
 
 // ==================== GLOBAL STATE ====================
