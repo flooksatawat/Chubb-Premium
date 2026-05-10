@@ -2948,29 +2948,6 @@ function _showQuickToast(msg) {
     setTimeout(() => t.remove(), 1500);
 }
 
-/** รวม canvas ทุกหน้าใน PDF viewer เป็นภาพเดียว — สำหรับ navigator.share/long-press save ใน LIFF */
-async function _composeCanvasesToImageBlob() {
-    const area = document.getElementById('pdfViewerCanvas');
-    if (!area) return null;
-    const canvases = Array.from(area.querySelectorAll('canvas'));
-    if (!canvases.length) return null;
-
-    const width = Math.max(...canvases.map(c => c.width));
-    const totalH = canvases.reduce((s, c) => s + c.height, 0);
-    const out = document.createElement('canvas');
-    out.width = width;
-    out.height = totalH;
-    const ctx = out.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, width, totalH);
-    let y = 0;
-    for (const c of canvases) {
-        ctx.drawImage(c, 0, y, c.width, c.height);
-        y += c.height;
-    }
-    return await new Promise(res => out.toBlob(b => res(b), 'image/png'));
-}
-
 async function handlePdfSaveLinkClick(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -3000,20 +2977,11 @@ async function handlePdfSaveLinkClick(e) {
 
     _showQuickToast('กำลังเตรียมไฟล์...');
 
-    // 1) ลอง Web Share API กับไฟล์ PDF — iOS Safari/LINE in-app บางเวอร์ชันรองรับ "Save to Files"
+    // Web Share API กับไฟล์ PDF — ผู้ใช้กด "Save to Files" / "บันทึกในไฟล์"
     const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
     if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
 
-    // 2) Fallback: รวม canvas ทุกหน้าเป็น PNG แล้ว share — บันทึกเข้า "รูปภาพ" ของอุปกรณ์ได้
-    const imgBlob = await _composeCanvasesToImageBlob();
-    if (imgBlob) {
-        const imgName = _pdfViewerFilename.replace(/\.pdf$/i, '.png');
-        const imgFile = new File([imgBlob], imgName, { type: 'image/png' });
-        if (await tryShareFile(imgFile, imgName, imgName)) return;
-    }
-
-    // 3) Last resort: บอกผู้ใช้ให้แตะค้างบนภาพ PDF เพื่อบันทึก
-    _showLiffSaveInstruction();
+    _showLiffPdfFallback();
 }
 
 async function handlePdfShare() {
@@ -3025,19 +2993,11 @@ async function handlePdfShare() {
     await _ensureLiffReady();
     _showQuickToast('กำลังเตรียมแชร์...');
 
-    // 1) Web Share API (ไฟล์ PDF)
+    // 1) Web Share API กับไฟล์ PDF (ผู้ใช้เลือก LINE chat / Save to Files)
     const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
     if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
 
-    // 2) Web Share API (ภาพ PNG รวม) — กรณีไม่รับ PDF
-    const imgBlob = await _composeCanvasesToImageBlob();
-    if (imgBlob) {
-        const imgName = _pdfViewerFilename.replace(/\.pdf$/i, '.png');
-        const imgFile = new File([imgBlob], imgName, { type: 'image/png' });
-        if (await tryShareFile(imgFile, imgName, imgName)) return;
-    }
-
-    // 3) liff.shareTargetPicker — ส่งข้อความสรุปเข้า LINE chat
+    // 2) liff.shareTargetPicker — ส่งข้อความสรุปเข้า LINE chat
     if (_liffApi('shareTargetPicker')) {
         try {
             const summary = (typeof generateShortShareText === 'function')
@@ -3051,10 +3011,10 @@ async function handlePdfShare() {
         }
     }
 
-    _showLiffSaveInstruction();
+    _showLiffPdfFallback();
 }
 
-function _showLiffSaveInstruction() {
+function _showLiffPdfFallback() {
     const existing = document.getElementById('_liffFallbackToast');
     if (existing) existing.remove();
     const toast = document.createElement('div');
@@ -3062,10 +3022,10 @@ function _showLiffSaveInstruction() {
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
     const hasSharePicker = _liffApi('shareTargetPicker');
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">บันทึก PDF เป็นรูปภาพ</div>
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึก/แชร์ไฟล์ได้</div>
         <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
-            <strong style="color:white;">แตะค้างที่ภาพ PDF</strong> ด้านบน<br>
-            แล้วเลือก <strong style="color:white;">"บันทึกรูปภาพ"</strong>
+            อุปกรณ์นี้ไม่รองรับการแชร์ไฟล์ PDF ใน LIFF<br>
+            ${hasSharePicker ? 'สามารถส่งสรุปแผนเป็นข้อความใน LINE ได้' : ''}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
             ${hasSharePicker ? '<button id="_liffShareTextBtn" style="background:#06c755;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">ส่งข้อความใน LINE</button>' : ''}
@@ -3133,7 +3093,7 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
                 const canvas = document.createElement('canvas');
                 canvas.width = vp.width;
                 canvas.height = vp.height;
-                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white' });
+                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white', webkitTouchCallout: 'none', webkitUserSelect: 'none', userSelect: 'none', pointerEvents: 'none' });
                 canvasArea.appendChild(canvas);
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
             }
