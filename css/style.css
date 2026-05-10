@@ -486,7 +486,8 @@
         #rightPane { display: flex !important; flex-direction: column !important; flex: 1 !important; height: 100vh !important; overflow: hidden !important; background-color: #f8fafc !important; }
         #resultCanvas { flex: 1 !important; display: flex !important; flex-direction: column !important; height: 100% !important; padding: 1rem !important; overflow-y: auto !important; }
         .policy-table-wrapper { flex: 1 1 auto !important; overflow-x: hidden !important; overflow-y: auto !important; margin-top: 0 !important; border-radius: 0 !important; }
-        .policy-table-wrapper thead th { position: sticky !important; top: 0 !important; z-index: 40 !important; background: linear-gradient(135deg,#1e3a5f,#0f4c81) !important; color: white !important; white-space: normal !important; }
+        .policy-table-wrapper thead th { position: sticky !important; top: 0 !important; z-index: 40 !important; background: linear-gradient(135deg,#0d9488,#0369a1) !important; color: white !important; white-space: normal !important; }
+        #policyTableBody tr:hover td { background-color: rgba(13,148,136,0.13) !important; transition: background-color 0.15s; }
         #pdfTableTarget th, #pdfTableTarget td { padding: 8px 5px !important; font-size: 11px !important; white-space: normal !important; }
         .menu-x { background-color: #ef4444 !important; color: white !important; }
         /* Keyboard overflow fix — mobile */

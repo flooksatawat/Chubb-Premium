@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css?v=foldable21">
+    <link rel="stylesheet" href="css/style.css?v=foldable27">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -222,7 +222,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
-                            <input type="text" id="sumInsuredInput" value="500,000" class="input-box-rounded pl-8" oninput="handleSumInput(this)">
+                            <input type="text" id="sumInsuredInput" value="200,000" class="input-box-rounded pl-8" oninput="handleSumInput(this)">
                         </div>
                     </div>
 
@@ -394,19 +394,18 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <!-- ==================== VIEW 2: TABLE ==================== -->
         <div id="tableView" class="flex flex-col flex-1 overflow-hidden w-full relative z-10" style="display:none;">
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
-                <!-- Row 1: ข้อมูล เพศ/อายุ/แผน/เบี้ย/ทุน -->
-                <div id="tableHeaderTitle" class="px-4 pt-2.5 pb-1.5 leading-tight overflow-hidden"></div>
-                <!-- Row 2: PDF + จุดคุ้มทุน -->
-                <div class="flex items-center justify-between px-4 pb-2 pt-1 border-t border-slate-100/80 gap-2">
-                    <div class="flex items-center gap-2">
+                <!-- Single row: ข้อมูล (left) | จุดคุ้มทุน (center) | PDF (right-absolute) -->
+                <button onclick="exportTableToPDF()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-red-50 text-red-600 border border-red-100 px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-transform shadow-sm z-10"><i class="fas fa-file-pdf"></i> PDF</button>
+                <div class="flex items-center gap-3 px-4 py-2.5 pr-20">
+                    <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight overflow-hidden"></div>
+                    <div class="flex items-center gap-1.5 shrink-0">
                         <i class="fas fa-chart-line text-emerald-500 text-[13px]"></i>
-                        <span class="text-[11px] font-bold text-slate-600">จุดคุ้มทุน</span>
+                        <span class="text-[12px] font-semibold text-slate-600 whitespace-nowrap">จุดคุ้มทุน</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()">
                             <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
                         </label>
                     </div>
-                    <button onclick="exportTableToPDF()" class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm shrink-0"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
                 </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
@@ -416,7 +415,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="flex-1 min-h-0 flex flex-col bg-white/25 backdrop-blur-sm overflow-hidden">
                 <div id="cashFlowPlanContainer" class="hidden shrink-0 border-b border-slate-100"></div>
                 <div class="overflow-y-auto flex-1 custom-scrollbar policy-table-wrapper relative pb-[180px] scrollable-view" id="pdfTableTarget">
-                    <table class="w-full text-[12px] sm:text-[13px] text-center border-collapse"><thead class="sticky top-0 z-30 bg-slate-50" id="policyTableHead"></thead><tbody id="policyTableBody"></tbody></table>
+                    <table class="w-full text-[24px] text-center border-collapse"><thead class="sticky top-0 z-30 bg-slate-50" id="policyTableHead"></thead><tbody id="policyTableBody"></tbody></table>
                 </div>
             </div>
         </div>
@@ -1470,11 +1469,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
            รวมถึง re-render เมื่อผู้ใช้กาง/พับ Galaxy Z Fold กลางคัน */
         (function () {
             function tryInjectToCanvas() {
-                if (!window.__rightPaneActive) return;
-                if (typeof window.isWideLayout !== 'function' || !window.isWideLayout()) return;
-                if (typeof _injectToPearLCanvas !== 'function') return;
-                if (typeof lastCalculationData !== 'undefined' && lastCalculationData) {
-                    _injectToPearLCanvas(lastCalculationData);
+                // Auto-refresh table if it is currently mounted in the right pane
+                const rp = document.getElementById('rightPane');
+                const tv = document.getElementById('tableView');
+                if (tv && rp && tv.parentElement === rp) {
+                    if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
                 }
             }
 

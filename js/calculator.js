@@ -24,7 +24,7 @@ let COM_RATES = {};
 
 // ตั้งค่าขั้นต่ำและพื้นฐานของแต่ละแผน
 const PLAN_CONFIG = {
-    "CI Extra Plus": { abbr: "CX", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 4000, getMaxSum: (age) => age <= 15 ? 3000000 : 10000000, options: ['10CX', '20CX'], hasCashFlow: false },
+    "CI Extra Plus": { abbr: "CX", minAge: 0, maxAge: 65, minSum: 200000, minPrem: 4000, getMaxSum: (age) => age <= 15 ? 3000000 : 10000000, options: ['10CX', '20CX'], hasCashFlow: false },
     "Signature Legacy": { abbr: "SLB", minAge: 0, maxAge: 70, minSum: 5000000, minPrem: 0, getMaxSum: (age) => 500000000, options: ['5SLB', '10SLB'], hasCashFlow: false },
     "Life Protector 20": { abbr: "LPB", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20LPB'], hasCashFlow: false },
     "Supreme Life Protector": { abbr: "SLPA", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20SLPA'], hasCashFlow: false },
