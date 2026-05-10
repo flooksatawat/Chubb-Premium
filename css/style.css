@@ -190,19 +190,9 @@
             }
         }
 
-        /* Foldable explicit detection — เมื่อหน้าจอมี hinge แนวตั้ง (ซ้าย|ขวา)
-           ให้ left pane เท่ากับ segment ซ้าย และ right pane เท่ากับ segment ขวา */
-        @media (horizontal-viewport-segments: 2) and (min-height: 600px) {
-            .app-container {
-                flex: 0 0 env(viewport-segment-width 0 0) !important;
-                min-width: env(viewport-segment-width 0 0) !important;
-                max-width: env(viewport-segment-width 0 0) !important;
-                width: env(viewport-segment-width 0 0) !important;
-            }
-            .right-pane {
-                margin-left: calc(env(viewport-segment-left 1 0) - env(viewport-segment-width 0 0));
-            }
-        }
+        /* ==================== FOLDABLE INNER SCREEN — TABLET LAYOUT ====================
+           จอในของมือถือพับ (เช่น Galaxy Z Fold ~821-893 px) ใช้ layout เหมือน Tablet
+           คือ left pane 400px fixed + right pane flex เหมือนกัน */
 
         /* ==================== RIGHT PANE — RESULT CANVAS ==================== */
         .result-canvas {
