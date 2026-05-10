@@ -1754,14 +1754,36 @@ window.displayPremiumResult = function(tableHtml, planName) {
 };
 
 // รวมศูนย์เปิด Modal (รองรับทุกแผน)
+function _injectModalToRightPane(modalId) {
+    const modal = document.getElementById(modalId);
+    const canvas = document.getElementById('resultCanvas');
+    if (!modal || !canvas) { openPopup(modalId); return; }
+
+    const cardEl = modal.querySelector('.modal-content-card');
+    if (!cardEl) { openPopup(modalId); return; }
+
+    const placeholder = document.getElementById('canvasPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+
+    // Clone populated modal card into right pane wrapper
+    const wrapper = document.createElement('div');
+    wrapper.id = 'rightPaneModalContent';
+    wrapper.className = 'max-w-sm mx-auto pb-6';
+    const clone = cardEl.cloneNode(true);
+    // Remove close button — no overlay to dismiss
+    clone.querySelectorAll('button[onclick*="closePopup"]').forEach(b => b.remove());
+    wrapper.appendChild(clone);
+
+    const existing = document.getElementById('rightPaneModalContent');
+    if (existing) existing.remove();
+    canvas.innerHTML = '';
+    canvas.appendChild(wrapper);
+}
+
 function openUniversalModal(d) {
     if(!d) return;
 
-    // จอใหญ่ (Tablet/iPad/Foldable inner): ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
-    if (window.isWideLayout()) {
-        _injectToPearLCanvas(d);
-        return;
-    }
+    const _wide = window.isWideLayout();
 
     injectMaturityModal();
     const _diseaseBtn = document.getElementById('shareDiseaseListBtn');
@@ -1833,7 +1855,7 @@ function openUniversalModal(d) {
             </button>
             <button onclick="openGenericShareModal('all')" class="w-full mt-2 bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
         }
-        openPopup('resultModal');
+        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
     }
     else if (currentAppPlan === 'Signature Legacy') {
         setText('modalSLBGender', d.gender); setText('modalSLBAge', d.age + " ปี"); setText('modalSLBYears', d.years + " ปี"); 
@@ -1841,7 +1863,7 @@ function openUniversalModal(d) {
         let accidentalTotal = d.sum + Math.min(d.sum, 100000000); setText('modalSLBAccident', formatNum(accidentalTotal));
         setText('modalSLBCancer', formatNum(Math.min(d.sum * 0.30, 30000000))); let terminalMaxCap = (d.age >= 60 && d.age <= 70) ? 50000000 : 100000000;
         setText('modalSLBTerminal', formatNum(Math.min(d.sum * 0.90, terminalMaxCap))); setText('modalSLBTerminalNote', `* หากรับเงินก้อนมะเร็ง 30% ไปแล้ว จะหักออกจากยอดนี้`);
-        openPopup('slbResultModal'); 
+        _wide ? _injectModalToRightPane('slbResultModal') : openPopup('slbResultModal');
     } 
     else if (currentAppPlan === 'CI Extra Plus') {
         setText('modalGender', d.gender); 
@@ -1902,7 +1924,7 @@ function openUniversalModal(d) {
         const dynamicContainer = document.getElementById('modalDynamicBenefits');
         if (dynamicContainer) dynamicContainer.classList.add('hidden');
 
-        openPopup('resultModal');
+        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
     }
     else {
         setText('modalGender', d.gender); setText('modalAge', d.age + " ปี"); setText('modalYears', d.years + " ปี"); 
@@ -1976,7 +1998,7 @@ function openUniversalModal(d) {
         if (actionContainer) {
             actionContainer.innerHTML = `<button onclick="openGenericShareModal('all')" class="w-full bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
         }
-        openPopup('resultModal');
+        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
     }
 }
 
