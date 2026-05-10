@@ -26,8 +26,8 @@ let COM_RATES = {};
 const PLAN_CONFIG = {
     "CI Extra Plus": { abbr: "CX", minAge: 0, maxAge: 65, minSum: 200000, minPrem: 4000, getMaxSum: (age) => age <= 15 ? 3000000 : 10000000, options: ['10CX', '20CX'], hasCashFlow: false },
     "Signature Legacy": { abbr: "SLB", minAge: 0, maxAge: 70, minSum: 5000000, minPrem: 0, getMaxSum: (age) => 500000000, options: ['5SLB', '10SLB'], hasCashFlow: false },
-    "Life Protector 20": { abbr: "LPB", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20LPB'], hasCashFlow: false },
-    "Supreme Life Protector": { abbr: "SLPA", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20SLPA'], hasCashFlow: false },
+    "Life Protector 20": { abbr: "LPB", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20LPB'], hasCashFlow: false },
+    "Supreme Life Protector": { abbr: "SLPA", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['20SLPA'], hasCashFlow: false },
     "Whole Life Extra": { abbr: "WXN", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['WXN10', 'WXN15'], hasCashFlow: true },
     "24 TX": { abbr: "TX", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['24TX'], hasCashFlow: true },
     "868 / 818 Elite Saving": { abbr: "Elite", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['S868', 'S818'], hasCashFlow: true },
