@@ -378,11 +378,11 @@ function switchView(targetView) {
     }
 
     // ── Update nav active state ──
-    ['navMainBtn','navTableBtn','navCashBtn','navCompareBtn'].forEach(id => {
+    ['navMainBtn','navTableBtn','navCashBtn'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.remove('active');
     });
-    const activeMap = { main:'navMainBtn', table:'navTableBtn', cash:'navCashBtn', compare:'navCompareBtn' };
+    const activeMap = { main:'navMainBtn', table:'navTableBtn', cash:'navCashBtn' };
     const activeBtn = document.getElementById(activeMap[targetView]);
     if (activeBtn) activeBtn.classList.add('active');
 
@@ -419,10 +419,6 @@ function switchView(targetView) {
             if (el.parentElement === rightPane && appCont) appCont.appendChild(el);
         }
 
-        // Hide compare panel if it exists
-        const comparePanel = document.getElementById('comparePanelView');
-        if (comparePanel) comparePanel.style.setProperty('display', 'none', 'important');
-
         if (targetView === 'main') {
             if (rightPaneMain) rightPaneMain.style.removeProperty('display');
             unmount(tableView);
@@ -437,11 +433,6 @@ function switchView(targetView) {
             unmount(tableView);
             mountInRight(cashView);
             if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
-        } else if (targetView === 'compare') {
-            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
-            unmount(tableView);
-            unmount(cashView);
-            showComparePanel(rightPane);
         }
 
     } else {
