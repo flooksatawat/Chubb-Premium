@@ -494,6 +494,8 @@ const modernPlansData = [
 
 let isModernSearchActive = false;
 let _loopOneHeight = 0; // pixel height of one card-set copy, measured after render
+let _cachedLoopHTML = null;   // cached loop HTML (3 copies)
+let _cachedForPlan = null;    // which currentAppPlan the cache was built for
 
 function initSwipeToDismiss() {
     const wrapper = document.getElementById('planSelectCardWrapper');
@@ -525,19 +527,17 @@ function initSwipeToDismiss() {
 }
 
 function openPlanModal() {
-    renderModernCards(modernPlansData, true);
     const modal = document.getElementById('planSelectModal');
     if (modal) modal.classList.remove('hidden');
 
-    setTimeout(() => {
-        const cardWrapper = document.getElementById('planSelectCardWrapper');
-        if(cardWrapper) {
-            cardWrapper.classList.remove('translate-y-10', 'opacity-0');
-            cardWrapper.classList.add('translate-y-0', 'opacity-100');
-        }
-        initSwipeToDismiss();
-    }, 50);
+    const cardWrapper = document.getElementById('planSelectCardWrapper');
+    if (cardWrapper) {
+        cardWrapper.classList.remove('translate-y-10', 'opacity-0');
+        cardWrapper.classList.add('translate-y-0', 'opacity-100');
+    }
 
+    renderModernCards(modernPlansData, true);
+    initSwipeToDismiss();
     initModernScrollInteractions();
 }
 
@@ -609,29 +609,38 @@ function renderModernCards(dataList, isInitialLoad = false) {
 
     } else {
         // ── Loop mode: render 3 identical copies, anchor scroll to middle copy ──
-        // DOM stays fixed at 3×N cards — no appending, no memory growth.
-        const single = _buildOneSetHTML(dataList);
-        container.innerHTML = single + single + single;
+        const cacheHit = _cachedLoopHTML && _cachedForPlan === currentAppPlan;
 
-        requestAnimationFrame(() => {
-            // Measure exact pixel distance between copy-1 start and copy-2 start.
-            // getBoundingClientRect at scrollTop=0 gives accurate layout positions.
-            const cards = container.querySelectorAll('.card-3d-container');
-            const n = dataList.length;
-            if (cards.length >= 2 * n) {
-                const r0 = cards[0].getBoundingClientRect();
-                const rN = cards[n].getBoundingClientRect();
-                _loopOneHeight = Math.round(rN.top - r0.top);
-            } else {
-                _loopOneHeight = Math.round(container.scrollHeight / 3);
-            }
-            // Jump to the start of the middle copy so the user can scroll
-            // both up (into copy 1) and down (into copy 3) without hitting a wall.
+        if (!cacheHit) {
+            const single = _buildOneSetHTML(dataList);
+            _cachedLoopHTML = single + single + single;
+            _cachedForPlan = currentAppPlan;
+            _loopOneHeight = 0; // force remeasure
+        }
+
+        container.innerHTML = _cachedLoopHTML;
+
+        if (_loopOneHeight > 0) {
+            // Cached measurement — jump immediately, no rAF needed
             container.scrollTop = _loopOneHeight;
-        });
+        } else {
+            requestAnimationFrame(() => {
+                const cards = container.querySelectorAll('.card-3d-container');
+                const n = dataList.length;
+                if (cards.length >= 2 * n) {
+                    const r0 = cards[0].getBoundingClientRect();
+                    const rN = cards[n].getBoundingClientRect();
+                    _loopOneHeight = Math.round(rN.top - r0.top);
+                } else {
+                    _loopOneHeight = Math.round(container.scrollHeight / 3);
+                }
+                container.scrollTop = _loopOneHeight;
+            });
+        }
     }
 
-    initNeomorphicTilt();
+    // Tilt only on non-touch (desktop) — skip on mobile entirely
+    if (window.matchMedia('(hover: hover)').matches) initNeomorphicTilt();
 }
 
 function initNeomorphicTilt() {
@@ -1066,6 +1075,7 @@ function replacePercentWithAmount(text, sum, premium) {
 
 function selectAppPlan(planName) {
     if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
+    _cachedForPlan = null; // invalidate card cache so active highlight updates
 
     const _rp = document.getElementById('rightPane');
     const _tv = document.getElementById('tableView');
