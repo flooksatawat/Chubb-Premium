@@ -190,9 +190,37 @@
             }
         }
 
-        /* ==================== FOLDABLE INNER SCREEN — TABLET LAYOUT ====================
-           จอในของมือถือพับ (เช่น Galaxy Z Fold ~821-893 px) ใช้ layout เหมือน Tablet
-           คือ left pane 400px fixed + right pane flex เหมือนกัน */
+        /* ==================== FOLDABLE INNER SCREEN — 1:2 RATIO ====================
+           จอในของมือถือพับ (เช่น Galaxy Z Fold ~821-893 px) ใช้สัดส่วน 1:2
+           - จอใน Fold portrait (821 wide) → ซ้าย ~273 + ขวา ~547
+           - จอใน Fold landscape (893 wide) → ซ้าย ~298 + ขวา ~595 */
+        @media (min-width: 700px) and (max-width: 1000px) and (min-height: 700px) {
+            .app-container {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                width: auto !important;
+            }
+            .right-pane {
+                flex: 2 1 0 !important;
+                min-width: 0 !important;
+            }
+        }
+
+        /* Foldable explicit detection — เมื่อหน้าจอมี hinge แนวตั้ง (ซ้าย|ขวา) */
+        @media (horizontal-viewport-segments: 2) and (min-height: 600px) {
+            .app-container {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                width: auto !important;
+            }
+            .right-pane {
+                flex: 2 1 0 !important;
+                min-width: 0 !important;
+                margin-left: 0 !important;
+            }
+        }
 
         /* ==================== RIGHT PANE — RESULT CANVAS ==================== */
         .result-canvas {
