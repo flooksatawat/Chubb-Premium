@@ -1865,7 +1865,7 @@ function openUniversalModal(d) {
             </button>
             <button onclick="openGenericShareModal('all')" class="w-full mt-2 bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
         }
-        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
+        openPopup('resultModal');
     }
     else if (currentAppPlan === 'Signature Legacy') {
         setText('modalSLBGender', d.gender); setText('modalSLBAge', d.age + " ปี"); setText('modalSLBYears', d.years + " ปี"); 
@@ -1873,7 +1873,7 @@ function openUniversalModal(d) {
         let accidentalTotal = d.sum + Math.min(d.sum, 100000000); setText('modalSLBAccident', formatNum(accidentalTotal));
         setText('modalSLBCancer', formatNum(Math.min(d.sum * 0.30, 30000000))); let terminalMaxCap = (d.age >= 60 && d.age <= 70) ? 50000000 : 100000000;
         setText('modalSLBTerminal', formatNum(Math.min(d.sum * 0.90, terminalMaxCap))); setText('modalSLBTerminalNote', `* หากรับเงินก้อนมะเร็ง 30% ไปแล้ว จะหักออกจากยอดนี้`);
-        _wide ? _injectModalToRightPane('slbResultModal') : openPopup('slbResultModal');
+        openPopup('slbResultModal');
     } 
     else if (currentAppPlan === 'CI Extra Plus') {
         setText('modalGender', d.gender); 
@@ -1934,7 +1934,7 @@ function openUniversalModal(d) {
         const dynamicContainer = document.getElementById('modalDynamicBenefits');
         if (dynamicContainer) dynamicContainer.classList.add('hidden');
 
-        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
+        openPopup('resultModal');
     }
     else {
         setText('modalGender', d.gender); setText('modalAge', d.age + " ปี"); setText('modalYears', d.years + " ปี"); 
@@ -2008,7 +2008,7 @@ function openUniversalModal(d) {
         if (actionContainer) {
             actionContainer.innerHTML = `<button onclick="openGenericShareModal('all')" class="w-full bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
         }
-        _wide ? _injectModalToRightPane('resultModal') : openPopup('resultModal');
+        openPopup('resultModal');
     }
 }
 
