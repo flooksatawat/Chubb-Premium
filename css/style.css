@@ -167,7 +167,7 @@
                 min-width: 0 !important;
             }
             /* badge แบบ/เพศ/อายุ/เบี้ย/ทุน — บังคับอยู่บรรทัดเดียวทุกขนาดหน้าจอ */
-            #tableHeaderTitle span { font-size: 11px !important; padding: 2px 6px !important; }
+            #tableHeaderTitle span { font-size: 10px !important; padding: 1px 5px !important; flex-shrink: 1 !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
             #tableHeaderTitle > div { flex-wrap: nowrap !important; gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; overflow: hidden !important; }
         }
 
