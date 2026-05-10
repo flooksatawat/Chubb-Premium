@@ -813,31 +813,37 @@
             #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
         }
 
-        /* ==================== จอใหญ่ 14"+ (≥ 1440px) — หัวตารางใหญ่ขึ้น ==================== */
-        @media (min-width: 1440px) and (min-height: 600px) {
+        /* ==================== จอใหญ่ 14"+ (≥ 1280px) — หัวตารางใหญ่ขึ้น ==================== */
+        @media (min-width: 1280px) and (min-height: 600px) {
             /* 1 แถว: badges + toggle ขนาน เพราะ right pane กว้างมาก */
             #tableHeaderRow {
                 flex-direction: row !important;
                 align-items: center !important;
-                gap: 12px !important;
-                padding: 10px 80px 10px 24px !important;
+                gap: 16px !important;
+                padding: 12px 90px 12px 28px !important;
             }
             #tableHeaderTitle { flex: 1 !important; }
             #tableHeaderTitle span {
-                font-size: 13px !important;
-                padding: 3px 10px !important;
+                font-size: 15px !important;
+                padding: 5px 14px !important;
                 white-space: nowrap !important;
                 flex-shrink: 0 !important;
                 overflow: visible !important;
                 text-overflow: unset !important;
+                border-radius: 999px !important;
             }
             #tableHeaderTitle > div {
                 flex-wrap: nowrap !important;
-                gap: 6px !important;
+                gap: 8px !important;
             }
             #breakevenToggleText {
-                font-size: 13px !important;
+                font-size: 15px !important;
                 display: inline !important;
+            }
+            /* ตารางข้อมูล — ตัวอักษรใหญ่ขึ้นตามหน้าจอ */
+            #pdfTableTarget th, #pdfTableTarget td {
+                font-size: 15px !important;
+                padding: 11px 10px !important;
             }
         }
 
