@@ -2481,7 +2481,9 @@ function generatePolicyTableData() {
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
     const _gThai = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-    document.getElementById('tableHeaderTitle').innerHTML = `
+    // 7.8 นิ้ว ≈ 744 CSS px (iPad mini 6 = 7.69", 744px) — ต่ำกว่านี้ = มือถือ
+    const _isMobile = (document.documentElement.clientWidth || window.innerWidth) < 744;
+    document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-1 py-0.5">
             <div class="flex flex-wrap gap-1.5 items-center">
                 <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-blue-600 text-white shadow-sm shrink-0">${currentPlan}</span>
@@ -2492,6 +2494,13 @@ function generatePolicyTableData() {
                 <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
                 <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
             </div>
+        </div>` : `
+        <div class="flex flex-wrap gap-1.5 items-center py-0.5">
+            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-blue-600 text-white shadow-sm shrink-0">${currentPlan}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">เพศ: ${_gThai}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">อายุ: ${d.age}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
 
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[13px]" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
