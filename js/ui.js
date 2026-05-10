@@ -15,6 +15,18 @@ window.isWideLayout = function () {
     return w >= 700 && h >= 600;
 };
 
+function fitHeaderTitle() {
+    const span = document.getElementById('headerTitleText');
+    if (!span) return;
+    span.style.whiteSpace = 'nowrap';
+    span.style.fontSize = '20px';
+    const h1 = span.closest('h1');
+    if (!h1) return;
+    while (h1.scrollWidth > h1.offsetWidth + 2 && parseFloat(span.style.fontSize) > 11) {
+        span.style.fontSize = (parseFloat(span.style.fontSize) - 0.5) + 'px';
+    }
+}
+
 // ==================== PRODUCT CONDITIONS LOADER ====================
 window.PRODUCT_CONDITIONS = {};
 
@@ -1052,6 +1064,7 @@ function selectAppPlan(planName) {
     inputAge.value = config.minAge !== undefined ? config.minAge : 0;
     
     document.getElementById('headerTitleText').innerText = planName;
+    fitHeaderTitle();
     const planInfo = allInsurancePlans.find(p => p.name === planName);
     if (planInfo) setText('headerDescText', planInfo.desc);
     
@@ -3272,6 +3285,7 @@ window.onload = async () => {
     if (typeof loadAllRates === 'function') await loadAllRates();
 
     if (typeof setGender === 'function') setGender('male');
+    fitHeaderTitle();
     if (typeof openPlanModal === 'function') openPlanModal();
 };
 
