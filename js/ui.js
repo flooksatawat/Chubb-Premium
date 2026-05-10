@@ -3593,51 +3593,50 @@ window.openTableFromModal = function() {
 };
 
 window.open3DDetailsView = function() {
-    if (window.isWideLayout()) {
-        const rightPane = document.getElementById('rightPane');
-        if (!rightPane) { openPopup('threeDDetailsModal'); window.render3DDetailsAccordion(); return; }
+    const isWide = window.isWideLayout();
+    const container = isWide ? document.getElementById('rightPane') : document.body;
 
-        if (typeof _unmountViewsFromRightPane === 'function') _unmountViewsFromRightPane();
+    if (isWide && typeof _unmountViewsFromRightPane === 'function') _unmountViewsFromRightPane();
 
-        let view = document.getElementById('threeDDetailsRightView');
-        if (!view) {
-            view = document.createElement('div');
-            view.id = 'threeDDetailsRightView';
-        }
-        view.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:linear-gradient(160deg,#f0f9ff 0%,#f8fafc 100%);';
+    let view = document.getElementById('threeDDetailsRightView');
+    if (!view) {
+        view = document.createElement('div');
+        view.id = 'threeDDetailsRightView';
+    }
+    // wide: absolute ใน rightPane / mobile: fixed เต็มจอ
+    view.style.cssText = isWide
+        ? 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:linear-gradient(160deg,#f0f9ff 0%,#f8fafc 100%);'
+        : 'display:flex;flex-direction:column;position:fixed;inset:0;z-index:9500;overflow:hidden;background:linear-gradient(160deg,#f0f9ff 0%,#f8fafc 100%);padding-top:env(safe-area-inset-top);';
 
-        view.innerHTML = `
-        <div style="background:linear-gradient(135deg,#0d9488,#0284c7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;border:1px solid rgba(255,255,255,0.3);">
-                    <i class="fas fa-shield-heart"></i>
-                </div>
-                <div>
-                    <div style="font-size:15px;font-weight:700;color:white;line-height:1.2;">รายละเอียดความคุ้มครอง</div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">19 หมวด · 3D Health Excellence</div>
-                </div>
+    view.innerHTML = `
+    <div style="background:linear-gradient(135deg,#0d9488,#0284c7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;border:1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-shield-heart"></i>
             </div>
-            <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
-        </div>`;
+            <div>
+                <div style="font-size:15px;font-weight:700;color:white;line-height:1.2;">รายละเอียดความคุ้มครอง</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">19 หมวด · 3D Health Excellence</div>
+            </div>
+        </div>
+        <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+    </div>`;
 
-        // ย้าย #threeDDetailsAccordionBody เข้า view โดยตรง (live DOM — ปุ่ม pill อัปเดตได้ทันที)
-        const accordionBody = document.getElementById('threeDDetailsAccordionBody');
-        if (accordionBody) {
-            accordionBody.className = 'overflow-y-auto flex-1 custom-scrollbar';
-            view.appendChild(accordionBody);
-        }
+    // ย้าย accordionBody จริงเข้า view (live DOM)
+    const accordionBody = document.getElementById('threeDDetailsAccordionBody');
+    if (accordionBody) {
+        accordionBody.className = 'overflow-y-auto flex-1 custom-scrollbar';
+        view.appendChild(accordionBody);
+    }
 
-        if (view.parentElement !== rightPane) rightPane.appendChild(view);
+    if (view.parentElement !== container) container.appendChild(view);
 
+    if (isWide) {
         const placeholder = document.getElementById('canvasPlaceholder');
         if (placeholder) placeholder.style.display = 'none';
-
-        // render หลังจาก DOM พร้อม
-        if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
-    } else {
-        openPopup('threeDDetailsModal');
-        if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
     }
+
+    if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
 };
 
 window.close3DDetailsRightView = function() {
