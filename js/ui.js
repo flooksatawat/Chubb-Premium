@@ -2056,7 +2056,7 @@ function getComRateArray(planKey) {
 }
 
 function updateMBDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
@@ -2113,7 +2113,7 @@ window.toggleMYBTiers = function() {
 };
 
 function updateMYBDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
@@ -2161,7 +2161,7 @@ function updateMYBDisplay() {
 }
 
 function updateNABDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
@@ -2239,7 +2239,7 @@ window.toggleComTiers = function() {
 function refreshAllDisplays() { 
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return; 
     const p = lastCalculationData.premium || 0; 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
+    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
     
     const rateArr = getComRateArray(effectivePlan);
