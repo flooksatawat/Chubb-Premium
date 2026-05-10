@@ -2013,8 +2013,15 @@ function openUniversalModal(d) {
 }
 
 // ==================== CASH MODULE DISPLAYS ====================
+const _COM_KEY_MAP = {
+    'TLA': '20TLA', 'Convertable Term': '20TLA',
+    '24 TX': '24TX',
+    'S868': 'S868', 'S818': 'S818',
+};
+
 function getComRateArray(planKey) {
     if (typeof COM_RATES === 'undefined') return [];
+    planKey = _COM_KEY_MAP[planKey] || planKey;
     let planData = COM_RATES[planKey];
     if (!planData) return [];
     if (Array.isArray(planData)) return planData;
@@ -2066,8 +2073,8 @@ function getComRateArray(planKey) {
 }
 
 function updateMBDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
-    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
     
@@ -2123,8 +2130,8 @@ window.toggleMYBTiers = function() {
 };
 
 function updateMYBDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
-    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
     
@@ -2171,8 +2178,8 @@ function updateMYBDisplay() {
 }
 
 function updateNABDisplay() { 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
-    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     const rateArr = getComRateArray(effectivePlan);
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData || rateArr.length === 0) return; 
     
@@ -2249,8 +2256,8 @@ window.toggleComTiers = function() {
 function refreshAllDisplays() { 
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return; 
     const p = lastCalculationData.premium || 0; 
-    let rateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan === 'TLA' ? '20TLA' : currentPlan;
-    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : currentAppPlan; 
+    let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
+    const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     
     const rateArr = getComRateArray(effectivePlan);
     const fyc = Math.round(p * (rateArr[0] || 0)) || 0; 
