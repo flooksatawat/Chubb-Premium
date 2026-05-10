@@ -962,7 +962,8 @@ window.render3DOptionsUI = function() {
     hxOpts.forEach(opt => {
         let isSel = (opt === hxVal);
         let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-indigo-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-indigo-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
-        html += `<button onclick="window.handle3DClick('HX', '${opt}')" class="${btnClass}">${opt}</button>`;
+        const hxLbl = (HX_PLAN_INFO[opt] && HX_PLAN_INFO[opt].room) || opt;
+        html += `<button onclick="window.handle3DClick('HX', '${opt}')" class="${btnClass}">${hxLbl}</button>`;
     });
     html += `</div></div></div>`;
 
@@ -3802,7 +3803,7 @@ window.render3DDetailsAccordion = function() {
 
     // ── 1. Sticky header: HX pills + rider pills ─────────────────────────
     const selOpen = window._3dSelectorOpen !== false;
-    const hxLabel = hxVal ? hxVal : 'ยังไม่เลือก';
+    const hxLabel = hxVal ? ((HX_PLAN_INFO[hxVal] && HX_PLAN_INFO[hxVal].room) || hxVal) : 'ยังไม่เลือก';
     const hxoLabel = hxoVal === 'ไม่เลือก' ? '–' : (DL[hxoVal]||hxoVal)+' บ./ครั้ง';
     const hxdLabel = hxdVal === 'ไม่เลือก' ? '–' : (DL[hxdVal]||hxdVal)+' บ./รอบ';
     const hbfLabel = hbfVal === 'ไม่เลือก' ? '–' : ((hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])||hbfVal)+' บ./วัน';
@@ -3829,7 +3830,8 @@ window.render3DDetailsAccordion = function() {
         stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">แผนค่าห้อง (HX)</p>
             <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-6 gap-1">`;
         hxOpts.forEach(opt => {
-            stickyHtml += `<button onclick="window.set3DHX('${opt}')" class="${opt===hxVal?pillSel:pillDef}">${opt.replace('HX','')}</button>`;
+            const lbl = (HX_PLAN_INFO[opt] && HX_PLAN_INFO[opt].room) || opt;
+            stickyHtml += `<button onclick="window.set3DHX('${opt}')" class="${opt===hxVal?pillSel:pillDef}">${lbl}</button>`;
         });
         stickyHtml += `</div></div>`;
 
