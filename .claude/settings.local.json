@@ -3,7 +3,12 @@
     "allow": [
       "Bash(Select-String -Path \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Chubb-Premium-08.05\\\\js\\\\ui.js\" -Pattern \"setCfMainMode|setCfSubMode|_buildCashFlowPlanCard|runCashFlowPlan|toggleCfPlanPanel\")",
       "Bash(Select-Object LineNumber, Line)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(ls \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")",
+      "Bash(dir \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")"
     ]
   }
 }

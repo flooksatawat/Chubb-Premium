@@ -1645,6 +1645,9 @@ window._injectToPearLCanvas = _injectToPearLCanvas;
 function _unmountViewsFromRightPane() {
     const rightPane = document.getElementById('rightPane');
     const appCont = document.querySelector('.app-container');
+    // Remove dynamic 3D details view
+    const d3v = document.getElementById('threeDDetailsRightView');
+    if (d3v) d3v.remove();
     ['tableView', 'cashView'].forEach(id => {
         const el = document.getElementById(id);
         if (el && rightPane && el.parentElement === rightPane) {
@@ -1790,6 +1793,25 @@ function _injectModalToRightPane(modalId) {
     canvas.appendChild(wrapper);
 }
 
+const _MODAL_ACTION_HTML = `
+<div class="grid grid-cols-2 gap-2.5 mb-2.5">
+    <button onclick="openTableFromModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(168,85,247,0.35)] active:scale-[0.97] transition-all">
+        <i class="fas fa-table-list text-[18px]"></i>ตารางมูลค่า
+    </button>
+    <button onclick="openInstallmentModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(99,102,241,0.35)] active:scale-[0.97] transition-all">
+        <i class="fas fa-credit-card text-[18px]"></i>ตัวเลือกชำระ
+    </button>
+    <button onclick="openBankModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(251,146,60,0.35)] active:scale-[0.97] transition-all">
+        <i class="fas fa-building-columns text-[18px]"></i>บัญชีโอนเงิน
+    </button>
+    <button onclick="openGenericShareModal('premium')" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(37,99,235,0.35)] active:scale-[0.97] transition-all">
+        <i class="fas fa-coins text-[18px]"></i>แชร์เบี้ย
+    </button>
+</div>
+<button onclick="openGenericShareModal('all')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all">
+    <i class="fas fa-share-nodes text-[18px]"></i>แชร์สรุปทั้งหมด
+</button>`;
+
 function openUniversalModal(d) {
     if(!d) return;
 
@@ -1858,13 +1880,7 @@ function openUniversalModal(d) {
         }
         
         const actionContainer = document.getElementById('modalActionBtnsContainer');
-        if (actionContainer) {
-            actionContainer.innerHTML = `
-            <button onclick="openTableFromModal()" class="w-full py-3.5 bg-fuchsia-50/50 text-fuchsia-800 font-bold rounded-2xl border border-fuchsia-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-fuchsia-100">
-                <div class="flex items-center gap-3"><i class="fas fa-table-list text-fuchsia-600"></i> ตารางมูลค่ากรมธรรม์</div><i class="fas fa-chevron-right opacity-50"></i>
-            </button>
-            <button onclick="openGenericShareModal('all')" class="w-full mt-2 bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
-        }
+        if (actionContainer) actionContainer.innerHTML = _MODAL_ACTION_HTML;
         openPopup('resultModal');
     }
     else if (currentAppPlan === 'Signature Legacy') {
@@ -1915,21 +1931,7 @@ function openUniversalModal(d) {
         if (_diseaseBtn) _diseaseBtn.classList.remove('hidden');
 
         const actionContainer = document.getElementById('modalActionBtnsContainer');
-        if (actionContainer) {
-            actionContainer.innerHTML = `
-                <button onclick="openTableFromModal()" class="w-full py-3.5 bg-fuchsia-50/50 text-fuchsia-800 font-bold rounded-2xl border border-fuchsia-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-fuchsia-100">
-                    <div class="flex items-center gap-3"><i class="fas fa-table-list text-fuchsia-600"></i> ตารางมูลค่ากรมธรรม์</div><i class="fas fa-chevron-right opacity-50"></i>
-                </button>
-                <button onclick="openGenericShareModal('premium')" class="w-full py-3.5 bg-blue-50 text-blue-700 font-bold rounded-2xl border border-blue-200 flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-blue-100">
-                    <div class="flex items-center gap-3"><i class="fas fa-coins text-blue-500"></i> แชร์เฉพาะเบี้ยประกัน</div><i class="fas fa-share-nodes opacity-50"></i>
-                </button>
-                <button onclick="openGenericShareModal('all')" class="w-full py-3.5 bg-[#1e3a8a] text-white font-bold rounded-2xl shadow-md flex justify-between items-center px-5 active:scale-[0.98] transition-all hover:bg-blue-900">
-                    <div class="flex items-center gap-3"><i class="fas fa-file-invoice text-blue-300"></i> แชร์สรุปทั้งหมด</div><i class="fas fa-share-nodes text-blue-300"></i>
-                </button>
-                <button onclick="closePopup('resultModal')" class="w-full py-3.5 bg-slate-100 text-slate-600 font-bold rounded-2xl border border-slate-200 mt-2 hover:bg-slate-200 transition-colors">
-                    ปิดหน้าต่าง
-                </button>`;
-        }
+        if (actionContainer) actionContainer.innerHTML = _MODAL_ACTION_HTML;
         
         const dynamicContainer = document.getElementById('modalDynamicBenefits');
         if (dynamicContainer) dynamicContainer.classList.add('hidden');
@@ -1995,7 +1997,7 @@ function openUniversalModal(d) {
                  html += `<div class="bg-slate-50 p-2.5 rounded-[12px] border border-slate-100 mt-2"><p class="text-[10px] text-slate-500 italic font-medium leading-relaxed">${pd.remark.replace(/\n/g, '<br>')}</p></div>`;
             }
             if (currentAppPlan === '3D Health Excellence') {
-                html += `<button onclick="openPopup('threeDDetailsModal'); window.render3DDetailsAccordion();" class="w-full mt-3 flex items-center justify-between p-3.5 bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/70 rounded-[14px] hover:shadow-md active:scale-[0.98] transition-all group">
+                html += `<button onclick="window.open3DDetailsView();" class="w-full mt-3 flex items-center justify-between p-3.5 bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/70 rounded-[14px] hover:shadow-md active:scale-[0.98] transition-all group">
                     <span class="flex items-center gap-2 text-[13px] font-bold text-teal-800"><i class="fas fa-shield-heart text-teal-500"></i> ดูรายละเอียดความคุ้มครอง 19 หมวด</span>
                     <i class="fas fa-chevron-right text-teal-400 text-[11px] group-hover:text-teal-600 transition-colors"></i>
                 </button>`;
@@ -2005,9 +2007,7 @@ function openUniversalModal(d) {
         }
         
         const actionContainer = document.getElementById('modalActionBtnsContainer');
-        if (actionContainer) {
-            actionContainer.innerHTML = `<button onclick="openGenericShareModal('all')" class="w-full bg-[#059669] hover:bg-[#047857] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(16,185,129,0.3)] active:scale-95 transition-all"><i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุปทั้งหมด</button>`;
-        }
+        if (actionContainer) actionContainer.innerHTML = _MODAL_ACTION_HTML;
         openPopup('resultModal');
     }
 }
@@ -3569,10 +3569,71 @@ document.addEventListener('input', function(e) {
 });
 
 window.openTableFromModal = function() {
+    if (currentAppPlan === '3D Health Excellence') {
+        if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
+        setTimeout(() => window.open3DDetailsView(), 300);
+        return;
+    }
     if (typeof closePopup === 'function') closePopup('resultModal');
     setTimeout(() => {
         if (typeof switchView === 'function') switchView('table');
     }, 300);
+};
+
+window.open3DDetailsView = function() {
+    if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
+    if (window.isWideLayout()) {
+        const rightPane = document.getElementById('rightPane');
+        const appCont   = document.querySelector('.app-container');
+        const modal     = document.getElementById('threeDDetailsModal');
+        if (!modal || !rightPane) { openPopup('threeDDetailsModal'); return; }
+
+        // Unmount any other views first
+        if (typeof _unmountViewsFromRightPane === 'function') _unmountViewsFromRightPane();
+
+        // Build an inline view inside rightPane
+        let view = document.getElementById('threeDDetailsRightView');
+        if (!view) {
+            view = document.createElement('div');
+            view.id = 'threeDDetailsRightView';
+        }
+        view.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:linear-gradient(160deg,#f0f9ff 0%,#f8fafc 100%);';
+
+        // Header
+        view.innerHTML = `
+        <div style="background:linear-gradient(135deg,#0d9488,#0284c7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;border:1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-shield-heart"></i>
+                </div>
+                <div>
+                    <div style="font-size:15px;font-weight:700;color:white;line-height:1.2;">รายละเอียดความคุ้มครอง</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">19 หมวด · 3D Health Excellence</div>
+                </div>
+            </div>
+            <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+        </div>
+        <div id="threeDDetailsRightBody" class="overflow-y-auto flex-1 custom-scrollbar"></div>`;
+
+        if (view.parentElement !== rightPane) rightPane.appendChild(view);
+
+        // Copy accordion content
+        const src = document.getElementById('threeDDetailsAccordionBody');
+        const dst = view.querySelector('#threeDDetailsRightBody');
+        if (src && dst) dst.innerHTML = src.innerHTML;
+
+        // Hide placeholder
+        const placeholder = document.getElementById('canvasPlaceholder');
+        if (placeholder) placeholder.style.display = 'none';
+    } else {
+        openPopup('threeDDetailsModal');
+    }
+};
+
+window.close3DDetailsRightView = function() {
+    const view = document.getElementById('threeDDetailsRightView');
+    if (view) view.remove();
+    if (typeof window.resetRightPaneToPlaceholder === 'function') window.resetRightPaneToPlaceholder();
 };
 
 function sharePlan() { if (typeof openGenericShareModal === 'function') openGenericShareModal('all'); }
