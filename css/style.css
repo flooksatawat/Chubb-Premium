@@ -665,6 +665,16 @@
                 width: 320px !important;
             }
             #rightPane { flex: 1 1 0 !important; }
+            /* hidden state สำหรับ toggle — ต้องระบุซ้ำเพื่อ override flex ข้างบน */
+            .command-center-layout.left-pane-hidden .app-container {
+                flex: 0 0 0 !important;
+                width: 0 !important;
+                max-width: 0 !important;
+                min-width: 0 !important;
+                overflow: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
         }
 
         /* ==================== SWIPE-TO-HIDE LEFT PANE ==================== */
