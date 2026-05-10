@@ -2464,7 +2464,7 @@ function generatePolicyTableData() {
             <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุน: ${sumDisplay}</span>
         </div>`;
 
-    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[16px]" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[13px]" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
         <th class="py-3 px-3 font-bold text-center">อายุ</th>
         ${hideAnnualSaving ? '' : '<th class="py-3 px-3 font-bold text-right">ออมเงิน</th>'}
         <th class="py-3 px-3 font-bold text-right">ออมสะสม</th>
