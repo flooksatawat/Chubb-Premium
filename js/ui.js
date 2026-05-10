@@ -1650,9 +1650,14 @@ window._injectToPearLCanvas = _injectToPearLCanvas;
 function _unmountViewsFromRightPane() {
     const rightPane = document.getElementById('rightPane');
     const appCont = document.querySelector('.app-container');
-    // Remove dynamic 3D details view
+    // Remove dynamic 3D details view (คืน accordionBody กลับ modal ก่อน)
     const d3v = document.getElementById('threeDDetailsRightView');
-    if (d3v) d3v.remove();
+    if (d3v) {
+        const ab = document.getElementById('threeDDetailsAccordionBody');
+        const modal = document.getElementById('threeDDetailsModal');
+        if (ab && modal) { const mc = modal.querySelector('.modal-content-card'); if (mc) mc.appendChild(ab); }
+        d3v.remove();
+    }
     ['tableView', 'cashView'].forEach(id => {
         const el = document.getElementById(id);
         if (el && rightPane && el.parentElement === rightPane) {
@@ -3588,17 +3593,12 @@ window.openTableFromModal = function() {
 };
 
 window.open3DDetailsView = function() {
-    if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
     if (window.isWideLayout()) {
         const rightPane = document.getElementById('rightPane');
-        const appCont   = document.querySelector('.app-container');
-        const modal     = document.getElementById('threeDDetailsModal');
-        if (!modal || !rightPane) { openPopup('threeDDetailsModal'); return; }
+        if (!rightPane) { openPopup('threeDDetailsModal'); window.render3DDetailsAccordion(); return; }
 
-        // Unmount any other views first
         if (typeof _unmountViewsFromRightPane === 'function') _unmountViewsFromRightPane();
 
-        // Build an inline view inside rightPane
         let view = document.getElementById('threeDDetailsRightView');
         if (!view) {
             view = document.createElement('div');
@@ -3606,7 +3606,6 @@ window.open3DDetailsView = function() {
         }
         view.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:linear-gradient(160deg,#f0f9ff 0%,#f8fafc 100%);';
 
-        // Header
         view.innerHTML = `
         <div style="background:linear-gradient(135deg,#0d9488,#0284c7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:12px;">
@@ -3619,25 +3618,36 @@ window.open3DDetailsView = function() {
                 </div>
             </div>
             <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
-        </div>
-        <div id="threeDDetailsRightBody" class="overflow-y-auto flex-1 custom-scrollbar"></div>`;
+        </div>`;
+
+        // ย้าย #threeDDetailsAccordionBody เข้า view โดยตรง (live DOM — ปุ่ม pill อัปเดตได้ทันที)
+        const accordionBody = document.getElementById('threeDDetailsAccordionBody');
+        if (accordionBody) {
+            accordionBody.className = 'overflow-y-auto flex-1 custom-scrollbar';
+            view.appendChild(accordionBody);
+        }
 
         if (view.parentElement !== rightPane) rightPane.appendChild(view);
 
-        // Copy accordion content
-        const src = document.getElementById('threeDDetailsAccordionBody');
-        const dst = view.querySelector('#threeDDetailsRightBody');
-        if (src && dst) dst.innerHTML = src.innerHTML;
-
-        // Hide placeholder
         const placeholder = document.getElementById('canvasPlaceholder');
         if (placeholder) placeholder.style.display = 'none';
+
+        // render หลังจาก DOM พร้อม
+        if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
     } else {
         openPopup('threeDDetailsModal');
+        if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
     }
 };
 
 window.close3DDetailsRightView = function() {
+    // คืน accordionBody กลับ modal ก่อนลบ view
+    const accordionBody = document.getElementById('threeDDetailsAccordionBody');
+    const modal = document.getElementById('threeDDetailsModal');
+    if (accordionBody && modal && accordionBody.parentElement !== modal.querySelector('.modal-content-card')) {
+        const modalCard = modal.querySelector('.modal-content-card');
+        if (modalCard) modalCard.appendChild(accordionBody);
+    }
     const view = document.getElementById('threeDDetailsRightView');
     if (view) view.remove();
     if (typeof window.resetRightPaneToPlaceholder === 'function') window.resetRightPaneToPlaceholder();
