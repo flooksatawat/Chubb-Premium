@@ -410,17 +410,47 @@ const modernPlansData = [
 let isModernSearchActive = false;
 let _loopOneHeight = 0; // pixel height of one card-set copy, measured after render
 
+function initSwipeToDismiss() {
+    const wrapper = document.getElementById('planSelectCardWrapper');
+    if (!wrapper || wrapper._swipeInit) return;
+    wrapper._swipeInit = true;
+
+    let startY = 0, currentY = 0;
+
+    wrapper.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        currentY = startY;
+        wrapper.style.transition = 'none';
+    }, { passive: true });
+
+    wrapper.addEventListener('touchmove', (e) => {
+        const list = document.getElementById('planListContainer');
+        if (list && list.scrollTop > 0) return;
+        currentY = e.touches[0].clientY;
+        const delta = currentY - startY;
+        if (delta > 0) wrapper.style.transform = `translateY(${delta}px)`;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', () => {
+        const delta = currentY - startY;
+        wrapper.style.transition = '';
+        wrapper.style.transform = '';
+        if (delta > 80) closePlanModal();
+    });
+}
+
 function openPlanModal() {
     renderModernCards(modernPlansData, true);
     const modal = document.getElementById('planSelectModal');
     if (modal) modal.classList.remove('hidden');
-    
+
     setTimeout(() => {
         const cardWrapper = document.getElementById('planSelectCardWrapper');
         if(cardWrapper) {
             cardWrapper.classList.remove('translate-y-10', 'opacity-0');
             cardWrapper.classList.add('translate-y-0', 'opacity-100');
         }
+        initSwipeToDismiss();
     }, 50);
 
     initModernScrollInteractions();

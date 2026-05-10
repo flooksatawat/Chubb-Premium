@@ -524,12 +524,14 @@
             .app-container .input-box-rounded { font-size: 16px !important; height: 40px !important; }
 
             /* Tailwind arbitrary heights */
+            .app-container .h-\[54px\] { height: 42px !important; }
             .app-container .h-\[50px\] { height: 38px !important; }
             .app-container .h-\[42px\] { height: 32px !important; }
 
             /* Tailwind arbitrary font sizes */
             .app-container .text-\[22px\] { font-size: 16px !important; }
             .app-container .text-\[20px\] { font-size: 15px !important; }
+            .app-container .text-\[16px\] { font-size: 13px !important; }
             .app-container .text-\[15px\] { font-size: 12px !important; }
             .app-container .text-\[14px\] { font-size: 11px !important; }
             .app-container .text-\[13px\] { font-size: 11px !important; }
