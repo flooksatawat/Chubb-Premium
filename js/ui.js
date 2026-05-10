@@ -330,15 +330,24 @@ function highlightActivePills(fSum, fPrem, fCashFlow) {
 
 // ==================== DYNAMIC THEME ====================
 function applyDayColorTheme() {
-    const day = new Date().getDay(); 
+    const day = new Date().getDay();
     const themes = {
-        0: 'bg-gradient-to-br from-[#E24634] to-[#C12516] border-[#E24634]/30 shadow-[0_10px_25px_rgba(226,70,52,0.35)]', 
+        0: 'bg-gradient-to-br from-[#E24634] to-[#C12516] border-[#E24634]/30 shadow-[0_10px_25px_rgba(226,70,52,0.35)]',
         1: 'bg-gradient-to-br from-[#FBBF24] to-[#F59E0B] border-[#FBBF24]/30 shadow-[0_10px_25px_rgba(251,191,36,0.35)]',
-        2: 'bg-gradient-to-br from-[#E73994] to-[#C11871] border-[#E73994]/30 shadow-[0_10px_25px_rgba(231,57,148,0.35)]', 
-        3: 'bg-gradient-to-br from-[#93CD47] to-[#71A825] border-[#93CD47]/30 shadow-[0_10px_25px_rgba(147,205,71,0.35)]', 
-        4: 'bg-gradient-to-br from-[#EF702B] to-[#C94E0C] border-[#EF702B]/30 shadow-[0_10px_25px_rgba(239,112,43,0.35)]', 
-        5: 'bg-gradient-to-br from-[#53B9D6] to-[#2C95B3] border-[#53B9D6]/30 shadow-[0_10px_25px_rgba(83,185,214,0.35)]', 
-        6: 'bg-gradient-to-br from-[#7D3CB9] to-[#592091] border-[#7D3CB9]/30 shadow-[0_10px_25px_rgba(125,60,185,0.35)]'  
+        2: 'bg-gradient-to-br from-[#E73994] to-[#C11871] border-[#E73994]/30 shadow-[0_10px_25px_rgba(231,57,148,0.35)]',
+        3: 'bg-gradient-to-br from-[#93CD47] to-[#71A825] border-[#93CD47]/30 shadow-[0_10px_25px_rgba(147,205,71,0.35)]',
+        4: 'bg-gradient-to-br from-[#EF702B] to-[#C94E0C] border-[#EF702B]/30 shadow-[0_10px_25px_rgba(239,112,43,0.35)]',
+        5: 'bg-gradient-to-br from-[#53B9D6] to-[#2C95B3] border-[#53B9D6]/30 shadow-[0_10px_25px_rgba(83,185,214,0.35)]',
+        6: 'bg-gradient-to-br from-[#7D3CB9] to-[#592091] border-[#7D3CB9]/30 shadow-[0_10px_25px_rgba(125,60,185,0.35)]'
+    };
+    const dayColors = {
+        0: { from: '#E24634', to: '#C12516' },
+        1: { from: '#FBBF24', to: '#F59E0B' },
+        2: { from: '#E73994', to: '#C11871' },
+        3: { from: '#93CD47', to: '#71A825' },
+        4: { from: '#EF702B', to: '#C94E0C' },
+        5: { from: '#53B9D6', to: '#2C95B3' },
+        6: { from: '#7D3CB9', to: '#592091' },
     };
 
     const mainHeader = document.getElementById('mainHeaderBtn');
@@ -350,8 +359,19 @@ function applyDayColorTheme() {
     const cashHeader = document.querySelector('#cashView > div > div.bg-gradient-to-br');
     if (cashHeader) {
         const baseClassesCash = "w-full rounded-[24px] py-5 px-4 flex flex-col items-center justify-center relative overflow-hidden border";
-        const cashShadow = themes[day].replace('shadow-[0_10px_25px', 'shadow-[0_12px_30px'); 
+        const cashShadow = themes[day].replace('shadow-[0_10px_25px', 'shadow-[0_12px_30px');
         cashHeader.className = `${baseClassesCash} ${cashShadow}`;
+    }
+
+    // วงกลมรอ (ai-waveform) ใน right pane — เปลี่ยนสีตามวัน
+    const dc = dayColors[day];
+    document.querySelectorAll('.ai-waveform-ring').forEach(ring => {
+        ring.style.borderColor = dc.from;
+    });
+    const centerCircle = document.querySelector('#canvasPlaceholder .ai-waveform > div:last-child');
+    if (centerCircle) {
+        centerCircle.style.background = `linear-gradient(135deg, ${dc.from}, ${dc.to})`;
+        centerCircle.style.boxShadow = `0 8px 28px ${dc.from}66`;
     }
 }
 
@@ -2458,10 +2478,10 @@ function generatePolicyTableData() {
     document.getElementById('tableHeaderTitle').innerHTML = `
         <div class="flex flex-wrap gap-1.5 items-center py-0.5">
             <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-blue-600 text-white shadow-sm shrink-0">${currentPlan}</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">${_gThai}</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">${d.age}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">เพศ: ${_gThai}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">อายุ: ${d.age}</span>
             <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุน: ${sumDisplay}</span>
+            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
 
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[13px]" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
