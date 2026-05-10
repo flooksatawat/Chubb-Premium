@@ -396,11 +396,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
                 <!-- Single row: ข้อมูล (left) | จุดคุ้มทุน (center) | PDF (right-absolute) -->
                 <button onclick="exportTableToPDF()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-red-50 text-red-600 border border-red-100 px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-transform shadow-sm z-10"><i class="fas fa-file-pdf"></i> PDF</button>
-                <div class="flex items-center gap-3 px-4 py-2.5 pr-20">
+                <div id="tableHeaderRow" class="flex items-center gap-3 px-4 py-2.5 pr-20">
                     <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight overflow-hidden"></div>
                     <div class="flex items-center gap-1.5 shrink-0">
                         <i class="fas fa-chart-line text-emerald-500 text-[13px]"></i>
-                        <span class="text-[12px] font-semibold text-slate-600 whitespace-nowrap">จุดคุ้มทุน</span>
+                        <span id="breakevenToggleText" class="text-[12px] font-semibold text-slate-600 whitespace-nowrap">จุดคุ้มทุน</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()">
                             <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>

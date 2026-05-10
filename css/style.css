@@ -166,9 +166,12 @@
                 position: relative;
                 min-width: 0 !important;
             }
-            /* badge แบบ/เพศ/อายุ/เบี้ย/ทุน — บังคับอยู่บรรทัดเดียวทุกขนาดหน้าจอ */
+            /* badge แบบ/เพศ/อายุ/เบี้ย/ทุน — บังคับอยู่บรรทัดเดียว */
             #tableHeaderTitle span { font-size: 10px !important; padding: 1px 5px !important; flex-shrink: 1 !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
             #tableHeaderTitle > div { flex-wrap: nowrap !important; gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; overflow: hidden !important; }
+            /* ประหยัดพื้นที่ header: ซ่อนข้อความ "จุดคุ้มทุน" + ลด padding-right */
+            #breakevenToggleText { display: none !important; }
+            #tableHeaderRow { padding-right: 56px !important; }
         }
 
         /* จอนอกของมือถือพับ (แนว landscape เท่านั้น เช่น 792×353) — บังคับเป็น mobile
