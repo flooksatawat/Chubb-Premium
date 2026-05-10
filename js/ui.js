@@ -2940,19 +2940,6 @@ function _liffApi(name) {
         && liff.isApiAvailable(name);
 }
 
-async function _openExternalBrowser() {
-    await _ensureLiffReady();
-    if (typeof liff !== 'undefined' && typeof liff.openWindow === 'function') {
-        try {
-            liff.openWindow({ url: window.location.href, external: true });
-            return true;
-        } catch (err) {
-            console.warn('[LIFF] openWindow failed:', err);
-        }
-    }
-    return false;
-}
-
 function _showQuickToast(msg) {
     const t = document.createElement('div');
     t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 24px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
@@ -2961,8 +2948,31 @@ function _showQuickToast(msg) {
     setTimeout(() => t.remove(), 1500);
 }
 
+/** รวม canvas ทุกหน้าใน PDF viewer เป็นภาพเดียว — สำหรับ navigator.share/long-press save ใน LIFF */
+async function _composeCanvasesToImageBlob() {
+    const area = document.getElementById('pdfViewerCanvas');
+    if (!area) return null;
+    const canvases = Array.from(area.querySelectorAll('canvas'));
+    if (!canvases.length) return null;
+
+    const width = Math.max(...canvases.map(c => c.width));
+    const totalH = canvases.reduce((s, c) => s + c.height, 0);
+    const out = document.createElement('canvas');
+    out.width = width;
+    out.height = totalH;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, totalH);
+    let y = 0;
+    for (const c of canvases) {
+        ctx.drawImage(c, 0, y, c.width, c.height);
+        y += c.height;
+    }
+    return await new Promise(res => out.toBlob(b => res(b), 'image/png'));
+}
+
 async function handlePdfSaveLinkClick(e) {
-    if (e && e.preventDefault) e.preventDefault();      // ป้องกัน <a> นำทาง
+    if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
 
     if (!_pdfViewerBlob || !_pdfViewerFilename) {
@@ -2973,7 +2983,7 @@ async function handlePdfSaveLinkClick(e) {
     await _ensureLiffReady();
     const inLine = isInLineApp();
 
-    // browser ปกติ: trigger <a download> ตรงๆ
+    // browser ปกติ: ใช้ <a download> ตามเดิม
     if (!inLine) {
         const link = document.getElementById('pdfSaveLink');
         if (link && link.href && link.href !== '#' && !link.href.endsWith('#')) {
@@ -2989,16 +2999,21 @@ async function handlePdfSaveLinkClick(e) {
     }
 
     _showQuickToast('กำลังเตรียมไฟล์...');
-    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
 
-    // 1) Web Share API
-    if (await tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename)) return;
+    // 1) ลอง Web Share API กับไฟล์ PDF — iOS Safari/LINE in-app บางเวอร์ชันรองรับ "Save to Files"
+    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
 
-    // 2) LIFF: เปิด external browser
-    if (inLine && await _openExternalBrowser()) return;
+    // 2) Fallback: รวม canvas ทุกหน้าเป็น PNG แล้ว share — บันทึกเข้า "รูปภาพ" ของอุปกรณ์ได้
+    const imgBlob = await _composeCanvasesToImageBlob();
+    if (imgBlob) {
+        const imgName = _pdfViewerFilename.replace(/\.pdf$/i, '.png');
+        const imgFile = new File([imgBlob], imgName, { type: 'image/png' });
+        if (await tryShareFile(imgFile, imgName, imgName)) return;
+    }
 
-    // 3) Fallback toast พร้อมปุ่ม
-    _showLiffDownloadFallback();
+    // 3) Last resort: บอกผู้ใช้ให้แตะค้างบนภาพ PDF เพื่อบันทึก
+    _showLiffSaveInstruction();
 }
 
 async function handlePdfShare() {
@@ -3010,18 +3025,25 @@ async function handlePdfShare() {
     await _ensureLiffReady();
     _showQuickToast('กำลังเตรียมแชร์...');
 
-    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    // 1) Web Share API (ไฟล์ PDF)
+    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
 
-    // 1) Web Share API (ไฟล์)
-    if (await tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename)) return;
+    // 2) Web Share API (ภาพ PNG รวม) — กรณีไม่รับ PDF
+    const imgBlob = await _composeCanvasesToImageBlob();
+    if (imgBlob) {
+        const imgName = _pdfViewerFilename.replace(/\.pdf$/i, '.png');
+        const imgFile = new File([imgBlob], imgName, { type: 'image/png' });
+        if (await tryShareFile(imgFile, imgName, imgName)) return;
+    }
 
-    // 2) LIFF shareTargetPicker (ข้อความ)
+    // 3) liff.shareTargetPicker — ส่งข้อความสรุปเข้า LINE chat
     if (_liffApi('shareTargetPicker')) {
         try {
             const summary = (typeof generateShortShareText === 'function')
                 ? generateShortShareText()
                 : (_pdfViewerFilename || 'รายละเอียดแผนประกัน');
-            const text = `${summary}\n\n📄 ${_pdfViewerFilename}\n(กดบันทึก PDF เพื่อดาวน์โหลดไฟล์)`;
+            const text = `${summary}\n\n📄 ${_pdfViewerFilename}`;
             const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
             if (ret) return;
         } catch (err) {
@@ -3029,44 +3051,29 @@ async function handlePdfShare() {
         }
     }
 
-    // 3) LIFF: เปิด external browser
-    if (isInLineApp() && await _openExternalBrowser()) return;
-
-    // 4) Browser ปกติ: trigger <a download>
-    const linkEl = document.getElementById('pdfSaveLink');
-    if (linkEl && linkEl.href && linkEl.href !== '#' && !linkEl.href.endsWith('#')) {
-        linkEl.click();
-        return;
-    }
-
-    _showLiffDownloadFallback();
+    _showLiffSaveInstruction();
 }
 
-function _showLiffDownloadFallback() {
+function _showLiffSaveInstruction() {
     const existing = document.getElementById('_liffFallbackToast');
     if (existing) existing.remove();
     const toast = document.createElement('div');
     toast.id = '_liffFallbackToast';
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
-    const hasLiffOpen = typeof liff !== 'undefined' && typeof liff.openWindow === 'function';
     const hasSharePicker = _liffApi('shareTargetPicker');
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">บันทึก PDF ใน LINE ไม่ได้</div>
-        <div style="color:#94a3b8;margin-bottom:12px;font-size:12px;">LINE in-app browser ไม่รองรับการดาวน์โหลดไฟล์โดยตรง</div>
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">บันทึก PDF เป็นรูปภาพ</div>
+        <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
+            <strong style="color:white;">แตะค้างที่ภาพ PDF</strong> ด้านบน<br>
+            แล้วเลือก <strong style="color:white;">"บันทึกรูปภาพ"</strong>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-            ${hasLiffOpen ? '<button id="_liffOpenExtBtn" style="background:#3b82f6;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">เปิดเบราว์เซอร์ภายนอก</button>' : ''}
             ${hasSharePicker ? '<button id="_liffShareTextBtn" style="background:#06c755;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">ส่งข้อความใน LINE</button>' : ''}
             <button id="_liffCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
         </div>
     `;
     document.body.appendChild(toast);
     document.getElementById('_liffCloseToastBtn').addEventListener('click', () => toast.remove());
-    if (hasLiffOpen) {
-        document.getElementById('_liffOpenExtBtn').addEventListener('click', () => {
-            liff.openWindow({ url: window.location.href, external: true });
-            toast.remove();
-        });
-    }
     if (hasSharePicker) {
         document.getElementById('_liffShareTextBtn').addEventListener('click', async () => {
             try {
