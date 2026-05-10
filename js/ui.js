@@ -368,6 +368,7 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
+    // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
         if (!lastCalculationData || lastCalculationData.premium === 0) {
@@ -376,58 +377,82 @@ function switchView(targetView) {
         }
     }
 
-    const isWide = window.innerWidth >= 700;
-    const appContainer = document.querySelector('.app-container');
-    const rightPane   = document.getElementById('rightPane');
-    const resultCanvas = document.getElementById('resultCanvas');
-    const tableView   = document.getElementById('tableView');
-    const cashView    = document.getElementById('cashView');
-    const mainView    = document.getElementById('mainView');
+    // ── Update nav active state ──
+    ['navMainBtn','navTableBtn','navCashBtn','navCompareBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    const activeMap = { main:'navMainBtn', table:'navTableBtn', cash:'navCashBtn', compare:'navCompareBtn' };
+    const activeBtn = document.getElementById(activeMap[targetView]);
+    if (activeBtn) activeBtn.classList.add('active');
 
-    const navBtns = {
-        main:  document.getElementById('navMainBtn'),
-        table: document.getElementById('navTableBtn'),
-        cash:  document.getElementById('navCashBtn'),
-        compare: document.getElementById('navCompareBtn'),
-    };
-    Object.values(navBtns).forEach(btn => { if (btn) btn.classList.remove('active'); });
-    if (navBtns[targetView]) navBtns[targetView].classList.add('active');
+    const isWide        = window.innerWidth >= 700;
+    const rightPane     = document.getElementById('rightPane');
+    const rightPaneMain = document.getElementById('rightPaneMain');
 
     if (isWide && rightPane) {
-        // ── Tablet / Fold mode: keep form in left, content in right ──
-        mainView && mainView.classList.remove('hidden');
+        // ════ Tablet / Fold — keep form left, show content right ════
+        const mainView  = document.getElementById('mainView');
+        const tableView = document.getElementById('tableView');
+        const cashView  = document.getElementById('cashView');
+        const appCont   = document.querySelector('.app-container');
 
-        const showInRight = (el) => {
+        // Always keep mainView (form) visible in left pane
+        if (mainView) mainView.classList.remove('hidden');
+
+        // Helper: move element into rightPane and make it fill space
+        function mountInRight(el) {
             if (!el) return;
             if (el.parentElement !== rightPane) rightPane.appendChild(el);
             el.classList.remove('hidden');
-            el.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;';
-        };
-        const hideEl = (el) => { if (el) el.classList.add('hidden'); };
+            el.style.setProperty('display', 'flex', 'important');
+            el.style.flex          = '1';
+            el.style.flexDirection = 'column';
+            el.style.overflow      = 'hidden';
+            el.style.width         = '100%';
+        }
+        // Helper: hide and return element to appContainer if it wandered into rightPane
+        function unmount(el) {
+            if (!el) return;
+            el.style.cssText = '';
+            el.classList.add('hidden');
+            if (el.parentElement === rightPane && appCont) appCont.appendChild(el);
+        }
+
+        // Hide compare panel if it exists
+        const comparePanel = document.getElementById('comparePanelView');
+        if (comparePanel) comparePanel.style.setProperty('display', 'none', 'important');
 
         if (targetView === 'main') {
-            resultCanvas && resultCanvas.classList.remove('hidden');
-            hideEl(tableView); hideEl(cashView);
-            // return views to app-container so mobile still works
-            if (tableView && tableView.parentElement === rightPane) appContainer.appendChild(tableView);
-            if (cashView  && cashView.parentElement  === rightPane) appContainer.appendChild(cashView);
+            if (rightPaneMain) rightPaneMain.style.removeProperty('display');
+            unmount(tableView);
+            unmount(cashView);
         } else if (targetView === 'table') {
-            hideEl(resultCanvas); hideEl(cashView);
-            showInRight(tableView);
+            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
+            unmount(cashView);
+            mountInRight(tableView);
             if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
         } else if (targetView === 'cash') {
-            hideEl(resultCanvas); hideEl(tableView);
-            showInRight(cashView);
+            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
+            unmount(tableView);
+            mountInRight(cashView);
             if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
         } else if (targetView === 'compare') {
-            hideEl(resultCanvas); hideEl(tableView); hideEl(cashView);
+            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
+            unmount(tableView);
+            unmount(cashView);
             showComparePanel(rightPane);
         }
+
     } else {
-        // ── Mobile mode: original left-pane switching ──
-        const views = { main: mainView, table: tableView, cash: cashView };
-        if (targetView === 'table') generatePolicyTableData();
-        if (targetView === 'cash')  refreshAllDisplays();
+        // ════ Mobile — original left-pane switching ════
+        const views = {
+            main:  document.getElementById('mainView'),
+            table: document.getElementById('tableView'),
+            cash:  document.getElementById('cashView'),
+        };
+        if (targetView === 'table') { if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
+        if (targetView === 'cash')  { if (typeof refreshAllDisplays === 'function') refreshAllDisplays(); }
         Object.values(views).forEach(v => { if (v) v.classList.add('hidden'); });
         if (views[targetView]) views[targetView].classList.remove('hidden');
     }
