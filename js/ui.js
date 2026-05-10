@@ -2913,11 +2913,17 @@ function closePdfViewer() {
     const modal = document.getElementById('pdfViewerModal');
     if (modal) {
         modal.classList.add('hidden');
-        modal.style.display = 'none';
+        modal.style.display = '';
     }
     const canvasArea = document.getElementById('pdfViewerCanvas');
     if (canvasArea) canvasArea.innerHTML = '';
+    const dlLink = document.getElementById('pdfSaveLink');
+    if (dlLink && dlLink.href && dlLink.href.startsWith('blob:')) {
+        URL.revokeObjectURL(dlLink.href);
+        dlLink.href = '#';
+    }
     _pdfViewerBlob = null;
+    _pdfViewerFilename = '';
 }
 
 function handlePdfSaveLinkClick(e) {
@@ -2945,76 +2951,33 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
     _pdfViewerBlob = pdfBlob;
     _pdfViewerFilename = filename;
 
-    // ลบ modal เก่าออกเสมอ แล้วสร้างใหม่ fresh — ไม่พึ่ง DOM เดิม
-    const old = document.getElementById('pdfViewerModal');
-    if (old) old.remove();
+    // ใช้ static HTML modal ที่ LIFF-compatible — ไม่สร้างใหม่ (มี safe-area inset อยู่แล้ว)
+    const modal = document.getElementById('pdfViewerModal');
+    if (!modal) return;
 
-    const modal = document.createElement('div');
-    modal.id = 'pdfViewerModal';
+    // อัปเดต title
+    const titleEl = document.getElementById('pdfViewerTitle');
+    if (titleEl) titleEl.textContent = planLabel || filename;
 
-    // ใช้ Object.assign แทน cssText — reliable กว่าใน WebView
-    Object.assign(modal.style, {
-        position: 'fixed',
-        top: '0', left: '0', right: '0', bottom: '0',
-        zIndex: '99999',
-        background: '#1e293b',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: 'Kanit, sans-serif'
-    });
-
-    // Blob URL สำหรับ download link
+    // อัปเดต download link
     const blobUrl = URL.createObjectURL(pdfBlob);
+    const dlLink = document.getElementById('pdfSaveLink');
+    if (dlLink) { dlLink.href = blobUrl; dlLink.setAttribute('download', filename); }
 
-    modal.innerHTML = `
-        <div style="background:linear-gradient(135deg,#243c94,#1e327a);padding:14px 16px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-            <div style="display:flex;align-items:center;gap:8px;overflow:hidden;">
-                <i class="fas fa-file-pdf" style="color:#fca5a5;font-size:16px;flex-shrink:0;"></i>
-                <span style="color:white;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${planLabel || filename}</span>
-            </div>
-            <button id="_pdfCloseBtn" style="background:rgba(255,255,255,0.15);border:none;color:white;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">&times;</button>
-        </div>
+    // แสดง modal
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 
-        <div id="_pdfCanvasArea" style="flex:1;overflow-y:auto;background:#334155;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;">
-            <div style="text-align:center;padding:32px 16px;color:#94a3b8;">
-                <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:10px;"></i>
-                <div style="font-size:13px;">กำลังเตรียม PDF...</div>
-            </div>
-        </div>
-
-        <div style="background:#0f172a;padding:12px 16px;display:flex;gap:10px;flex-shrink:0;">
-            <a id="_pdfDlLink" href="${blobUrl}" download="${filename}"
-               style="flex:1;background:#dc2626;color:white;padding:14px 8px;border-radius:14px;font-weight:700;font-size:13px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
-                <i class="fas fa-download"></i> บันทึก PDF
-            </a>
-            <button id="_pdfShareBtn"
-               style="flex:1;background:#059669;color:white;padding:14px 8px;border-radius:14px;font-weight:700;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-                <i class="fas fa-share-nodes"></i> แชร์
-            </button>
+    // Reset canvas — แสดง spinner ก่อน
+    const canvasArea = document.getElementById('pdfViewerCanvas');
+    if (canvasArea) {
+        canvasArea.innerHTML = `<div style="text-align:center;padding:40px 16px;color:#94a3b8;">
+            <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:12px;"></i>
+            <span style="font-size:13px;">กำลังโหลด PDF...</span>
         </div>`;
+    }
 
-    document.body.appendChild(modal);
-
-    // Event listeners — direct reference ไม่พึ่ง global function
-    document.getElementById('_pdfCloseBtn').addEventListener('click', () => {
-        modal.remove();
-        _pdfViewerBlob = null;
-        URL.revokeObjectURL(blobUrl);
-    });
-
-    document.getElementById('_pdfShareBtn').addEventListener('click', () => {
-        if (!_pdfViewerBlob) return;
-        const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-        tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename).then(shared => {
-            if (!shared) {
-                const dl = document.getElementById('_pdfDlLink');
-                if (dl) dl.click();
-            }
-        });
-    });
-
-    // Render PDF.js ถ้ามี — เป็น enhancement เท่านั้น ถ้าไม่มีก็ยังมีปุ่ม Download
-    const canvasArea = document.getElementById('_pdfCanvasArea');
+    // Render PDF.js ถ้ามี — เป็น enhancement เท่านั้น
     if (canvasArea && typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';

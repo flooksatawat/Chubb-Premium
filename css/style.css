@@ -515,6 +515,34 @@
         @media (max-width: 699px) {
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
             .content-area { padding-bottom: 0; }
+
+            /* ── หัวตารางมือถือ: column layout ≤ 2 แถว badge ── */
+            #tableHeaderRow {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 2px !important;
+                padding: 5px 12px 4px 12px !important;
+            }
+            #tableHeaderTitle { flex: unset !important; }
+            #tableHeaderTitle span {
+                font-size: 9px !important;
+                padding: 1px 5px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                flex-shrink: 1 !important;
+                min-width: 0 !important;
+            }
+            #tableHeaderTitle > div {
+                flex-wrap: wrap !important;
+                gap: 2px !important;
+                padding-top: 1px !important;
+                padding-bottom: 1px !important;
+                max-height: 28px !important;
+                overflow: hidden !important;
+            }
+            #tableHeaderRow > div:last-child { justify-content: flex-end !important; }
+            #breakevenToggleText { font-size: 10px !important; }
         }
 
         /* ==================== FOLDABLE 1:2 OVERRIDE (ต้องอยู่หลัง #rightPane global) ====================
@@ -653,9 +681,9 @@
             .app-container .rounded-\[24px\] { border-radius: 16px !important; }
             .app-container .rounded-\[20px\] { border-radius: 12px !important; }
 
-            /* ลดขนาด badge ข้อมูลหัวตาราง (แบบ/เพศ/อายุ/เบี้ย/ทุน) ใน right pane */
-            #tableHeaderTitle span { font-size: 11px !important; padding: 2px 6px !important; }
-            #tableHeaderTitle > div { gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; }
+            /* ลดขนาด badge หัวตาราง — ใน right pane ของ iPad mini */
+            #tableHeaderTitle span { font-size: 10px !important; padding: 1px 5px !important; flex-shrink: 1 !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+            #tableHeaderTitle > div { flex-wrap: nowrap !important; gap: 2px !important; padding-top: 1px !important; padding-bottom: 1px !important; overflow: hidden !important; }
 
             /* ── Plan selection modal — card compact for iPad mini 300px pane ── */
             #planListContainer .w-16 { width: 42px !important; height: 42px !important; }
@@ -783,6 +811,34 @@
             #modalBottomBar .h-\[52px\] { height: 38px !important; }
             #modalBottomBar .py-3\.5 { padding-top: 8px !important; padding-bottom: 8px !important; }
             #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
+        }
+
+        /* ==================== จอใหญ่ 14"+ (≥ 1440px) — หัวตารางใหญ่ขึ้น ==================== */
+        @media (min-width: 1440px) and (min-height: 600px) {
+            /* 1 แถว: badges + toggle ขนาน เพราะ right pane กว้างมาก */
+            #tableHeaderRow {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 12px !important;
+                padding: 10px 80px 10px 24px !important;
+            }
+            #tableHeaderTitle { flex: 1 !important; }
+            #tableHeaderTitle span {
+                font-size: 13px !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
+                overflow: visible !important;
+                text-overflow: unset !important;
+            }
+            #tableHeaderTitle > div {
+                flex-wrap: nowrap !important;
+                gap: 6px !important;
+            }
+            #breakevenToggleText {
+                font-size: 13px !important;
+                display: inline !important;
+            }
         }
 
         /* ==================== SWIPE-TO-HIDE LEFT PANE ==================== */
