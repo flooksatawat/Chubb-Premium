@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css?v=foldable20">
+    <link rel="stylesheet" href="css/style.css?v=foldable21">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -310,8 +310,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <!-- Cash Flow Container -->
                     <div class="premium-card shrink-0 hidden border-emerald-200 bg-emerald-50/30" id="cashFlowContainer">
                         <div class="flex justify-between items-center mb-2.5">
-                            <p class="text-emerald-700 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-money-bill-trend-up"></i> กระแสเงินสด (รับเงินคืน)</p>
-                            <span class="text-[9px] bg-white text-emerald-600 px-2 py-0.5 rounded-full font-bold shadow-sm border border-emerald-100">คำนวณย้อนกลับได้</span>
+                            <p class="text-emerald-700 text-[11px] font-bold flex items-center gap-1.5"><i class="fas fa-money-bill-trend-up"></i> กระแสเงินสด (รับเงินคืน)</p>
+                            <span class="text-[8px] bg-white text-emerald-600 px-1.5 py-0.5 rounded-full font-bold shadow-sm border border-emerald-100">ย้อนกลับได้</span>
                         </div>
                         <!-- Single Box (ทั่วไป) -->
                         <div id="singleCashFlowBox" class="hidden">
@@ -393,13 +393,24 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
         <!-- ==================== VIEW 2: TABLE ==================== -->
         <div id="tableView" class="flex flex-col flex-1 overflow-hidden w-full relative z-10" style="display:none;">
-            <div class="glass-header flex justify-between items-center px-4 pt-safe pb-3 shrink-0 relative z-20 border-b border-white/50 mt-1">
-                <h3 id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight overflow-hidden"></h3>
-                <button onclick="exportTableToPDF()" class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm shrink-0"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
+            <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
+                <!-- Row 1: ข้อมูล เพศ/อายุ/แผน/เบี้ย/ทุน -->
+                <div id="tableHeaderTitle" class="px-4 pt-2.5 pb-1.5 leading-tight overflow-hidden"></div>
+                <!-- Row 2: PDF + จุดคุ้มทุน -->
+                <div class="flex items-center justify-between px-4 pb-2 pt-1 border-t border-slate-100/80 gap-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-chart-line text-emerald-500 text-[13px]"></i>
+                        <span class="text-[11px] font-bold text-slate-600">จุดคุ้มทุน</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+                    <button onclick="exportTableToPDF()" class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm shrink-0"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
+                </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
-                <div class="flex items-center justify-between px-5 py-3"><span class="text-[13px] font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-chart-line text-emerald-500"></i> แสดงจุดคุ้มทุน</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div></label></div>
-                <div id="breakevenSummary" class="hidden px-4 pb-3 text-center transition-all"></div>
+                <div id="breakevenSummary" class="hidden px-4 py-2 text-center transition-all"></div>
                 <div id="surrenderContainer" class="hidden transition-all"></div>
             </div>
             <div class="flex-1 min-h-0 flex flex-col bg-white/25 backdrop-blur-sm overflow-hidden">
@@ -498,7 +509,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <button id="navCashBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/4 text-slate-400" onclick="switchView('cash')">
                     <i class="fas fa-money-bill-trend-up text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">CASH</span>
                 </button>
-                <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/4 text-slate-400" onclick="openPopup('aiMenuModal')">
+                <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/4 text-slate-400" onclick="openAIPanel()">
                     <i class="fas fa-robot text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">AI</span>
                 </button>
             </div>
@@ -542,21 +553,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <!-- RIGHT PANE — Result Canvas (visible ≥ 768px, รองรับ iPad / Tablet / จอในของมือถือพับ) -->
         <div class="right-pane hidden min-[700px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane" style="flex-direction:column;">
             <div id="rightPaneMain" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-            <div style="padding:20px 24px 14px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="width:44px;height:44px;border-radius:16px;background:linear-gradient(135deg,#00A651,#00843F);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,166,81,0.35);flex-shrink:0;">
-                        <i class="fas fa-shield-heart" style="color:white;font-size:17px;"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:800;font-size:15px;color:#1e293b;line-height:1;font-family:'Kanit',sans-serif;">Chubb Premium</div>
-                        <div style="font-size:10px;color:#94a3b8;margin-top:3px;font-family:'Kanit',sans-serif;">Result Canvas · AI Powered</div>
-                    </div>
-                    <div style="margin-left:auto;" id="canvasStatusBadge">
-                        <span id="canvasStatusText" style="font-size:10px;font-weight:700;color:#00A651;background:rgba(0,166,81,0.1);border:1px solid rgba(0,166,81,0.25);padding:4px 12px;border-radius:999px;font-family:'Kanit',sans-serif;">READY</span>
-                    </div>
-                </div>
-            </div>
-            <div id="resultCanvas" class="no-scrollbar w-full h-full p-8 overflow-y-auto" style="flex:1;">
+            <div id="resultCanvas" class="no-scrollbar w-full h-full p-6 overflow-y-auto" style="flex:1;">
                 <div class="result-canvas-placeholder" id="canvasPlaceholder">
                     <div class="ai-waveform" style="width:150px;height:150px;">
                         <div class="ai-waveform-ring" style="width:54px;height:54px;"></div>

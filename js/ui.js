@@ -1053,7 +1053,8 @@ function selectAppPlan(planName) {
     
     const config = PLAN_CONFIG[planName] || PLAN_CONFIG["CI Extra Plus"];
     const inputAge = document.getElementById('ageInput');
-    inputAge.value = config.minAge !== undefined ? config.minAge : 0;
+    const curAge = parseInt(inputAge.value) || 0;
+    if (curAge <= 0) inputAge.value = config.minAge !== undefined ? config.minAge : 1;
     
     document.getElementById('headerTitleText').innerText = planName;
     fitHeaderTitle();
@@ -1614,13 +1615,48 @@ window.injectToWorkspace = function(html) {
         void canvas.offsetWidth;
         canvas.classList.add('workspace-fade-slide-up');
         if (typeof closeVoiceOverlay === 'function') closeVoiceOverlay();
-        const st = document.getElementById('canvasStatusText');
-        if (st) { st.textContent = 'LIVE'; st.style.color = '#00A651'; }
         return true;
     }
     return false;
 };
 window.renderToWorkspace = window.injectToWorkspace; // legacy alias
+
+window.openAIPanel = function() {
+    if (!window.isWideLayout()) { openPopup('aiMenuModal'); return; }
+    const html = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2rem;gap:1.5rem;">
+        <div style="text-align:center;margin-bottom:0.5rem;">
+            <div style="width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,#2563eb,#1e3a8a);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 24px rgba(37,99,235,0.35);">
+                <i class="fas fa-robot" style="color:white;font-size:24px;"></i>
+            </div>
+            <div style="font-size:18px;font-weight:800;color:#1e293b;font-family:'Kanit',sans-serif;">เลือกผู้ช่วย AI</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:4px;">AI Tools สำหรับตัวแทน</div>
+        </div>
+        <div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;">
+            <button onclick="window.open('https://gemini.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
+                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
+                    <i class="fas fa-sparkles" style="color:#0284c7;font-size:18px;"></i>
+                </div>
+                <div style="text-align:left;flex:1;">
+                    <div style="font-size:15px;font-weight:700;color:#1e40af;">Google Gemini</div>
+                    <div style="font-size:11px;color:#64748b;">AI สำหรับค้นหาและวิเคราะห์</div>
+                </div>
+                <i class="fas fa-external-link-alt" style="color:#93c5fd;font-size:12px;"></i>
+            </button>
+            <button onclick="window.open('https://notebooklm.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
+                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
+                    <i class="fas fa-book-open" style="color:#7c3aed;font-size:18px;"></i>
+                </div>
+                <div style="text-align:left;flex:1;">
+                    <div style="font-size:15px;font-weight:700;color:#6d28d9;">Notebook LM</div>
+                    <div style="font-size:11px;color:#64748b;">AI สำหรับสรุปเอกสาร</div>
+                </div>
+                <i class="fas fa-external-link-alt" style="color:#c4b5fd;font-size:12px;"></i>
+            </button>
+        </div>
+    </div>`;
+    if (window.injectToWorkspace) window.injectToWorkspace(html);
+};
 
 window.resetRightPaneToPlaceholder = function() {
     window.__rightPaneActive = false;
@@ -2380,24 +2416,26 @@ function generatePolicyTableData() {
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
     document.getElementById('tableHeaderTitle').innerHTML = `
-        <div class="flex flex-wrap gap-1.5 items-center">
-            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">เพศ: ${d.gender}</span>
-            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">อายุ: ${d.age} ปี</span>
-            <span class="px-3 py-1 rounded-full text-[10px] font-medium bg-white/60 text-slate-700 border border-white/50 shadow-sm">ระยะเวลา: ${planPeriod} ปี</span>
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white text-slate-700 border border-slate-200 shadow-sm">เบี้ยประกัน: <span class="text-slate-900">${initialPrem.toLocaleString()}</span></span>
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#00A651]/10 text-[#00A651] border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white/60 text-slate-500 border border-white/50 shadow-sm">${planAbbr}</span>
+        <div class="flex flex-wrap gap-1 items-center mb-1">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-sm">${planAbbr}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/70 text-slate-700 border border-slate-200">เพศ: ${d.gender}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/70 text-slate-700 border border-slate-200">อายุ: ${d.age} ปี</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/70 text-slate-700 border border-slate-200">ระยะเวลา: ${planPeriod} ปี</span>
+        </div>
+        <div class="flex flex-wrap gap-1 items-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุน: ${sumDisplay}</span>
         </div>`;
-    
-    document.getElementById('policyTableHead').innerHTML = `<tr class="bg-slate-50 border-b-2 border-slate-100 text-slate-900 text-[10px] min-[380px]:text-[11px] sm:text-[12px]">
-        <th class="py-4 px-3 font-bold text-center whitespace-nowrap">อายุ</th>
-        ${hideAnnualSaving ? '' : '<th class="py-4 px-3 font-bold text-right whitespace-nowrap">ออมเงิน</th>'}
-        <th class="py-4 px-3 font-bold text-right whitespace-nowrap">ออมสะสม</th>
-        ${hideAnnualSaving ? '<th class="py-4 px-3 font-bold text-amber-700 text-right whitespace-nowrap">รับเงินก้อน</th>' : ''}
-        ${forceShowCashFlow ? `<th class="py-4 px-3 font-bold text-blue-600 text-right whitespace-nowrap">กระแสเงินสด</th><th class="py-4 px-3 font-bold text-indigo-600 text-right whitespace-nowrap">รวมรับเงิน</th>` : ''}
-        <th class="py-4 px-3 font-bold text-right whitespace-nowrap">เงินสดพร้อมใช้</th>
-        ${showSAColumn ? `<th class="py-4 px-3 font-bold text-right whitespace-nowrap">ทุนประกัน</th>` : ''}
-        ${showAccidentColumn ? `<th class="py-4 px-3 font-bold text-right whitespace-nowrap">อุบัติเหตุ</th>` : ''}
+
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[10px] min-[380px]:text-[11px]" style="background:linear-gradient(135deg,#1e3a5f,#0f4c81);">
+        <th class="py-3 px-2 font-bold text-center">อายุ</th>
+        ${hideAnnualSaving ? '' : '<th class="py-3 px-2 font-bold text-right">ออมเงิน</th>'}
+        <th class="py-3 px-2 font-bold text-right">ออมสะสม</th>
+        ${hideAnnualSaving ? '<th class="py-3 px-2 font-bold text-amber-200 text-right">รับเงินก้อน</th>' : ''}
+        ${forceShowCashFlow ? `<th class="py-3 px-2 font-bold text-blue-200 text-right">กระแสเงินสด</th><th class="py-3 px-2 font-bold text-indigo-200 text-right">รวมรับเงิน</th>` : ''}
+        <th class="py-3 px-2 font-bold text-right">เงินสดพร้อมใช้</th>
+        ${showSAColumn ? `<th class="py-3 px-2 font-bold text-rose-200 text-right">ทุนประกัน</th>` : ''}
+        ${showAccidentColumn ? `<th class="py-3 px-2 font-bold text-right">อุบัติเหตุ</th>` : ''}
     </tr>`;
     
     // --- 4. Main Loop ---
@@ -2587,10 +2625,8 @@ function generatePolicyTableData() {
         setTimeout(() => document.getElementById('breakevenRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
     }
 
-    // ซ่อนแถบเมนู (จุดคุ้มทุน/ทุนประกัน) และข้อความสรุปจุดคุ้มทุน สำหรับ 24 TX
+    // 24TX: แสดงทุนประกันได้ แต่ซ่อนสรุปจุดคุ้มทุน
     if (isTX) {
-        const surrenderContainer = document.getElementById('surrenderContainer');
-        if (surrenderContainer) surrenderContainer.classList.add('hidden');
         const summary = document.getElementById('breakevenSummary');
         if (summary) summary.classList.add('hidden');
     } else {

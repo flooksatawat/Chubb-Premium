@@ -484,10 +484,16 @@
 
         /* ==================== STRICT RIGHT-PANE OVERRIDES (final) ==================== */
         #rightPane { display: flex !important; flex-direction: column !important; flex: 1 !important; height: 100vh !important; overflow: hidden !important; background-color: #f8fafc !important; }
-        #resultCanvas { flex: 1 !important; display: flex !important; flex-direction: column !important; height: 100% !important; padding: 1.5rem !important; overflow-y: auto !important; }
-        .policy-table-wrapper { flex: 1 1 auto !important; overflow: auto !important; margin-top: 1rem !important; border-radius: 0.75rem !important; }
-        .policy-table-wrapper thead th { position: sticky !important; top: 0 !important; z-index: 40 !important; background-color: #1e293b !important; color: white !important; }
+        #resultCanvas { flex: 1 !important; display: flex !important; flex-direction: column !important; height: 100% !important; padding: 1rem !important; overflow-y: auto !important; }
+        .policy-table-wrapper { flex: 1 1 auto !important; overflow-x: hidden !important; overflow-y: auto !important; margin-top: 0 !important; border-radius: 0 !important; }
+        .policy-table-wrapper thead th { position: sticky !important; top: 0 !important; z-index: 40 !important; background: linear-gradient(135deg,#1e3a5f,#0f4c81) !important; color: white !important; white-space: normal !important; }
+        #pdfTableTarget th, #pdfTableTarget td { padding: 8px 5px !important; font-size: 11px !important; white-space: normal !important; }
         .menu-x { background-color: #ef4444 !important; color: white !important; }
+        /* Keyboard overflow fix — mobile */
+        @media (max-width: 699px) {
+            .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+            .content-area { padding-bottom: 0; }
+        }
 
         /* ==================== FOLDABLE 1:2 OVERRIDE (ต้องอยู่หลัง #rightPane global) ====================
            ID selector ข้างบนมี specificity สูงกว่า .right-pane ใน media query
