@@ -1145,10 +1145,16 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.remove('flex');
         }
     } else if (planName === '24 TX') {
-        currentMode = 'premium'; 
+        currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
-        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden'); 
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.style.order = '1';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        const premSubLbl24 = document.getElementById('premiumSubLabel');
+        if(premSubLbl24) premSubLbl24.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
