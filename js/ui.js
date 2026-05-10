@@ -2522,6 +2522,8 @@ function generatePolicyTableData() {
     } else if (isTX) {
         payYears = 24;
         maxYear = 90 - d.age;
+    } else if (isCL) {
+        maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
     }
 
     let html = ''; 
@@ -2926,25 +2928,155 @@ function closePdfViewer() {
     _pdfViewerFilename = '';
 }
 
-function handlePdfSaveLinkClick(e) {
-    // ถ้า <a download> ไม่ทำงาน (เช่น บาง WebView) ให้ลอง navigator.share แทน
-    const link = e.currentTarget;
-    if (!link.href || link.href === window.location.href + '#') {
-        e.preventDefault();
-        handlePdfShare();
+async function _ensureLiffReady() {
+    if (window._liffReady && typeof window._liffReady.then === 'function') {
+        try { await window._liffReady; } catch {}
     }
 }
 
-function handlePdfShare() {
-    if (!_pdfViewerBlob || !_pdfViewerFilename) return;
-    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-    tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename).then(shared => {
-        if (!shared) {
-            // Fallback: กระตุ้น download link
-            const link = document.getElementById('pdfSaveLink');
-            if (link && link.href && link.href !== '#') link.click();
+function _liffApi(name) {
+    return typeof liff !== 'undefined'
+        && typeof liff.isApiAvailable === 'function'
+        && liff.isApiAvailable(name);
+}
+
+async function _openExternalBrowser() {
+    await _ensureLiffReady();
+    if (typeof liff !== 'undefined' && typeof liff.openWindow === 'function') {
+        try {
+            liff.openWindow({ url: window.location.href, external: true });
+            return true;
+        } catch (err) {
+            console.warn('[LIFF] openWindow failed:', err);
         }
-    });
+    }
+    return false;
+}
+
+function _showQuickToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 24px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1500);
+}
+
+async function handlePdfSaveLinkClick(e) {
+    if (e && e.preventDefault) e.preventDefault();      // ป้องกัน <a> นำทาง
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    if (!_pdfViewerBlob || !_pdfViewerFilename) {
+        _showQuickToast('ยังไม่มีไฟล์ PDF');
+        return;
+    }
+
+    await _ensureLiffReady();
+    const inLine = isInLineApp();
+
+    // browser ปกติ: trigger <a download> ตรงๆ
+    if (!inLine) {
+        const link = document.getElementById('pdfSaveLink');
+        if (link && link.href && link.href !== '#' && !link.href.endsWith('#')) {
+            const tmp = document.createElement('a');
+            tmp.href = link.href;
+            tmp.download = _pdfViewerFilename;
+            document.body.appendChild(tmp);
+            tmp.click();
+            tmp.remove();
+            _showQuickToast('กำลังดาวน์โหลด...');
+            return;
+        }
+    }
+
+    _showQuickToast('กำลังเตรียมไฟล์...');
+    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+
+    // 1) Web Share API
+    if (await tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename)) return;
+
+    // 2) LIFF: เปิด external browser
+    if (inLine && await _openExternalBrowser()) return;
+
+    // 3) Fallback toast พร้อมปุ่ม
+    _showLiffDownloadFallback();
+}
+
+async function handlePdfShare() {
+    if (!_pdfViewerBlob || !_pdfViewerFilename) {
+        _showQuickToast('ยังไม่มีไฟล์ PDF');
+        return;
+    }
+
+    await _ensureLiffReady();
+    _showQuickToast('กำลังเตรียมแชร์...');
+
+    const file = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+
+    // 1) Web Share API (ไฟล์)
+    if (await tryShareFile(file, _pdfViewerFilename, _pdfViewerFilename)) return;
+
+    // 2) LIFF shareTargetPicker (ข้อความ)
+    if (_liffApi('shareTargetPicker')) {
+        try {
+            const summary = (typeof generateShortShareText === 'function')
+                ? generateShortShareText()
+                : (_pdfViewerFilename || 'รายละเอียดแผนประกัน');
+            const text = `${summary}\n\n📄 ${_pdfViewerFilename}\n(กดบันทึก PDF เพื่อดาวน์โหลดไฟล์)`;
+            const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
+            if (ret) return;
+        } catch (err) {
+            console.warn('[LIFF] shareTargetPicker failed:', err);
+        }
+    }
+
+    // 3) LIFF: เปิด external browser
+    if (isInLineApp() && await _openExternalBrowser()) return;
+
+    // 4) Browser ปกติ: trigger <a download>
+    const linkEl = document.getElementById('pdfSaveLink');
+    if (linkEl && linkEl.href && linkEl.href !== '#' && !linkEl.href.endsWith('#')) {
+        linkEl.click();
+        return;
+    }
+
+    _showLiffDownloadFallback();
+}
+
+function _showLiffDownloadFallback() {
+    const existing = document.getElementById('_liffFallbackToast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.id = '_liffFallbackToast';
+    toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
+    const hasLiffOpen = typeof liff !== 'undefined' && typeof liff.openWindow === 'function';
+    const hasSharePicker = _liffApi('shareTargetPicker');
+    toast.innerHTML = `
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">บันทึก PDF ใน LINE ไม่ได้</div>
+        <div style="color:#94a3b8;margin-bottom:12px;font-size:12px;">LINE in-app browser ไม่รองรับการดาวน์โหลดไฟล์โดยตรง</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            ${hasLiffOpen ? '<button id="_liffOpenExtBtn" style="background:#3b82f6;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">เปิดเบราว์เซอร์ภายนอก</button>' : ''}
+            ${hasSharePicker ? '<button id="_liffShareTextBtn" style="background:#06c755;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">ส่งข้อความใน LINE</button>' : ''}
+            <button id="_liffCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    document.getElementById('_liffCloseToastBtn').addEventListener('click', () => toast.remove());
+    if (hasLiffOpen) {
+        document.getElementById('_liffOpenExtBtn').addEventListener('click', () => {
+            liff.openWindow({ url: window.location.href, external: true });
+            toast.remove();
+        });
+    }
+    if (hasSharePicker) {
+        document.getElementById('_liffShareTextBtn').addEventListener('click', async () => {
+            try {
+                const summary = (typeof generateShortShareText === 'function') ? generateShortShareText() : '';
+                await liff.shareTargetPicker([{ type: 'text', text: summary || _pdfViewerFilename }]);
+            } catch (err) { console.warn('[LIFF] shareTargetPicker failed:', err); }
+            toast.remove();
+        });
+    }
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
 }
 
 async function showPdfViewer(pdfBlob, filename, planLabel) {

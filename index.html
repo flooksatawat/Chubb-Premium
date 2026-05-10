@@ -6,10 +6,17 @@
     <title>Chubb-Premium/</title>
     <!-- โหลดไลบรารีภายนอก -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.LIFF_ID = '2010019212-OmM6NuTV';
+        window._liffReady = (typeof liff !== 'undefined')
+            ? liff.init({ liffId: window.LIFF_ID }).catch(err => { console.warn('[LIFF] init failed:', err); })
+            : Promise.resolve();
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -1463,7 +1470,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=6"></script>
+    <script src="js/ui.js?v=7"></script>
     <script src="js/share.js?v=5"></script>
     <script>
         window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
