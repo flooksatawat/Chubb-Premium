@@ -497,6 +497,20 @@
         #policyTableBody tr:hover td { background-color: rgba(13,148,136,0.13) !important; transition: background-color 0.15s; }
         #pdfTableTarget th, #pdfTableTarget td { padding: 9px 6px !important; font-size: 13px !important; white-space: normal !important; }
         .menu-x { background-color: #ef4444 !important; color: white !important; }
+
+        /* Plan list cards — single line always, ellipsis for overflow, small is OK */
+        #planListContainer h4,
+        #planListContainer p {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        /* Reduce base icon box on all screens so text has more room */
+        #planListContainer .w-16 { width: 48px !important; height: 48px !important; }
+        #planListContainer .h-16 { height: 48px !important; }
+        #planListContainer .text-\[28px\] { font-size: 22px !important; }
+        #planListContainer .text-\[26px\] { font-size: 20px !important; }
+
         /* Keyboard overflow fix — mobile */
         @media (max-width: 699px) {
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
@@ -583,19 +597,20 @@
             .app-container #bottomNavContainer .rounded-full { }
 
             /* ── Plan selection modal — card compact ── */
-            #planListContainer .w-16 { width: 44px !important; height: 44px !important; }
-            #planListContainer .h-16 { height: 44px !important; }
-            #planListContainer .text-\[28px\] { font-size: 20px !important; }
-            #planListContainer .text-\[26px\] { font-size: 18px !important; }
+            #planListContainer .w-16 { width: 40px !important; height: 40px !important; }
+            #planListContainer .h-16 { height: 40px !important; }
+            #planListContainer .text-\[28px\] { font-size: 18px !important; }
+            #planListContainer .text-\[26px\] { font-size: 16px !important; }
             #planListContainer .text-\[17px\] { font-size: 13px !important; }
-            #planListContainer .text-\[12px\] { font-size: 11px !important; }
-            #planListContainer .mr-4 { margin-right: 8px !important; }
-            #planListContainer .p-4 { padding: 10px !important; }
-            #planListContainer .w-8 { width: 26px !important; }
-            #planListContainer .h-8 { height: 26px !important; }
+            #planListContainer .text-\[14px\] { font-size: 10px !important; }
+            #planListContainer .text-\[12px\] { font-size: 9px !important; }
+            #planListContainer .mr-4 { margin-right: 6px !important; }
+            #planListContainer .p-4 { padding: 8px !important; }
+            #planListContainer .w-8 { width: 22px !important; }
+            #planListContainer .h-8 { height: 22px !important; }
             #planListContainer .rounded-\[24px\] { border-radius: 14px !important; }
             #planListContainer .rounded-\[20px\] { border-radius: 12px !important; }
-            #planListContainer .px-5 { padding-left: 12px !important; padding-right: 12px !important; }
+            #planListContainer .px-5 { padding-left: 10px !important; padding-right: 10px !important; }
 
             /* ── Plan modal bottom bar ── */
             #modalBottomBar .w-\[52px\] { width: 38px !important; }
@@ -641,18 +656,35 @@
             /* ลดขนาด badge ข้อมูลหัวตาราง (แบบ/เพศ/อายุ/เบี้ย/ทุน) ใน right pane */
             #tableHeaderTitle span { font-size: 11px !important; padding: 2px 6px !important; }
             #tableHeaderTitle > div { gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; }
+
+            /* ── Plan selection modal — card compact for iPad mini 300px pane ── */
+            #planListContainer .w-16 { width: 42px !important; height: 42px !important; }
+            #planListContainer .h-16 { height: 42px !important; }
+            #planListContainer .text-\[28px\] { font-size: 19px !important; }
+            #planListContainer .text-\[26px\] { font-size: 17px !important; }
+            #planListContainer .text-\[14px\] { font-size: 11px !important; }
+            #planListContainer .text-\[12px\] { font-size: 10px !important; }
+            #planListContainer .mr-4 { margin-right: 7px !important; }
+            #planListContainer .p-4 { padding: 9px !important; }
+            #planListContainer .w-8 { width: 24px !important; }
+            #planListContainer .h-8 { height: 24px !important; }
+            #planListContainer .px-5 { padding-left: 11px !important; padding-right: 11px !important; }
+            #modalBottomBar .w-\[52px\] { width: 38px !important; }
+            #modalBottomBar .h-\[52px\] { height: 38px !important; }
+            #modalBottomBar .py-3\.5 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
         }
 
-        /* ==================== จอใหญ่กว่า 8" (851–1023px) — อัตราส่วน 1:2 ====================
-           left pane 1 ส่วน : right pane 2 ส่วน */
+        /* ==================== จอใหญ่กว่า 8" (851–1023px) — อัตราส่วน 2:3 ====================
+           left pane 2 ส่วน : right pane 3 ส่วน (40%:60%) */
         @media (min-width: 851px) and (max-width: 1023px) and (min-height: 600px) {
             .app-container {
-                flex: 1 1 0 !important;
+                flex: 2 1 0 !important;
                 min-width: 0 !important;
                 max-width: none !important;
                 width: auto !important;
             }
-            #rightPane { flex: 2 1 0 !important; }
+            #rightPane { flex: 3 1 0 !important; }
 
             /* Compact scaling สำหรับ left pane ~280-341px (7.8" screen) */
             .app-container .content-area { padding-left: 10px !important; padding-right: 10px !important; }
@@ -697,7 +729,8 @@
             #planListContainer .text-\[28px\] { font-size: 20px !important; }
             #planListContainer .text-\[26px\] { font-size: 18px !important; }
             #planListContainer .text-\[17px\] { font-size: 13px !important; }
-            #planListContainer .text-\[12px\] { font-size: 11px !important; }
+            #planListContainer .text-\[14px\] { font-size: 11px !important; }
+            #planListContainer .text-\[12px\] { font-size: 10px !important; }
             #planListContainer .mr-4 { margin-right: 8px !important; }
             #planListContainer .p-4 { padding: 10px !important; }
             #planListContainer .w-8 { width: 26px !important; }
@@ -734,6 +767,22 @@
                 opacity: 0 !important;
                 pointer-events: none !important;
             }
+            /* ── Plan selection modal — card compact for Notebook 320px pane ── */
+            #planListContainer .w-16 { width: 42px !important; height: 42px !important; }
+            #planListContainer .h-16 { height: 42px !important; }
+            #planListContainer .text-\[28px\] { font-size: 19px !important; }
+            #planListContainer .text-\[26px\] { font-size: 17px !important; }
+            #planListContainer .text-\[14px\] { font-size: 11px !important; }
+            #planListContainer .text-\[12px\] { font-size: 10px !important; }
+            #planListContainer .mr-4 { margin-right: 7px !important; }
+            #planListContainer .p-4 { padding: 9px !important; }
+            #planListContainer .w-8 { width: 24px !important; }
+            #planListContainer .h-8 { height: 24px !important; }
+            #planListContainer .px-5 { padding-left: 11px !important; padding-right: 11px !important; }
+            #modalBottomBar .w-\[52px\] { width: 38px !important; }
+            #modalBottomBar .h-\[52px\] { height: 38px !important; }
+            #modalBottomBar .py-3\.5 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
         }
 
         /* ==================== SWIPE-TO-HIDE LEFT PANE ==================== */
