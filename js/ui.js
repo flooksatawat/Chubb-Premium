@@ -2211,7 +2211,7 @@ function refreshAllDisplays() {
         document.getElementById('caseIncomeComm').innerText = fyc.toLocaleString() + " ฿"; 
     }
     
-    const _yearMatch = rateKey && rateKey.match(/^(\d+)/);
+    const _yearMatch = rateKey && (rateKey.match(/^(\d+)/) || rateKey.match(/(\d+)$/));
     const _comTitle = currentAppPlan ? `${currentAppPlan}${_yearMatch ? ' ' + _yearMatch[1] + ' ปี' : ''}` : 'คอมมิชชัน';
     let comH = `<h4 class="text-[13px] font-black text-slate-800 text-center mb-4">${_comTitle}</h4>`;
     let totalComAmt = 0; let totalComPct = 0;
