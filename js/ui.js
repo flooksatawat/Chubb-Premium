@@ -401,13 +401,8 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
-    // 3D plan: ตาราง → แสดง 19 หมวด แทน tableView
+    // 3D plan: ตาราง → แสดง 19 หมวด แทน tableView (ไม่ต้องการข้อมูลคำนวณ)
     if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {
-        if (typeof calculate === 'function') calculate(currentMode, true);
-        if (!lastCalculationData || lastCalculationData.premium === 0) {
-            showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน");
-            return;
-        }
         window.open3DDetailsView();
         return;
     }
