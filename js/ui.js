@@ -410,13 +410,12 @@ function switchView(targetView) {
         const appCont   = document.querySelector('.app-container');
 
         // Always keep mainView (form) visible in left pane
-        if (mainView) mainView.classList.remove('hidden');
+        if (mainView) mainView.style.removeProperty('display');
 
         // Helper: move element into rightPane and make it fill space
         function mountInRight(el) {
             if (!el) return;
             if (el.parentElement !== rightPane) rightPane.appendChild(el);
-            el.classList.remove('hidden');
             el.style.setProperty('display', 'flex', 'important');
             el.style.flex          = '1';
             el.style.flexDirection = 'column';
@@ -426,8 +425,7 @@ function switchView(targetView) {
         // Helper: hide and return element to appContainer if it wandered into rightPane
         function unmount(el) {
             if (!el) return;
-            el.style.cssText = '';
-            el.classList.add('hidden');
+            el.style.cssText = 'display:none';
             if (el.parentElement === rightPane && appCont) appCont.appendChild(el);
         }
 
@@ -456,8 +454,8 @@ function switchView(targetView) {
         };
         if (targetView === 'table') { if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
         if (targetView === 'cash')  { if (typeof refreshAllDisplays === 'function') refreshAllDisplays(); }
-        Object.values(views).forEach(v => { if (v) v.classList.add('hidden'); });
-        if (views[targetView]) views[targetView].classList.remove('hidden');
+        Object.values(views).forEach(v => { if (v) v.style.display = 'none'; });
+        if (views[targetView]) views[targetView].style.removeProperty('display');
     }
 }
 
