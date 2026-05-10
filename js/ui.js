@@ -61,12 +61,28 @@ const CRITICAL_ILLNESSES = [
 ];
 
 const SECTION_DATA = {
-    m14: { title: "หมวด 14: อวัยวะเทียม และการศัลยกรรมตกแต่ง", desc: "ค่ารักษาพยาบาลสำหรับอวัยวะเทียมและการผ่าตัดเพื่อการศัลยกรรมตกแต่งเสริมสร้างเพื่อแก้ไขความบกพร่องจากโรคร้ายแรง หรืออุบัติเหตุร้ายแรง", items: ["การใส่ตาเทียม", "การสร้างเต้านมใหม่หลังผ่าตัดมะเร็ง", "วิกผม/ผมปลอม"], cond: "ระยะเวลารอคอย 120 วัน, จ่ายสูงสุด 1 ครั้ง/โรคตลอดชีวิต" },
-    m15: { title: "หมวด 15: การรักษาด้านสุขภาพจิต", desc: "ความคุ้มครองโรคเครียดภายหลังภยันตราย (PTSD) จากเหตุการณ์รุนแรง หรือเจ็บป่วยโรคร้ายแรง ครอบคลุมทั้ง IPD และ OPD ต่อเนื่อง", items: ["รักษาอาการ PTSD", "เยียวยาจิตใจหลังอุบัติเหตุ", "ปรึกษาแพทย์ต่อเนื่อง 90 วัน"], cond: "ระยะเวลารอคอย 180 วัน, สูงสุด 3 ครั้ง/เหตุการณ์" },
-    m16: { title: "หมวด 16: พยาบาลเฝ้าไข้พิเศษที่บ้าน", desc: "ค่าบริการพยาบาลวิชาชีพดูแลที่บ้านหลังจากออกจากการรักษาเป็นผู้ป่วยในภายใน 90 วัน", items: ["พยาบาลวิชาชีพดูแล 24 ชม.", "การฟื้นฟูหลังผ่าตัดใหญ่"], cond: "สูงสุด 15 วัน/ปี, ระยะเวลารอคอย 120 วัน" },
-    m17: { title: "หมวด 17: การเก็บรักษาเซลล์ไข่หรืออสุจิ", desc: "บริษัทจะจ่ายผลประโยชน์สำหรับค่าเก็บรักษาด้วยวิธีแช่แข็งเซลล์ไข่หรืออสุจิ สำหรับผู้เอาประกันภัยที่ได้รับการวินิจฉัยว่าเป็นโรคมะเร็ง", items: ["การเก็บรักษาเซลล์ไข่หรืออสุจิด้วยวิธีแช่แข็ง", "ใช้สำหรับกรณีที่จำเป็นต้องเข้ารับการรักษาด้วยเคมีบำบัด", "ใช้สำหรับกรณีที่จำเป็นต้องเข้ารับการรักษาด้วยรังสีบำบัด", "คุ้มครองเมื่อการรักษานั้นมีผลกระทบต่อภาวะเจริญพันธุ์"], cond: "ระยะเวลารอคอย 120 วัน" },
-    m18: { title: "หมวด 18: การผ่าตัดช่องปากและใบหน้าขากรรไกร", desc: "บริษัทจะจ่ายผลประโยชน์สำหรับค่ารักษาพยาบาลสำหรับการผ่าตัดช่องปากและขากรรไกร ทั้งกรณีผู้ป่วยนอก (OPD) และกรณีผู้ป่วยใน (IPD)", items: ["การผ่าตัดถอนฟันที่ฝังหรือฟันที่ไม่ขึ้น (เช่น ฟันคุด)", "การผ่าตัดถอนรากฟันที่ฝังอยู่ในกระดูกและมีความซับซ้อน", "การผ่าตัดซีสต์ในขากรรไกร", "การรักษามะเร็งและเนื้องอก", "การรักษาที่จำเป็นสำหรับข้อต่อขากรรไกร (TMJ)"], cond: "ระยะเวลารอคอย 180 วัน, ยกเว้นการทำกายภาพบำบัด" },
-    m19: { title: "หมวด 19: การตั้งครรภ์ และคลอดบุตร", desc: "นิยามสิทธิประโยชน์ (หมายเหตุ: แผน HX15-60 ไม่คุ้มครองในหมวดนี้)", items: ["การฝากครรภ์", "การคลอดบุตร", "ภาวะแทรกซ้อน"], cond: "ระยะเวลารอคอย 365 วัน, อายุระหว่าง 18-45 ปี" }
+    m14: { title: "อวัยวะเทียม และการศัลยกรรมตกแต่ง", items: ["การใส่ตาเทียม / อวัยวะเทียมหลังอุบัติเหตุหรือโรคร้ายแรง", "การสร้างเต้านมใหม่หลังผ่าตัดมะเร็ง", "วิกผม / ผมปลอม สำหรับผู้ป่วยมะเร็งที่รับเคมีบำบัด", "การผ่าตัดตกแต่งเสริมสร้างเพื่อแก้ไขความบกพร่องจากโรคร้ายแรง"], cond: "ระยะรอคอย 120 วัน · จ่ายสูงสุด 1 ครั้ง/โรคตลอดชีวิต" },
+    m15: { title: "การรักษาด้านสุขภาพจิต", items: ["โรคเครียดภายหลังภยันตราย (PTSD) จากเหตุการณ์รุนแรง", "การเยียวยาจิตใจหลังได้รับการวินิจฉัยโรคร้ายแรง", "การรักษาทั้ง IPD และ OPD ต่อเนื่องสูงสุด 90 วัน", "ครอบคลุมค่าปรึกษาจิตแพทย์และนักจิตวิทยาคลินิก"], cond: "ระยะรอคอย 180 วัน · สูงสุด 3 ครั้ง/เหตุการณ์" },
+    m16: { title: "พยาบาลเฝ้าไข้พิเศษที่บ้าน", items: ["พยาบาลวิชาชีพดูแลที่บ้านหลังออกจากโรงพยาบาลภายใน 90 วัน", "ดูแล 24 ชั่วโมงสำหรับผู้ป่วยหลังผ่าตัดใหญ่", "การฟื้นฟูสมรรถภาพและกายภาพบำบัดที่บ้าน"], cond: "สูงสุด 15 วัน/ปี · ระยะรอคอย 120 วัน" },
+    m17: { title: "การเก็บรักษาเซลล์ไข่หรืออสุจิ", items: ["การเก็บรักษาเซลล์ไข่หรืออสุจิด้วยวิธีแช่แข็ง", "สำหรับผู้ป่วยมะเร็งที่ต้องรักษาด้วยเคมีบำบัดหรือรังสีบำบัด", "คุ้มครองเมื่อการรักษาส่งผลกระทบต่อภาวะเจริญพันธุ์"], cond: "ระยะรอคอย 120 วัน" },
+    m18: { title: "การผ่าตัดช่องปากและใบหน้าขากรรไกร", items: ["การผ่าตัดถอนฟันที่ฝังในกระดูก เช่น ฟันคุด", "การผ่าตัดซีสต์ในขากรรไกร", "การรักษามะเร็งและเนื้องอกบริเวณช่องปาก", "การรักษาข้อต่อขากรรไกร (TMJ) ที่จำเป็น", "ครอบคลุมทั้ง OPD และ IPD"], cond: "ระยะรอคอย 180 วัน" },
+    m19: { title: "การตั้งครรภ์ และคลอดบุตร", items: ["ค่าฝากครรภ์และตรวจสุขภาพก่อนคลอด", "ค่าคลอดบุตรทั้งแบบธรรมชาติและผ่าตัด", "ภาวะแทรกซ้อนจากการตั้งครรภ์และคลอดบุตร", "เฉพาะแผน HX150 และ HX300 เท่านั้น"], cond: "ระยะรอคอย 365 วัน · อายุระหว่าง 18-45 ปี" }
+};
+
+const _3D_BASE_SUBS = {
+    '01': ["ค่าห้องพักเดี่ยวมาตรฐานตามวงเงินแผน HX ที่เลือก", "ค่าอาหารผู้ป่วยตามจริง", "กรณีอาการหนักต้องย้าย ICU จ่ายไม่เกิน 2 เท่าค่าห้อง"],
+    '02': ["ห้องผู้ป่วยหนัก ICU (Intensive Care Unit)", "ห้องผู้ป่วยหัวใจโคโรนารี CCU (Coronary Care Unit)", "จ่ายสูงสุดไม่เกิน 2 เท่าของวงเงินค่าห้องพักมาตรฐาน"],
+    '03': ["ค่าบริการพยาบาลทั่วไปตลอดช่วงนอนพักรักษา", "ค่าบริการโรงพยาบาลและสิ่งอำนวยความสะดวกทางการแพทย์", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '04': ["ค่าแพทย์เยี่ยมไข้ผู้ป่วยในรายวัน", "ครอบคลุมแพทย์เฉพาะทางที่ให้การรักษา", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '05': ["ค่าแพทย์ผ่าตัด ทั้งการผ่าตัดใหญ่และผ่าตัดเล็ก", "ค่าหัตถการทางการแพทย์ที่จำเป็น", "ค่าแพทย์ผู้ช่วยผ่าตัด", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '06': ["ค่าวิสัญญีแพทย์สำหรับการผ่าตัดทุกประเภท", "ครอบคลุมทั้งการดมยาสลบและการบล็อกยาชาเฉพาะที่", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '07': ["ค่าใช้ห้องผ่าตัดและอุปกรณ์ผ่าตัด", "ค่าเครื่องมือทางการแพทย์สำหรับการผ่าตัด", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '08': ["ค่ารักษาพยาบาลอื่นๆ ที่จำเป็นระหว่างนอนพัก", "ค่าบริการทางการแพทย์เบ็ดเตล็ดที่เกี่ยวข้อง", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '09': ["ค่ายาตามใบสั่งแพทย์ระหว่างนอนพักรักษา", "ค่าเวชภัณฑ์และสารน้ำที่จำเป็น", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '10': ["ค่าตรวจวิเคราะห์เลือด ปัสสาวะ และตรวจพิเศษ", "ค่า X-ray, CT Scan, MRI, PET Scan", "ค่าตรวจชิ้นเนื้อ (Biopsy)", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '11': ["ค่ารักษาผู้ป่วยนอกกรณีอุบัติเหตุ", "ต้องเข้ารับการรักษาภายใน 24 ชั่วโมงหลังเกิดอุบัติเหตุ", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '12': ["เคมีบำบัด (Chemotherapy) ทุกรูปแบบ", "รังสีบำบัด (Radiotherapy)", "การรักษาด้วยฮอร์โมนสำหรับมะเร็ง", "การรักษาด้วยภูมิคุ้มกันบำบัด (Immunotherapy)", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
+    '13': ["การฟอกเลือดด้วยเครื่องไตเทียม (Hemodialysis)", "การล้างไตผ่านช่องท้อง (Peritoneal Dialysis)", "เหมาจ่ายตามค่าใช้จ่ายจริง"],
 };
 
 // ==================== 3D HEALTH EXCELLENCE: PLAN & CATEGORY DATA ====================
@@ -3659,6 +3675,38 @@ function openBankModal() { if (typeof openPopup === 'function') openPopup('payme
 function openEsubModal() { if (typeof openPopup === 'function') openPopup('eSubQniModal'); }
 
 // ==================== 3D Health Excellence: Coverage Detail View ====================
+window._3dOpenCats = new Set();
+window.toggle3DCat = function(num) {
+    if (window._3dOpenCats.has(num)) window._3dOpenCats.delete(num);
+    else window._3dOpenCats.add(num);
+    window.render3DDetailsAccordion();
+};
+window.set3DHX = function(opt) {
+    window.currentHX = opt;
+    if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+    if (typeof calculate === 'function') calculate('sum', true);
+    window.render3DDetailsAccordion();
+};
+window.set3DHXO = function(opt) {
+    window.currentHXO = opt;
+    if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+    if (typeof calculate === 'function') calculate('sum', true);
+    window.render3DDetailsAccordion();
+};
+window.set3DHXD = function(opt) {
+    if (opt !== 'ไม่เลือก' && window.currentHXO === 'ไม่เลือก') window.currentHXO = 'HXO10';
+    window.currentHXD = opt;
+    if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+    if (typeof calculate === 'function') calculate('sum', true);
+    window.render3DDetailsAccordion();
+};
+window.set3DHBF = function(opt) {
+    window.currentHBF = opt;
+    if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
+    if (typeof calculate === 'function') calculate('sum', true);
+    window.render3DDetailsAccordion();
+};
+
 window.render3DDetailsAccordion = function() {
     const body = document.getElementById('threeDDetailsAccordionBody');
     if (!body) return;
@@ -3668,129 +3716,143 @@ window.render3DDetailsAccordion = function() {
     const hxdVal = window.currentHXD || 'ไม่เลือก';
     const hbfVal = window.currentHBF || 'ไม่เลือก';
 
-    const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
-
+    const hxOpts  = ['HX15','HX20','HX40','HX60','HX150','HX300'];
+    const hxoOpts = ['ไม่เลือก','HXO10','HXO20','HXO30','HXO50'];
+    const hxdOpts = ['ไม่เลือก','HXD100','HXD200','HXD500','HXD1000'];
+    const hbfOpts = ['ไม่เลือก','HBF500','HBF1000','HBF3000','HBF5000'];
     const DL = {
-        'HXO10': '1,000', 'HXO20': '2,000', 'HXO30': '3,000', 'HXO50': '5,000',
-        'HXD100': '10,000', 'HXD200': '20,000', 'HXD500': '50,000', 'HXD1000': '100,000',
-        'HBF500': '500', 'HBF1000': '1,000', 'HBF3000': '3,000', 'HBF5000': '5,000',
+        'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000',
+        'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000',
+        'HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000',
     };
 
-    // ── 1. Plan selection pills (sticky sub-header) ───────────────────────
-    let pillHtml = `<div class="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-slate-100 px-3 pt-3 pb-2.5">
-        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">เลือกแผนค่าห้อง (HX)</p>
-        <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-3 gap-1">`;
-    hxOpts.forEach(opt => {
-        const isSel = opt === hxVal;
-        const cls = isSel
-            ? 'py-1.5 text-[12px] font-bold text-teal-700 bg-white shadow rounded-xl border border-teal-200/60'
-            : 'py-1.5 text-[12px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
-        pillHtml += `<button onclick="window.currentHX='${opt}'; window.render3DDetailsAccordion();" class="${cls}">${opt}</button>`;
-    });
-    pillHtml += `</div></div>`;
+    const pillSel = 'py-1.5 text-[11px] font-bold text-teal-700 bg-white shadow rounded-xl border border-teal-200/60';
+    const pillDef = 'py-1.5 text-[11px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
 
-    // ── 2. Content area ───────────────────────────────────────────────────
+    // ── 1. Sticky header: HX pills + rider pills ─────────────────────────
+    let stickyHtml = `<div class="sticky top-0 z-10 bg-white/97 backdrop-blur-sm border-b border-slate-100 px-3 pt-3 pb-2.5 space-y-2">`;
+
+    // HX plan
+    stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">แผนค่าห้อง (HX)</p>
+        <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-6 gap-1">`;
+    hxOpts.forEach(opt => {
+        stickyHtml += `<button onclick="window.set3DHX('${opt}')" class="${opt===hxVal?pillSel:pillDef}">${opt.replace('HX','')}</button>`;
+    });
+    stickyHtml += `</div></div>`;
+
+    if (hxVal) {
+        // HXO
+        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">OPD Extra (HXO) <span class="text-teal-500">${hxoVal==='ไม่เลือก'?'ไม่เลือก':DL[hxoVal]+' บ./ครั้ง'}</span></p>
+            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+        hxoOpts.forEach(opt => {
+            const lbl = opt==='ไม่เลือก'?'ไม่':'HXO'+opt.replace('HXO','');
+            stickyHtml += `<button onclick="window.set3DHXO('${opt}')" class="${opt===hxoVal?pillSel:pillDef}">${lbl}</button>`;
+        });
+        stickyHtml += `</div></div>`;
+
+        // HXD
+        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Deductible (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
+            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+        hxdOpts.forEach(opt => {
+            const lbl = opt==='ไม่เลือก'?'ไม่':'HXD'+opt.replace('HXD','');
+            stickyHtml += `<button onclick="window.set3DHXD('${opt}')" class="${opt===hxdVal?pillSel:pillDef}">${lbl}</button>`;
+        });
+        stickyHtml += `</div></div>`;
+
+        // HBF
+        stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfVal==='ไม่เลือก'?'ไม่เลือก':(hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])+' บ./วัน'}</span></p>
+            <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+        hbfOpts.forEach(opt => {
+            const lbl = opt==='ไม่เลือก'?'ไม่':opt.replace('HBF','');
+            stickyHtml += `<button onclick="window.set3DHBF('${opt}')" class="${opt===hbfVal?pillSel:pillDef}">${lbl}</button>`;
+        });
+        stickyHtml += `</div></div>`;
+    }
+    stickyHtml += `</div>`;
+
+    // ── 2. Content ────────────────────────────────────────────────────────
     let contentHtml = '';
 
     if (!hxVal || hxVal === 'ไม่เลือก') {
         contentHtml = `<div class="flex flex-col items-center justify-center py-16 text-center gap-3">
             <i class="fas fa-bed text-4xl text-slate-200 mb-1"></i>
             <p class="text-[13px] font-semibold text-slate-400">กรุณาเลือกแผน HX ด้านบน</p>
-            <p class="text-[11px] text-slate-300">แตะปุ่มแผนเพื่อดูรายละเอียดความคุ้มครอง</p>
+            <p class="text-[11px] text-slate-300">แตะเพื่อดูรายละเอียดความคุ้มครอง 19 หมวด</p>
         </div>`;
     } else {
-        const planInfo = HX_PLAN_INFO[hxVal] || { room: '-', lump: '-', tier: 'base' };
+        const planInfo = HX_PLAN_INFO[hxVal] || { room:'-', lump:'-', tier:'base' };
         const tier = planInfo.tier;
 
-        const catRow = (cat) =>
-            `<div class="border-b border-slate-100 py-3 flex items-start gap-3 text-sm text-slate-700">
-                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
-                <div class="flex-1 min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 block">หมวด ${cat.num}</span>
-                    <span class="font-medium leading-snug">${cat.title}</span>
+        // Plan info bar
+        contentHtml += `<div class="px-3 pt-3">
+            <div class="flex items-center justify-between p-3 bg-teal-50 rounded-2xl border border-teal-100 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-bed text-teal-500"></i>
+                    <span class="text-sm font-bold text-teal-800">${hxVal}</span>
+                    <span class="text-[11px] text-teal-600">ค่าห้อง ${planInfo.room} บ./คืน</span>
                 </div>
-                <span class="text-[11px] text-slate-400 shrink-0 self-center font-medium">${cat.limit}</span>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 block">วงเงินสูงสุด</span>
+                    <span class="text-sm font-bold text-teal-700">${planInfo.lump}</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 p-2.5 bg-rose-50 rounded-xl border border-rose-100 mb-4">
+                <i class="fas fa-heart-pulse text-rose-500 text-sm shrink-0"></i>
+                <span class="text-[12px] font-bold text-rose-700">โรคร้ายแรง — รับวงเงินคุ้มครอง 2 เท่า</span>
             </div>`;
 
-        const SNUM = { m14:'14', m15:'15', m16:'16', m17:'17', m18:'18', m19:'19' };
-        const sectionRow = (key) => {
-            const sec = SECTION_DATA[key]; if (!sec) return '';
-            const cleanTitle = sec.title.replace(/^หมวด \d+:\s*/, '');
-            const subItems = sec.items.map(i => `<p class="text-[11px] text-slate-400 leading-snug">· ${i}</p>`).join('');
-            const condNote = sec.cond ? `<p class="text-[10px] text-slate-400 italic mt-1">${sec.cond}</p>` : '';
-            return `<div class="border-b border-slate-100 py-3 flex items-start gap-3">
-                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
-                <div class="flex-1 min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 block">หมวด ${SNUM[key]}</span>
-                    <span class="text-sm font-medium text-slate-700 leading-snug">${cleanTitle}</span>
-                    <div class="mt-1 space-y-0.5">${subItems}</div>
-                    ${condNote}
+        // Category accordion rows
+        const accRow = (num, title, limit, subs, condNote) => {
+            const isOpen = window._3dOpenCats.has(num);
+            const subHtml = isOpen && subs && subs.length
+                ? `<div class="mt-2 space-y-1 pl-1">` +
+                  subs.map(s=>`<p class="text-[11px] text-slate-500 leading-snug flex items-start gap-1.5"><i class="fas fa-circle text-[4px] text-slate-300 mt-1.5 shrink-0"></i>${s}</p>`).join('') +
+                  (condNote ? `<p class="text-[10px] text-amber-600 italic mt-1.5 flex items-start gap-1"><i class="fas fa-clock text-[9px] mt-0.5 shrink-0"></i>${condNote}</p>` : '') +
+                  `</div>` : '';
+            return `<div class="border-b border-slate-100 py-2.5 cursor-pointer" onclick="window.toggle3DCat('${num}')">
+                <div class="flex items-center gap-2.5">
+                    <i class="fas fa-check-circle text-emerald-500 shrink-0 text-sm"></i>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[9px] font-bold text-slate-400 block leading-none mb-0.5">หมวด ${num}</span>
+                        <span class="text-[13px] font-semibold text-slate-700 leading-snug">${title}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="text-[10px] text-slate-400 font-medium">${limit}</span>
+                        <i class="fas fa-chevron-${isOpen?'up':'down'} text-[10px] text-slate-300"></i>
+                    </div>
                 </div>
+                ${subHtml}
             </div>`;
         };
 
-        const riderRow = (icon, iconCls, label, sublabel, value, unit) =>
-            `<div class="border-b border-slate-100 py-3 flex items-center gap-3">
-                <i class="fas ${icon} ${iconCls} shrink-0 text-base"></i>
-                <div class="flex-1 min-w-0">
-                    <span class="text-sm font-medium text-slate-700">${label}</span>
-                    <p class="text-[11px] text-slate-400">${sublabel}</p>
-                </div>
-                <span class="text-sm font-bold text-slate-700 shrink-0">${value}
-                    <span class="text-[11px] font-normal text-slate-400">${unit}</span>
-                </span>
-            </div>`;
+        // หมวด 1-13 (ทุกแผน)
+        HX_BASE_CATEGORIES.forEach(cat => {
+            contentHtml += accRow(cat.num, cat.title, cat.limit, _3D_BASE_SUBS[cat.num], null);
+        });
 
-        contentHtml += `<div class="px-3 pt-3 pb-6">`;
-
-        // Plan info bar + CI highlight
-        contentHtml += `<div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <span class="text-sm font-bold text-slate-700"><i class="fas fa-bed text-teal-500 mr-1.5"></i>${hxVal}</span>
-            <span class="text-[11px] text-slate-400 font-medium">${planInfo.room} บ./คืน · ${planInfo.lump} บ.</span>
-        </div>`;
-        contentHtml += `<div class="bg-rose-50 text-rose-700 p-3 rounded-lg flex items-center gap-2 font-bold mb-4">
-            <i class="fas fa-heart-pulse text-rose-500 shrink-0"></i>
-            <span class="text-[13px]">โรคร้ายแรงรับวงเงิน 2 เท่า</span>
-        </div>`;
-
-        // Categories 1–13 (all plans)
-        contentHtml += HX_BASE_CATEGORIES.map(catRow).join('');
-
-        // Categories 14–18 (HX40 / HX60 / HX150 / HX300)
+        // หมวด 14-18 (mid + full)
         if (tier === 'mid' || tier === 'full') {
-            contentHtml += ['m14','m15','m16','m17','m18'].map(sectionRow).join('');
+            [['14','m14'],['15','m15'],['16','m16'],['17','m17'],['18','m18']].forEach(([num, key]) => {
+                const sec = SECTION_DATA[key]; if (!sec) return;
+                contentHtml += accRow(num, sec.title, 'เหมาจ่าย', sec.items, sec.cond);
+            });
         }
 
-        // Category 19 (HX150 / HX300 only)
+        // หมวด 19 (full only)
         if (tier === 'full') {
-            contentHtml += sectionRow('m19');
-        }
-
-        // Riders — only if at least one is active
-        const hasRider = (hxoVal !== 'ไม่เลือก') || (hxdVal !== 'ไม่เลือก') || (hbfVal !== 'ไม่เลือก');
-        if (hasRider) {
-            contentHtml += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-4 pb-1">ส่วนเสริม (Riders)</p>`;
-            if (hxoVal !== 'ไม่เลือก')
-                contentHtml += riderRow('fa-plus-circle', 'text-blue-400',
-                    'OPD Extra (HXO)', 'วงเงินค่ารักษาผู้ป่วยนอก',
-                    DL[hxoVal] || hxoVal, 'บาท/ครั้ง');
-            if (hxdVal !== 'ไม่เลือก')
-                contentHtml += riderRow('fa-shield-alt', 'text-indigo-400',
-                    'Advance Deductible (HXD)', 'วงเงิน Deductible / รอบปีกรมธรรม์',
-                    DL[hxdVal] || hxdVal, 'บาท/รอบ');
-            if (hbfVal !== 'ไม่เลือก') {
-                const hbfDisplay = hbfVal.startsWith('CUSTOM:')
-                    ? parseInt(hbfVal.split(':')[1]).toLocaleString()
-                    : (DL[hbfVal] || hbfVal);
-                contentHtml += riderRow('fa-heartbeat', 'text-rose-400',
-                    'ชดเชยรายวัน (HBF)', 'เงินชดเชยกรณีนอนโรงพยาบาล',
-                    hbfDisplay, 'บาท/วัน');
-            }
+            const sec = SECTION_DATA['m19'];
+            if (sec) contentHtml += accRow('19', sec.title, 'เหมาจ่าย', sec.items, sec.cond);
         }
 
         contentHtml += `</div>`;
 
+        // tier badge
+        const tierBadge = { base:'HX15–20 (13 หมวด)', mid:'HX40–60 (18 หมวด)', full:'HX150–300 (19 หมวด)' };
+        contentHtml += `<div class="mx-3 mb-6 mt-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+            <span class="text-[10px] text-slate-400">แผนนี้คุ้มครอง · </span>
+            <span class="text-[10px] font-bold text-teal-600">${tierBadge[tier]||''}</span>
+        </div>`;
     }
 
-    body.innerHTML = pillHtml + contentHtml;
+    body.innerHTML = stickyHtml + contentHtml;
 };
