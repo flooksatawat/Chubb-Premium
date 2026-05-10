@@ -636,15 +636,16 @@
             #tableHeaderTitle > div { gap: 3px !important; padding-top: 1px !important; padding-bottom: 1px !important; }
         }
 
-        /* ==================== จอใหญ่กว่า 7.92" (> 850px) — ลด left pane ให้แคบลง ====================
-           เพิ่ม right pane ให้มีพื้นที่แสดงผลมากขึ้น */
+        /* ==================== จอใหญ่กว่า 8" (> 850px) — อัตราส่วน 1:2 ====================
+           left pane 1 ส่วน : right pane 2 ส่วน */
         @media (min-width: 851px) and (min-height: 600px) {
             .app-container {
-                flex: 0 0 360px !important;
-                min-width: 360px !important;
-                max-width: 360px !important;
-                width: 360px !important;
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                width: auto !important;
             }
+            #rightPane { flex: 2 1 0 !important; }
         }
 
         /* ==================== SWIPE-TO-HIDE LEFT PANE ==================== */
@@ -662,6 +663,5 @@
                 opacity: 0 !important;
                 pointer-events: none !important;
             }
-            #restoreLeftPaneBtn { display: none !important; }
-            .command-center-layout.left-pane-hidden #restoreLeftPaneBtn { display: flex !important; }
+            #toggleLeftPaneBtn { display: flex !important; }
         }

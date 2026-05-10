@@ -551,16 +551,16 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
         <!-- RIGHT PANE — Result Canvas (visible ≥ 768px, รองรับ iPad / Tablet / จอในของมือถือพับ) -->
         <div class="right-pane hidden min-[700px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane" style="flex-direction:column;">
-            <!-- ปุ่มกู้คืน left pane — แสดงเมื่อ swipe ซ่อน left pane -->
-            <button id="restoreLeftPaneBtn" onclick="window.restoreLeftPane && window.restoreLeftPane()"
-                title="แสดงเมนูซ้าย"
-                style="position:absolute;top:50%;left:0;transform:translateY(-50%);z-index:100;
-                       width:22px;height:56px;
-                       background:linear-gradient(180deg,#243c94,#2a45a3);
-                       border-radius:0 10px 10px 0;border:none;cursor:pointer;
-                       align-items:center;justify-content:center;
-                       box-shadow:3px 0 10px rgba(36,60,148,0.25);">
-                <i class="fas fa-chevron-right" style="color:rgba(255,255,255,0.9);font-size:9px;"></i>
+            <!-- ปุ่ม toggle ซ่อน/แสดง left pane -->
+            <button id="toggleLeftPaneBtn" onclick="window.toggleLeftPane && window.toggleLeftPane()"
+                title="ซ่อน/แสดงเมนูซ้าย"
+                style="position:absolute;top:12px;left:12px;z-index:100;
+                       width:30px;height:30px;
+                       background:rgba(255,255,255,0.92);
+                       border-radius:9px;border:1px solid rgba(36,60,148,0.18);cursor:pointer;
+                       display:flex;align-items:center;justify-content:center;
+                       box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+                <i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:10px;"></i>
             </button>
             <div id="rightPaneMain" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
             <div id="resultCanvas" class="no-scrollbar w-full h-full p-6 overflow-y-auto" style="flex:1;">
@@ -1528,41 +1528,25 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             });
         })();
 
-        // ==================== SWIPE-TO-HIDE LEFT PANE ====================
-        (function initSwipePane() {
-            const layout   = document.querySelector('.command-center-layout');
-            const leftPane = document.querySelector('.app-container');
-            const rightPane = document.getElementById('rightPane');
-            if (!layout || !leftPane || !rightPane) return;
-            const THRESHOLD = 65; // px ขั้นต่ำในการ swipe
+        // ==================== TOGGLE LEFT PANE BUTTON ====================
+        (function initTogglePane() {
+            const layout = document.querySelector('.command-center-layout');
+            if (!layout) return;
 
-            window.hideLeftPane    = () => layout.classList.add('left-pane-hidden');
-            window.restoreLeftPane = () => layout.classList.remove('left-pane-hidden');
+            window.toggleLeftPane = function() {
+                const hidden = layout.classList.toggle('left-pane-hidden');
+                const icon = document.getElementById('toggleLeftPaneIcon');
+                if (icon) icon.className = hidden ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+            };
 
-            let lx = 0, ly = 0, rx = 0, ry = 0;
-
-            // Swipe ซ้ายบน left pane → ซ่อน
-            leftPane.addEventListener('touchstart', e => { lx = e.touches[0].clientX; ly = e.touches[0].clientY; }, { passive: true });
-            leftPane.addEventListener('touchend', e => {
-                if (!window.isWideLayout || !window.isWideLayout()) return;
-                const dx = e.changedTouches[0].clientX - lx;
-                const dy = e.changedTouches[0].clientY - ly;
-                if (dx < -THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) window.hideLeftPane();
-            }, { passive: true });
-
-            // Swipe ขวาบน right pane → กู้คืน
-            rightPane.addEventListener('touchstart', e => { rx = e.touches[0].clientX; ry = e.touches[0].clientY; }, { passive: true });
-            rightPane.addEventListener('touchend', e => {
-                if (!window.isWideLayout || !window.isWideLayout()) return;
-                const dx = e.changedTouches[0].clientX - rx;
-                const dy = e.changedTouches[0].clientY - ry;
-                if (dx > THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) window.restoreLeftPane();
-            }, { passive: true });
-
-            // Reset เมื่อหมุนจอหรือ resize
+            // Reset เมื่อหมุนจอหรือ resize ออกจาก wide mode
             window.addEventListener('resize', () => {
                 setTimeout(() => {
-                    if (!window.isWideLayout || !window.isWideLayout()) layout.classList.remove('left-pane-hidden');
+                    if (!window.isWideLayout || !window.isWideLayout()) {
+                        layout.classList.remove('left-pane-hidden');
+                        const icon = document.getElementById('toggleLeftPaneIcon');
+                        if (icon) icon.className = 'fas fa-chevron-left';
+                    }
                 }, 200);
             });
         })();
