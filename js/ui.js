@@ -412,17 +412,13 @@ function switchView(targetView) {
         // Always keep mainView (form) visible in left pane
         if (mainView) mainView.style.removeProperty('display');
 
-        // Helper: move element into rightPane and make it fill space
+        // Mount: absolute overlay on top of rightPaneMain — no rightPaneMain toggle needed
         function mountInRight(el) {
             if (!el) return;
             if (el.parentElement !== rightPane) rightPane.appendChild(el);
-            el.style.setProperty('display', 'flex', 'important');
-            el.style.flex          = '1';
-            el.style.flexDirection = 'column';
-            el.style.overflow      = 'hidden';
-            el.style.width         = '100%';
+            el.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:#f8fafc;';
         }
-        // Helper: hide and return element to appContainer if it wandered into rightPane
+        // Unmount: hide and return to appContainer
         function unmount(el) {
             if (!el) return;
             el.style.cssText = 'display:none';
@@ -430,16 +426,13 @@ function switchView(targetView) {
         }
 
         if (targetView === 'main') {
-            if (rightPaneMain) rightPaneMain.style.removeProperty('display');
             unmount(tableView);
             unmount(cashView);
         } else if (targetView === 'table') {
-            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
             unmount(cashView);
             mountInRight(tableView);
             if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
         } else if (targetView === 'cash') {
-            if (rightPaneMain) rightPaneMain.style.setProperty('display', 'none', 'important');
             unmount(tableView);
             mountInRight(cashView);
             if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
