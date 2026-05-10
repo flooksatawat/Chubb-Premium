@@ -2006,7 +2006,23 @@ function getComRateArray(planKey) {
                     let mainRateKey = currentAppPlan === '24 TX' ? '24TX' : currentPlan;
                     return getComRateArray(mainRateKey);
                 }
-                return Array.isArray(rateData) ? rateData : [];
+                if (Array.isArray(rateData)) return rateData;
+                // sum-tiered: look up by sum insured
+                if (typeof rateData === 'object' && rateData !== null) {
+                    const sum = (typeof lastCalculationData !== 'undefined' && lastCalculationData) ? (lastCalculationData.sum || 0) : 0;
+                    for (let sumKey in rateData) {
+                        if (sumKey.includes('-')) {
+                            let sp = sumKey.split('-');
+                            let sMin = parseInt(sp[0], 10);
+                            let sMax = parseInt(sp[1], 10);
+                            if (sum >= sMin && sum <= sMax) return Array.isArray(rateData[sumKey]) ? rateData[sumKey] : [];
+                        }
+                    }
+                    // default: last sum tier
+                    const lastSumKey = Object.keys(rateData).pop();
+                    return lastSumKey && Array.isArray(rateData[lastSumKey]) ? rateData[lastSumKey] : [];
+                }
+                return [];
             }
         }
     }
