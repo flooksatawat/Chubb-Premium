@@ -3844,7 +3844,7 @@ window.render3DDetailsAccordion = function() {
             stickyHtml += `</div></div>`;
 
             // HXD
-            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Deductible (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Advance (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
                 <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
             hxdOpts.forEach(opt => {
                 const lbl = opt==='ไม่เลือก'?'ไม่':'HXD'+opt.replace('HXD','');
