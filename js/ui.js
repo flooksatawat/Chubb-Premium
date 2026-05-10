@@ -2009,15 +2009,15 @@ function openUniversalModal(d) {
             if (pd && pd.remark && currentAppPlan !== '3D Health Excellence') {
                  html += `<div class="bg-slate-50 p-2.5 rounded-[12px] border border-slate-100 mt-2"><p class="text-[10px] text-slate-500 italic font-medium leading-relaxed">${pd.remark.replace(/\n/g, '<br>')}</p></div>`;
             }
-            if (currentAppPlan === '3D Health Excellence') {
-                html += `<button onclick="window.open3DDetailsView();" class="w-full mt-3 flex items-center justify-between p-3.5 bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/70 rounded-[14px] hover:shadow-md active:scale-[0.98] transition-all group">
-                    <span class="flex items-center gap-2 text-[13px] font-bold text-teal-800"><i class="fas fa-shield-heart text-teal-500"></i> ดูรายละเอียดความคุ้มครอง 19 หมวด</span>
-                    <i class="fas fa-chevron-right text-teal-400 text-[11px] group-hover:text-teal-600 transition-colors"></i>
-                </button>`;
-            }
             dynamicContainer.innerHTML = html;
         }
-        
+
+        // 3D + wide layout → แสดง 19 หมวดใน right pane ทันที ไม่ต้องเปิด popup
+        if (currentAppPlan === '3D Health Excellence' && _wide) {
+            window.open3DDetailsView();
+            return;
+        }
+
         const actionContainer = document.getElementById('modalActionBtnsContainer');
         if (actionContainer) actionContainer.innerHTML = _MODAL_ACTION_HTML;
         openPopup('resultModal');
@@ -3593,6 +3593,8 @@ window.openTableFromModal = function() {
 };
 
 window.open3DDetailsView = function() {
+    // ปิด popup ที่อาจบังอยู่ก่อน
+    if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
     const isWide = window.isWideLayout();
     const container = isWide ? document.getElementById('rightPane') : document.body;
 
@@ -3788,7 +3790,6 @@ window.render3DDetailsAccordion = function() {
 
         contentHtml += `</div>`;
 
-        contentHtml += '<div class="sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t border-slate-100 px-3 py-2.5">' + window.renderD3QuickPills('accordion') + '</div>';
     }
 
     body.innerHTML = pillHtml + contentHtml;
