@@ -257,8 +257,8 @@ function showVoiceResultPopup(d) {
         rows += `<button onclick="manualTriggerPopup(); closePopup('voiceResultModal')" class="w-full mt-3 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 text-[14px] active:scale-95 transition-transform"><i class='fas fa-file-alt'></i> ดูรายละเอียด</button>`;
     }
 
-    // จอใหญ่: ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
-    if (window.innerWidth >= 840) {
+    // จอใหญ่ (Tablet/iPad/Foldable inner): ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
+    if (typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 768) {
         if (typeof _injectToPearLCanvas === 'function') _injectToPearLCanvas(d);
         return;
     }

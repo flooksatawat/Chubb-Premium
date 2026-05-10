@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=foldable2">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -148,7 +148,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 </head>
 <body>
     <div class="command-center-layout">
-    <div class="app-container w-full min-[840px]:w-[400px] min-[840px]:min-w-[400px] min-[840px]:max-w-[400px] min-[840px]:h-screen overflow-x-hidden bg-white z-20 shadow-xl">
+    <div class="app-container w-full min-[700px]:w-[400px] min-[700px]:min-w-[400px] min-[700px]:max-w-[400px] min-[700px]:h-screen overflow-x-hidden bg-white z-20 shadow-xl">
         <!-- Ambient Glow Elements -->
         <div class="ambient-bg">
             <div class="ambient-glow-1"></div>
@@ -525,8 +525,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <!-- ใส่ absolute เต็มจอ แล้วตั้ง overflow-y-auto ให้ Scroll ได้อิสระ 100% -->
                  <div id="planListContainer" class="absolute inset-0 w-full h-full overflow-y-auto no-scrollbar px-5 pt-[140px] pb-[130px] space-y-3.5 z-10" style="-webkit-overflow-scrolling: touch;"></div>
                 <!-- JS จะใส่ข้อมูลที่นี่ -->
-                </div>
-                
+
                 <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white/30 via-white/10 to-transparent pointer-events-none z-20 transition-opacity duration-500"></div>
 
                 <!-- Floating AI Bottom Bar -->
@@ -549,8 +548,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
     </div><!-- /app-container -->
 
-        <!-- RIGHT PANE — Result Canvas (visible ≥ 840px) -->
-        <div class="right-pane hidden min-[840px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane">
+        <!-- RIGHT PANE — Result Canvas (visible ≥ 768px, รองรับ iPad / Tablet / จอในของมือถือพับ) -->
+        <div class="right-pane hidden min-[700px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane">
             <div style="padding:20px 24px 14px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="width:44px;height:44px;border-radius:16px;background:linear-gradient(135deg,#00A651,#00843F);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,166,81,0.35);flex-shrink:0;">
@@ -1457,7 +1456,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=5"></script>
+    <script src="js/ui.js?v=6"></script>
     <script src="js/share.js?v=5"></script>
     <script>
         window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
@@ -1468,6 +1467,66 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 if (e.shiftKey && (e.key === 'i' || e.key === 'I' || e.key === 'j' || e.key === 'J' || e.key === 'c' || e.key === 'C')) { e.preventDefault(); return false; }
             }
         }, false);
+
+        /* Wide-layout auto-render — ให้จอขวาแสดงผลลัพธ์ทันทีเมื่ออยู่ในโหมดจอใหญ่
+           (iPad / Tablet / Desktop / จอในของมือถือพับ) โดยไม่ต้องรอผู้ใช้กดปุ่ม
+           รวมถึง re-render เมื่อผู้ใช้กาง/พับ Galaxy Z Fold กลางคัน */
+        (function () {
+            function tryInjectToCanvas() {
+                if (typeof window.isWideLayout !== 'function' || !window.isWideLayout()) return;
+                if (typeof _injectToPearLCanvas !== 'function') return;
+                // คำนวณก่อนถ้ายังไม่มีข้อมูล (อาจเป็นการเปิดแอปครั้งแรก)
+                if ((typeof lastCalculationData === 'undefined' || !lastCalculationData)
+                    && typeof calculate === 'function') {
+                    try {
+                        const mode = typeof currentMode !== 'undefined' ? currentMode : 'premium';
+                        calculate(mode, true);
+                    } catch (e) { /* swallow — first-load defaults may not be ready */ }
+                }
+                if (typeof lastCalculationData !== 'undefined' && lastCalculationData) {
+                    _injectToPearLCanvas(lastCalculationData);
+                }
+            }
+
+            // Initial render — รอให้ scripts โหลดและฟิลด์ default พร้อม
+            window.addEventListener('load', function () {
+                setTimeout(tryInjectToCanvas, 400);
+            });
+
+            // Live re-render ทุกครั้งที่ calculate() สำเร็จ (debounced)
+            // wrap function calculate เพื่อ hook โดยไม่แก้ไฟล์ calculator.js
+            // ถ้า __suppressLive = true (เช่น ระหว่าง computeForPlan สำหรับ comparison) — ข้ามการ render
+            // เพื่อกัน infinite loop: render → compute → calculate → render → ...
+            let liveTimer = null;
+            function hookCalculate() {
+                if (typeof window.calculate !== 'function' || window.__calculateHooked) return;
+                const original = window.calculate;
+                window.calculate = function () {
+                    const result = original.apply(this, arguments);
+                    if (!window.__suppressLive) {
+                        clearTimeout(liveTimer);
+                        liveTimer = setTimeout(tryInjectToCanvas, 80);
+                    }
+                    return result;
+                };
+                window.__calculateHooked = true;
+            }
+            window.addEventListener('load', hookCalculate);
+            setTimeout(hookCalculate, 1000); // กันพลาด timing
+
+            // Live switch เมื่อกาง/พับมือถือพับ
+            let lastWide = typeof window.isWideLayout === 'function' ? window.isWideLayout() : false;
+            let resizeTimer = null;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function () {
+                    const nowWide = typeof window.isWideLayout === 'function' ? window.isWideLayout() : false;
+                    if (nowWide === lastWide) return;
+                    lastWide = nowWide;
+                    if (nowWide) tryInjectToCanvas();
+                }, 150);
+            });
+        })();
     </script>
 </body>
 </html>

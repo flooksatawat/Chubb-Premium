@@ -1,4 +1,21 @@
-﻿// ==================== PRODUCT CONDITIONS LOADER ====================
+﻿// ==================== LAYOUT BREAKPOINT (Tablet / iPad / Foldable inner screen) ====================
+// ตรงกับ CSS media query: (min-width: 700px) and (min-height: 600px)
+// ใช้ documentElement.clientWidth/Height (viewport CSS จริง — ตรงกับ matchMedia)
+// แทน window.innerWidth/Height (window inner รวม scrollbar/sidebar) เพื่อ sync กับ CSS
+// รองรับ:
+//   - iPad ทั้ง portrait/landscape (768×1024)
+//   - จอในของมือถือพับ (เช่น Galaxy Z Fold ~893×821 / 821×893 CSS px)
+//   - คอม/laptop ที่มี scrollbar หรือ sidebar กินพื้นที่
+// ไม่รวม:
+//   - จอนอกของมือถือพับ (~792×353) — สูงไม่พอ
+//   - มือถือทั่วไป
+window.isWideLayout = function () {
+    const w = document.documentElement.clientWidth || window.innerWidth;
+    const h = document.documentElement.clientHeight || window.innerHeight;
+    return w >= 700 && h >= 600;
+};
+
+// ==================== PRODUCT CONDITIONS LOADER ====================
 window.PRODUCT_CONDITIONS = {};
 
 // โหลดไฟล์ JSON ทั้งหมด
@@ -1174,7 +1191,7 @@ function manualTriggerPopup() {
             return;
         }
 
-        if (window.innerWidth >= 840 && document.getElementById('rightPane')) {
+        if (window.isWideLayout() && document.getElementById('rightPane')) {
             if (typeof _injectToPearLCanvas === 'function') {
                 _injectToPearLCanvas(lastCalculationData);
             } else {
@@ -1196,10 +1213,58 @@ function injectMaturityModal() {
     }
 }
 
+// ==================== PLAN COMPARISON ENGINE ====================
+// คำนวณ premium/sum สำหรับแผนอื่น โดยใช้ค่าใน form ปัจจุบัน
+// (save state → switch plan → calculate → restore — กัน side effects ด้วย __suppressLive flag)
+window.__comparePlan = null;
+
+window.computeForPlan = function (planName) {
+    if (!planName || typeof PLAN_CONFIG === 'undefined' || !PLAN_CONFIG[planName]) return null;
+    if (planName === currentAppPlan) return lastCalculationData;
+
+    const cfg = PLAN_CONFIG[planName];
+    const saved = {
+        appPlan: currentAppPlan,
+        plan: currentPlan,
+        data: lastCalculationData,
+        mode: typeof currentMode !== 'undefined' ? currentMode : 'premium',
+        suppress: window.__suppressLive
+    };
+    window.__suppressLive = true;
+    let result = null;
+    try {
+        currentAppPlan = planName;
+        currentPlan = (cfg.options && cfg.options[0]) || currentPlan;
+        if (typeof calculate === 'function') calculate(saved.mode, true);
+        if (lastCalculationData) {
+            result = Object.assign({}, lastCalculationData, { _planName: planName });
+        }
+    } catch (e) {
+        console.warn('computeForPlan failed for', planName, e);
+    } finally {
+        currentAppPlan = saved.appPlan;
+        currentPlan = saved.plan;
+        lastCalculationData = saved.data;
+        window.__suppressLive = saved.suppress;
+    }
+    return result;
+};
+
 // ==================== PEARL LIVE CANVAS — Right Pane Injection ====================
+// Mobile (Swal popup) → ตารางสรุปแบบเดิม
+// Wide layout (iPad/Tablet/Desktop/Foldable inner) → 2-column plan comparison
 function _injectToPearLCanvas(d) {
     const fmtN = (n) => typeof formatNum === 'function' ? formatNum(n) : Math.round(n).toLocaleString();
     const fmtP = (n) => Math.round(n).toLocaleString();
+
+    // Skip ถ้าอยู่ระหว่าง computeForPlan (กัน recursion)
+    if (window.__suppressLive) return;
+
+    // Wide layout → render comparison view
+    if (window.isWideLayout && window.isWideLayout()) {
+        const html = _buildComparisonHtml(d, fmtN, fmtP);
+        if (window.injectToWorkspace(html)) return;
+    }
 
     const statusText = document.getElementById('canvasStatusText');
     if (statusText) { statusText.textContent = 'LIVE'; statusText.style.color = '#00A651'; }
@@ -1281,8 +1346,8 @@ function _injectToPearLCanvas(d) {
                 </table>
             </div>
 
-        <!-- Desktop right-pane: compact 3-button layout (visible ≥840px) -->
-        <div class="hidden min-[840px]:block">
+        <!-- Desktop / Tablet / Foldable right-pane: compact 3-button layout (visible ≥768px) -->
+        <div class="hidden min-[700px]:block">
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <button onclick="openTableFromModal()" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/70 hover:bg-white/90 border border-white/80 text-slate-600 font-bold text-sm shadow-sm transition-colors">
                     <i class="fas fa-table text-indigo-500"></i>ตาราง
@@ -1296,8 +1361,8 @@ function _injectToPearLCanvas(d) {
             </button>
         </div>
 
-        <!-- Mobile Swal popup: spacious vertical Pill Column (visible <840px) -->
-        <div class="min-[840px]:hidden flex flex-col gap-3 p-4">
+        <!-- Mobile Swal popup: spacious vertical Pill Column (visible <768px / จอนอกพับ) -->
+        <div class="min-[700px]:hidden flex flex-col gap-3 p-4">
             <button onclick="Swal.close(); setTimeout(() => openTableFromModal(), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
                 <i class="fas fa-table text-lg text-blue-500"></i>
                 <span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span>
@@ -1325,7 +1390,7 @@ function _injectToPearLCanvas(d) {
         </div>
         </div>`;
 
-    // Desktop: inject directly into the workspace; mobile/no-canvas: fall back to Swal popup.
+    // Mobile / no-canvas: fall back to Swal popup (wide layout handled at top of function)
     const resultHtml = contentHtml;
     if (!window.injectToWorkspace(resultHtml)) {
         Swal.fire({
@@ -1336,15 +1401,114 @@ function _injectToPearLCanvas(d) {
         });
     }
 }
+
+// ==================== COMPARISON VIEW BUILDER (Wide Layout Only) ====================
+function _buildComparisonHtml(d, fmtN, fmtP) {
+    const compareName = (window.__comparePlan && window.__comparePlan !== currentAppPlan)
+        ? window.__comparePlan : null;
+    const compareData = compareName ? window.computeForPlan(compareName) : null;
+
+    const planList = (typeof PLAN_CONFIG !== 'undefined')
+        ? Object.keys(PLAN_CONFIG).filter(p => p !== currentAppPlan)
+        : [];
+
+    const dropdownOpts = '<option value="">— เลือกแผนเพื่อเปรียบเทียบ —</option>'
+        + planList.map(p => `<option value="${p}"${p === compareName ? ' selected' : ''}>${p}</option>`).join('');
+
+    function metricCard(label, valueHtml, color) {
+        return `
+            <div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">${label}</div>
+                <div class="text-2xl font-extrabold ${color} mt-2 leading-tight">${valueHtml}</div>
+            </div>
+        `;
+    }
+
+    function column(title, isCurrent, data) {
+        const cardClass = isCurrent
+            ? 'border-emerald-300 bg-gradient-to-br from-emerald-50/60 to-white shadow-md'
+            : 'border-blue-200 bg-gradient-to-br from-blue-50/40 to-white';
+
+        const header = isCurrent
+            ? `
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="text-base font-extrabold text-slate-900 truncate">${title || '—'}</div>
+                    <span class="shrink-0 inline-block bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">แผนปัจจุบัน</span>
+                </div>
+                <div class="text-[11px] text-emerald-700 font-medium">ค่าที่คำนวณจากฟอร์มซ้าย</div>
+            `
+            : `
+                <select onchange="window.__comparePlan = this.value || null; if (window.lastCalculationData) window._injectToPearLCanvas(window.lastCalculationData);"
+                    class="w-full bg-white border border-blue-300 rounded-lg px-3 py-2.5 text-sm font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 cursor-pointer">
+                    ${dropdownOpts}
+                </select>
+                <div class="text-[11px] text-blue-700 font-medium mt-2">เลือกแผนเพื่อดูเบี้ย/ทุนเปรียบเทียบ</div>
+            `;
+
+        const body = data ? `
+            <div class="mt-4 space-y-3">
+                ${metricCard('เบี้ยประกัน / ปี', `${fmtP(data.premium)} <span class="text-base font-bold text-slate-500">฿</span>`, 'text-blue-600')}
+                ${metricCard('ทุนประกัน', `${fmtN(data.sum)} <span class="text-base font-bold text-slate-500">฿</span>`, 'text-emerald-600')}
+            </div>
+        ` : `
+            <div class="mt-4 flex flex-col items-center justify-center text-center text-slate-400 py-12 px-4 border-2 border-dashed border-slate-200 rounded-xl">
+                <i class="fas fa-arrow-up text-3xl mb-3 text-blue-300"></i>
+                <div class="text-sm font-medium">เลือกแผนจากเมนูด้านบน<br>เพื่อเปรียบเทียบเบี้ย/ทุน</div>
+            </div>
+        `;
+
+        return `
+            <div class="rounded-2xl border-2 ${cardClass} p-5 flex flex-col" style="min-width:0;">
+                ${header}
+                ${body}
+            </div>
+        `;
+    }
+
+    return `
+        <div class="max-w-5xl mx-auto p-2">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1e3a8a] to-[#2a45a3] flex items-center justify-center shadow-md shrink-0">
+                    <i class="fas fa-scale-balanced text-white text-sm"></i>
+                </div>
+                <div>
+                    <div class="text-base font-extrabold text-slate-900 leading-tight">เปรียบเทียบแผนประกัน</div>
+                    <div class="text-[11px] text-slate-500 font-medium">เลือกแผนทางขวาเพื่อเทียบเบี้ย/ทุนกับแผนปัจจุบัน</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: <span class="font-bold">${d.gender}</span></span>
+                <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: <span class="font-bold">${d.age} ปี</span></span>
+                ${d.years ? `<span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: <span class="font-bold">${d.years} ปี</span></span>` : ''}
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                ${column(currentAppPlan, true, d)}
+                ${column(compareName, false, compareData)}
+            </div>
+
+            ${compareData ? `
+                <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[12px] text-slate-600">
+                    <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                    ผลต่างเบี้ย/ปี: <span class="font-bold ${compareData.premium > d.premium ? 'text-rose-600' : 'text-emerald-600'}">${(compareData.premium > d.premium ? '+' : '')}${fmtP(compareData.premium - d.premium)} ฿</span>
+                    · ผลต่างทุน: <span class="font-bold ${compareData.sum > d.sum ? 'text-emerald-600' : 'text-rose-600'}">${(compareData.sum > d.sum ? '+' : '')}${fmtN(compareData.sum - d.sum)} ฿</span>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+window._buildComparisonHtml = _buildComparisonHtml;
+
 // Expose globally so share.js (loaded in same scope) can always reach it
 window._injectToPearLCanvas = _injectToPearLCanvas;
 
 // ==================== WORKSPACE DATA BRIDGE ====================
-// Force-injects HTML into the desktop right-pane. Returns false if no canvas
-// or below the 840px desktop threshold so callers can fall back to Swal.
+// Force-injects HTML into the right-pane. Returns false if no canvas
+// or below the wide-layout threshold (≥768×600) so callers can fall back to Swal.
 window.injectToWorkspace = function(html) {
     const canvas = document.getElementById('resultCanvas');
-    if (canvas && window.innerWidth >= 840) {
+    if (canvas && window.isWideLayout()) {
         canvas.innerHTML = html;
         canvas.classList.remove('workspace-fade-slide-up');
         void canvas.offsetWidth; // force reflow so the animation replays on each inject
@@ -1361,7 +1525,7 @@ window.renderToWorkspace = window.injectToWorkspace; // legacy alias
 // ==================== GLOBAL DISPLAY HUB ====================
 window.displayPremiumResult = function(tableHtml, planName) {
     planName = planName || 'ผลการคำนวณ';
-    const isDesktop = window.innerWidth >= 840;
+    const isDesktop = window.isWideLayout();
 
     if (isDesktop && window.renderToWorkspace(tableHtml)) {
         return;
@@ -1390,8 +1554,8 @@ window.displayPremiumResult = function(tableHtml, planName) {
 function openUniversalModal(d) {
     if(!d) return;
 
-    // จอใหญ่: ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
-    if (window.innerWidth >= 840) {
+    // จอใหญ่ (Tablet/iPad/Foldable inner): ใช้ displayPremiumResult hub — ห้ามเด้ง Popup เด็ดขาด
+    if (window.isWideLayout()) {
         _injectToPearLCanvas(d);
         return;
     }

@@ -123,7 +123,13 @@
 
         .right-pane { display: none; }
 
-        @media (min-width: 840px) {
+        /* Tablet / iPad / Desktop / Foldable inner screen
+           - iPad portrait/landscape (≥ 768 × 600)
+           - Galaxy Z Fold inner screen ทั้งสองแนว (~893×821 และ 821×893)
+           - ใช้ 700px (ไม่ใช่ 768px) เพราะ document viewport จริงอาจเล็กกว่า window
+             เนื่องจาก scrollbar/DevTools/sidebar กินพื้นที่
+           - กันจอนอกพับแนว landscape (792×353) ไม่ให้หลุดเป็น desktop เพราะสูงไม่พอ */
+        @media (min-width: 700px) and (min-height: 600px) {
             body {
                 justify-content: flex-start;
                 align-items: flex-start;
@@ -139,25 +145,62 @@
                 overflow: hidden;
             }
             .app-container {
-                flex: 0 0 400px;
-                min-width: 400px;
-                max-width: 400px;
-                width: 400px;
-                height: 100vh;
-                height: 100dvh;
-                border-radius: 0;
-                border: none;
-                margin: 0;
+                flex: 0 0 400px !important;
+                min-width: 400px !important;
+                max-width: 400px !important;
+                width: 400px !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                border-radius: 0 !important;
+                border: none !important;
+                margin: 0 !important;
                 box-shadow: 4px 0 20px rgba(15, 23, 42, 0.10);
             }
             .right-pane {
-                display: flex;
-                flex: 1;
+                display: flex !important;
+                flex: 1 1 0 !important;
                 flex-direction: column;
                 background: #f8fafc;
                 border-left: 1px solid rgba(220, 230, 242, 0.9);
                 overflow: hidden;
                 position: relative;
+                min-width: 0 !important;
+            }
+        }
+
+        /* จอนอกของมือถือพับ (แนว landscape เท่านั้น เช่น 792×353) — บังคับเป็น mobile
+           ใช้เงื่อนไขเข้มงวดเพื่อไม่กระทบคอมที่หน้าต่าง browser เตี้ยกว่าปกติ */
+        @media (max-height: 450px) and (orientation: landscape) and (max-width: 1000px) {
+            .right-pane { display: none !important; }
+            .app-container {
+                max-width: 440px !important;
+                min-width: 0 !important;
+                width: 100% !important;
+                flex: 0 1 auto !important;
+                margin: 0 auto !important;
+            }
+            .command-center-layout {
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            body {
+                justify-content: center !important;
+                align-items: center !important;
+                background: #f4f7fb !important;
+            }
+        }
+
+        /* Foldable explicit detection — เมื่อหน้าจอมี hinge แนวตั้ง (ซ้าย|ขวา)
+           ให้ left pane เท่ากับ segment ซ้าย และ right pane เท่ากับ segment ขวา */
+        @media (horizontal-viewport-segments: 2) and (min-height: 600px) {
+            .app-container {
+                flex: 0 0 env(viewport-segment-width 0 0) !important;
+                min-width: env(viewport-segment-width 0 0) !important;
+                max-width: env(viewport-segment-width 0 0) !important;
+                width: env(viewport-segment-width 0 0) !important;
+            }
+            .right-pane {
+                margin-left: calc(env(viewport-segment-left 1 0) - env(viewport-segment-width 0 0));
             }
         }
 
@@ -340,7 +383,7 @@
         .pdt-row:nth-child(8) { animation-delay: 0.39s; }
 
         /* Right pane: resultCanvas layout */
-        @media (min-width: 840px) {
+        @media (min-width: 700px) and (min-height: 600px) {
             #resultCanvas {
                 display: flex;
                 flex-direction: column;
