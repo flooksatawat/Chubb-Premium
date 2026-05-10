@@ -1818,8 +1818,11 @@ const _MODAL_ACTION_HTML = `
         <i class="fas fa-coins text-[18px]"></i>แชร์เบี้ย
     </button>
 </div>
-<button onclick="openGenericShareModal('all')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all">
+<button onclick="openGenericShareModal('all')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all mb-2.5">
     <i class="fas fa-share-nodes text-[18px]"></i>แชร์สรุปทั้งหมด
+</button>
+<button onclick="openEsubModal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(244,63,94,0.35)] active:scale-[0.97] transition-all">
+    <i class="fas fa-file-signature text-[18px]"></i>E-sub &amp; QNI
 </button>`;
 
 function openUniversalModal(d) {
@@ -2011,7 +2014,6 @@ function openUniversalModal(d) {
                     <span class="flex items-center gap-2 text-[13px] font-bold text-teal-800"><i class="fas fa-shield-heart text-teal-500"></i> ดูรายละเอียดความคุ้มครอง 19 หมวด</span>
                     <i class="fas fa-chevron-right text-teal-400 text-[11px] group-hover:text-teal-600 transition-colors"></i>
                 </button>`;
-                html += '<div class="mt-3 pt-3 border-t border-slate-100">' + window.renderD3QuickPills('resultModal') + '</div>';
             }
             dynamicContainer.innerHTML = html;
         }
