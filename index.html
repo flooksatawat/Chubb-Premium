@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css?v=foldable19">
+    <link rel="stylesheet" href="css/style.css?v=foldable20">
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -1473,16 +1473,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
            รวมถึง re-render เมื่อผู้ใช้กาง/พับ Galaxy Z Fold กลางคัน */
         (function () {
             function tryInjectToCanvas() {
+                if (!window.__rightPaneActive) return;
                 if (typeof window.isWideLayout !== 'function' || !window.isWideLayout()) return;
                 if (typeof _injectToPearLCanvas !== 'function') return;
-                // คำนวณก่อนถ้ายังไม่มีข้อมูล (อาจเป็นการเปิดแอปครั้งแรก)
-                if ((typeof lastCalculationData === 'undefined' || !lastCalculationData)
-                    && typeof calculate === 'function') {
-                    try {
-                        const mode = typeof currentMode !== 'undefined' ? currentMode : 'premium';
-                        calculate(mode, true);
-                    } catch (e) { /* swallow — first-load defaults may not be ready */ }
-                }
                 if (typeof lastCalculationData !== 'undefined' && lastCalculationData) {
                     _injectToPearLCanvas(lastCalculationData);
                 }

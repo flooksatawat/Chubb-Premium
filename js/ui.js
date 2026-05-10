@@ -1046,7 +1046,8 @@ function replacePercentWithAmount(text, sum, premium) {
 function selectAppPlan(planName) {
     if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
 
-    closePopup('planSelectModal'); 
+    closePopup('planSelectModal');
+    if (typeof window.resetRightPaneToPlaceholder === 'function') window.resetRightPaneToPlaceholder();
     currentAppPlan = planName; 
     currentMode = 'sum'; 
     
@@ -1598,9 +1599,19 @@ window._injectToPearLCanvas = _injectToPearLCanvas;
 window.injectToWorkspace = function(html) {
     const canvas = document.getElementById('resultCanvas');
     if (canvas && window.isWideLayout()) {
-        canvas.innerHTML = html;
+        const placeholder = document.getElementById('canvasPlaceholder');
+        if (placeholder) placeholder.style.display = 'none';
+        let resultDiv = document.getElementById('canvasResult');
+        if (!resultDiv) {
+            resultDiv = document.createElement('div');
+            resultDiv.id = 'canvasResult';
+            resultDiv.style.cssText = 'width:100%;';
+            canvas.appendChild(resultDiv);
+        }
+        resultDiv.innerHTML = html;
+        window.__rightPaneActive = true;
         canvas.classList.remove('workspace-fade-slide-up');
-        void canvas.offsetWidth; // force reflow so the animation replays on each inject
+        void canvas.offsetWidth;
         canvas.classList.add('workspace-fade-slide-up');
         if (typeof closeVoiceOverlay === 'function') closeVoiceOverlay();
         const st = document.getElementById('canvasStatusText');
@@ -1610,6 +1621,14 @@ window.injectToWorkspace = function(html) {
     return false;
 };
 window.renderToWorkspace = window.injectToWorkspace; // legacy alias
+
+window.resetRightPaneToPlaceholder = function() {
+    window.__rightPaneActive = false;
+    const placeholder = document.getElementById('canvasPlaceholder');
+    if (placeholder) placeholder.style.display = '';
+    const resultDiv = document.getElementById('canvasResult');
+    if (resultDiv) resultDiv.innerHTML = '';
+};
 
 // ==================== GLOBAL DISPLAY HUB ====================
 window.displayPremiumResult = function(tableHtml, planName) {
