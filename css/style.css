@@ -555,4 +555,37 @@
             /* nav bottom bar */
             .app-container .glass-nav { padding-top: 6px !important; padding-bottom: 6px !important; }
             .app-container .pb-safe { padding-bottom: 10px !important; }
+
+            /* ── Bottom nav gradient container ── */
+            .app-container .pt-12 { padding-top: 20px !important; }
+
+            /* ── Bottom nav mic button ── */
+            .app-container #bottomNavContainer .w-\[48px\] { width: 36px !important; }
+            .app-container #bottomNavContainer .h-\[48px\] { height: 36px !important; }
+            .app-container #bottomNavContainer .text-\[18px\] { font-size: 14px !important; }
+            .app-container #bottomNavContainer .\-mt-5 { margin-top: -10px !important; }
+            .app-container #bottomNavContainer .rounded-full { }
+
+            /* ── Plan selection modal — card compact ── */
+            #planListContainer .w-16 { width: 44px !important; height: 44px !important; }
+            #planListContainer .h-16 { height: 44px !important; }
+            #planListContainer .text-\[28px\] { font-size: 20px !important; }
+            #planListContainer .text-\[26px\] { font-size: 18px !important; }
+            #planListContainer .text-\[17px\] { font-size: 13px !important; }
+            #planListContainer .text-\[12px\] { font-size: 11px !important; }
+            #planListContainer .mr-4 { margin-right: 8px !important; }
+            #planListContainer .p-4 { padding: 10px !important; }
+            #planListContainer .w-8 { width: 26px !important; }
+            #planListContainer .h-8 { height: 26px !important; }
+            #planListContainer .rounded-\[24px\] { border-radius: 14px !important; }
+            #planListContainer .rounded-\[20px\] { border-radius: 12px !important; }
+            #planListContainer .px-5 { padding-left: 12px !important; padding-right: 12px !important; }
+
+            /* ── Plan modal bottom bar ── */
+            #modalBottomBar .w-\[52px\] { width: 38px !important; }
+            #modalBottomBar .h-\[52px\] { height: 38px !important; }
+            #modalBottomBar .py-3\.5 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            #modalBottomBar .text-\[19px\] { font-size: 14px !important; }
+            #modalBottomBar .rounded-\[28px\] { border-radius: 18px !important; }
+            #modalBottomBar .rounded-\[22px\] { border-radius: 14px !important; }
         }
