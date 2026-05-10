@@ -370,24 +370,123 @@ function getPlanAbbr(planName) {
 function switchView(targetView) {
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
-        if (!lastCalculationData || lastCalculationData.premium === 0) { 
-            showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน"); 
-            return; 
+        if (!lastCalculationData || lastCalculationData.premium === 0) {
+            showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน");
+            return;
         }
     }
 
-    const views = { 'main': document.getElementById('mainView'), 'table': document.getElementById('tableView'), 'cash': document.getElementById('cashView') };
-    const navBtns = { 'main': document.getElementById('navMainBtn'), 'table': document.getElementById('navTableBtn'), 'cash': document.getElementById('navCashBtn') };
-    
-    if (targetView === 'table') generatePolicyTableData();
-    if (targetView === 'cash') refreshAllDisplays();
-    
-    Object.values(views).forEach(view => { if (view) view.classList.add('hidden'); });
+    const isWide = window.innerWidth >= 700;
+    const appContainer = document.querySelector('.app-container');
+    const rightPane   = document.getElementById('rightPane');
+    const resultCanvas = document.getElementById('resultCanvas');
+    const tableView   = document.getElementById('tableView');
+    const cashView    = document.getElementById('cashView');
+    const mainView    = document.getElementById('mainView');
+
+    const navBtns = {
+        main:  document.getElementById('navMainBtn'),
+        table: document.getElementById('navTableBtn'),
+        cash:  document.getElementById('navCashBtn'),
+        compare: document.getElementById('navCompareBtn'),
+    };
     Object.values(navBtns).forEach(btn => { if (btn) btn.classList.remove('active'); });
-    
-    if (views[targetView]) views[targetView].classList.remove('hidden');
     if (navBtns[targetView]) navBtns[targetView].classList.add('active');
+
+    if (isWide && rightPane) {
+        // ── Tablet / Fold mode: keep form in left, content in right ──
+        mainView && mainView.classList.remove('hidden');
+
+        const showInRight = (el) => {
+            if (!el) return;
+            if (el.parentElement !== rightPane) rightPane.appendChild(el);
+            el.classList.remove('hidden');
+            el.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;';
+        };
+        const hideEl = (el) => { if (el) el.classList.add('hidden'); };
+
+        if (targetView === 'main') {
+            resultCanvas && resultCanvas.classList.remove('hidden');
+            hideEl(tableView); hideEl(cashView);
+            // return views to app-container so mobile still works
+            if (tableView && tableView.parentElement === rightPane) appContainer.appendChild(tableView);
+            if (cashView  && cashView.parentElement  === rightPane) appContainer.appendChild(cashView);
+        } else if (targetView === 'table') {
+            hideEl(resultCanvas); hideEl(cashView);
+            showInRight(tableView);
+            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+        } else if (targetView === 'cash') {
+            hideEl(resultCanvas); hideEl(tableView);
+            showInRight(cashView);
+            if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
+        } else if (targetView === 'compare') {
+            hideEl(resultCanvas); hideEl(tableView); hideEl(cashView);
+            showComparePanel(rightPane);
+        }
+    } else {
+        // ── Mobile mode: original left-pane switching ──
+        const views = { main: mainView, table: tableView, cash: cashView };
+        if (targetView === 'table') generatePolicyTableData();
+        if (targetView === 'cash')  refreshAllDisplays();
+        Object.values(views).forEach(v => { if (v) v.classList.add('hidden'); });
+        if (views[targetView]) views[targetView].classList.remove('hidden');
+    }
 }
+
+function showComparePanel(rightPane) {
+    let panel = document.getElementById('comparePanelView');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'comparePanelView';
+        panel.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;';
+        panel.innerHTML = `
+        <div style="padding:16px 20px 12px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:800;font-size:15px;color:#1e293b;font-family:'Kanit',sans-serif;">เปรียบเทียบแผน</div>
+            <button onclick="switchView('main')" style="background:#f1f5f9;border:none;border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;color:#64748b;cursor:pointer;font-family:'Kanit',sans-serif;">✕ ปิด</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px;display:flex;gap:12px;" id="compareColumns">
+            <div style="flex:1;background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;" id="compareCol1">
+                <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;">แผนที่ 1</div>
+                <div id="compareResult1" style="font-size:13px;color:#475569;font-family:'Kanit',sans-serif;">กดปุ่ม "บันทึกแผน" หลังคำนวณ</div>
+            </div>
+            <div style="flex:1;background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;" id="compareCol2">
+                <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;">แผนที่ 2</div>
+                <div id="compareResult2" style="font-size:13px;color:#475569;font-family:'Kanit',sans-serif;">เลือกแผนอื่นแล้วกด "บันทึกแผน"</div>
+            </div>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;display:flex;gap:8px;">
+            <button onclick="saveCompareSlot(1)" style="flex:1;background:linear-gradient(135deg,#3b82f6,#1e40af);color:white;border:none;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Kanit',sans-serif;">บันทึกแผนที่ 1</button>
+            <button onclick="saveCompareSlot(2)" style="flex:1;background:linear-gradient(135deg,#10b981,#047857);color:white;border:none;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Kanit',sans-serif;">บันทึกแผนที่ 2</button>
+        </div>`;
+        rightPane.appendChild(panel);
+    } else {
+        panel.style.display = 'flex';
+        panel.classList.remove('hidden');
+    }
+}
+
+window._compareSlots = { 1: null, 2: null };
+window.saveCompareSlot = function(slot) {
+    if (!lastCalculationData || lastCalculationData.premium === 0) {
+        showCustomError("คำนวณก่อนแล้วค่อยบันทึก"); return;
+    }
+    window._compareSlots[slot] = { ...lastCalculationData, plan: currentAppPlan };
+    const col = document.getElementById('compareResult' + slot);
+    if (!col) return;
+    const d = window._compareSlots[slot];
+    col.innerHTML = `
+        <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:6px;">${d.plan || 'แผนที่ ' + slot}</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:white;border-radius:8px;border:1px solid #e2e8f0;">
+                <span style="font-size:11px;color:#64748b;">เบี้ย/ปี</span>
+                <span style="font-size:12px;font-weight:800;color:#2563eb;">${(d.premium||0).toLocaleString()} ฿</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:white;border-radius:8px;border:1px solid #e2e8f0;">
+                <span style="font-size:11px;color:#64748b;">วงเงิน</span>
+                <span style="font-size:12px;font-weight:800;color:#00A651;">${(d.sumInsured||0).toLocaleString()} ฿</span>
+            </div>
+        </div>`;
+};
 
 // ============================================================================
 // 🌟 THE NEW ULTRA-MODERN 3D PLAN LOGIC & INFINITE SCROLL 🌟
