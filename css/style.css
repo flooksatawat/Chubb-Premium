@@ -15,7 +15,7 @@
             position: relative; overflow: hidden; margin: 0 auto; 
             box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.15); 
         }
-        @media (min-width: 450px) { .app-container { height: 95vh; border-radius: 40px; border: 6px solid #ffffff; } }
+        @media (min-width: 700px) { .app-container { height: 95vh; border-radius: 40px; border: 6px solid #ffffff; } }
         
         .content-area { flex: 1; overflow-y: auto; padding: 0 16px; display: flex; flex-direction: column; position: relative; z-index: 10; }
         
@@ -515,6 +515,10 @@
         @media (max-width: 699px) {
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
             .content-area { padding-bottom: 0; }
+
+            /* ซ่อนกรอบน้ำเงินชื่อแบบ + เมนูเลือกแผนย่อย บนมือถือ */
+            #appHeaderWrapper { display: none !important; }
+            #planSelectionWrapper { display: none !important; }
 
             /* ── หัวตารางมือถือ: column layout ≤ 2 แถว badge ── */
             #tableHeaderRow {
