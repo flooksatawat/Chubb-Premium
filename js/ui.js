@@ -662,9 +662,9 @@ function _buildOneSetHTML(dataList) {
         const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
         const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
         if (isActive) {
-            html += `<div class="card-3d-container"><button onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
         } else {
-            html += `<div class="card-3d-container"><button onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
         }
     });
     return html;
@@ -689,9 +689,9 @@ function renderModernCards(dataList, isInitialLoad = false) {
             const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
             const delay = (i + 1) * 0.04;
             if (isActive) {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
             } else {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
             }
         });
         container.innerHTML = html;
@@ -1177,6 +1177,19 @@ function replacePercentWithAmount(text, sum, premium) {
 
 function selectAppPlan(planName) {
     if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
+
+    // ── Compare mode intercept ──
+    if (window.__compareMode && window.__comparePlanA) {
+        const planA = window.__comparePlanA;
+        if (planName !== planA) {
+            closePopup('planSelectModal');
+            window.renderCompareView(planA, planName);
+            return;
+        } else {
+            window.cancelCompareMode();
+        }
+    }
+
     _cachedForPlan = null; // invalidate card cache so active highlight updates
 
     const _rp = document.getElementById('rightPane');
@@ -1461,6 +1474,135 @@ function injectMaturityModal() {
 // คำนวณ premium/sum สำหรับแผนอื่น โดยใช้ค่าใน form ปัจจุบัน
 // (save state → switch plan → calculate → restore — กัน side effects ด้วย __suppressLive flag)
 window.__comparePlan = null;
+
+// ── Side-by-side comparison (wide layout only) ─────────────────────────────
+window.__compareMode  = false;
+window.__comparePlanA = null;
+
+window.startCompareMode = function(planName) {
+    if (!window.isWideLayout()) return; // wide only
+    window.__compareMode  = true;
+    window.__comparePlanA = planName;
+    // show floating banner
+    let banner = document.getElementById('_compareBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = '_compareBanner';
+        banner.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#1e3a8a,#0369a1);color:white;padding:10px 18px;border-radius:14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25);white-space:nowrap;';
+        document.body.appendChild(banner);
+    }
+    banner.innerHTML = `<i class="fas fa-code-compare"></i> เปรียบเทียบ: <span style="color:#93c5fd">${planName}</span> &nbsp;→&nbsp; กดเลือกแบบที่ 2 &nbsp;<button onclick="window.cancelCompareMode()" style="background:rgba(255,255,255,0.15);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
+    banner.style.display = 'flex';
+};
+
+window.cancelCompareMode = function() {
+    window.__compareMode  = false;
+    window.__comparePlanA = null;
+    const banner = document.getElementById('_compareBanner');
+    if (banner) banner.style.display = 'none';
+};
+
+window.renderCompareView = function(planA, planB) {
+    window.cancelCompareMode();
+    if (!window.isWideLayout()) return;
+
+    if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
+
+    const dA = planA === currentAppPlan ? Object.assign({}, lastCalculationData, { _planName: planA }) : window.computeForPlan(planA);
+    const dB = window.computeForPlan(planB);
+    if (!dA || !dB) { showCustomError('ไม่สามารถคำนวณข้อมูลเปรียบเทียบได้'); return; }
+
+    const fmtP = n => Math.round(n).toLocaleString();
+    const fmtN = n => typeof formatNum === 'function' ? formatNum(n) : Math.round(n).toLocaleString();
+
+    function cardHTML(plan, d) {
+        const cfg = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[plan]) || {};
+        const hasCF = !!cfg.hasCashFlow;
+        const premLabel = hasCF ? 'จำนวนเงินออม' : 'เบี้ยประกัน';
+        let rows = '';
+        rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">${premLabel}</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-rose-600">${fmtP(d.premium)} ฿/ปี</td></tr>`;
+        rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">ทุนประกันชีวิต</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-slate-800">${fmtN(d.sum)} ฿</td></tr>`;
+        if (hasCF && d.cashFlow > 0) rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">กระแสเงินสด/ปี</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-emerald-600">${fmtP(d.cashFlow)} ฿</td></tr>`;
+        const pd = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[plan];
+        if (pd && pd.benefits) {
+            pd.benefits.slice(0, 4).forEach(b => {
+                let plain = (typeof replacePercentWithAmount === 'function' ? replacePercentWithAmount(b, d.sum, d.premium) : b).replace(/<[^>]+>/g,'');
+                const [lbl, ...rest] = plain.split(':');
+                if (rest.length) rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">${lbl.replace(/^\S\s/,'').trim()}</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-slate-700">${rest.join(':').trim()}</td></tr>`;
+            });
+        }
+        const planInfo = typeof allInsurancePlans !== 'undefined' ? allInsurancePlans.find(p => p.name === plan) : null;
+        const icon = planInfo ? `<i class="${planInfo.icon} text-xl"></i>` : '<i class="fas fa-shield-heart text-xl"></i>';
+        return `<div class="flex-1 min-w-0 flex flex-col bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden">
+            <div class="flex items-center gap-3 px-4 py-3" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+                <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">${icon}</div>
+                <div class="min-w-0"><div class="text-white font-bold text-[13px] leading-tight truncate">${plan}</div>
+                <div class="text-white/70 text-[11px]">อายุ ${d.age} | ${(d.gender==='male'||d.gender==='ชาย')?'ชาย':'หญิง'}</div></div>
+            </div>
+            <table class="w-full border-collapse flex-1"><tbody>${rows}</tbody></table>
+            <div class="p-3 border-t border-slate-100">
+                <button onclick="selectAppPlan('${plan}');closePlanModal();" class="w-full py-2 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+                    <i class="fas fa-arrow-right"></i> เลือกแบบนี้
+                </button>
+            </div>
+        </div>`;
+    }
+
+    const html = `<div class="p-4 h-full overflow-y-auto">
+        <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-code-compare text-blue-600"></i>
+            <span class="font-bold text-slate-700 text-[14px]">เปรียบเทียบแบบประกัน</span>
+            <button onclick="window.resetRightPaneToPlaceholder()" class="ml-auto text-[11px] text-slate-400 hover:text-slate-600 flex items-center gap-1"><i class="fas fa-xmark"></i> ปิด</button>
+        </div>
+        <div class="flex gap-3">${cardHTML(planA, dA)}${cardHTML(planB, dB)}</div>
+    </div>`;
+
+    window.injectToWorkspace(html);
+};
+
+// Long-press delegation — เริ่ม compare mode บน wide layout เท่านั้น
+(function initCompareLongPress() {
+    const THRESHOLD = 500;
+    let _timer = null, _downPlan = null;
+
+    function getTargetPlan(e) {
+        const btn = e.target.closest('[data-plan]');
+        return btn ? btn.getAttribute('data-plan') : null;
+    }
+    function cancel() { clearTimeout(_timer); _timer = null; _downPlan = null; }
+
+    document.addEventListener('touchstart', e => {
+        if (!window.isWideLayout()) return;
+        const container = document.getElementById('planListContainer');
+        if (!container || !container.contains(e.target)) return;
+        _downPlan = getTargetPlan(e);
+        if (!_downPlan) return;
+        _timer = setTimeout(() => {
+            window.startCompareMode(_downPlan);
+            _downPlan = null;
+            // haptic
+            if (navigator.vibrate) navigator.vibrate(40);
+        }, THRESHOLD);
+    }, { passive: true });
+    document.addEventListener('touchend',   cancel, { passive: true });
+    document.addEventListener('touchmove',  cancel, { passive: true });
+    document.addEventListener('touchcancel',cancel, { passive: true });
+
+    // mouse long-press for desktop/notebook
+    document.addEventListener('mousedown', e => {
+        if (e.button !== 0 || !window.isWideLayout()) return;
+        const container = document.getElementById('planListContainer');
+        if (!container || !container.contains(e.target)) return;
+        _downPlan = getTargetPlan(e);
+        if (!_downPlan) return;
+        _timer = setTimeout(() => {
+            window.startCompareMode(_downPlan);
+            _downPlan = null;
+        }, THRESHOLD);
+    });
+    document.addEventListener('mouseup',   cancel);
+    document.addEventListener('mouseleave',cancel);
+})();
 
 window.computeForPlan = function (planName) {
     if (!planName || typeof PLAN_CONFIG === 'undefined' || !PLAN_CONFIG[planName]) return null;
