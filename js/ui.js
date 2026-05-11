@@ -2698,15 +2698,15 @@ function generatePolicyTableData() {
     // < 700px = มือถือ (ใช้ breakpoint เดียวกับ right pane) → 2 บรรทัด
     const _isMobile = window.innerWidth < 700;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
-        <div class="flex flex-col gap-1 py-0.5">
-            <div class="flex flex-wrap gap-1.5 items-center">
-                <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-blue-600 text-white shadow-sm shrink-0">${currentPlan}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">เพศ: ${_gThai}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">อายุ: ${d.age}</span>
+        <div class="flex flex-col gap-0.5 py-0.5">
+            <div class="flex gap-1 items-center overflow-hidden">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white shadow-sm whitespace-nowrap shrink-0">${currentPlan}</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/70 text-slate-700 border border-slate-200 whitespace-nowrap shrink-0">เพศ: ${_gThai}</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/70 text-slate-700 border border-slate-200 whitespace-nowrap shrink-0">อายุ: ${d.age}</span>
             </div>
-            <div class="flex flex-wrap gap-1.5 items-center">
-                <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[13px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
+            <div class="flex gap-1 items-center overflow-hidden">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm whitespace-nowrap shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm whitespace-nowrap shrink-0">ทุน: ${sumDisplay}</span>
             </div>
         </div>` : `
         <div class="flex flex-wrap gap-1.5 items-center py-0.5">
@@ -2717,16 +2717,18 @@ function generatePolicyTableData() {
             <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
 
-    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white text-[13px]" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
-        <th class="py-3 px-3 font-bold text-center">อายุ</th>
-        ${hideAnnualSaving ? '' : '<th class="py-3 px-3 font-bold text-right">ออมเงิน</th>'}
-        <th class="py-3 px-3 font-bold text-right">ออมสะสม</th>
-        ${hideAnnualSaving ? '<th class="py-3 px-3 font-bold text-amber-200 text-right">รับเงินก้อน</th>' : ''}
-        ${forceShowCashFlow ? `<th class="py-3 px-3 font-bold text-blue-200 text-right">กระแสเงินสด</th><th class="py-3 px-3 font-bold text-indigo-200 text-right">รวมรับเงิน</th>` : ''}
-        <th class="py-3 px-3 font-bold text-right">เงินสดพร้อมใช้</th>
-        ${showCoverageColumn ? `<th class="py-3 px-3 font-bold text-rose-200 text-right">วงเงินคุ้มครอง</th>` : ''}
-        ${showSAColumn ? `<th class="py-3 px-3 font-bold text-rose-200 text-right">ทุนประกัน</th>` : ''}
-        ${showAccidentColumn ? `<th class="py-3 px-3 font-bold text-right">อุบัติเหตุ</th>` : ''}
+    const _thCls = _isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold';
+    const _thSz = _isMobile ? 'font-size:10px;white-space:nowrap;' : '';
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isMobile ? 'font-size:10px;' : 'font-size:13px;'}">
+        <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
+        ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">ออมเงิน</th>`}
+        <th class="${_thCls} text-right" style="${_thSz}">ออมสะสม</th>
+        ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">กระแสเงินสด</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">รวมรับเงิน</th>` : ''}
+        <th class="${_thCls} text-right" style="${_thSz}">เงินสดพร้อมใช้</th>
+        ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">วงเงินคุ้มครอง</th>` : ''}
+        ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">ทุนประกัน</th>` : ''}
+        ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
     </tr>`;
     
     // --- 4. Main Loop ---
