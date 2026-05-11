@@ -667,9 +667,9 @@ function _buildOneSetHTML(dataList) {
         const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
         const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
         if (isActive) {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
         } else {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
         }
     });
     return html;
@@ -694,9 +694,9 @@ function renderModernCards(dataList, isInitialLoad = false) {
             const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
             const delay = (i + 1) * 0.04;
             if (isActive) {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[28px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[14px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[12px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[13px]"></i></div></button></div>`;
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
             } else {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[26px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[14px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[12px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-8 h-8 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[11px]"></i></div></button></div>`;
+                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
             }
         });
         container.innerHTML = html;
@@ -836,6 +836,7 @@ function updateQuickPills(planName) {
                 if (window.lastCalculationData) {
                     highlightActivePills(window.lastCalculationData.sum, window.lastCalculationData.premium, window.lastCalculationData.cashFlow || 0);
                 }
+                if (currentAppPlan === '3D Health Excellence') _refresh3DRightView();
             }, 50);
         };
         window.calculate.hasUIHook = true;
@@ -1110,6 +1111,8 @@ window.renderD3QuickPills = function(ctx) {
 };
 
 function _refresh3DRightView() {
+    const v = document.getElementById('threeDDetailsRightView');
+    if (!v || v.style.display === 'none') return;
     if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
 }
 window.setHX = function(val) { window.currentHX = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView(); };
@@ -2707,6 +2710,17 @@ function generatePolicyTableData() {
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
                     </label>
                 `;
+            } else if (isCX || isCL || isSLB) {
+                rightMenuHTML = `
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-wallet text-sky-500 text-[16px] w-5 text-center shrink-0"></i>
+                        <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleShowCV" class="sr-only peer" onchange="generatePolicyTableData();">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500 shadow-inner"></div>
+                    </label>
+                `;
             }
 
             const _iN = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[12px] font-bold text-slate-700 text-center focus:border-emerald-400 focus:bg-white outline-none transition-colors';
@@ -2806,8 +2820,9 @@ function generatePolicyTableData() {
 
     // --- 2. Variables ---
     const isSurrenderActive = document.getElementById('toggleSurrender')?.checked || false;
-    const isBreakevenActive = isTX ? false : (document.getElementById('toggleBreakeven')?.checked || false);
+    const isBreakevenActive = document.getElementById('toggleBreakeven')?.checked || false;
     const isShowSAActive = document.getElementById('toggleShowSA')?.checked || false;
+    const isShowCVActive = document.getElementById('toggleShowCV')?.checked || false;
     
     let startAge = 61, endAge = 70;
     if (isSurrenderActive && hasSurrenderMenu) {
@@ -2827,9 +2842,10 @@ function generatePolicyTableData() {
     const showCashFlowBase = isWXN || isElite || isTX;
     const forceShowCashFlow = showCashFlowBase;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = hasSurrenderMenu || isSLB || isTX || ((isWXN || isElite) && isShowSAActive);
+    const showSAColumn = hasSurrenderMenu || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL;
+    const showCVColumn = (isCX || isCL || isSLB) ? isShowCVActive : true;
 
     // --- 3. Header ---
     const initialSA = Math.round(d.sum); 
@@ -2842,38 +2858,53 @@ function generatePolicyTableData() {
     const _gThai = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
     // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
     const _vw = document.documentElement.clientWidth || window.innerWidth;
-    const _isMobile = _vw < 768;
+    const _isMobile = _vw < 700;
+    const _badgeMobile = 'flex-1 py-1 rounded-lg text-[13px] font-bold text-center whitespace-nowrap';
+    const _badgeDesktop = 'flex-1 py-1.5 rounded-xl text-[15px] font-bold text-center whitespace-nowrap';
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
-        <div class="flex flex-col gap-0.5 py-0.5">
-            <div class="flex gap-1 items-center overflow-hidden">
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white shadow-sm whitespace-nowrap shrink-0">${currentPlan}</span>
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/70 text-slate-700 border border-slate-200 whitespace-nowrap shrink-0">เพศ: ${_gThai}</span>
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/70 text-slate-700 border border-slate-200 whitespace-nowrap shrink-0">อายุ: ${d.age}</span>
+        <div class="flex flex-col gap-1 py-1 w-full">
+            <div class="flex gap-1 w-full">
+                <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
+                <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
+                <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
             </div>
-            <div class="flex gap-1 items-center overflow-hidden">
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm whitespace-nowrap shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm whitespace-nowrap shrink-0">ทุน: ${sumDisplay}</span>
+            <div class="flex gap-1 w-full">
+                <span class="${_badgeMobile} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
+                <span class="${_badgeMobile} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุน: ${sumDisplay}</span>
             </div>
         </div>` : `
-        <div class="flex flex-wrap gap-1.5 items-center py-0.5">
-            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-blue-600 text-white shadow-sm shrink-0">${currentPlan}</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">เพศ: ${_gThai}</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-medium bg-white/70 text-slate-700 border border-slate-200 shrink-0">อายุ: ${d.age}</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-white text-slate-800 border border-slate-200 shadow-sm shrink-0">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
-            <span class="px-3 py-1 rounded-full text-[15px] font-bold bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm shrink-0">ทุนประกัน: ${sumDisplay}</span>
+        <div class="flex gap-2 items-center py-1 w-full">
+            <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
+            <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
+            <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
+            <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
+            <span class="${_badgeDesktop} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
 
-    const _thCls = _isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold';
-    const _thSz = _isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;';
-    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isMobile ? 'font-size:10px;' : 'font-size:13px;'}">
+    // compact mode เมื่อ WXN/Elite/TX เปิด SA → 7 columns ต้องย่อให้พอดีจอ
+    const _isCompact = showSAColumn && isShowSAActive && (isWXN || isElite || isTX);
+    const _thCls = _isCompact ? 'py-1.5 px-1 font-bold' : (_isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold');
+    const _thSz  = _isCompact ? 'font-size:9px;white-space:nowrap;' : (_isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;');
+    const _tdBase = _isCompact ? 'py-2 px-1' : 'py-4 px-3';
+
+    // ชื่อหัวตาราง: compact ใช้ label สั้น
+    const _lSaving   = _isCompact ? 'ออม'    : 'ออมเงิน';
+    const _lAccum    = _isCompact ? 'สะสม'   : 'ออมสะสม';
+    const _lCF       = _isCompact ? 'CF'     : 'กระแสเงินสด';
+    const _lTotal    = _isCompact ? 'รวมรับ' : 'รวมรับเงิน';
+    const _lCV       = _isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้';
+    const _lCoverage = _isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง';
+    const _lSA       = _isCompact ? 'ทุน'    : 'ทุนประกัน';
+
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
-        ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">ออมเงิน</th>`}
-        <th class="${_thCls} text-right" style="${_thSz}">ออมสะสม</th>
+        ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
+        <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">กระแสเงินสด</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">รวมรับเงิน</th>` : ''}
-        <th class="${_thCls} text-right" style="${_thSz}">เงินสดพร้อมใช้</th>
-        ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">วงเงินคุ้มครอง</th>` : ''}
-        ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">ทุนประกัน</th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
+        ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
+        ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
+        ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
         ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
     </tr>`;
     
@@ -3032,17 +3063,18 @@ function generatePolicyTableData() {
         if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
+        const _fSz = _isCompact ? 'font-size:9px;' : '';
         html += `<tr id="${rowId}" class="${trClass}">
-            <td class="py-4 px-3 text-slate-700 font-medium text-center">${currentAge}</td>
-            ${hideAnnualSaving ? '' : `<td class="py-4 px-3 text-slate-700 text-right">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
-            <td class="py-4 px-3 text-slate-800 font-bold text-right">${totalSaving.toLocaleString()}</td>
-            ${hideAnnualSaving ? `<td class="py-4 px-3 text-amber-700 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
-            ${forceShowCashFlow ? `<td class="py-4 px-3 text-blue-600 font-bold text-right">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="py-4 px-3 text-indigo-600 font-bold text-right">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
-            <td class="py-4 px-3 ${isBreakevenActive && y === beYear ? 'text-emerald-700 text-[13px]' : 'text-slate-800'} font-bold text-right">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>`;
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
+            ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
+            <td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>
+            ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
+            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
+            ${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
 
-        if (showCoverageColumn) html += `<td class="py-4 px-3 text-rose-600 font-bold text-right">${currentSA > 0 ? currentSA.toLocaleString() : '—'}</td>`;
-        if (showSAColumn) html += `<td class="py-4 px-3 text-rose-600 font-bold text-right">${saCompact}</td>`;
-        if (showAccidentColumn) html += `<td class="py-4 px-3 text-rose-600 font-bold text-right">${accidentCompact}</td>`;
+        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${currentSA > 0 ? currentSA.toLocaleString() : '—'}</td>`;
+        if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
+        if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
         html += `</tr>`;
 
         if (y >= cfLoopEnd) break;
@@ -3067,16 +3099,11 @@ function generatePolicyTableData() {
         setTimeout(() => document.getElementById('breakevenRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
     }
 
-    // 24TX: แสดงทุนประกันได้ แต่ซ่อนสรุปจุดคุ้มทุน
-    if (isTX) {
-        const summary = document.getElementById('breakevenSummary');
-        if (summary) summary.classList.add('hidden');
-    } else {
-        // ดึงกลับมาแสดงปกติสำหรับแผนอื่นๆ (หากมีการติ๊กจุดคุ้มทุนค้างไว้)
-        if (isBreakevenActive) {
-            const summary = document.getElementById('breakevenSummary');
-            if (summary) summary.classList.remove('hidden');
-        }
+    // แสดง/ซ่อน breakevenSummary ตาม toggle สำหรับทุกแผน
+    const summary = document.getElementById('breakevenSummary');
+    if (summary) {
+        if (isBreakevenActive && foundBreakeven) summary.classList.remove('hidden');
+        else if (!isBreakevenActive) summary.classList.add('hidden');
     }
 
 
@@ -3751,7 +3778,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 doc.text(currentPlan, 105, 13, { align: 'center' }); 
                 
                 const formatN = typeof formatNum === 'function' ? formatNum : (n) => n;
-                let sumDisplay = (d.sum >= 1000000 && d.sum % 1000000 === 0) ? (d.sum/1000000)+' ล้านบาท' : (d.sum >= 100000 && d.sum % 100000 === 0) ? (d.sum/100000)+' แสนบาท' : formatN(d.sum)+' บาท'; 
+                let sumDisplay = (d.sum % 1000000 === 0 && d.sum >= 1000000) ? (d.sum/1000000)+' ล้านบาท' : formatN(d.sum)+' บาท';
                 
                 const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentPlan) : currentPlan;
                 const surrenderNote = isSurrenderActive ? ' | ทยอยเวนคืน' : '';
@@ -3833,6 +3860,22 @@ async function exportTableToPDF(actionType = 'preview') {
     } finally { 
         if (toast && toast.parentNode) toast.remove(); 
     }
+}
+
+// ==================== PDF DROPDOWN MENU ====================
+function togglePdfMenu(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('pdfDropdown');
+    if (!dd) return;
+    const isHidden = dd.classList.contains('hidden');
+    dd.classList.toggle('hidden', !isHidden);
+    if (isHidden) {
+        // ปิดเมื่อคลิกนอก
+        setTimeout(() => document.addEventListener('click', closePdfMenu, { once: true }), 0);
+    }
+}
+function closePdfMenu() {
+    document.getElementById('pdfDropdown')?.classList.add('hidden');
 }
 
 // ============================================================================

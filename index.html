@@ -186,7 +186,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <!-- Content Area -->
             <!-- ขยาย pb เพื่อแก้ปัญหาเมนูบังหน้าจอตอนเลื่อน -->
             <div class="content-area pt-4 no-scrollbar relative z-10 scrollable-view" id="manualInputs">
-                <div class="w-full flex flex-col gap-3 pb-[120px]">
+                <div class="w-full flex flex-col gap-3 pb-[80px]">
                     
                     <!-- Top Toggles -->
                     <div class="flex flex-col gap-3 shrink-0">
@@ -401,17 +401,25 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <!-- ==================== VIEW 2: TABLE ==================== -->
         <div id="tableView" class="flex flex-col flex-1 overflow-hidden w-full relative z-10" style="display:none;">
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
-                <!-- Single row: ข้อมูล (left) | จุดคุ้มทุน (center) | PDF (right-absolute) -->
-                <button onclick="exportTableToPDF()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-red-50 text-red-600 border border-red-100 px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-transform shadow-sm z-10"><i class="fas fa-file-pdf"></i> PDF</button>
-                <div id="tableHeaderRow" class="flex items-start gap-3 px-4 py-2 pr-20">
+                <div id="tableHeaderRow" class="flex items-center gap-2 px-3 py-2">
                     <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight"></div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <i class="fas fa-chart-line text-emerald-500 text-[13px]"></i>
-                        <span id="breakevenToggleText" class="text-[12px] font-semibold text-slate-600 whitespace-nowrap">จุดคุ้มทุน</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleBreakeven" class="sr-only peer" onchange="toggleBreakevenDisplay()">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                        </label>
+                    <div class="relative shrink-0" id="pdfMenuWrap">
+                        <button onclick="togglePdfMenu(event)" class="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-transform">
+                            <i class="fas fa-file-pdf text-[12px]"></i>
+                            <span class="whitespace-nowrap">PDF</span>
+                            <i class="fas fa-chevron-down text-[8px] opacity-70"></i>
+                        </button>
+                        <div id="pdfDropdown" class="hidden absolute right-0 top-full mt-1.5 z-50 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden w-36">
+                            <button onclick="exportTableToPDF('preview');closePdfMenu()" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors border-b border-slate-50">
+                                <i class="fas fa-eye text-blue-500 w-4 text-center"></i> ดูตัวอย่าง
+                            </button>
+                            <button onclick="exportTableToPDF('save');closePdfMenu()" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors border-b border-slate-50">
+                                <i class="fas fa-share-nodes text-emerald-500 w-4 text-center"></i> แชร์/บันทึก
+                            </button>
+                            <button onclick="exportTableToPDF('print');closePdfMenu()" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors">
+                                <i class="fas fa-print text-slate-400 w-4 text-center"></i> พิมพ์
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
