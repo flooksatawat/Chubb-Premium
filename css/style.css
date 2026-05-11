@@ -534,12 +534,9 @@
                 min-width: 0 !important;
             }
             #tableHeaderTitle > div {
-                flex-wrap: wrap !important;
                 gap: 2px !important;
                 padding-top: 1px !important;
                 padding-bottom: 1px !important;
-                max-height: 28px !important;
-                overflow: hidden !important;
             }
             #tableHeaderRow > div:last-child { justify-content: flex-end !important; }
             #breakevenToggleText { font-size: 10px !important; }
