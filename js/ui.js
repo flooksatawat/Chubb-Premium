@@ -502,11 +502,6 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
-    // 3D plan: ตาราง → แสดง 19 หมวด แทน tableView (ไม่ต้องการข้อมูลคำนวณ)
-    if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {
-        window.open3DDetailsView();
-        return;
-    }
     // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
@@ -2114,9 +2109,18 @@ function openUniversalModal(d) {
             dynamicContainer.innerHTML = html;
         }
 
-        // 3D + wide layout → แสดง 19 หมวดใน right pane ทันที ไม่ต้องเปิด popup
+        // 3D + wide layout → แสดงตารางใน right pane เรียลไทม์
         if (currentAppPlan === '3D Health Excellence' && _wide) {
-            window.open3DDetailsView();
+            const tableView = document.getElementById('tableView');
+            const cashView  = document.getElementById('cashView');
+            const rightPane = document.getElementById('rightPane');
+            const appCont   = document.querySelector('.app-container');
+            if (cashView) { cashView.style.cssText = 'display:none'; if (cashView.parentElement === rightPane && appCont) appCont.appendChild(cashView); }
+            if (tableView && rightPane) {
+                if (tableView.parentElement !== rightPane) rightPane.appendChild(tableView);
+                tableView.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:#f8fafc;';
+            }
+            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
             return;
         }
 
@@ -3610,11 +3614,6 @@ document.addEventListener('input', function(e) {
 });
 
 window.openTableFromModal = function() {
-    if (currentAppPlan === '3D Health Excellence') {
-        if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
-        setTimeout(() => window.open3DDetailsView(), 300);
-        return;
-    }
     if (typeof closePopup === 'function') closePopup('resultModal');
     setTimeout(() => {
         if (typeof switchView === 'function') switchView('table');
