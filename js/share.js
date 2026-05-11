@@ -280,6 +280,7 @@ function showVoiceResultPopup(d) {
 function showDefinition(title, desc) { document.getElementById('defTitle').innerText = title; document.getElementById('defDescription').innerText = desc; openPopup('definitionModal'); }
 
 function setupLongPress() {
+    return; // ปิดฟังก์ชั่นกดค้างดูเงื่อนไขทุกแบบประกัน
     const btn = document.getElementById('mainHeaderBtn'); if (!btn) return;
     let pressTimer; let startX, startY;
     const handleStart = (x, y) => { 
@@ -304,15 +305,24 @@ function setupLongPress() {
 
 function setupScrollHideNav() {
     const bottomNav = document.getElementById('bottomNavContainer'); if (!bottomNav) return;
-    document.querySelectorAll('.scrollable-view').forEach(el => {
+    const attached = new WeakSet();
+    const attach = (el) => {
+        if (!el || attached.has(el)) return;
+        attached.add(el);
         let lastScrollTop = 0;
         el.addEventListener('scroll', function() {
             let st = this.scrollTop;
             if (st <= 10) { bottomNav.style.transform = 'translateY(0)'; bottomNav.style.opacity = '1'; lastScrollTop = st; return; }
-            if (st < 0) return; if (Math.abs(lastScrollTop - st) <= 5) return; 
-            if (st > lastScrollTop) { bottomNav.style.transform = 'translateY(150%)'; bottomNav.style.opacity = '0'; } 
+            if (st < 0) return; if (Math.abs(lastScrollTop - st) <= 5) return;
+            if (st > lastScrollTop) { bottomNav.style.transform = 'translateY(150%)'; bottomNav.style.opacity = '0'; }
             else { bottomNav.style.transform = 'translateY(0)'; bottomNav.style.opacity = '1'; }
             lastScrollTop = st;
         }, { passive: true });
+    };
+    document.querySelectorAll('.scrollable-view').forEach(attach);
+    // ผูก listener กับ scrollable-view ที่ถูก render ทีหลัง (ทุก plan)
+    const mo = new MutationObserver(() => {
+        document.querySelectorAll('.scrollable-view').forEach(attach);
     });
+    mo.observe(document.body, { childList: true, subtree: true });
 }

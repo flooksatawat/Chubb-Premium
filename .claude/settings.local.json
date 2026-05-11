@@ -8,7 +8,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(ls \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")",
-      "Bash(dir \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")"
+      "Bash(dir \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")",
+      "Bash(python -c \"import pdfplumber; pdf=pdfplumber.open\\('3D Health Excellence.pdf'\\); [print\\(f'--- PAGE {i+1} ---\\\\n'+p.extract_text\\(\\)\\) for i,p in enumerate\\(pdf.pages[:15]\\)]\")",
+      "PowerShell(python3 -c \"import pdfplumber; pdf=pdfplumber.open\\(r'C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\3D\\\\3D Health Excellence.pdf'\\); [print\\(f'--- PAGE {i+1} ---\\\\n'+p.extract_text\\(\\)\\) for i,p in enumerate\\(pdf.pages[:20]\\)]\" 2>&1)"
     ]
   }
 }
