@@ -2840,8 +2840,9 @@ function generatePolicyTableData() {
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
     const _gThai = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-    // มือถือ (single-pane) = 2 บรรทัด ใช้ viewport เท่านั้น
-    const _isMobile = !window.isWideLayout();
+    // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
+    const _vw = document.documentElement.clientWidth || window.innerWidth;
+    const _isMobile = _vw < 768;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-0.5 py-0.5">
             <div class="flex gap-1 items-center overflow-hidden">
