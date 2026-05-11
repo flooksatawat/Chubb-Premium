@@ -2864,7 +2864,7 @@ function generatePolicyTableData() {
         </div>`;
 
     const _thCls = _isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold';
-    const _thSz = _isMobile ? 'font-size:10px;white-space:nowrap;' : '';
+    const _thSz = _isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;';
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isMobile ? 'font-size:10px;' : 'font-size:13px;'}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">ออมเงิน</th>`}
