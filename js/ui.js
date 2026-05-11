@@ -2688,9 +2688,9 @@ function generatePolicyTableData() {
 
             if (hasSurrenderMenu) {
                 rightMenuHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-hand-holding-usd text-blue-500 text-[16px] w-5 text-center"></i>
-                        <span class="text-[13px] font-bold text-slate-700">ทยอยเวนคืน</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-hand-holding-usd text-blue-500 text-[16px] w-5 text-center shrink-0"></i>
+                        <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">ทยอยเวนคืน</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleSurrender" class="sr-only peer">
@@ -2699,9 +2699,9 @@ function generatePolicyTableData() {
                 `;
             } else if (isWXN || isElite || isTX) {
                 rightMenuHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-shield-alt text-rose-500 text-[16px] w-5 text-center"></i>
-                        <span class="text-[13px] font-bold text-slate-700">แสดงทุนประกัน</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-shield-alt text-rose-500 text-[16px] w-5 text-center shrink-0"></i>
+                        <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">แสดงทุนประกัน</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleShowSA" class="sr-only peer" onchange="generatePolicyTableData();">
@@ -2722,9 +2722,9 @@ function generatePolicyTableData() {
             surrenderContainer.innerHTML = `
                 <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-3.5 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm">
                     <div class="${leftMenuClass} flex items-center">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center"></i>
-                            <span class="text-[13px] font-bold text-slate-700">แสดงจุดคุ้มทุน</span>
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
+                            <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
@@ -2841,8 +2841,10 @@ function generatePolicyTableData() {
     const headerTitle = `${planAbbr} ${d.gender} ${d.age} | วงเงิน ${sumDisplay} | ออม ${initialPrem.toLocaleString()} บาท | ${planPeriod} ปี`;
     
     const _gThai = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-    // < 700px = มือถือ (ใช้ breakpoint เดียวกับ right pane) → 2 บรรทัด
-    const _isMobile = window.innerWidth < 700;
+    // ใช้ความกว้างจริงของ tableView (รองรับ right-pane บน iPad/foldable) → < 700 = 2 บรรทัด
+    const _tvEl = document.getElementById('tableView');
+    const _tvW = (_tvEl && _tvEl.offsetWidth) || window.innerWidth;
+    const _isMobile = _tvW < 700;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-0.5 py-0.5">
             <div class="flex gap-1 items-center overflow-hidden">
