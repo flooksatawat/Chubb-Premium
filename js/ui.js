@@ -1109,13 +1109,16 @@ window.renderD3QuickPills = function(ctx) {
     return `<div class="grid grid-cols-5 gap-1.5">${btns}</div>`;
 };
 
-window.setHX = function(val) { window.currentHX = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
-window.setHXO = function(val) { window.currentHXO = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
+function _refresh3DRightView() {
+    if (typeof window.render3DDetailsAccordion === 'function') window.render3DDetailsAccordion();
+}
+window.setHX = function(val) { window.currentHX = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView(); };
+window.setHXO = function(val) { window.currentHXO = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView(); };
 window.setHXD = function(val) {
     if (val !== 'ไม่เลือก' && window.currentHXO === 'ไม่เลือก') { window.currentHXO = 'HXO10'; }
-    window.currentHXD = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true);
+    window.currentHXD = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView();
 };
-window.setHBF = function(val) { window.currentHBF = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); };
+window.setHBF = function(val) { window.currentHBF = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView(); };
 window.setMFPlan = function(val) { window.currentMF = val; closePopup('mfPlanModal'); if(typeof calculate === 'function') calculate('sum', true); };
 
 // ==================== ระบบดึงเงื่อนไข (เพื่อแสดงใน Popup กดค้าง) ====================
@@ -3926,7 +3929,10 @@ window.open3DDetailsView = function() {
                 <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">19 หมวด · 3D Health Excellence</div>
             </div>
         </div>
-        <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button onclick="exportTableToPDF()" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+        </div>
     </div>`;
 
     // ย้าย accordionBody จริงเข้า view (live DOM)
