@@ -514,7 +514,10 @@
         /* Keyboard overflow fix — mobile */
         @media (max-width: 699px) {
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
-            .content-area { padding-bottom: 0; }
+            .content-area { padding-bottom: 0; padding-top: 0 !important; }
+            /* ตัดพื้นที่ว่างขอบจอด้านบนบนมือถือ */
+            .pt-safe { padding-top: 0 !important; }
+            #mainView > div:first-child { margin-top: 0 !important; }
 
 
             /* ── หัวตารางมือถือ: column layout ≤ 2 แถว badge ── */
