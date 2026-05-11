@@ -502,6 +502,11 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
+    // 3D plan: ตาราง → แสดง 19 หมวด แทน tableView (ไม่ใช้ข้อมูลคำนวณ)
+    if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {
+        window.open3DDetailsView();
+        return;
+    }
     // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
@@ -2251,18 +2256,9 @@ function openUniversalModal(d) {
             dynamicContainer.innerHTML = html;
         }
 
-        // 3D + wide layout → แสดงตารางใน right pane เรียลไทม์
+        // 3D + wide layout → แสดง 19 หมวดในจอขวาเรียลไทม์ (ไม่มี selector ในจอขวา)
         if (currentAppPlan === '3D Health Excellence' && _wide) {
-            const tableView = document.getElementById('tableView');
-            const cashView  = document.getElementById('cashView');
-            const rightPane = document.getElementById('rightPane');
-            const appCont   = document.querySelector('.app-container');
-            if (cashView) { cashView.style.cssText = 'display:none'; if (cashView.parentElement === rightPane && appCont) appCont.appendChild(cashView); }
-            if (tableView && rightPane) {
-                if (tableView.parentElement !== rightPane) rightPane.appendChild(tableView);
-                tableView.style.cssText = 'display:flex;flex-direction:column;position:absolute;inset:0;z-index:10;overflow:hidden;background:#f8fafc;';
-            }
-            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+            window.open3DDetailsView();
             return;
         }
 
@@ -3524,7 +3520,141 @@ async function loadThaiFontBold() {
     }
 }
 
-async function exportTableToPDF(actionType = 'preview') { 
+async function _export3DPDF(actionType = 'preview') {
+    const hxVal = window.currentHX || '';
+    if (!hxVal || hxVal === 'ไม่เลือก') return showCustomError("กรุณาเลือกแผน HX ก่อน");
+
+    const toast = document.createElement('div');
+    toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-900 text-white px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all";
+    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างเอกสาร PDF...</span>`;
+    document.body.appendChild(toast);
+
+    try {
+        const [fontBase64, fontBoldBase64] = await Promise.all([
+            typeof loadThaiFont === 'function' ? loadThaiFont() : Promise.resolve(null),
+            typeof loadThaiFontBold === 'function' ? loadThaiFontBold() : Promise.resolve(null)
+        ]);
+        if (!window.jspdf && !window.jsPDF) throw new Error("ไม่พบไลบรารี jsPDF");
+        const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        let fontName = 'helvetica';
+        if (fontBase64) {
+            doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
+            doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+            if (fontBoldBase64) {
+                doc.addFileToVFS('Sarabun-Bold.ttf', fontBoldBase64);
+                doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold');
+            } else {
+                doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'bold');
+            }
+            fontName = 'Sarabun';
+        }
+
+        const planInfo = HX_PLAN_INFO[hxVal] || { room:'-', lump:'-', tier:'base' };
+        const tier = planInfo.tier;
+        const hxoVal = window.currentHXO || 'ไม่เลือก';
+        const hxdVal = window.currentHXD || 'ไม่เลือก';
+        const hbfVal = window.currentHBF || 'ไม่เลือก';
+
+        // Header
+        doc.setFillColor(13, 148, 136);
+        doc.rect(0, 0, 210, 22, 'F');
+        doc.setFont(fontName, 'bold'); doc.setFontSize(15); doc.setTextColor(255,255,255);
+        doc.text('3D Health Excellence — ความคุ้มครอง 19 หมวด', 105, 10, { align: 'center' });
+        doc.setFont(fontName, 'normal'); doc.setFontSize(11);
+        doc.text(`${hxVal} · ค่าห้อง ${planInfo.room} บ./คืน · วงเงิน ${planInfo.lump}`, 105, 17, { align: 'center' });
+
+        let y = 30;
+        // Riders summary
+        doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(30,41,59);
+        doc.text('สัญญาเพิ่มเติม:', 15, y);
+        doc.setFont(fontName, 'normal'); doc.setTextColor(71,85,105);
+        doc.text(`HXO: ${hxoVal} | HXD: ${hxdVal} | HBF: ${hbfVal}`, 55, y);
+        y += 8;
+
+        const checkPage = (h) => { if (y + h > 285) { doc.addPage(); y = 20; } };
+
+        // Categories 1-13
+        const allCats = [...HX_BASE_CATEGORIES];
+        if (tier === 'mid' || tier === 'full') {
+            ['14','15','16','17','18'].forEach(n => {
+                const sec = SECTION_DATA['m'+n];
+                if (sec) allCats.push({ num: n, title: sec.title, limit: sec.cond || '', subs: sec.items });
+            });
+        }
+        if (tier === 'full') {
+            const sec = SECTION_DATA['m19'];
+            if (sec) allCats.push({ num: '19', title: sec.title, limit: sec.cond || '', subs: sec.items });
+        }
+
+        allCats.forEach(cat => {
+            checkPage(14);
+            doc.setFillColor(240, 253, 250);
+            doc.rect(15, y - 4, 180, 8, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(13,148,136);
+            doc.text(`หมวด ${cat.num}`, 18, y + 1.5);
+            doc.setTextColor(30,41,59);
+            const titleLines = doc.splitTextToSize(cat.title, 140);
+            doc.text(titleLines[0], 35, y + 1.5);
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9); doc.setTextColor(100,116,139);
+            if (cat.limit) doc.text(cat.limit, 192, y + 1.5, { align: 'right' });
+            y += 9;
+
+            const subs = cat.subs || _3D_BASE_SUBS[cat.num];
+            if (subs && subs.length) {
+                doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
+                subs.forEach(s => {
+                    const lines = doc.splitTextToSize('• ' + s, 175);
+                    checkPage(lines.length * 5 + 2);
+                    doc.text(lines, 20, y);
+                    y += lines.length * 5;
+                });
+                y += 2;
+            }
+            if (titleLines.length > 1) {
+                doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
+                for (let i = 1; i < titleLines.length; i++) {
+                    checkPage(5);
+                    doc.text(titleLines[i], 35, y);
+                    y += 5;
+                }
+            }
+            y += 3;
+        });
+
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFont(fontName, 'normal'); doc.setFontSize(9);
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setDrawColor(226,232,240); doc.line(15, 285, 195, 285);
+            doc.setTextColor(148,163,184); doc.text(`หน้า ${i} / ${pageCount}`, 195, 290, { align: 'right' });
+        }
+
+        const pdfBlob = doc.output('blob');
+        const pdfFileName = `3D_Health_${hxVal}_19หมวด.pdf`;
+        if (toast.parentElement) toast.remove();
+
+        if (actionType === 'download' || typeof showPdfViewer !== 'function') {
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a'); a.href = url; a.download = pdfFileName; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+            showPdfViewer(pdfBlob, pdfFileName);
+        }
+    } catch (e) {
+        console.error('3D PDF export failed', e);
+        if (toast.parentElement) toast.remove();
+        showCustomError('สร้าง PDF ไม่สำเร็จ: ' + e.message);
+    }
+}
+
+async function exportTableToPDF(actionType = 'preview') {
+    // 3D plan: PDF 19 หมวด แทนตารางมูลค่า
+    if (currentAppPlan === '3D Health Excellence') {
+        return _export3DPDF(actionType);
+    }
     if (!lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");
     
     const toast = document.createElement('div'); 
@@ -3758,6 +3888,11 @@ document.addEventListener('input', function(e) {
 });
 
 window.openTableFromModal = function() {
+    if (currentAppPlan === '3D Health Excellence') {
+        if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
+        setTimeout(() => window.open3DDetailsView(), 300);
+        return;
+    }
     if (typeof closePopup === 'function') closePopup('resultModal');
     setTimeout(() => {
         if (typeof switchView === 'function') switchView('table');
@@ -4124,5 +4259,6 @@ window.render3DDetailsAccordion = function() {
         }
     }
 
-    body.innerHTML = stickyHtml + contentHtml;
+    // ตัด selector sticky header ออก — left pane มี selector อยู่แล้ว
+    body.innerHTML = contentHtml;
 };
