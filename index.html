@@ -1796,10 +1796,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         profileBar.style.display = 'flex';
     }
 
-    /* ── API calls ── */
+    /* ── API calls — ใช้ liff.fetch เมื่ออยู่ใน LINE เพื่อหลีกเลี่ยง CORS ── */
+    async function apiFetch(url) {
+        if (window.IS_IN_LIFF && typeof liff !== 'undefined' && liff.fetch) {
+            return liff.fetch(url);
+        }
+        return fetch(url, { redirect: 'follow' });
+    }
+
     async function callAPI(params) {
         const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params);
-        const r   = await fetch(url, { redirect: 'follow' });
+        const r   = await apiFetch(url);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
     }
@@ -1853,16 +1860,19 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         const btn = $('authRequestBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'กำลังส่งคำขอ...'; }
         const profile = getLS(CACHE_KEY) || window.lineProfile;
-        if (!profile) { alert('DEBUG: ไม่มี profile — กำลัง reload'); location.reload(); return; }
-        alert('DEBUG userId: ' + profile.userId + '\nname: ' + profile.displayName);
-        const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({
-            action: 'request',
-            userId: profile.userId,
-            displayName: profile.displayName || ''
-        });
-        /* ใช้ no-cors เพื่อหลีกเลี่ยง CORS block ใน LINE browser — request ถึง server แน่นอน */
-        try { await fetch(url, { redirect: 'follow', mode: 'no-cors' }); }
-        catch (err) { console.warn('[requestAccess] fetch failed:', err); }
+        if (!profile) {
+            if (btn) btn.textContent = 'ไม่พบข้อมูล LINE กรุณารีเฟรช';
+            return;
+        }
+        /* DEBUG: แสดง userId บนปุ่มชั่วคราว */
+        if (btn) btn.textContent = 'ID: ' + (profile.userId || 'null');
+        try {
+            await callAPI({ action: 'request', userId: profile.userId, displayName: profile.displayName || '' });
+        } catch (err) {
+            console.warn('[requestAccess] failed:', err);
+            if (btn) btn.textContent = 'Error: ' + err.message;
+            await new Promise(r => setTimeout(r, 3000));
+        }
         setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
         setState('pending');
     };
