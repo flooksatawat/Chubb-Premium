@@ -344,10 +344,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         <div id="planSelectionWrapper" class="shrink-0">
                             <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[50px]" id="planSelectionContainer">
                                 <div id="planBg" class="absolute top-1 bottom-1 left-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none"></div>
-                                <button id="btnPlan1" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300">10CX</button>
-                                <button id="btnPlan2" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">20CX</button>
-                                <button id="btnPlan3" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">60</button>
-                                <button id="btnPlan4" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">90</button>
+                                <button id="btnPlan1" onclick="setPlan(currentPlanOptions[0])" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300">10CX</button>
+                                <button id="btnPlan2" onclick="setPlan(currentPlanOptions[1])" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">20CX</button>
+                                <button id="btnPlan3" onclick="setPlan(currentPlanOptions[2])" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">60</button>
+                                <button id="btnPlan4" onclick="setPlan(currentPlanOptions[3])" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium hidden text-slate-500 hover:text-slate-700 transition-all duration-300">90</button>
                             </div>
                         </div>
                     </div>
