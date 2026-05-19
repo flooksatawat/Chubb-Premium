@@ -3364,7 +3364,8 @@ function _blobToDataUrl(blob) {
     });
 }
 
-// บันทึก PDF — เน้นรักษา user gesture บน iOS LIFF (ห้าม await ก่อน navigate)
+// บันทึก PDF — บน LIFF บันทึกลงเครื่องโดยไม่เปิดบราวเซอร์
+// ต้องรักษา user gesture (เรียก navigator.share/click แบบ sync — ห้าม await ก่อนหน้า)
 function handlePdfSaveLinkClick(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -3389,62 +3390,87 @@ function handlePdfSaveLinkClick(e) {
             tmp.click();
             setTimeout(() => { tmp.remove(); }, 100);
             _showQuickToast('กำลังดาวน์โหลด...');
-            return;
         } catch (err) {
             console.warn('[Save] <a download> with blob URL failed:', err);
-        }
-    }
-
-    // ===== LIFF: ใช้ pre-computed dataUri แบบ sync — รักษา user gesture =====
-    const dataUri = _pdfViewerDataUri;
-    if (dataUri) {
-        // 1) ลอง <a download> (Android WebView รองรับ)
-        try {
-            const tmp = document.createElement('a');
-            tmp.href = dataUri;
-            tmp.download = filename;
-            tmp.rel = 'noopener';
-            document.body.appendChild(tmp);
-            tmp.click();
-            tmp.remove();
-        } catch (err) {
-            console.warn('[Save] <a download> dataURI failed:', err);
-        }
-
-        // 2) navigate inline (iOS LIFF เปิด native PDF viewer มีปุ่ม Share → Save to Files)
-        //    ใช้ window.open ก่อน (เปิดแท็บใหม่ใน LIFF — บาง LIFF version รองรับ)
-        try {
-            const w = window.open(dataUri, '_blank');
-            if (w) return;
-        } catch (err) {
-            console.warn('[Save] window.open dataURI failed:', err);
-        }
-
-        // 3) Last resort: navigate ในแท็บปัจจุบัน (อาจถูก LIFF บล็อก)
-        try {
-            window.location.href = dataUri;
-            return;
-        } catch (err) {
-            console.warn('[Save] location.href dataURI failed:', err);
-        }
-    } else {
-        // dataUri ยังไม่พร้อม (ปกติคำนวณเสร็จก่อน) — เริ่ม compute แล้วบอก user
-        _showQuickToast('กำลังเตรียมไฟล์ ลองอีกครั้ง...');
-        if (_pdfViewerBlob) {
-            _blobToDataUrl(_pdfViewerBlob).then(uri => { _pdfViewerDataUri = uri; }).catch(() => {});
         }
         return;
     }
 
-    // 4) ทั้งหมดล้มเหลว → เสนอ Web Share / เปิด external browser
-    _trySaveFallbacks(inLine);
+    // ===== LIFF: บันทึกลงเครื่อง — ไม่เปิดบราวเซอร์/แท็บใหม่ =====
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const pdfFile = (typeof File !== 'undefined')
+        ? new File([_pdfViewerBlob], filename, { type: 'application/pdf' })
+        : null;
+    const canWebShareFile = pdfFile && navigator.share
+        && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }));
+
+    // iOS LIFF: <a download> ไม่ทำงาน — ใช้ Web Share API → native share sheet → "Save to Files"
+    if (isIOS) {
+        if (canWebShareFile) {
+            try {
+                navigator.share({ files: [pdfFile], title: filename, text: filename })
+                    .catch(err => {
+                        if (!err || err.name === 'AbortError') return;
+                        console.warn('[Save] navigator.share failed:', err);
+                        _showPdfSaveFallback();
+                    });
+                return;
+            } catch (err) {
+                console.warn('[Save] navigator.share threw:', err);
+            }
+        }
+        _showPdfSaveFallback();
+        return;
+    }
+
+    // Android LIFF: <a download> + blob URL บันทึกลง Downloads ได้
+    try {
+        const url = _pdfViewerBlobUrl || URL.createObjectURL(_pdfViewerBlob);
+        const tmp = document.createElement('a');
+        tmp.href = url;
+        tmp.download = filename;
+        tmp.rel = 'noopener';
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        _showQuickToast('กำลังบันทึก...');
+        return;
+    } catch (err) {
+        console.warn('[Save] LIFF <a download> blob failed:', err);
+    }
+
+    // Fallback: Web Share API
+    if (canWebShareFile) {
+        try {
+            navigator.share({ files: [pdfFile], title: filename, text: filename })
+                .catch(err => {
+                    if (!err || err.name === 'AbortError') return;
+                    _showPdfSaveFallback();
+                });
+            return;
+        } catch {}
+    }
+
+    _showPdfSaveFallback();
 }
 
-async function _trySaveFallbacks(inLine) {
-    await _ensureLiffReady();
-    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
-    _showPdfActionFallback();
+function _showPdfSaveFallback() {
+    const existing = document.getElementById('_pdfActionFallbackToast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.id = '_pdfActionFallbackToast';
+    toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
+    toast.innerHTML = `
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
+        <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
+            อุปกรณ์/LINE เวอร์ชันนี้ไม่อนุญาตให้บันทึกไฟล์โดยตรง<br>
+            กรุณาใช้ปุ่ม <strong style="color:white;">แชร์</strong> เพื่อส่งไฟล์ไปแอปอื่น
+        </div>
+        <button id="_pdfCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
+    `;
+    document.body.appendChild(toast);
+    document.getElementById('_pdfCloseToastBtn').addEventListener('click', () => toast.remove());
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 8000);
 }
 
 // แชร์ PDF — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ PDF)
