@@ -1864,12 +1864,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
-            if (window.IS_IN_LIFF) {
-                setState('loading', 'กำลังเปิดใน Chrome...');
-                openInChrome();
-            } else {
-                openApp();
-            }
+            openApp();
         } else if (d.status === 'inactive') {
             const profile = getLS(CACHE_KEY);
             if (profile) $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
@@ -2038,12 +2033,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             }
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
-            if (window.IS_IN_LIFF) {
-                setState('loading', 'กำลังเปิดใน Chrome...');
-                openInChrome();
-            } else {
-                openApp();
-            }
+            openApp();
         } else if (d.status === 'pending') {
             setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
