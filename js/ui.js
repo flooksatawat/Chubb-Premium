@@ -4891,4 +4891,50 @@ window.render3DDetailsAccordion = function() {
 
     // ตัด selector sticky header ออก — left pane มี selector อยู่แล้ว
     body.innerHTML = contentHtml;
-};
+};
+// ── Screenshot mode: ซ่อน UI แสดงเฉพาะตาราง ให้ user ถ่าย screenshot ──
+window.enterTableScreenshotMode = function() {
+    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+
+    // หา element ที่ต้องซ่อน
+    const toHide = [
+        document.getElementById('navBar'),
+        document.getElementById('navShareBtn'),
+        document.querySelector('.fixed.bottom-0'),
+        document.querySelector('[id*="bottomNav"]'),
+    ].filter(Boolean);
+
+    // สร้าง overlay แสดง instruction
+    const overlay = document.createElement('div');
+    overlay.id = '_ssOverlay';
+    overlay.style.cssText = [
+        'position:fixed;top:0;left:0;right:0;z-index:99999',
+        'background:linear-gradient(135deg,#0ea5e9,#0284c7)',
+        'display:flex;align-items:center;justify-content:space-between',
+        'padding:max(12px,env(safe-area-inset-top)) 14px 10px',
+        'box-shadow:0 2px 12px rgba(0,0,0,0.25)',
+    ].join(';');
+    overlay.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="color:white;font-size:13px;font-weight:700;"><i class="fas fa-camera" style="margin-right:6px;"></i>Screenshot Mode</span>
+            <span style="color:rgba(255,255,255,0.85);font-size:11px;">ถ่ายหน้าจอ → แชร์ใน LINE ได้เลย</span>
+        </div>
+        <button id="_ssExitBtn" style="background:rgba(255,255,255,0.2);border:none;border-radius:20px;color:white;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">ออก</button>
+    `;
+    document.body.appendChild(overlay);
+
+    // ซ่อน nav bar
+    const navBar = document.getElementById('navBar');
+    let navBarWasHidden = false;
+    if (navBar) { navBarWasHidden = navBar.style.display === 'none'; navBar.style.display = 'none'; }
+
+    // Scroll ไปที่ tableView
+    const tableView = document.getElementById('tableView');
+    if (tableView) tableView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const exit = () => {
+        overlay.remove();
+        if (navBar) navBar.style.display = navBarWasHidden ? 'none' : '';
+    };
+    document.getElementById('_ssExitBtn').addEventListener('click', exit);
+};
