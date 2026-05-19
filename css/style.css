@@ -88,6 +88,8 @@
         .hidden { display: none !important; }
         body[data-view="table"] #lineProfileBar,
         body[data-view="cash"]  #lineProfileBar { display: none !important; }
+        body:has(.modal-overlay.show) #lineProfileBar,
+        body.swal2-shown #lineProfileBar { display: none !important; }
         
         /* ==================== SCROLLBARS & TABLE ==================== */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
