@@ -7,48 +7,51 @@
 const SHEET_NAME   = 'users';
 const LINE_TOKEN   = '4iywSmI5WCO1DNj6ZKbeX/IEC0z8jolKXPBRNpr1z8PRMNpewEGeHv3CzciQ71jGjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3zSzGgLst8X+An6jf3Bb87YBlAOJd0V5emHgULgOe2zDwdB04t89/1O/w1cDnyilFU=';
 const ADMIN_ID     = 'U32acf744ebc29839f6639049cb5f3001';
-const SHEET_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/edit';
+const ADMIN_KEY    = 'chubb2025admin';
+const GAS_URL      = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
 
 // ── CORS headers ──────────────────────────────────────────────
 function corsOutput(obj) {
-  const output = ContentService
+  return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-  return output;
 }
 
 function doGet(e) {
   const action  = e.parameter.action || 'check';
   const userId  = (e.parameter.userId || '').trim();
   const name    = (e.parameter.displayName || '').trim();
+  const key     = (e.parameter.key || '').trim();
 
   if (action === 'check')   return corsOutput(checkUser(userId));
   if (action === 'request') return corsOutput(requestAccess(userId, name));
+  if (action === 'approve' && key === ADMIN_KEY) return htmlOutput(approveUser(userId));
+  if (action === 'reject'  && key === ADMIN_KEY) return htmlOutput(rejectUser(userId));
   return corsOutput({ ok: false, error: 'unknown action' });
+}
+
+function htmlOutput(result) {
+  const msg = result.ok ? '✅ ดำเนินการสำเร็จ' : '❌ เกิดข้อผิดพลาด: ' + (result.error || '');
+  return HtmlService.createHtmlOutput(`<html><body style="font-family:sans-serif;text-align:center;padding:40px;font-size:20px">${msg}<br><br><a href="javascript:window.close()">ปิด</a></body></html>`);
 }
 
 function doPost(e) {
   try {
     const body   = JSON.parse(e.postData.contents);
-
-    // LINE Webhook events
     if (body.events) {
       body.events.forEach(ev => {
         if (ev.type === 'follow' || ev.type === 'message') {
           const uid = ev.source && ev.source.userId;
-          const name = ev.type === 'follow' ? 'follow event' : (ev.message && ev.message.text || 'message');
           if (uid) {
-            // บันทึก userId ลง Sheet แถว webhook log
             const ss = SpreadsheetApp.getActiveSpreadsheet();
             let log = ss.getSheetByName('webhook_log');
             if (!log) { log = ss.insertSheet('webhook_log'); log.appendRow(['userId','event','time']); }
-            log.appendRow([uid, name, new Date().toISOString()]);
+            log.appendRow([uid, ev.type, new Date().toISOString()]);
           }
         }
       });
       return corsOutput({ ok: true });
     }
-
     const action = body.action || '';
     if (action === 'add')    return corsOutput(addUser(body.userId, body.displayName));
     if (action === 'remove') return corsOutput(removeUser(body.userId));
@@ -61,10 +64,8 @@ function doPost(e) {
 // ── ตรวจสอบสิทธิ์ ──────────────────────────────────────────────
 function checkUser(userId) {
   if (!userId) return { ok: false, authorized: false, status: 'no_id' };
-
   const sheet = getSheet();
   const data  = sheet.getDataRange().getValues();
-
   for (let i = 1; i < data.length; i++) {
     const [id, name, status] = data[i];
     if (String(id).trim() === userId) {
@@ -78,16 +79,12 @@ function checkUser(userId) {
 // ── ขอสิทธิ์ใหม่ ──────────────────────────────────────────────
 function requestAccess(userId, displayName) {
   if (!userId) return { ok: false, error: 'no_user_id' };
-
   const sheet = getSheet();
   const data  = sheet.getDataRange().getValues();
-
-  // ถ้ามีอยู่แล้ว (active/inactive/pending)
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim() === userId) {
       const status = String(data[i][2]).toLowerCase();
       if (status === 'active') return { ok: true, status: 'active', authorized: true };
-      // อัปเดตชื่อและเปลี่ยนเป็น pending (กรณี inactive)
       if (status !== 'pending') {
         sheet.getRange(i + 1, 2).setValue(displayName || data[i][1]);
         sheet.getRange(i + 1, 3).setValue('pending');
@@ -96,31 +93,76 @@ function requestAccess(userId, displayName) {
       return { ok: true, status: 'pending' };
     }
   }
-
-  // เพิ่มใหม่เป็น pending
-  sheet.appendRow([
-    userId,
-    displayName || '',
-    'pending',
-    new Date().toISOString().split('T')[0]
-  ]);
-
+  sheet.appendRow([userId, displayName || '', 'pending', new Date().toISOString().split('T')[0]]);
   notifyAdmin(userId, displayName || '');
   return { ok: true, status: 'pending' };
 }
 
-// ── แจ้ง admin ผ่าน LINE Push ──────────────────────────────────
+// ── อนุมัติ ────────────────────────────────────────────────────
+function approveUser(userId) {
+  if (!userId) return { ok: false, error: 'no_user_id' };
+  const sheet = getSheet();
+  const data  = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === userId) {
+      sheet.getRange(i + 1, 3).setValue('active');
+      notifyUser(userId, '✅ คำขอของคุณได้รับการอนุมัติแล้ว\nกลับไปที่แอปแล้วกด "ตรวจสอบอีกครั้ง" เพื่อเข้าใช้งานได้เลยครับ');
+      return { ok: true, action: 'approved' };
+    }
+  }
+  return { ok: false, error: 'not_found' };
+}
+
+// ── ปฏิเสธ ────────────────────────────────────────────────────
+function rejectUser(userId) {
+  if (!userId) return { ok: false, error: 'no_user_id' };
+  const sheet = getSheet();
+  const data  = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === userId) {
+      sheet.getRange(i + 1, 3).setValue('inactive');
+      notifyUser(userId, '❌ ขออภัย คำขอของคุณถูกปฏิเสธ\nหากมีข้อสงสัยกรุณาติดต่อผู้ดูแลระบบ');
+      return { ok: true, action: 'rejected' };
+    }
+  }
+  return { ok: false, error: 'not_found' };
+}
+
+// ── แจ้ง admin ผ่าน LINE Push (Flex Message) ──────────────────
 function notifyAdmin(userId, displayName) {
   try {
-    const msg = `🔔 คำขอใช้งานใหม่\n\n👤 ชื่อ: ${displayName}\n🆔 ID: ${userId}\n\n✅ อนุมัติ → เปลี่ยน status เป็น active ใน Sheet\n${SHEET_URL}`;
+    const approveUrl = GAS_URL + '?action=approve&userId=' + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
+    const rejectUrl  = GAS_URL + '?action=reject&userId='  + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
+    const flex = {
+      type: 'flex',
+      altText: '🔔 คำขอใช้งานใหม่: ' + displayName,
+      contents: {
+        type: 'bubble',
+        header: {
+          type: 'box', layout: 'vertical', backgroundColor: '#1a73e8',
+          contents: [{ type: 'text', text: '🔔 คำขอใช้งานใหม่', color: '#ffffff', weight: 'bold', size: 'lg' }]
+        },
+        body: {
+          type: 'box', layout: 'vertical', spacing: 'sm',
+          contents: [
+            { type: 'text', text: '👤 ' + displayName, weight: 'bold', size: 'md' },
+            { type: 'text', text: '🆔 ' + userId, size: 'xs', color: '#888888', wrap: true }
+          ]
+        },
+        footer: {
+          type: 'box', layout: 'horizontal', spacing: 'sm',
+          contents: [
+            { type: 'button', style: 'primary', color: '#2ecc71', action: { type: 'uri', label: '✅ อนุมัติ', uri: approveUrl } },
+            { type: 'button', style: 'primary', color: '#e74c3c', action: { type: 'uri', label: '❌ ปฏิเสธ', uri: rejectUrl } }
+          ]
+        }
+      }
+    };
     UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
       method: 'post',
       contentType: 'application/json',
       headers: { Authorization: 'Bearer ' + LINE_TOKEN },
-      payload: JSON.stringify({
-        to: ADMIN_ID,
-        messages: [{ type: 'text', text: msg }]
-      }),
+      payload: JSON.stringify({ to: ADMIN_ID, messages: [flex] }),
       muteHttpExceptions: true
     });
   } catch (e) {
@@ -128,13 +170,26 @@ function notifyAdmin(userId, displayName) {
   }
 }
 
+// ── แจ้ง user ผลการอนุมัติ ────────────────────────────────────
+function notifyUser(userId, message) {
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + LINE_TOKEN },
+      payload: JSON.stringify({ to: userId, messages: [{ type: 'text', text: message }] }),
+      muteHttpExceptions: true
+    });
+  } catch (e) {
+    console.error('notifyUser failed', e);
+  }
+}
+
 // ── เพิ่ม / อัปเดต user ────────────────────────────────────────
 function addUser(userId, displayName) {
   if (!userId) return { ok: false, error: 'no_user_id' };
-
   const sheet = getSheet();
   const data  = sheet.getDataRange().getValues();
-
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim() === userId) {
       sheet.getRange(i + 1, 2).setValue(displayName || data[i][1]);
