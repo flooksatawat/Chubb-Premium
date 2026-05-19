@@ -18,28 +18,32 @@
         window.LIFF_ID = '2010019212-OmM6NuTV';
         window.IS_IN_LIFF = false;
         window.LIFF_READY = false;
-        window._liffReady = new Promise((resolve) => {
-            const initLiff = () => {
-                if (typeof liff === 'undefined') {
-                    console.warn('[LIFF] SDK not loaded');
-                    return resolve();
-                }
-                liff.init({ liffId: window.LIFF_ID })
-                    .then(() => {
-                        window.LIFF_READY = true;
-                        window.IS_IN_LIFF = !!(liff.isInClient && liff.isInClient());
-                        if (window.IS_IN_LIFF) document.body.classList.add('in-liff');
-                        console.log('[LIFF] ready. isInClient=', window.IS_IN_LIFF);
-                    })
-                    .catch(err => { console.warn('[LIFF] init failed:', err); })
-                    .finally(resolve);
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initLiff, { once: true });
-            } else {
-                initLiff();
+        // timeout 8 วิ — ป้องกัน Chrome ค้างถ้า LIFF init ช้า
+        let _liffResolve;
+        window._liffReady = new Promise((resolve) => { _liffResolve = resolve; });
+        const _liffTimeout = setTimeout(() => {
+            console.warn('[LIFF] init timeout');
+            _liffResolve();
+        }, 8000);
+        const initLiff = () => {
+            if (typeof liff === 'undefined') {
+                console.warn('[LIFF] SDK not loaded');
+                clearTimeout(_liffTimeout); _liffResolve(); return;
             }
-        });
+            liff.init({ liffId: window.LIFF_ID })
+                .then(() => {
+                    window.LIFF_READY = true;
+                    window.IS_IN_LIFF = !!(liff.isInClient && liff.isInClient());
+                    console.log('[LIFF] ready. isInClient=', window.IS_IN_LIFF);
+                })
+                .catch(err => { console.warn('[LIFF] init failed:', err); })
+                .finally(() => { clearTimeout(_liffTimeout); _liffResolve(); });
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLiff, { once: true });
+        } else {
+            initLiff();
+        }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
