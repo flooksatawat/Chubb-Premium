@@ -1911,6 +1911,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             return;
         }
 
+        /* 3b. อยู่ใน LINE in-app browser → เปิด Chrome ทันที (LIFF session จะพกไปด้วย) */
+        if (window.IS_IN_LIFF) {
+            setState('loading', 'กำลังเปิดใน Chrome...');
+            liff.openWindow({ url: location.href, external: true });
+            return;
+        }
+
         /* 4. ดึง profile */
         setState('loading', 'กำลังโหลดข้อมูล...');
         let profile;
