@@ -4937,7 +4937,7 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d) {
         ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
         : rawAmt.toLocaleString('th-TH');
     const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
-    const cleanName = `${planAbbr}_${genderTh}_${d.age}ปี_${amtLabel}${amtFmt}`;
+    const cleanName = `${planAbbr} ${genderTh} ${d.age}ปี ${amtLabel}${amtFmt}`;
     const pdfName   = cleanName + '.pdf';
     const jpgName   = cleanName + '.jpg';
 
