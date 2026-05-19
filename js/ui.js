@@ -3312,8 +3312,24 @@ async function tryShareFile(file, title, text) {
 // ===== PDF VIEWER STATE =====
 let _pdfViewerBlob = null;
 let _pdfViewerFilename = '';
-let _pdfViewerDataUri = null;   // pre-computed in showPdfViewer — สำหรับ sync use ใน click handler (LIFF gesture)
-let _pdfViewerBlobUrl = null;   // เก็บ blob URL ที่สร้างใน showPdfViewer — revoke ตอนปิด
+let _pdfViewerDataUri = null;
+let _pdfViewerBlobUrl = null;
+let _pdfViewerImageBlob = null;     // composite PNG ของทุกหน้า — pre-computed สำหรับ sync save
+let _pdfViewerImageBlobUrl = null;
+let _pdfZoom = 1;
+const _PDF_ZOOM_MIN = 0.5;
+const _PDF_ZOOM_MAX = 4;
+
+function _setPdfZoom(z) {
+    _pdfZoom = Math.max(_PDF_ZOOM_MIN, Math.min(_PDF_ZOOM_MAX, z));
+    const inner = document.getElementById('pdfViewerCanvasInner');
+    if (inner) inner.style.zoom = String(_pdfZoom);
+    const label = document.getElementById('pdfZoomLabel');
+    if (label) label.textContent = Math.round(_pdfZoom * 100) + '%';
+}
+function pdfZoomIn() { _setPdfZoom(_pdfZoom * 1.25); }
+function pdfZoomOut() { _setPdfZoom(_pdfZoom / 1.25); }
+function pdfZoomReset() { _setPdfZoom(1); }
 
 function closePdfViewer() {
     const modal = document.getElementById('pdfViewerModal');
@@ -3329,10 +3345,14 @@ function closePdfViewer() {
         dlLink.href = '#';
     }
     if (_pdfViewerBlobUrl) { try { URL.revokeObjectURL(_pdfViewerBlobUrl); } catch {} }
+    if (_pdfViewerImageBlobUrl) { try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {} }
     _pdfViewerBlob = null;
     _pdfViewerFilename = '';
     _pdfViewerDataUri = null;
     _pdfViewerBlobUrl = null;
+    _pdfViewerImageBlob = null;
+    _pdfViewerImageBlobUrl = null;
+    _setPdfZoom(1);
 }
 
 async function _ensureLiffReady() {
@@ -3398,15 +3418,121 @@ function handlePdfSaveLinkClick(e) {
 
     // ===== LIFF: บันทึกลงเครื่อง โดยไม่หลุดไปบราวเซอร์ภายนอก =====
     // ลำดับ:
-    //   1) window.print() ผ่าน iframe — Android Print Dialog มี "บันทึกเป็น PDF" → Downloads
-    //   2) Web Share API — OS share sheet → Save to Files
-    //   3) Fallback toast (shareTargetPicker ส่งข้อความสรุปเข้าแชท)
+    //   1) Image download — <a download> กับ MIME image/png (สมมุติว่า LINE block แค่ PDF)
+    //   2) window.print() iframe — Android Print Dialog → "บันทึกเป็น PDF"
+    //   3) Web Share API — OS share sheet → Save to Files
+    //   4) Fallback toast (shareTargetPicker ส่งข้อความสรุป)
 
+    if (_trySaveViaImageDownload(filename)) {
+        _showQuickToast('กำลังบันทึกรูปภาพ...');
+        return;
+    }
     if (_trySaveViaPrint()) {
         _showQuickToast('เลือก "บันทึกเป็น PDF" ในหน้าต่างที่เปิดขึ้น');
         return;
     }
     _trySaveViaShareOrFallback(filename);
+}
+
+// บันทึกเป็นรูป PNG — สมมติฐานว่า LINE WebView block เฉพาะ PDF download แต่ปล่อย image
+function _trySaveViaImageDownload(filename) {
+    if (!_pdfViewerImageBlobUrl) return false;
+    const imgFilename = String(filename || 'document').replace(/\.pdf$/i, '') + '.png';
+    try {
+        const tmp = document.createElement('a');
+        tmp.href = _pdfViewerImageBlobUrl;
+        tmp.download = imgFilename;
+        tmp.rel = 'noopener';
+        tmp.type = 'image/png';
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        return true;
+    } catch (err) {
+        console.warn('[ImgDL] failed:', err);
+        return false;
+    }
+}
+
+// Composite ทุก canvas เป็น PNG เดียว — เรียกหลัง PDF.js render เสร็จใน showPdfViewer
+async function _precomputeImageBlob() {
+    const canvasArea = document.getElementById('pdfViewerCanvas');
+    if (!canvasArea) return;
+    const canvases = canvasArea.querySelectorAll('canvas');
+    if (canvases.length === 0) return;
+
+    const list = Array.from(canvases);
+    const maxWidth = Math.max(...list.map(c => c.width));
+    const gap = 4;
+    const totalHeight = list.reduce((sum, c) => sum + c.height, 0) + gap * (list.length - 1);
+
+    const composite = document.createElement('canvas');
+    composite.width = maxWidth;
+    composite.height = totalHeight;
+    const ctx = composite.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, maxWidth, totalHeight);
+
+    let y = 0;
+    for (const c of list) {
+        ctx.drawImage(c, Math.floor((maxWidth - c.width) / 2), y);
+        y += c.height + gap;
+    }
+
+    await new Promise(resolve => {
+        composite.toBlob(blob => {
+            if (blob) {
+                if (_pdfViewerImageBlobUrl) {
+                    try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {}
+                }
+                _pdfViewerImageBlob = blob;
+                _pdfViewerImageBlobUrl = URL.createObjectURL(blob);
+            }
+            resolve();
+        }, 'image/png');
+    });
+}
+
+// Pinch-to-zoom + double-tap zoom สำหรับ #pdfViewerCanvas
+function _setupPdfZoomGestures() {
+    const area = document.getElementById('pdfViewerCanvas');
+    if (!area || area.__zoomSetup) return;
+    area.__zoomSetup = true;
+
+    let initialDist = 0;
+    let initialZoom = 1;
+    let lastTap = 0;
+
+    area.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            initialDist = Math.sqrt(dx * dx + dy * dy);
+            initialZoom = _pdfZoom;
+        }
+    }, { passive: true });
+
+    area.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialDist > 0) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            _setPdfZoom(initialZoom * (dist / initialDist));
+        }
+    }, { passive: false });
+
+    area.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) initialDist = 0;
+        // double-tap toggle zoom
+        if (e.touches.length === 0 && e.changedTouches.length === 1) {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                _setPdfZoom(_pdfZoom > 1.05 ? 1 : 2);
+            }
+            lastTap = now;
+        }
+    }, { passive: true });
 }
 
 // ใช้ Print API → Android Print Dialog มีตัวเลือก "บันทึกเป็น PDF" บันทึกลง Downloads จริง
@@ -3678,6 +3804,7 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
             <span style="font-size:13px;">กำลังโหลด PDF...</span>
         </div>`;
     }
+    _setPdfZoom(1);
 
     // Render PDF.js ถ้ามี — เป็น enhancement เท่านั้น
     if (canvasArea && typeof pdfjsLib !== 'undefined') {
@@ -3687,6 +3814,12 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
             const ab = await pdfBlob.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
             canvasArea.innerHTML = '';
+            // wrap canvases ใน inner — สำหรับ apply CSS zoom
+            const inner = document.createElement('div');
+            inner.id = 'pdfViewerCanvasInner';
+            inner.style.cssText = 'display:flex;flex-direction:column;gap:10px;transform-origin:top left;zoom:1;';
+            canvasArea.appendChild(inner);
+
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const dpr = window.devicePixelRatio || 1;
@@ -3696,10 +3829,14 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
                 const canvas = document.createElement('canvas');
                 canvas.width = vp.width;
                 canvas.height = vp.height;
-                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white', webkitTouchCallout: 'none', webkitUserSelect: 'none', userSelect: 'none', pointerEvents: 'none' });
-                canvasArea.appendChild(canvas);
+                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white' });
+                inner.appendChild(canvas);
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
             }
+
+            // หลัง render เสร็จ — composite รูปไว้ใช้ตอน save + setup pinch zoom
+            _precomputeImageBlob().catch(err => console.warn('[PDF] image composite failed:', err));
+            _setupPdfZoomGestures();
         } catch {
             canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
                 PDF พร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึก PDF</strong> ด้านล่าง</div>`;
