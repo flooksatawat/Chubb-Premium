@@ -3419,14 +3419,12 @@ function handlePdfSaveLinkClick(e) {
             const p = navigator.share({ files: [imgFile], title: imgFilename });
             if (p && typeof p.then === 'function') {
                 p.then(() => {
-                    _showQuickToast('บันทึกสำเร็จ');
+                    _showQuickToast('แชร์/บันทึกสำเร็จ');
                 }).catch(err => {
                     if (err && err.name === 'AbortError') return;
                     console.warn('[Save] navigator.share rejected:', err);
-                    // fallback ลอง <a download> แบบ PNG (LINE WebView บางตัวยอม)
-                    if (!_trySaveViaImageDownload(imgFilename)) {
-                        _showPdfSaveFallback(`share: ${err && err.name || 'reject'}`);
-                    }
+                    // fallback: long-press lightbox (ทำงานได้แน่บน LINE Android)
+                    _showLongPressSaveModal();
                 });
                 return;
             }
@@ -3436,20 +3434,60 @@ function handlePdfSaveLinkClick(e) {
         }
     }
 
-    // Fallback 1: <a download> ของ PNG (บาง LINE WebView อนุญาต)
+    // Fallback 1: long-press lightbox — <img> + กดค้างเปิด native save menu
+    //            ใช้กับ LIFF Android ที่ navigator.share ไม่รองรับไฟล์
+    if (_showLongPressSaveModal()) {
+        return;
+    }
+
+    // Fallback 2: <a download> ของ PNG
     if (_trySaveViaImageDownload(imgFilename)) {
         _showQuickToast('กำลังบันทึกรูปภาพ...');
         return;
     }
 
-    // Fallback 2: print iframe → Android Print Dialog → "บันทึกเป็น PDF"/รูป
-    if (_trySaveViaPrint()) {
-        _showQuickToast('เลือกบันทึกในหน้าต่างที่เปิดขึ้น');
-        return;
-    }
-
     // Fallback 3: toast (เปิดในเบราว์เซอร์ภายนอก / shareTargetPicker)
     _showPdfSaveFallback(navigator.share ? 'share unavailable' : 'no share API');
+}
+
+// Lightbox สำหรับ "กดค้างเพื่อบันทึกภาพ" — fallback ที่ทำงานได้แน่นอนบน LINE WebView Android
+// เพราะ <img> รองรับ long-press → native context menu → "บันทึกภาพ" / "Save image"
+// ต้อง stopPropagation บน contextmenu เพราะ window มี global preventDefault
+function _showLongPressSaveModal() {
+    if (!_pdfViewerImageBlobUrl) return false;
+    const existing = document.getElementById('_imgSaveLightbox');
+    if (existing) existing.remove();
+
+    const url = _pdfViewerImageBlobUrl;
+    const modal = document.createElement('div');
+    modal.id = '_imgSaveLightbox';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom));';
+    modal.innerHTML = `
+        <div style="text-align:center;color:white;padding:14px 16px 6px;font-size:13px;font-weight:600;line-height:1.6;flex-shrink:0;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(251,191,36,0.15);padding:8px 14px;border-radius:12px;border:1px solid rgba(251,191,36,0.4);">
+                <i class="fas fa-hand-pointer" style="color:#fbbf24;font-size:16px;"></i>
+                <span>กดค้างที่ภาพ → เลือก <strong style="color:#fbbf24;">"บันทึกภาพ"</strong></span>
+            </div>
+        </div>
+        <div id="_imgSaveLightboxScroll" style="flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;">
+            <img id="_imgSaveLightboxImg" src="${url}" alt="image"
+                 style="display:block;width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.5);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
+        </div>
+        <div style="padding:10px 16px;flex-shrink:0;">
+            <button id="_closeImgLightbox" style="display:block;width:100%;background:#475569;color:white;border:none;padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;">เสร็จสิ้น</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // ปลดบล็อก contextmenu/touchcallout เฉพาะภาพ
+    const img = document.getElementById('_imgSaveLightboxImg');
+    if (img) {
+        img.addEventListener('contextmenu', e => e.stopPropagation(), true);
+        img.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    }
+
+    document.getElementById('_closeImgLightbox').addEventListener('click', () => modal.remove());
+    return true;
 }
 
 // บันทึกเป็นรูป PNG ผ่าน <a download> — ใช้เป็น fallback เมื่อ Web Share API ไม่ทำงาน
@@ -3511,112 +3549,97 @@ async function _precomputeImageBlob() {
     });
 }
 
-// Pinch-to-zoom + pan + double-tap — ใช้ CSS transform (ไม่ใช่ style.zoom)
-// ทำงานได้จริงบน LINE WebView/iOS Safari/Android Chrome
+// Pinch-zoom 2 นิ้ว (width-based) + 1 นิ้วเลื่อน native + double-tap toggle
+// width-based zoom: inner.style.width = `${scale*100}%` → browser re-rasterize จาก
+// canvas bitmap ความละเอียดสูงทุกครั้ง = คมชัดเสมอ และ scroll-bounds ขยายตามขนาดจริง
+// ทำให้ผู้ใช้เลื่อนซ้าย-ขวา-บน-ล่าง ด้วย 1 นิ้วได้แบบ native scroll
 const _IMG_ZOOM_MIN = 1;
-const _IMG_ZOOM_MAX = 5;
+const _IMG_ZOOM_MAX = 6;
 function _setupPdfZoomGestures() {
     const area = document.getElementById('pdfViewerCanvas');
     const inner = document.getElementById('pdfViewerCanvasInner');
     if (!area || !inner || area.__zoomSetup) return;
     area.__zoomSetup = true;
 
-    let scale = 1, tx = 0, ty = 0;
-    let startDist = 0, startScale = 1;
-    let startMidX = 0, startMidY = 0;
-    let startTx = 0, startTy = 0;
-    let panStartX = 0, panStartY = 0;
-    let isPanning = false, isPinching = false;
-    let lastTap = 0;
+    let scale = 1;
+    let startDist = 0;
+    let startScale = 1;
+    let startMidX = 0, startMidY = 0;  // relative to area
+    let startScrollLeft = 0, startScrollTop = 0;
+    let lastTap = 0, lastTapX = 0, lastTapY = 0;
 
     const apply = () => {
-        inner.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+        inner.style.width = `${100 * scale}%`;
     };
-    const clampPan = () => {
-        const rect = area.getBoundingClientRect();
-        const innerW = inner.offsetWidth * scale;
-        const innerH = inner.offsetHeight * scale;
-        const maxX = Math.max(0, (innerW - rect.width) / 2);
-        const maxY = Math.max(0, (innerH - rect.height) / 2);
-        tx = Math.max(-maxX, Math.min(maxX, tx));
-        ty = Math.max(-maxY, Math.min(maxY, ty));
+    const reset = () => {
+        scale = 1;
+        apply();
+        area.scrollLeft = 0;
+        area.scrollTop = 0;
     };
-    const reset = () => { scale = 1; tx = 0; ty = 0; apply(); };
-
-    // base styles — transform-origin ที่กลาง inner
-    inner.style.transformOrigin = '50% 0%';
-    inner.style.transition = '';
-    inner.style.willChange = 'transform';
 
     area.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
-            isPinching = true;
-            isPanning = false;
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            startDist = Math.hypot(dx, dy);
+            const t0 = e.touches[0], t1 = e.touches[1];
+            startDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
             startScale = scale;
-            startMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            startMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            startTx = tx;
-            startTy = ty;
-        } else if (e.touches.length === 1 && scale > 1.01) {
-            isPanning = true;
-            panStartX = e.touches[0].clientX - tx;
-            panStartY = e.touches[0].clientY - ty;
+            const rect = area.getBoundingClientRect();
+            startMidX = (t0.clientX + t1.clientX) / 2 - rect.left;
+            startMidY = (t0.clientY + t1.clientY) / 2 - rect.top;
+            startScrollLeft = area.scrollLeft;
+            startScrollTop = area.scrollTop;
         }
     }, { passive: true });
 
     area.addEventListener('touchmove', (e) => {
-        if (isPinching && e.touches.length === 2) {
+        // เฉพาะ 2 นิ้วเท่านั้น — 1 นิ้วปล่อยให้ browser scroll เอง
+        if (e.touches.length === 2 && startDist > 0) {
             e.preventDefault();
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const dist = Math.hypot(dx, dy);
+            const t0 = e.touches[0], t1 = e.touches[1];
+            const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
             const newScale = Math.max(_IMG_ZOOM_MIN, Math.min(_IMG_ZOOM_MAX, startScale * (dist / startDist)));
-            // เก็บจุดกลางของ pinch ให้อยู่กับที่ขณะซูม
             const ratio = newScale / startScale;
-            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            tx = startTx + (midX - startMidX) + (1 - ratio) * (startMidX - (area.getBoundingClientRect().left + area.clientWidth / 2));
-            ty = startTy + (midY - startMidY) + (1 - ratio) * (startMidY - (area.getBoundingClientRect().top));
             scale = newScale;
-            clampPan();
             apply();
-        } else if (isPanning && e.touches.length === 1 && scale > 1.01) {
-            e.preventDefault();
-            tx = e.touches[0].clientX - panStartX;
-            ty = e.touches[0].clientY - panStartY;
-            clampPan();
-            apply();
+            // ปรับ scroll เพื่อให้จุดกลางของ pinch อยู่ตำแหน่งเดิมบนหน้าจอ
+            area.scrollLeft = (startScrollLeft + startMidX) * ratio - startMidX;
+            area.scrollTop = (startScrollTop + startMidY) * ratio - startMidY;
         }
     }, { passive: false });
 
     area.addEventListener('touchend', (e) => {
-        if (e.touches.length < 2) isPinching = false;
-        if (e.touches.length === 0) {
-            isPanning = false;
-            // ถ้าซูมเลย max หรือต่ำกว่า 1 → snap
-            if (scale < 1.01) reset();
-            // double-tap toggle zoom
-            if (e.changedTouches.length === 1) {
-                const now = Date.now();
-                if (now - lastTap < 300) {
-                    if (scale > 1.05) reset();
-                    else {
-                        scale = 2.2;
-                        tx = 0; ty = 0;
-                        apply();
-                    }
-                    lastTap = 0;
+        if (e.touches.length < 2) startDist = 0;
+        // double-tap zoom toggle (1 นิ้ว แตะ 2 ครั้งเร็ว)
+        if (e.touches.length === 0 && e.changedTouches.length === 1) {
+            const t = e.changedTouches[0];
+            const now = Date.now();
+            const dt = now - lastTap;
+            const dxTap = Math.abs(t.clientX - lastTapX);
+            const dyTap = Math.abs(t.clientY - lastTapY);
+            if (dt < 300 && dxTap < 30 && dyTap < 30) {
+                const rect = area.getBoundingClientRect();
+                const tapX = t.clientX - rect.left;
+                const tapY = t.clientY - rect.top;
+                const oldScale = scale;
+                scale = scale > 1.05 ? 1 : 2.5;
+                apply();
+                if (scale === 1) {
+                    area.scrollLeft = 0;
+                    area.scrollTop = 0;
                 } else {
-                    lastTap = now;
+                    const ratio = scale / oldScale;
+                    area.scrollLeft = (area.scrollLeft + tapX) * ratio - tapX;
+                    area.scrollTop = (area.scrollTop + tapY) * ratio - tapY;
                 }
+                lastTap = 0;
+            } else {
+                lastTap = now;
+                lastTapX = t.clientX;
+                lastTapY = t.clientY;
             }
         }
     }, { passive: true });
 
-    // expose สำหรับ reset เวลาเปิด viewer ใหม่
     area.__resetZoom = reset;
 }
 
@@ -3758,22 +3781,59 @@ function _showPdfSaveFallback(errInfo) {
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
 }
 
-// แชร์ภาพ — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ผ่านโดยตรง)
-async function handlePdfShare() {
-    if (!_pdfViewerBlob || !_pdfViewerFilename) {
+// แชร์รูปภาพ — sync entry เพื่อรักษา user gesture สำหรับ navigator.share
+function handlePdfShare() {
+    if (!_pdfViewerImageBlob && !_pdfViewerBlob) {
         _showQuickToast('ยังไม่มีรูปภาพ');
         return;
     }
+    if (!_pdfViewerImageBlob) {
+        _showQuickToast('กำลังเตรียมภาพ — กรุณารอสักครู่');
+        return;
+    }
 
+    const baseName = String(_pdfViewerFilename || 'document').replace(/\.pdf$/i, '');
+    const imgName = baseName + '.png';
+    const imgFile = (typeof File !== 'undefined')
+        ? new File([_pdfViewerImageBlob], imgName, { type: 'image/png' })
+        : null;
+
+    // ===== ลอง Web Share API กับไฟล์ก่อน (รักษา gesture — sync call ไม่ await) =====
+    // ทำงานบนทั้ง LIFF iOS, Android Chrome WebView ใหม่ๆ, และ mobile browser ปกติ
+    // System share sheet จะมีตัวเลือก "Save to Photos", "Share to LINE", "Messenger" ฯลฯ
+    if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+        try {
+            const p = navigator.share({ files: [imgFile], title: imgName });
+            if (p && typeof p.then === 'function') {
+                p.then(() => {
+                    _showQuickToast('แชร์สำเร็จ');
+                }).catch(err => {
+                    if (err && err.name === 'AbortError') return;
+                    console.warn('[Share] navigator.share file failed:', err);
+                    _handleShareFileFallback();
+                });
+                return;
+            }
+        } catch (err) {
+            console.warn('[Share] navigator.share threw:', err);
+            // ลอง fallback
+        }
+    }
+
+    _handleShareFileFallback();
+}
+
+// Fallback chain แบบ async — เรียกหลัง navigator.share file ไม่ผ่าน
+async function _handleShareFileFallback() {
     await _ensureLiffReady();
     const inLine = isInLineApp();
 
-    // ===== LIFF: ใช้ pattern เดียวกับ shareToLine ที่ทำงานได้ =====
+    // LIFF: shareTargetPicker (text summary — LINE ไม่รับไฟล์ผ่าน LIFF)
     if (window.LIFF_READY && window.IS_IN_LIFF
         && typeof liff !== 'undefined'
         && typeof liff.isApiAvailable === 'function'
         && liff.isApiAvailable('shareTargetPicker')) {
-        console.log('[LIFF] handlePdfShare → shareTargetPicker');
+        console.log('[LIFF] handlePdfShare → shareTargetPicker (text fallback)');
         try {
             const summary = (typeof generateShortShareText === 'function')
                 ? generateShortShareText()
@@ -3783,29 +3843,13 @@ async function handlePdfShare() {
             if (ret) {
                 Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
             }
-            // ret === null = user ยกเลิก — ไม่แจ้ง error
             return;
         } catch (err) {
             console.warn('[LIFF] shareTargetPicker failed:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'ไม่สามารถส่งข้อความได้',
-                text: 'กรุณาลองใหม่อีกครั้ง',
-                confirmButtonText: 'ตกลง'
-            });
-            return;
         }
     }
 
-    // ===== Mobile browser: Web Share API กับไฟล์รูปภาพ =====
-    if (!inLine && _pdfViewerImageBlob) {
-        const baseName = String(_pdfViewerFilename || 'document').replace(/\.pdf$/i, '');
-        const imgName = baseName + '.png';
-        const imgFile = new File([_pdfViewerImageBlob], imgName, { type: 'image/png' });
-        if (await tryShareFile(imgFile, imgName, imgName)) return;
-    }
-
-    // ===== Desktop browser: เปิดเมนูแชร์ข้อความ (LINE/Messenger/Copy) =====
+    // Desktop: เปิดเมนูแชร์ข้อความ
     if (!inLine && typeof openGenericShareModal === 'function'
         && typeof lastCalculationData !== 'undefined' && lastCalculationData) {
         openGenericShareModal('all');
@@ -3904,14 +3948,14 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
             const ab = await pdfBlob.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
             canvasArea.innerHTML = '';
-            // wrap canvases ใน inner — สำหรับ apply transform (pinch zoom)
+            // wrap canvases ใน inner — width-based zoom (เปลี่ยน width = scale × 100%)
             const inner = document.createElement('div');
             inner.id = 'pdfViewerCanvasInner';
-            inner.style.cssText = 'display:flex;flex-direction:column;gap:10px;transform-origin:50% 0%;transform:translate(0,0) scale(1);will-change:transform;';
+            inner.style.cssText = 'display:flex;flex-direction:column;gap:10px;width:100%;margin:0 auto;';
             canvasArea.appendChild(inner);
 
-            // เรนเดอร์ความละเอียดสูง — บูสต์เพิ่มจาก DPR ×2 เพื่อให้ภาพคมชัดขณะซูม
-            const HI_RES_BOOST = 2.5;
+            // เรนเดอร์ความละเอียดสูงสุด — บูสต์ DPR ×4 ให้คมชัดที่ max zoom 6×
+            const HI_RES_BOOST = 4;
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const dpr = window.devicePixelRatio || 1;
@@ -3921,7 +3965,7 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
                 const canvas = document.createElement('canvas');
                 canvas.width = vp.width;
                 canvas.height = vp.height;
-                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white' });
+                Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white', imageRendering: '-webkit-optimize-contrast' });
                 inner.appendChild(canvas);
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
             }

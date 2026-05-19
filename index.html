@@ -1468,8 +1468,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <i class="fas fa-times" style="color:white;font-size:16px;"></i>
             </button>
         </div>
-        <!-- Canvas area — รองรับ pinch-zoom ด้วยนิ้ว (transform-based) + pan ขณะซูม -->
-        <div id="pdfViewerCanvas" style="flex:1;overflow:auto;background:#334155;padding:12px;-webkit-overflow-scrolling:touch;touch-action:none;position:relative;overscroll-behavior:contain;">
+        <!-- Canvas area — pinch-zoom 2 นิ้ว (width-based) + เลื่อน 1 นิ้วได้ native -->
+        <div id="pdfViewerCanvas" style="flex:1;overflow:auto;background:#334155;padding:12px;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;position:relative;overscroll-behavior:contain;">
             <div style="text-align:center;padding:40px 16px;color:#94a3b8;">
                 <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:12px;"></i>
                 <span style="font-size:13px;">กำลังโหลดเอกสาร...</span>
@@ -1490,7 +1490,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=21"></script>
+    <script src="js/ui.js?v=22"></script>
     <script src="js/share.js?v=5"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
