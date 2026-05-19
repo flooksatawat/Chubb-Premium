@@ -1917,15 +1917,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         try { profile = await liff.getProfile(); }
         catch { setState('loading', 'โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช'); return; }
 
-        /* 3b. อยู่ใน LINE in-app browser → บันทึก profile แล้วเปิด Chrome */
-        if (window.IS_IN_LIFF) {
-            window.lineProfile = profile;
-            setLS(CACHE_KEY, profile);
-            setState('loading', 'กำลังเปิดใน Chrome...');
-            liff.openWindow({ url: location.href, external: true });
-            return;
-        }
-
         window.lineProfile = profile;
         setLS(CACHE_KEY, profile);
 
@@ -1936,7 +1927,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
-            openApp();
+            /* อนุมัติแล้ว → เปิด Chrome (ครั้งแรก) หรือเข้าแอปตรง (อยู่ใน Chrome แล้ว) */
+            if (window.IS_IN_LIFF) {
+                setState('loading', 'กำลังเปิดใน Chrome...');
+                liff.openWindow({ url: location.href, external: true });
+            } else {
+                openApp();
+            }
         } else if (d.status === 'pending') {
             setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
