@@ -198,24 +198,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     gap:0;transition:opacity 0.4s ease,transform 0.4s ease;
 }
 #lineLoginOverlay.fade-out { opacity:0;pointer-events:none; }
-#lineProfileBar {
-    display:none;position:fixed;
-    top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;
-    z-index:1000;
-}
-#lineProfilePicBtn {
-    width:48px;height:48px;border-radius:50%;cursor:pointer;
-    object-fit:cover;border:2px solid rgba(255,255,255,0.8);
-    box-shadow:0 2px 10px rgba(0,0,0,0.18);display:block;
-}
-#lineProfileMenu {
-    display:none;position:absolute;right:0;top:56px;
-    background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
-    border-radius:14px;padding:10px 14px;min-width:140px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.5);
-    font-family:'Kanit',sans-serif;
-}
-#lineProfileMenu .pname { font-size:13px;font-weight:600;color:#1e293b; }
 </style>
 </head>
 <body>
@@ -282,14 +264,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <button onclick="dismissExternal()" style="width:100%;background:#f1f5f9;color:#64748b;font-size:14px;font-weight:600;padding:12px;border-radius:14px;border:none;cursor:pointer;font-family:Kanit,sans-serif;">
             ใช้ใน LINE ก็ได้
         </button>
-    </div>
-</div>
-
-<!-- LINE PROFILE BAR (แสดงหลัง login) -->
-<div id="lineProfileBar">
-    <img id="lineProfilePic" src="" id="lineProfilePicBtn" onclick="toggleProfileMenu()" width="48" height="48" style="width:48px;height:48px;border-radius:50%;cursor:pointer;object-fit:cover;border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 10px rgba(0,0,0,0.18);display:block;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><circle cx=%2224%22 cy=%2224%22 r=%2224%22 fill=%22%2300B900%22/></svg>'">
-    <div id="lineProfileMenu">
-        <div class="pname" id="lineProfileName"></div>
     </div>
 </div>
 
@@ -1755,9 +1729,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     }
 
     const overlay     = document.getElementById('lineLoginOverlay');
-    const profileBar  = document.getElementById('lineProfileBar');
-    const profilePic  = document.getElementById('lineProfilePic');
-    const profileName = document.getElementById('lineProfileName');
     const loginBtn    = document.getElementById('lineLoginBtn');
 
     /* ── helpers ── */
@@ -1823,12 +1794,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    function showProfile(p) {
-        if (!profileBar) return;
-        if (p.pictureUrl) { profilePic.src = p.pictureUrl; profilePic.style.display = ''; }
-        profileName.textContent = p.displayName || '';
-        profileBar.style.display = 'flex';
-    }
+    function showProfile(p) { /* profile bar removed */ }
 
     /* ── API calls — ใช้ liff.fetch เมื่ออยู่ใน LINE เพื่อหลีกเลี่ยง CORS ── */
     async function apiFetch(url) {
@@ -1947,20 +1913,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     };
 
     /* ── Logout ── */
-    window.toggleProfileMenu = function () {
-        const menu = document.getElementById('lineProfileMenu');
-        if (!menu) return;
-        const isOpen = menu.style.display === 'block';
-        menu.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) {
-            setTimeout(() => document.addEventListener('click', function close(e) {
-                if (!document.getElementById('lineProfileBar').contains(e.target)) {
-                    menu.style.display = 'none';
-                    document.removeEventListener('click', close);
-                }
-            }), 0);
-        }
-    };
 
     window.lineLogout = function () {
         clearLS();

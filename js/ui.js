@@ -199,21 +199,13 @@ const HX_LIMITS = {
 // ==================== UI HELPERS & NOTIFICATIONS ====================
 // ฟังก์ชันสำหรับเปิดหน้าต่าง ค่ารักษาพิเศษ ซ้อนขึ้นมา
 function showMedExtraDef() { openPopup('medExtraDefModal'); }
-function _syncProfileBar() {
-    const pb = document.getElementById('lineProfileBar');
-    if (!pb) return;
-    const anyOpen = document.querySelector('.modal-overlay.show');
-    const swalOpen = document.body.classList.contains('swal2-shown');
-    const notMain  = document.body.getAttribute('data-view') && document.body.getAttribute('data-view') !== 'main';
-    pb.style.display = (anyOpen || swalOpen || notMain) ? 'none' : 'flex';
-}
 function openPopup(id) {
     const modal = document.getElementById(id);
-    if (modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.add('show'); _syncProfileBar(); }, 10); }
+    if (modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.add('show'); }, 10); }
 }
 function closePopup(id) {
     const modal = document.getElementById(id);
-    if (modal) { modal.classList.remove('show'); setTimeout(() => { modal.classList.add('hidden'); _syncProfileBar(); }, 300); }
+    if (modal) { modal.classList.remove('show'); setTimeout(() => { modal.classList.add('hidden'); }, 300); }
 }
 function handleModalClick(e, modalId) { if (e.target.closest('button, input, select, textarea, a, .list-row, .interactive-btn, .prevent-close')) return; closePopup(modalId); }
 
@@ -549,10 +541,7 @@ function switchView(targetView) {
     const shareBtn = document.getElementById('navShareBtn');
     if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
 
-    // ── ซ่อนรูปโปรไฟล์เมื่ออยู่หน้าอื่น (บังข้อมูล) ──
     document.body.setAttribute('data-view', targetView);
-    const profileBar = document.getElementById('lineProfileBar');
-    if (profileBar) profileBar.style.display = targetView === 'main' ? 'flex' : 'none';
 
     const isWide        = window.innerWidth >= 700;
     const rightPane     = document.getElementById('rightPane');
@@ -4762,7 +4751,6 @@ window.navShareAction = async function() {
 // ============================================================================
 window.onload = async () => {
     // watch swal2-shown บน body เพื่อซ่อน/แสดง profile bar
-    new MutationObserver(_syncProfileBar).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
     // แสดงเมนู 11 แผนก่อนเลย ไม่รอโหลด
     if (typeof openPlanModal === 'function') openPlanModal();
@@ -4832,7 +4820,6 @@ window.open3DDetailsView = function() {
     // ปิด popup ที่อาจบังอยู่ก่อน
     if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
     document.body.setAttribute('data-view', 'table');
-    const _pb = document.getElementById('lineProfileBar'); if (_pb) _pb.style.display = 'none';
     const isWide = window.isWideLayout();
     const container = isWide ? document.getElementById('rightPane') : document.body;
 
