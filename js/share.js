@@ -324,7 +324,7 @@ function showVoiceResultPopup(d) {
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openBankModal === 'function') openBankModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openEsubModal === 'function') openEsubModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
 </div>`;
-        rows += `<button onclick="manualTriggerPopup(); closePopup('voiceResultModal')" class="w-full mt-3 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 text-[14px] active:scale-95 transition-transform"><i class='fas fa-file-alt'></i> ดูรายละเอียด</button>`;
+        rows += `<button onclick="closePopup('voiceResultModal'); setTimeout(() => { if(typeof openPlanModal === 'function') openPlanModal(); }, 200);" class="w-full mt-3 py-3.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 text-[14px] active:scale-95 transition-transform"><i class='fas fa-calculator'></i> คำนวณด้วยตนเอง</button>`;
     }
 
     let modal = document.getElementById('voiceResultModal');
