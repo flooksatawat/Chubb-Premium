@@ -7,6 +7,7 @@
 const SHEET_NAME   = 'users';
 const LINE_TOKEN   = '6N2/qrNuWkmn796yZcFj27QhS1aN6bzYAYNC3OhWweT503t8sowgYPLA45za07MvjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3xExtAN0o5Y+ps/u4ZWvKWUY02ndWDpFk/xzus0AN9PlQdB04t89/1O/w1cDnyilFU=';
 const ADMIN_ID     = 'U540a35c3526b71dcd9cbb50785762be4';
+const ADMIN_EMAIL  = 'flooksatawat@gmail.com';
 const SHEET_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/edit';
 
 // ── CORS headers ──────────────────────────────────────────────
@@ -90,10 +91,23 @@ function requestAccess(userId, displayName) {
   return { ok: true, status: 'pending' };
 }
 
-// ── แจ้ง admin ผ่าน LINE Push ──────────────────────────────────
+// ── แจ้ง admin ผ่าน Email + LINE Push ─────────────────────────
 function notifyAdmin(userId, displayName) {
+  const msg = `🔔 คำขอใช้งานใหม่\n\n👤 ชื่อ: ${displayName}\n🆔 ID: ${userId}\n\n✅ อนุมัติ → เปลี่ยน status เป็น active ใน Sheet\n${SHEET_URL}`;
+
+  // Email notification
   try {
-    const msg = `🔔 คำขอใช้งานใหม่\n\n👤 ชื่อ: ${displayName}\n🆔 ID: ${userId}\n\n✅ อนุมัติ → เปลี่ยน status เป็น active ใน Sheet\n${SHEET_URL}`;
+    MailApp.sendEmail({
+      to: ADMIN_EMAIL,
+      subject: `[Chubb App] คำขอใช้งานใหม่: ${displayName}`,
+      body: msg
+    });
+  } catch (e) {
+    console.error('email failed', e);
+  }
+
+  // LINE Push (ถ้า userId ตรง)
+  try {
     UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
       method: 'post',
       contentType: 'application/json',
@@ -105,7 +119,7 @@ function notifyAdmin(userId, displayName) {
       muteHttpExceptions: true
     });
   } catch (e) {
-    console.error('notifyAdmin failed', e);
+    console.error('line push failed', e);
   }
 }
 
