@@ -1854,9 +1854,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if (btn) { btn.disabled = true; btn.textContent = 'กำลังส่งคำขอ...'; }
         const profile = getLS(CACHE_KEY) || window.lineProfile;
         if (!profile) { location.reload(); return; }
-        try {
-            await callAPI({ action: 'request', userId: profile.userId, displayName: profile.displayName });
-        } catch (err) { console.warn('[requestAccess] failed:', err); }
+        const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({
+            action: 'request',
+            userId: profile.userId,
+            displayName: profile.displayName || ''
+        });
+        /* ใช้ no-cors เพื่อหลีกเลี่ยง CORS block ใน LINE browser — request ถึง server แน่นอน */
+        try { await fetch(url, { redirect: 'follow', mode: 'no-cors' }); }
+        catch (err) { console.warn('[requestAccess] fetch failed:', err); }
         setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
         setState('pending');
     };
