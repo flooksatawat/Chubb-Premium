@@ -1,5 +1,7 @@
         /* ==================== BASE & RESET ==================== */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* ซ่อนปุ่ม/element ที่ไม่รองรับใน LIFF (LINE in-app browser) */
+        body.in-liff .hide-in-liff { display: none !important; }
         body { 
             font-family: 'Kanit', sans-serif; 
             background-color: #f4f7fb; 

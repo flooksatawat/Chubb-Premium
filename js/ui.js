@@ -3818,36 +3818,74 @@ async function exportTableToPDF(actionType = 'preview') {
             await showPdfViewer(pdfBlob, pdfFileName, planLabel);
 
         } else if (actionType === 'save') {
-            // ลอง share ก่อน (ทำงานได้ดีทั้ง LIFF และ mobile ทั่วไป)
-            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-            if (!shared) {
-                if (inLine) {
-                    // LIFF: เปิด viewer ให้ user กดบันทึกเอง
-                    await showPdfViewer(pdfBlob, pdfFileName, planLabel);
-                } else {
-                    // Desktop / mobile browser ทั่วไป: download ตรง
-                    doc.save(pdfFileName);
-                }
+            if (inLine) {
+                // LIFF: navigator.share มักไม่รองรับ files — เปิด viewer ตรงเลย user กดบันทึก/แชร์ในนั้น
+                console.log('[LIFF] save → showPdfViewer (in-app)');
+                await showPdfViewer(pdfBlob, pdfFileName, planLabel);
+            } else {
+                // Browser ปกติ: ลอง Web Share ก่อน (มือถือ), ถ้าไม่ได้ → download ตรง
+                const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+                if (!shared) doc.save(pdfFileName);
             }
 
         } else if (actionType === 'print') {
             if (inLine) {
-                showLineInAppModal();
+                // LIFF: พิมพ์ตรงไม่ได้ — แจ้ง user แล้วเปิด viewer ให้บันทึกแทน
+                console.log('[LIFF] print → save fallback');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'LINE ไม่รองรับการพิมพ์โดยตรง',
+                    text: 'กำลังเปิดตัวอย่าง PDF — กรุณาบันทึกแล้วพิมพ์จากแอป Files / Photos',
+                    timer: 2400,
+                    showConfirmButton: false
+                });
+                setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
             } else {
                 doc.autoPrint();
                 window.open(doc.output('bloburl'), '_blank');
             }
 
-        } else if (actionType === 'line' || actionType === 'messenger') {
-            // ลอง share ก่อน — ถ้าได้ user เลือก app เองจาก share sheet
-            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-            if (!shared) {
-                if (inLine) {
-                    // Fallback: แสดง viewer + ปุ่มแชร์
+        } else if (actionType === 'line') {
+            if (inLine
+                && typeof liff !== 'undefined'
+                && typeof liff.isApiAvailable === 'function'
+                && liff.isApiAvailable('shareTargetPicker')) {
+                // LIFF: ส่งข้อความสรุปผ่าน shareTargetPicker (LINE ไม่รับไฟล์ PDF ผ่าน LIFF)
+                console.log('[LIFF] line → shareTargetPicker (text summary)');
+                try {
+                    const summary = (typeof generateShortShareText === 'function')
+                        ? generateShortShareText()
+                        : `${planLabel}\n${shareTitle}`;
+                    const text = `${summary}\n\n📄 ${pdfFileName}`;
+                    const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
+                    if (ret) {
+                        Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
+                    }
+                } catch (err) {
+                    console.warn('[LIFF] shareTargetPicker failed:', err);
                     await showPdfViewer(pdfBlob, pdfFileName, planLabel);
-                } else {
-                    window.open(doc.output('bloburl'), '_blank');
                 }
+            } else {
+                // Browser ปกติ: ลอง share ไฟล์ก่อน
+                const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+                if (!shared) window.open(doc.output('bloburl'), '_blank');
+            }
+
+        } else if (actionType === 'messenger') {
+            if (inLine) {
+                // LIFF: Messenger deep link ใช้ไม่ได้ — แจ้ง user ให้ใช้ LINE/บันทึกแทน
+                console.log('[LIFF] messenger fallback in LIFF');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Messenger ไม่รองรับใน LINE',
+                    text: 'กำลังเปิดตัวอย่าง PDF — กดปุ่มแชร์ในนั้นเพื่อส่งผ่าน LINE หรือบันทึก',
+                    timer: 2400,
+                    showConfirmButton: false
+                });
+                setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
+            } else {
+                const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+                if (!shared) window.open(doc.output('bloburl'), '_blank');
             }
         }
     } catch (error) { 

@@ -32,7 +32,7 @@ function triggerInstallmentShare(type) {
             <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์ยอดชำระ${label}</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="hide-in-liff flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
@@ -84,7 +84,7 @@ function openGenericShareModal(type) {
             <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">เลือกช่องทางการแชร์</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="hide-in-liff flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
@@ -113,22 +113,75 @@ function _closeResultModals() {
     ['resultModal', 'slbResultModal', 'wxnResultModal', 'dynamicResultModal'].forEach(id => closePopup(id));
 }
 
-function shareToLine() {
+async function shareToLine() {
     _closeResultModals();
-    window.open('https://line.me/R/msg/text/?' + encodeURIComponent(_getShareText()), '_blank');
+    const text = _getShareText();
+
+    // LIFF: ใช้ shareTargetPicker (window.open บล็อก deep link ใน LINE in-app browser)
+    if (window.LIFF_READY && window.IS_IN_LIFF
+        && typeof liff !== 'undefined'
+        && typeof liff.isApiAvailable === 'function'
+        && liff.isApiAvailable('shareTargetPicker')) {
+        console.log('[LIFF] shareToLine via shareTargetPicker');
+        try {
+            const ret = await liff.shareTargetPicker([{ type: 'text', text: text }]);
+            if (ret) {
+                Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
+            }
+            // ret === null = user ยกเลิก / ไม่เลือก target → ไม่ต้องแจ้ง error
+        } catch (err) {
+            console.warn('[LIFF] shareTargetPicker failed:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถส่งข้อความได้',
+                text: 'กรุณาลองใหม่อีกครั้ง หรือใช้ปุ่ม "คัดลอก" แทน',
+                confirmButtonText: 'ตกลง'
+            });
+        }
+        return;
+    }
+
+    // Browser ปกติ: คงโค้ดเดิม
+    window.open('https://line.me/R/msg/text/?' + encodeURIComponent(text), '_blank');
 }
 
 function shareToMessenger() {
     _closeResultModals();
+
+    // LIFF: deep link fb-messenger:// ถูกบล็อก → fallback ไปคัดลอก
+    if (window.LIFF_READY && window.IS_IN_LIFF) {
+        console.log('[LIFF] shareToMessenger fallback to copy');
+        Swal.fire({
+            icon: 'info',
+            title: 'Messenger ไม่รองรับใน LINE',
+            text: 'คัดลอกข้อความให้แทน — แล้ววางใน Messenger ได้เลย',
+            timer: 2200,
+            showConfirmButton: false
+        });
+        setTimeout(() => copyShareData(), 800);
+        return;
+    }
+
+    // Browser ปกติ: คงโค้ดเดิม
     window.open('fb-messenger://share/?link=' + encodeURIComponent(_getShareText()), '_blank');
 }
 
-function copyShareData() {
+async function copyShareData() {
     _closeResultModals();
     const text = _getShareText();
-    navigator.clipboard.writeText(text).then(() => {
-        Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', timer: 1200, showConfirmButton: false });
-    }).catch(() => { copyToClipboard(text, 'คัดลอกเรียบร้อยแล้ว'); });
+
+    // navigator.clipboard อาจไม่พร้อมใช้ใน LIFF / non-secure context — ลอง+fallback
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', timer: 1200, showConfirmButton: false });
+            return;
+        }
+        throw new Error('clipboard API unavailable');
+    } catch (err) {
+        if (window.IS_IN_LIFF) console.log('[LIFF] clipboard fallback to execCommand:', err && err.message);
+        copyToClipboard(text, 'คัดลอกเรียบร้อยแล้ว');
+    }
 }
 
 function copyToClipboard(text, msg) { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); const toast = document.createElement('div'); toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-xs font-bold z-[1000] shadow-xl transition-opacity duration-300"; toast.innerText = msg; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 2000); }
