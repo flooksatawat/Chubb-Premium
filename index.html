@@ -1883,7 +1883,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 openApp();
             }
         } else if (d.status === 'inactive') {
-            setState('denied');
+            const profile = getLS(CACHE_KEY);
+            if (profile) $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
+            setState('request');
         } else {
             _pollCount = 15;
             startPendingPolling();
@@ -2052,7 +2054,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
             setState('pending');
         } else if (d.status === 'inactive') {
-            setState('denied');
+            $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
+            setState('request');
         } else {
             /* not_found → แสดงปุ่มขออนุญาต */
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
