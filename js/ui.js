@@ -4983,9 +4983,12 @@ window.navTableImageView = async function() {
             <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 16px 8px;">
                 ${thumbsHtml}
             </div>
-            <div style="padding:10px 14px 4px;flex-shrink:0;">
-                <button id="_tblShare" style="width:100%;padding:14px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fab fa-line" style="font-size:18px;"></i> แชร์ทั้ง ${pageCount} หน้าไปที่แชท
+            <div style="padding:10px 14px 4px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
+                <button id="_tblSharePdf" style="width:100%;padding:14px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-file-pdf" style="font-size:18px;"></i> แชร์เป็น PDF (ไม่บีบภาพ)
+                </button>
+                <button id="_tblShare" style="width:100%;padding:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:16px;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-images"></i> แชร์เป็นภาพ (${pageCount} หน้า)
                 </button>
             </div>`;
         document.body.appendChild(viewer);
@@ -4999,7 +5002,13 @@ window.navTableImageView = async function() {
         };
         document.getElementById('_tblClose').addEventListener('click', closeViewer);
 
-        // ปุ่มแชร์ — ส่งทุกหน้าพร้อมกันผ่าน native share sheet
+        // ปุ่ม PDF — ใช้ exportTableToPDF ที่มีอยู่แล้ว ส่งเป็น document ไม่บีบ
+        document.getElementById('_tblSharePdf').addEventListener('click', () => {
+            closeViewer();
+            setTimeout(() => exportTableToPDF('save'), 200);
+        });
+
+        // ปุ่มภาพ — ส่งทุกหน้าพร้อมกันผ่าน native share sheet
         document.getElementById('_tblShare').addEventListener('click', async () => {
             const files = pages.map(p => p.file);
             if (navigator.share && (!navigator.canShare || navigator.canShare({ files }))) {
