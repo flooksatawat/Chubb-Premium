@@ -1769,9 +1769,30 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    window.lineLogin = function () {
-        if (typeof liff === 'undefined') return;
-        liff.login({ redirectUri: location.href });
+    window.lineLogin = async function () {
+        const btn = document.getElementById('lineLoginBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>กำลังเชื่อมต่อ...'; }
+
+        try {
+            if (typeof liff === 'undefined') { location.reload(); return; }
+
+            // ถ้า LIFF ยังไม่ init — init ใหม่ก่อน
+            if (!window.LIFF_READY) {
+                await liff.init({ liffId: window.LIFF_ID });
+                window.LIFF_READY = true;
+            }
+
+            if (liff.isLoggedIn()) {
+                // Login อยู่แล้ว — reload เพื่อให้ flow เดิมทำงาน
+                location.reload();
+            } else {
+                liff.login({ redirectUri: location.href });
+            }
+        } catch (e) {
+            console.error('[LIFF] login error', e);
+            // fallback: reload
+            location.reload();
+        }
     };
 
     window.lineLogout = function () {
