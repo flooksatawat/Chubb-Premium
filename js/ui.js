@@ -282,6 +282,12 @@ function submitQuickCalc(rawValue) {
 
     // แผนที่ต้องระบุระยะเวลา
     const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','3D Health Excellence','Whole Life Extra'];
+    // ถ้าไม่พบชื่อแผนในคำสั่ง และยังไม่ได้เลือกแผนไว้ก่อน → แจ้งเตือน
+    if (!parsed.plan && !currentAppPlan) {
+        if (typeof showCustomError === 'function') showCustomError('ไม่พบชื่อแบบประกัน\nกรุณาระบุชื่อแบบ เช่น CI Extra Plus, Century Life, 3D Health');
+        return;
+    }
+
     const targetPlan = parsed.plan || currentAppPlan;
     if (PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
         const planMap = {
