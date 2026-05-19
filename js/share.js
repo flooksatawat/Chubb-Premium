@@ -99,8 +99,24 @@ function openGenericShareModal(type) {
     });
 }
 
+function generateSummaryText() {
+    if (!lastCalculationData) return '';
+    const d = lastCalculationData;
+    const genderTh = d.gender === 'male' ? 'ชาย' : 'หญิง';
+    const lines = [
+        `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
+        `👤 เพศ: ${genderTh}`,
+        `🎂 อายุ: ${d.age} ปี`,
+        `💰 ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
+        `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
+    ];
+    if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
+    return lines.join('\n');
+}
+
 function _getShareText() {
     if (currentShareType === 'installment') return pendingInstallmentData.allText || '';
+    if (currentShareType === 'summary') return generateSummaryText();
     if (currentShareType === 'diseaseList') return 'https://short-url.org/1nMQi';
     if (['scb', 'bbl', 'bay', 'kbank'].includes(currentShareType)) {
         const bText = { scb: 'ธ.ไทยพาณิชย์ : 049-416-6866 สาขาถนนวิทยุ', bbl: 'ธ.กรุงเทพ : 147-312-5357 สาขาสุรวงศ์', bay: 'ธ.กรุงศรี : 001-016-4329 สาขาเพลินจิต', kbank: 'ธ.กสิกร : 099-132-6065 สาขาพหลโยธิน' };
@@ -303,7 +319,7 @@ function showVoiceResultPopup(d) {
         const _pillBtn = "w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all";
         rows += `<div class="flex flex-col gap-3 mt-4 mb-2">
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openTableFromModal === 'function') openTableFromModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-table text-lg text-blue-500"></i><span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span></button>
-    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof sharePlan === 'function') sharePlan(); }, 200);" class="${_pillBtn}"><i class="fas fa-share-nodes text-lg text-[#00A651]"></i><span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span></button>
+    <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openGenericShareModal === 'function') openGenericShareModal('summary'); }, 200);" class="${_pillBtn}"><i class="fas fa-share-nodes text-lg text-[#00A651]"></i><span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span></button>
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openInstallmentModal === 'function') openInstallmentModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-credit-card text-lg text-purple-500"></i><span class="text-slate-700 font-medium">ตัวเลือกชำระ</span></button>
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openBankModal === 'function') openBankModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openEsubModal === 'function') openEsubModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
