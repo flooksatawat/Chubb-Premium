@@ -231,10 +231,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <p style="font-size:14px;color:rgba(255,255,255,0.85);font-family:Kanit,sans-serif;" id="authStateLoadingText">กำลังเชื่อมต่อ LINE...</p>
     </div>
 
-    <!-- State: request (ขออนุญาต) -->
+    <!-- State: request (ขออนุญาต + pending รวมกัน) -->
     <div id="authStateRequest" style="display:none;flex-direction:column;align-items:center;gap:16px;text-align:center;max-width:280px;">
-        <div style="font-size:40px;">👋</div>
+        <div id="authStateEmoji" style="font-size:40px;">👋</div>
         <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;" id="authRequestName"></p>
+        <p id="authRequestMsg" style="font-size:13px;color:rgba(255,255,255,0.75);font-family:Kanit,sans-serif;margin:0;display:none;"></p>
         <button onclick="requestAccess()" id="authRequestBtn"
             style="background:white;color:#00A000;font-size:15px;font-weight:700;padding:13px 28px;border-radius:14px;border:none;box-shadow:0 6px 20px rgba(0,0,0,0.2);cursor:pointer;font-family:Kanit,sans-serif;display:flex;align-items:center;gap:8px;">
             <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#00A000" d="M12 2C6.48 2 2 5.92 2 10.7c0 2.76 1.55 5.21 3.98 6.84-.18.65-.64 2.36-.73 2.73-.11.45.17.94.62.75.37-.16 4.18-2.75 5.87-3.87.42.05.84.08 1.27.08 5.52 0 10-3.92 10-8.7S17.52 2 12 2z"/></svg>
@@ -242,11 +243,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </button>
     </div>
 
-    <!-- State: pending (รออนุมัติ) -->
-    <div id="authStatePending" style="display:none;flex-direction:column;align-items:center;gap:14px;text-align:center;max-width:280px;">
-        <div style="font-size:40px;">⏳</div>
-        <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;">รอสักครู่นะครับ</p>
-    </div>
+    <!-- State: pending (hidden — ใช้ authStateRequest แทน) -->
+    <div id="authStatePending" style="display:none;"></div>
 
     <!-- State: denied -->
     <div id="authStateDenied" style="display:none;flex-direction:column;align-items:center;gap:14px;text-align:center;max-width:270px;">
@@ -1885,10 +1883,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     /* ── Request access ── */
     window.requestAccess = async function () {
         const btn = $('authRequestBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'รอสักครู่นะครับ...'; }
+        const msg = $('authRequestMsg');
+        const emoji = $('authStateEmoji');
+        if (btn) { btn.disabled = true; btn.style.display = 'none'; }
+        if (emoji) emoji.textContent = '⏳';
+        if (msg) { msg.textContent = 'รอสักครู่นะครับ'; msg.style.display = 'block'; }
         const profile = getLS(CACHE_KEY) || window.lineProfile;
         if (!profile) {
-            if (btn) btn.textContent = 'ไม่พบข้อมูล LINE กรุณารีเฟรช';
+            if (msg) msg.textContent = 'ไม่พบข้อมูล LINE กรุณารีเฟรช';
             return;
         }
         try {
@@ -1897,7 +1899,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             console.warn('[requestAccess] failed:', err);
         }
         setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
-        setState('pending');
+        startPendingPolling();
     };
 
     /* ── สร้าง Chrome URL พร้อม auth params ── */
