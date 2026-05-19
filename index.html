@@ -1953,24 +1953,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             try {
                 const p = JSON.parse(decodeURIComponent(paramProfile));
                 const a = JSON.parse(decodeURIComponent(paramAuth));
-                /* รับ _lp/_la เฉพาะที่ออกมาใหม่ (ไม่เกิน 5 นาที) ป้องกันแชร์ลิงค์ */
-                const age = Date.now() - (a.ts || 0);
-                if (age < 5 * 60 * 1000) {
-                    setLS(CACHE_KEY, p);
-                    setLS(AUTH_CACHE_KEY, a);
-                }
+                setLS(CACHE_KEY, p);
+                setLS(AUTH_CACHE_KEY, a);
             } catch {}
-            /* ลบ params ออกจาก URL โดยไม่ reload */
             history.replaceState(null, '', location.pathname);
         }
 
-        /* 1. Cache authorized → เปิดแอปทันที แล้ว re-verify กับ Sheet ใน background */
+        /* 1. Cache authorized → เปิดแอปทันที */
         const cachedProfile = getLS(CACHE_KEY);
         const cachedAuth    = getLS(AUTH_CACHE_KEY);
-        /* ล้าง pending cache เก่า — ไม่ใช้ pending จาก cache เพราะอาจ stale */
         if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
-            /* ถ้าอยู่ใน LINE in-app browser → redirect Chrome ก่อน */
             await window._liffReady;
             if (window.IS_IN_LIFF) {
                 setState('loading', 'กำลังเปิดใน Chrome...');
@@ -1980,35 +1973,12 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             window.lineProfile = cachedProfile;
             showProfile(cachedProfile);
             openApp();
-            /* Re-verify กับ Sheet ใน background — ถ้าถูกลบออกจะ kick ออกทันที */
-            callAPI({ action: 'check', userId: cachedProfile.userId }).then(d => {
-                if (!d.authorized) {
-                    localStorage.removeItem(AUTH_CACHE_KEY);
-                    localStorage.removeItem(CACHE_KEY);
-                    document.getElementById('appContainer') && (document.getElementById('appContainer').style.display = 'none');
-                    document.getElementById('lineProfileBar') && (document.getElementById('lineProfileBar').style.display = 'none');
-                    setState('denied');
-                    document.getElementById('lineLoginOverlay').style.display = 'flex';
-                }
-            }).catch(() => {});
             return;
         }
 
         /* 2. รอ LIFF init */
         setState('loading', 'กำลังเชื่อมต่อ LINE...');
         await window._liffReady;
-
-        /* ป้องกันการแชร์ลิงค์ — ต้องเปิดผ่าน LINE LIFF เท่านั้น */
-        if (!window.IS_IN_LIFF) {
-            document.getElementById('lineLoginOverlay').innerHTML = `
-              <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;max-width:280px;">
-                <div style="font-size:56px;">🔐</div>
-                <p style="font-size:18px;font-weight:800;color:white;font-family:Kanit,sans-serif;">เปิดผ่าน LINE เท่านั้น</p>
-                <p style="font-size:13px;color:rgba(255,255,255,0.8);font-family:Kanit,sans-serif;line-height:1.8;">ไม่สามารถเข้าใช้งานโดยตรงได้<br>กรุณาเปิดผ่าน LINE RichMenu</p>
-              </div>`;
-            document.getElementById('lineLoginOverlay').style.display = 'flex';
-            return;
-        }
 
         if (!window.LIFF_READY) {
             setState('loading', 'เชื่อมต่อไม่ได้ กรุณารีเฟรช');
