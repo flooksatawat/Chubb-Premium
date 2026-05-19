@@ -4983,12 +4983,12 @@ window.navTableImageView = async function() {
             <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 16px 8px;">
                 ${thumbsHtml}
             </div>
-            <div style="padding:10px 14px 4px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
-                <button id="_tblSharePdf" style="width:100%;padding:14px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-file-pdf" style="font-size:18px;"></i> แชร์เป็น PDF (ไม่บีบภาพ)
-                </button>
-                <button id="_tblShare" style="width:100%;padding:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:16px;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-images"></i> แชร์เป็นภาพ (${pageCount} หน้า)
+            <div style="padding:8px 14px 4px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
+                <div style="text-align:center;color:rgba(255,255,255,0.55);font-size:12px;font-weight:600;padding:6px 0;">
+                    <i class="fas fa-hand-pointer" style="margin-right:6px;"></i>กดค้างที่ภาพ → บันทึกรูปภาพ → เปิด LINE แนบรูป
+                </div>
+                <button id="_tblOpenLine" style="width:100%;padding:13px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fab fa-line" style="font-size:18px;"></i> เปิด LINE
                 </button>
             </div>`;
         document.body.appendChild(viewer);
@@ -5001,29 +5001,8 @@ window.navTableImageView = async function() {
             pages.forEach(p => { try { URL.revokeObjectURL(p.blobUrl); } catch {} });
         };
         document.getElementById('_tblClose').addEventListener('click', closeViewer);
-
-        // ปุ่ม PDF — ใช้ exportTableToPDF ที่มีอยู่แล้ว ส่งเป็น document ไม่บีบ
-        document.getElementById('_tblSharePdf').addEventListener('click', () => {
-            closeViewer();
-            setTimeout(() => exportTableToPDF('save'), 200);
-        });
-
-        // ปุ่มภาพ — ส่งทุกหน้าพร้อมกันผ่าน native share sheet
-        document.getElementById('_tblShare').addEventListener('click', async () => {
-            const files = pages.map(p => p.file);
-            if (navigator.share && (!navigator.canShare || navigator.canShare({ files }))) {
-                try {
-                    await navigator.share({ files, title: `${planAbbr}_ตารางมูลค่า` });
-                    return;
-                } catch (err) {
-                    if (err && err.name === 'AbortError') return;
-                }
-            }
-            const t = document.createElement('div');
-            t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 22px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
-            t.textContent = 'กดค้างที่ภาพแต่ละหน้า → บันทึกรูปภาพ';
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2500);
+        document.getElementById('_tblOpenLine').addEventListener('click', () => {
+            window.open('https://line.me/R/nv/chat', '_blank');
         });
     } catch (err) {
         loading.remove();
