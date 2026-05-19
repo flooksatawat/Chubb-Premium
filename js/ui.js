@@ -4459,6 +4459,68 @@ async function exportTableToPDF(actionType = 'preview') {
 }
 
 // ============================================================================
+// 📤 NAV SHARE BOTTOM SHEET — LINE / Messenger / Save
+// ============================================================================
+window.navShareAction = function() {
+    if (!lastCalculationData || lastCalculationData.premium === 0) {
+        showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+        return;
+    }
+    const ex = document.getElementById('_navShareSheet');
+    if (ex) { ex.remove(); return; }
+
+    const sheet = document.createElement('div');
+    sheet.id = '_navShareSheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;';
+    sheet.innerHTML = `
+        <div style="width:100%;background:white;border-radius:24px 24px 0 0;padding:20px 20px max(24px,env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,0.25);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <span style="font-size:16px;font-weight:700;color:#1e293b;"><i class="fas fa-share-alt" style="margin-right:8px;color:#3b82f6;"></i>แชร์ตารางให้ลูกค้า</span>
+                <button id="_nsClose" style="width:32px;height:32px;background:#f1f5f9;border:none;border-radius:50%;font-size:18px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:4px;">
+                <button id="_nsLine" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                    <div style="width:52px;height:52px;background:#06c755;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(6,199,85,0.35);">
+                        <i class="fab fa-line" style="color:white;font-size:26px;"></i>
+                    </div>
+                    <span style="font-size:13px;font-weight:700;color:#166534;">LINE</span>
+                </button>
+                <button id="_nsMsgr" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                    <div style="width:52px;height:52px;background:linear-gradient(135deg,#0084ff,#a020f0);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,132,255,0.35);">
+                        <i class="fab fa-facebook-messenger" style="color:white;font-size:26px;"></i>
+                    </div>
+                    <span style="font-size:13px;font-weight:700;color:#1d4ed8;">Messenger</span>
+                </button>
+                <button id="_nsSave" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                    <div style="width:52px;height:52px;background:#334155;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(51,65,85,0.3);">
+                        <i class="fas fa-download" style="color:white;font-size:24px;"></i>
+                    </div>
+                    <span style="font-size:13px;font-weight:700;color:#334155;">บันทึก</span>
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(sheet);
+
+    const close = () => sheet.remove();
+    sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+    document.getElementById('_nsClose').addEventListener('click', close);
+
+    document.getElementById('_nsLine').addEventListener('click', () => {
+        close();
+        if (typeof exportTableToPDF === 'function') exportTableToPDF('line');
+    });
+    document.getElementById('_nsMsgr').addEventListener('click', () => {
+        close();
+        if (typeof exportTableToPDF === 'function') exportTableToPDF('messenger');
+    });
+    document.getElementById('_nsSave').addEventListener('click', () => {
+        close();
+        if (typeof exportTableToPDF === 'function') exportTableToPDF('save');
+    });
+};
+
+// ============================================================================
 // 🌟 ONLOAD INITIALIZATION (เชื่อมระบบเดิมทั้งหมด + เปิดหน้าแรก) 🌟
 // ============================================================================
 window.onload = async () => {
