@@ -529,6 +529,10 @@ function switchView(targetView) {
     const shareBtn = document.getElementById('navShareBtn');
     if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
 
+    // ── ซ่อนรูปโปรไฟล์เมื่ออยู่หน้าอื่น (บังข้อมูล) ──
+    const profileBar = document.getElementById('lineProfileBar');
+    if (profileBar) profileBar.style.display = targetView === 'main' ? 'flex' : 'none';
+
     const isWide        = window.innerWidth >= 700;
     const rightPane     = document.getElementById('rightPane');
     const rightPaneMain = document.getElementById('rightPaneMain');
