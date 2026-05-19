@@ -3312,6 +3312,8 @@ async function tryShareFile(file, title, text) {
 // ===== PDF VIEWER STATE =====
 let _pdfViewerBlob = null;
 let _pdfViewerFilename = '';
+let _pdfViewerDataUri = null;   // pre-computed in showPdfViewer — สำหรับ sync use ใน click handler (LIFF gesture)
+let _pdfViewerBlobUrl = null;   // เก็บ blob URL ที่สร้างใน showPdfViewer — revoke ตอนปิด
 
 function closePdfViewer() {
     const modal = document.getElementById('pdfViewerModal');
@@ -3326,8 +3328,11 @@ function closePdfViewer() {
         URL.revokeObjectURL(dlLink.href);
         dlLink.href = '#';
     }
+    if (_pdfViewerBlobUrl) { try { URL.revokeObjectURL(_pdfViewerBlobUrl); } catch {} }
     _pdfViewerBlob = null;
     _pdfViewerFilename = '';
+    _pdfViewerDataUri = null;
+    _pdfViewerBlobUrl = null;
 }
 
 async function _ensureLiffReady() {
@@ -3359,7 +3364,8 @@ function _blobToDataUrl(blob) {
     });
 }
 
-async function handlePdfSaveLinkClick(e) {
+// บันทึก PDF — เน้นรักษา user gesture บน iOS LIFF (ห้าม await ก่อน navigate)
+function handlePdfSaveLinkClick(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
 
@@ -3369,77 +3375,79 @@ async function handlePdfSaveLinkClick(e) {
     }
 
     const inLine = isInLineApp();
+    const filename = _pdfViewerFilename;
 
-    // ===== 1) Browser ปกติ: blob URL + <a download> (มาตรฐาน) =====
+    // ===== Browser ปกติ: blob URL + <a download> =====
     if (!inLine) {
         try {
-            const url = URL.createObjectURL(_pdfViewerBlob);
+            const url = _pdfViewerBlobUrl || URL.createObjectURL(_pdfViewerBlob);
             const tmp = document.createElement('a');
             tmp.href = url;
-            tmp.download = _pdfViewerFilename;
+            tmp.download = filename;
             tmp.rel = 'noopener';
             document.body.appendChild(tmp);
             tmp.click();
-            setTimeout(() => { tmp.remove(); URL.revokeObjectURL(url); }, 1500);
+            setTimeout(() => { tmp.remove(); }, 100);
             _showQuickToast('กำลังดาวน์โหลด...');
             return;
         } catch (err) {
             console.warn('[Save] <a download> with blob URL failed:', err);
-            // ตกไปลอง Web Share / data URI ต่อ
         }
     }
 
-    _showQuickToast('กำลังเตรียมไฟล์...');
-    await _ensureLiffReady();
-
-    // ===== 2) Web Share API กับไฟล์ PDF =====
-    // iOS Safari/Chrome Android: เปิด share sheet → user เลือก "Save to Files" / "บันทึกใน LINE"
-    // LIFF: บาง version รองรับ
-    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) {
-        console.log('[Save] Web Share API success');
-        return;
-    }
-
-    // ===== 3) Fallback: data URI =====
-    //   - <a download> ก่อน (Android WebView รองรับ)
-    //   - แล้ว navigate ตาม (iOS LIFF เปิด native PDF viewer ที่มีปุ่ม Share)
-    let dataUri = null;
-    try {
-        dataUri = await _blobToDataUrl(_pdfViewerBlob);
-    } catch (err) {
-        console.warn('[Save] blob → dataURI failed:', err);
-    }
-
+    // ===== LIFF: ใช้ pre-computed dataUri แบบ sync — รักษา user gesture =====
+    const dataUri = _pdfViewerDataUri;
     if (dataUri) {
+        // 1) ลอง <a download> (Android WebView รองรับ)
         try {
             const tmp = document.createElement('a');
             tmp.href = dataUri;
-            tmp.download = _pdfViewerFilename;
+            tmp.download = filename;
             tmp.rel = 'noopener';
             document.body.appendChild(tmp);
             tmp.click();
             tmp.remove();
         } catch (err) {
-            console.warn('[Save] <a download> with dataURI failed:', err);
+            console.warn('[Save] <a download> dataURI failed:', err);
         }
 
-        // navigate inline เป็น last resort (iOS LIFF) — เผื่อ <a download> ไม่ทำงาน
-        setTimeout(() => {
-            try {
-                console.log('[Save] navigate to data URI (inline viewer)');
-                window.location.href = dataUri;
-            } catch (err) {
-                console.warn('[Save] dataURI navigation failed:', err);
-                _showPdfActionFallback();
-            }
-        }, 600);
+        // 2) navigate inline (iOS LIFF เปิด native PDF viewer มีปุ่ม Share → Save to Files)
+        //    ใช้ window.open ก่อน (เปิดแท็บใหม่ใน LIFF — บาง LIFF version รองรับ)
+        try {
+            const w = window.open(dataUri, '_blank');
+            if (w) return;
+        } catch (err) {
+            console.warn('[Save] window.open dataURI failed:', err);
+        }
+
+        // 3) Last resort: navigate ในแท็บปัจจุบัน (อาจถูก LIFF บล็อก)
+        try {
+            window.location.href = dataUri;
+            return;
+        } catch (err) {
+            console.warn('[Save] location.href dataURI failed:', err);
+        }
+    } else {
+        // dataUri ยังไม่พร้อม (ปกติคำนวณเสร็จก่อน) — เริ่ม compute แล้วบอก user
+        _showQuickToast('กำลังเตรียมไฟล์ ลองอีกครั้ง...');
+        if (_pdfViewerBlob) {
+            _blobToDataUrl(_pdfViewerBlob).then(uri => { _pdfViewerDataUri = uri; }).catch(() => {});
+        }
         return;
     }
 
+    // 4) ทั้งหมดล้มเหลว → เสนอ Web Share / เปิด external browser
+    _trySaveFallbacks(inLine);
+}
+
+async function _trySaveFallbacks(inLine) {
+    await _ensureLiffReady();
+    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
     _showPdfActionFallback();
 }
 
+// แชร์ PDF — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ PDF)
 async function handlePdfShare() {
     if (!_pdfViewerBlob || !_pdfViewerFilename) {
         _showQuickToast('ยังไม่มีไฟล์ PDF');
@@ -3448,11 +3456,13 @@ async function handlePdfShare() {
 
     await _ensureLiffReady();
     const inLine = isInLineApp();
-    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
 
-    // ===== LIFF: ส่งข้อความสรุปผ่าน shareTargetPicker (LIFF ไม่รับไฟล์ PDF) =====
-    if (inLine && _liffApi('shareTargetPicker')) {
-        _showQuickToast('กำลังเปิด LINE...');
+    // ===== LIFF: ใช้ pattern เดียวกับ shareToLine ที่ทำงานได้ =====
+    if (window.LIFF_READY && window.IS_IN_LIFF
+        && typeof liff !== 'undefined'
+        && typeof liff.isApiAvailable === 'function'
+        && liff.isApiAvailable('shareTargetPicker')) {
+        console.log('[LIFF] handlePdfShare → shareTargetPicker');
         try {
             const summary = (typeof generateShortShareText === 'function')
                 ? generateShortShareText()
@@ -3460,22 +3470,29 @@ async function handlePdfShare() {
             const text = `${summary}\n\n📄 ${_pdfViewerFilename}`;
             const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
             if (ret) {
-                _showQuickToast('ส่งข้อความแล้ว');
+                Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
             }
             // ret === null = user ยกเลิก — ไม่แจ้ง error
             return;
         } catch (err) {
             console.warn('[LIFF] shareTargetPicker failed:', err);
-            // ตกไปลอง Web Share ต่อ
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถส่งข้อความได้',
+                text: 'กรุณาลองใหม่อีกครั้ง',
+                confirmButtonText: 'ตกลง'
+            });
+            return;
         }
     }
 
-    // ===== Mobile/iOS: Web Share API กับไฟล์ PDF =====
-    _showQuickToast('กำลังเตรียมแชร์...');
-    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
+    // ===== Mobile browser: Web Share API กับไฟล์ PDF =====
+    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
+    if (!inLine && await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
 
-    // ===== Desktop browser: ไม่มี navigator.share → เปิดเมนูแชร์ข้อความ =====
-    if (!inLine && typeof openGenericShareModal === 'function' && typeof lastCalculationData !== 'undefined' && lastCalculationData) {
+    // ===== Desktop browser: เปิดเมนูแชร์ข้อความ (LINE/Messenger/Copy) =====
+    if (!inLine && typeof openGenericShareModal === 'function'
+        && typeof lastCalculationData !== 'undefined' && lastCalculationData) {
         openGenericShareModal('all');
         return;
     }
@@ -3490,21 +3507,31 @@ function _showPdfActionFallback() {
     toast.id = '_pdfActionFallbackToast';
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
     const hasSharePicker = _liffApi('shareTargetPicker');
+    const canOpenWindow = typeof liff !== 'undefined' && typeof liff.openWindow === 'function' && window.IS_IN_LIFF;
     const inLine = isInLineApp();
-    const headline = inLine ? 'อุปกรณ์ไม่รองรับการบันทึก/แชร์ไฟล์ PDF ใน LINE' : 'อุปกรณ์ไม่รองรับการบันทึก/แชร์ไฟล์';
+    const headline = inLine ? 'LINE จำกัดการบันทึกไฟล์โดยตรง' : 'อุปกรณ์ไม่รองรับการบันทึก/แชร์ไฟล์';
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึก/แชร์ไฟล์ได้</div>
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
         <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
             ${headline}<br>
-            ${hasSharePicker ? 'สามารถส่งสรุปแผนเป็นข้อความใน LINE ได้' : 'ลองเปิดบนเบราว์เซอร์ปกติ'}
+            ${canOpenWindow ? 'เปิดในเบราว์เซอร์ภายนอกเพื่อบันทึก PDF ได้' : (hasSharePicker ? 'สามารถส่งสรุปแผนเป็นข้อความใน LINE ได้' : 'ลองเปิดบนเบราว์เซอร์ปกติ')}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            ${canOpenWindow ? '<button id="_pdfOpenExtBtn" style="background:#0ea5e9;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">เปิดในเบราว์เซอร์</button>' : ''}
             ${hasSharePicker ? '<button id="_pdfShareTextBtn" style="background:#06c755;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">ส่งข้อความใน LINE</button>' : ''}
             <button id="_pdfCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
         </div>
     `;
     document.body.appendChild(toast);
     document.getElementById('_pdfCloseToastBtn').addEventListener('click', () => toast.remove());
+    if (canOpenWindow) {
+        document.getElementById('_pdfOpenExtBtn').addEventListener('click', () => {
+            try {
+                liff.openWindow({ url: window.location.href, external: true });
+            } catch (err) { console.warn('[LIFF] openWindow external failed:', err); }
+            toast.remove();
+        });
+    }
     if (hasSharePicker) {
         document.getElementById('_pdfShareTextBtn').addEventListener('click', async () => {
             try {
@@ -3514,12 +3541,13 @@ function _showPdfActionFallback() {
             toast.remove();
         });
     }
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 15000);
 }
 
 async function showPdfViewer(pdfBlob, filename, planLabel) {
     _pdfViewerBlob = pdfBlob;
     _pdfViewerFilename = filename;
+    _pdfViewerDataUri = null;
 
     // ใช้ static HTML modal ที่ LIFF-compatible — ไม่สร้างใหม่ (มี safe-area inset อยู่แล้ว)
     const modal = document.getElementById('pdfViewerModal');
@@ -3529,10 +3557,14 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
     const titleEl = document.getElementById('pdfViewerTitle');
     if (titleEl) titleEl.textContent = planLabel || filename;
 
-    // อัปเดต download link
-    const blobUrl = URL.createObjectURL(pdfBlob);
+    // สร้าง blob URL — เก็บไว้ revoke ตอนปิด (อย่า revoke ที่นี่)
+    _pdfViewerBlobUrl = URL.createObjectURL(pdfBlob);
     const dlLink = document.getElementById('pdfSaveLink');
-    if (dlLink) { dlLink.href = blobUrl; dlLink.setAttribute('download', filename); }
+    if (dlLink) { dlLink.href = _pdfViewerBlobUrl; dlLink.setAttribute('download', filename); }
+
+    // Pre-compute data URI — ใช้ใน click handler แบบ sync (รักษา user gesture บน iOS LIFF)
+    _blobToDataUrl(pdfBlob).then(uri => { _pdfViewerDataUri = uri; })
+        .catch(err => { console.warn('[PDF] pre-compute data URI failed:', err); });
 
     // แสดง modal
     modal.classList.remove('hidden');
