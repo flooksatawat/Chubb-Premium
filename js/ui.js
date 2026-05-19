@@ -4905,13 +4905,17 @@ window.navTableImageView = async function() {
     document.body.appendChild(loading);
 
     try {
-        // clone header + table ลง temp div
+        // A4 dimensions: 794px wide, 1123px tall (96dpi) + margin 28px ทุกด้าน
+        const A4_W = 794, A4_H = 1123, MARGIN = 28;
+        const contentW = A4_W - MARGIN * 2;
+
+        // clone header + table ลง temp div ความกว้าง A4
         const temp = document.createElement('div');
-        temp.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;background:#ffffff;padding:12px;width:' + (window.innerWidth || 390) + 'px;box-sizing:border-box;';
+        temp.style.cssText = `position:fixed;left:-9999px;top:0;z-index:-1;background:#ffffff;padding:${MARGIN}px;width:${A4_W}px;box-sizing:border-box;font-size:11px;`;
         const hdr = document.getElementById('tableHeaderTitle');
         if (hdr) {
             const hw = document.createElement('div');
-            hw.style.cssText = 'background:#f1f5f9;border-radius:10px;padding:8px 10px;margin-bottom:8px;';
+            hw.style.cssText = 'background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;';
             hw.appendChild(hdr.cloneNode(true));
             temp.appendChild(hw);
         }
@@ -4928,20 +4932,25 @@ window.navTableImageView = async function() {
         temp.appendChild(tblClone);
         document.body.appendChild(temp);
 
-        const scale = Math.max(2, window.devicePixelRatio || 2);
-        const canvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
+        const scale = 2;
+        const fullCanvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false, width: A4_W });
         temp.remove();
 
-        // แบ่ง canvas เป็นหน้า A4 (ratio 210:297)
+        // แบ่ง canvas เป็นหน้า A4 — แต่ละหน้า A4_W x A4_H พร้อม white background
         const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'table');
-        const pageH = Math.round(canvas.width * 297 / 210);
-        const pageCount = Math.ceil(canvas.height / pageH);
+        const pageCount = Math.ceil(fullCanvas.height / pageH_px);
         const pages = []; // { blob, blobUrl, file }
         for (let i = 0; i < pageCount; i++) {
+            // แต่ละหน้า: white A4 canvas วาง content จาก fullCanvas
             const pc = document.createElement('canvas');
-            pc.width = canvas.width;
-            pc.height = Math.min(pageH, canvas.height - i * pageH);
-            pc.getContext('2d').drawImage(canvas, 0, i * pageH, canvas.width, pc.height, 0, 0, canvas.width, pc.height);
+            pc.width = A4_W * scale;
+            pc.height = A4_H * scale;
+            const ctx = pc.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, pc.width, pc.height);
+            const srcY = i * pageH_px;
+            const srcH = Math.min(pageH_px, fullCanvas.height - srcY);
+            ctx.drawImage(fullCanvas, 0, srcY, fullCanvas.width, srcH, 0, 0, pc.width, srcH);
             const b = await new Promise(r => pc.toBlob(r, 'image/png'));
             const u = URL.createObjectURL(b);
             const f = new File([b], `${planAbbr}_ตาราง_หน้า${i + 1}.png`, { type: 'image/png' });
@@ -4949,14 +4958,15 @@ window.navTableImageView = async function() {
         }
         loading.remove();
 
-        // สร้าง thumbnail HTML สำหรับแต่ละหน้า
+        // สร้าง thumbnail HTML — แต่ละหน้ามีสัดส่วน A4 พอดีจอ
         const thumbsHtml = pages.map((p, i) => `
-            <div style="flex-shrink:0;text-align:center;">
-                <div style="color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;margin-bottom:4px;">หน้า ${i + 1}/${pageCount}</div>
+            <div style="flex-shrink:0;width:100%;text-align:center;">
+                <div style="color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;margin-bottom:5px;">หน้า ${i + 1} / ${pageCount}</div>
                 <img src="${p.blobUrl}" alt="หน้า${i + 1}"
-                    style="display:block;width:calc(100vw - 32px);max-width:480px;height:auto;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);
+                    style="display:block;width:100%;aspect-ratio:210/297;object-fit:contain;background:#fff;
+                           border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.6);
                            -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
-            </div>`).join('<div style="height:12px;flex-shrink:0;"></div>');
+            </div>`).join('<div style="height:14px;flex-shrink:0;"></div>');
 
         // viewer
         const viewer = document.createElement('div');
