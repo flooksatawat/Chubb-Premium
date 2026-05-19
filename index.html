@@ -1814,10 +1814,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     async function checkAuth(userId) {
         try {
             const d = await callAPI({ action: 'check', userId });
-            return d;
+            return { ...d, fromCache: false };
         } catch {
             const c = getLS(AUTH_CACHE_KEY);
-            return c ? { ok: true, authorized: c.ok, status: c.status || 'unknown' } : { ok: false, authorized: false, status: 'error' };
+            if (c && c.ok) return { ok: true, authorized: true, status: 'active', fromCache: true };
+            return { ok: false, authorized: false, status: 'not_found', fromCache: true };
         }
     }
 
@@ -1904,6 +1905,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         /* 1. Cache authorized → เปิดแอปทันที */
         const cachedProfile = getLS(CACHE_KEY);
         const cachedAuth    = getLS(AUTH_CACHE_KEY);
+        /* ล้าง pending cache เก่า — ไม่ใช้ pending จาก cache เพราะอาจ stale */
+        if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
             window.lineProfile = cachedProfile;
             showProfile(cachedProfile);
