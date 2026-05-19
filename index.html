@@ -424,14 +424,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <!-- ==================== VIEW 2: TABLE ==================== -->
         <div id="tableView" class="flex flex-col flex-1 overflow-hidden w-full relative z-10" style="display:none;">
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
-                <div id="tableHeaderRow" class="flex items-center gap-2 px-3 py-2">
+                <div id="tableHeaderRow" class="flex items-center gap-1.5 px-2 py-1.5">
                     <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight"></div>
-                    <div class="shrink-0">
-                        <button onclick="exportTableToPDF('preview')" class="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-transform">
-                            <i class="fas fa-image text-[12px]"></i>
-                            <span class="whitespace-nowrap">รูปภาพ</span>
-                        </button>
-                    </div>
                 </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
@@ -1490,7 +1484,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=23"></script>
+    <script src="js/ui.js?v=24"></script>
     <script src="js/share.js?v=5"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)

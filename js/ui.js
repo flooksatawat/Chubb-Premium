@@ -2859,24 +2859,30 @@ function generatePolicyTableData() {
     // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
     const _vw = document.documentElement.clientWidth || window.innerWidth;
     const _isMobile = _vw < 700;
-    const _badgeMobile = 'flex-1 py-1 rounded-lg text-[13px] font-bold text-center whitespace-nowrap';
-    const _badgeDesktop = 'flex-1 py-1.5 rounded-xl text-[15px] font-bold text-center whitespace-nowrap';
+    // ลดขนาด badge — padding/font/radius เล็กลง
+    const _badgeMobile = 'flex-1 py-0.5 px-1 rounded-md text-[10px] font-bold text-center whitespace-nowrap leading-tight';
+    const _badgeDesktop = 'flex-1 py-1 px-2 rounded-lg text-[12px] font-bold text-center whitespace-nowrap leading-tight';
+    // ปุ่ม "แชร์" — มี text บน desktop, icon-only บน mobile แคบ
+    const _shareBtnMobile = `<button onclick="exportTableToPDF('preview')" aria-label="แชร์" title="แชร์" class="flex-shrink-0 inline-flex items-center justify-center bg-red-500 active:bg-red-600 text-white rounded-md shadow-sm active:scale-95 transition-transform" style="height:22px;min-width:28px;padding:0 7px;"><i class="fas fa-share-alt text-[11px]"></i></button>`;
+    const _shareBtnDesktop = `<button onclick="exportTableToPDF('preview')" aria-label="แชร์" title="แชร์" class="flex-shrink-0 inline-flex items-center justify-center gap-1 bg-red-500 active:bg-red-600 hover:bg-red-600 text-white rounded-lg shadow-sm active:scale-95 transition-transform" style="height:28px;padding:0 12px;font-size:12px;font-weight:700;"><i class="fas fa-share-alt text-[12px]"></i><span>แชร์</span></button>`;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
-        <div class="flex flex-col gap-1 py-1 w-full">
-            <div class="flex gap-1 w-full">
+        <div class="flex flex-col gap-0.5 py-0.5 w-full">
+            <div class="flex gap-1 w-full items-stretch">
                 <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
+                ${_shareBtnMobile}
             </div>
             <div class="flex gap-1 w-full">
                 <span class="${_badgeMobile} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
                 <span class="${_badgeMobile} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุน: ${sumDisplay}</span>
             </div>
         </div>` : `
-        <div class="flex gap-2 items-center py-1 w-full">
+        <div class="flex gap-1.5 items-center py-0.5 w-full">
             <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
+            ${_shareBtnDesktop}
             <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
             <span class="${_badgeDesktop} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
@@ -3324,7 +3330,14 @@ function closePdfViewer() {
         modal.style.display = '';
     }
     const canvasArea = document.getElementById('pdfViewerCanvas');
-    if (canvasArea) canvasArea.innerHTML = '';
+    if (canvasArea) {
+        // revoke blob URLs ของ <img> ในวิวเวอร์
+        if (Array.isArray(canvasArea.__pageImgUrls)) {
+            canvasArea.__pageImgUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch {} });
+            canvasArea.__pageImgUrls = null;
+        }
+        canvasArea.innerHTML = '';
+    }
     const dlLink = document.getElementById('pdfSaveLink');
     if (dlLink && dlLink.href && dlLink.href.startsWith('blob:')) {
         URL.revokeObjectURL(dlLink.href);
@@ -3419,35 +3432,49 @@ function handlePdfSaveLinkClick(e) {
             const p = navigator.share({ files: [imgFile], title: imgFilename });
             if (p && typeof p.then === 'function') {
                 p.then(() => {
-                    _showQuickToast('แชร์/บันทึกสำเร็จ');
+                    _showQuickToast('บันทึกสำเร็จ');
                 }).catch(err => {
                     if (err && err.name === 'AbortError') return;
                     console.warn('[Save] navigator.share rejected:', err);
-                    // fallback: long-press lightbox (ทำงานได้แน่บน LINE Android)
-                    _showLongPressSaveModal();
+                    _showLongPressHintToast();
                 });
                 return;
             }
         } catch (err) {
             console.warn('[Save] navigator.share threw:', err);
-            // ตกลงไป fallback ด้านล่าง
         }
     }
 
-    // Fallback 1: long-press lightbox — <img> + กดค้างเปิด native save menu
-    //            ใช้กับ LIFF Android ที่ navigator.share ไม่รองรับไฟล์
-    if (_showLongPressSaveModal()) {
-        return;
-    }
-
-    // Fallback 2: <a download> ของ PNG
+    // Fallback: <a download> ของ PNG (บาง LINE WebView อนุญาต)
     if (_trySaveViaImageDownload(imgFilename)) {
         _showQuickToast('กำลังบันทึกรูปภาพ...');
         return;
     }
 
-    // Fallback 3: toast (เปิดในเบราว์เซอร์ภายนอก / shareTargetPicker)
-    _showPdfSaveFallback(navigator.share ? 'share unavailable' : 'no share API');
+    // สุดท้าย — แนะนำให้กดค้างที่ภาพในหน้านี้ (image แทน canvas รองรับ long-press save)
+    _showLongPressHintToast();
+}
+
+// Toast แนะนำให้กดค้างที่ภาพในหน้าวิวเวอร์ (แทน lightbox preview)
+function _showLongPressHintToast() {
+    const existing = document.getElementById('_longPressHintToast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.id = '_longPressHintToast';
+    t.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:linear-gradient(135deg,#1e293b,#0f172a);color:white;padding:14px 18px;border-radius:14px;font-size:13px;z-index:99999;box-shadow:0 6px 24px rgba(0,0,0,0.5);border:1px solid rgba(251,191,36,0.4);display:flex;align-items:center;gap:12px;';
+    t.innerHTML = `
+        <i class="fas fa-hand-pointer" style="color:#fbbf24;font-size:22px;flex-shrink:0;"></i>
+        <div style="flex:1;line-height:1.5;">
+            <div style="font-weight:700;margin-bottom:2px;">กดค้างที่ภาพในหน้านี้</div>
+            <div style="font-size:11px;color:#cbd5e1;">เลือก "บันทึกภาพ" / "Save image" จากเมนู</div>
+        </div>
+        <button id="_longPressHintClose" style="background:rgba(255,255,255,0.1);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;flex-shrink:0;">
+            <i class="fas fa-times" style="font-size:12px;"></i>
+        </button>
+    `;
+    document.body.appendChild(t);
+    document.getElementById('_longPressHintClose').addEventListener('click', () => t.remove());
+    setTimeout(() => { if (t.parentNode) t.remove(); }, 6000);
 }
 
 // Lightbox สำหรับ "กดค้างเพื่อบันทึกภาพ" — fallback ที่ทำงานได้แน่นอนบน LINE WebView Android
@@ -3547,6 +3574,35 @@ function _trySaveViaImageDownload(filename) {
         console.warn('[ImgDL] failed:', err);
         return false;
     }
+}
+
+// แทน <canvas> ในวิวเวอร์ด้วย <img> เพื่อรองรับ native long-press context menu
+// (canvas ไม่รองรับ "Save image" บน WebView ส่วนใหญ่ — ต้องใช้ <img>)
+async function _replaceCanvasesWithSaveableImages(canvases) {
+    const urls = [];
+    for (const canvas of canvases) {
+        if (!canvas || !canvas.parentNode) continue;
+        try {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) continue;
+            const url = URL.createObjectURL(blob);
+            urls.push(url);
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'page';
+            img.draggable = false;
+            img.style.cssText = 'width:100%;height:auto;display:block;border-radius:8px;background:white;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;';
+            // ปลดล็อก contextmenu/long-press save — override global blocker
+            img.addEventListener('contextmenu', e => e.stopPropagation(), true);
+            img.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+            canvas.parentNode.replaceChild(img, canvas);
+        } catch (err) {
+            console.warn('[ViewerImg] convert canvas to img failed:', err);
+        }
+    }
+    // เก็บ urls ไว้ revoke ตอนปิด viewer
+    const area = document.getElementById('pdfViewerCanvas');
+    if (area) area.__pageImgUrls = urls;
 }
 
 // Composite ทุก canvas เป็น PNG เดียว — เรียกหลัง PDF.js render เสร็จใน showPdfViewer
@@ -3979,6 +4035,7 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
 
             // เรนเดอร์ความละเอียดสูงสุด — บูสต์ DPR ×4 ให้คมชัดที่ max zoom 6×
             const HI_RES_BOOST = 4;
+            const renderedCanvases = [];
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const dpr = window.devicePixelRatio || 1;
@@ -3991,10 +4048,16 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
                 Object.assign(canvas.style, { width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: 'white', imageRendering: '-webkit-optimize-contrast' });
                 inner.appendChild(canvas);
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                renderedCanvases.push(canvas);
             }
 
             // หลัง render เสร็จ — composite รูปไว้ใช้ตอน save + setup pinch zoom
-            _precomputeImageBlob().catch(err => console.warn('[Image] composite failed:', err));
+            // แล้วแทนที่ canvas ด้วย <img> เพื่อรองรับ "กดค้าง → บันทึกภาพ" ใน WebView
+            // composite ต้องเสร็จก่อนแทนที่ — เพราะอ่าน pixel จาก canvas
+            _precomputeImageBlob()
+                .catch(err => console.warn('[Image] composite failed:', err))
+                .then(() => _replaceCanvasesWithSaveableImages(renderedCanvases))
+                .catch(err => console.warn('[Image] canvas→img failed:', err));
             _setupPdfZoomGestures();
         } catch {
             canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
@@ -4493,7 +4556,7 @@ window.open3DDetailsView = function() {
             </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-            <button onclick="exportTableToPDF()" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-image"></i> รูปภาพ</button>
+            <button onclick="exportTableToPDF()" aria-label="แชร์" title="แชร์" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-share-alt"></i> แชร์</button>
             <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
         </div>
     </div>`;
