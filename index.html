@@ -256,6 +256,18 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;">ไม่มีสิทธิ์เข้าใช้งาน</p>
         <p style="font-size:13px;color:rgba(255,255,255,0.75);font-family:Kanit,sans-serif;">กรุณาติดต่อผู้ดูแลระบบ</p>
     </div>
+
+    <!-- State: LINE Desktop (ไม่รองรับ LIFF) -->
+    <div id="authStateDesktop" style="display:none;flex-direction:column;align-items:center;gap:16px;text-align:center;max-width:300px;">
+        <div style="font-size:40px;">💻</div>
+        <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;">กรุณาเปิดใน Chrome</p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.75);font-family:Kanit,sans-serif;line-height:1.7;">LINE บนคอมไม่รองรับ LIFF<br>กรุณาคัดลอกลิงค์แล้วเปิดใน Chrome</p>
+        <button onclick="copyLiffUrl()" id="copyLiffBtn"
+            style="background:white;color:#1e327a;font-size:14px;font-weight:700;padding:12px 24px;border-radius:14px;border:none;box-shadow:0 6px 20px rgba(0,0,0,0.2);cursor:pointer;font-family:Kanit,sans-serif;display:flex;align-items:center;gap:8px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#1e327a" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            คัดลอกลิงค์
+        </button>
+    </div>
 </div>
 
 <!-- Open External Browser prompt (แสดงในครั้งแรกที่เปิดจาก LINE) -->
@@ -1778,9 +1790,23 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     /* ── State helpers ── */
     const $ = id => document.getElementById(id);
 
+    /* ตรวจ LINE Desktop — มี Line/ ใน UA แต่ไม่ใช่ Android/iPhone */
+    function isLineDesktop() {
+        const ua = navigator.userAgent;
+        return /Line\//i.test(ua) && !/Android|iPhone|iPad|iPod/i.test(ua);
+    }
+
+    window.copyLiffUrl = function() {
+        const url = 'https://liff.line.me/' + window.LIFF_ID;
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = $('copyLiffBtn');
+            if (btn) { btn.textContent = '✓ คัดลอกแล้ว!'; setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#1e327a" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> คัดลอกลิงค์'; }, 2000); }
+        }).catch(() => { prompt('คัดลอกลิงค์นี้:', 'https://liff.line.me/' + window.LIFF_ID); });
+    };
+
     function setState(name, loadingText) {
-        ['Loading','Request','Pending','Denied'].forEach(s =>
-            $('authState'+s).style.display = 'none');
+        ['Loading','Request','Pending','Denied','Desktop'].forEach(s =>
+            $('authState'+s) && ($('authState'+s).style.display = 'none'));
         if (name === 'loading') {
             $('authStateLoading').style.display = 'flex';
             if (loadingText) $('authStateLoadingText').textContent = loadingText;
@@ -1791,6 +1817,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             startPendingPolling();
         } else if (name === 'denied') {
             $('authStateDenied').style.display = 'flex';
+        } else if (name === 'desktop') {
+            $('authStateDesktop').style.display = 'flex';
         }
     }
 
@@ -1999,7 +2027,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             return;
         }
 
-        /* 2. รอ LIFF init */
+        /* 2. ตรวจ LINE Desktop — ไม่รองรับ LIFF */
+        if (isLineDesktop()) {
+            setState('desktop');
+            return;
+        }
+
+        /* 3. รอ LIFF init */
         setState('loading', 'กำลังเชื่อมต่อ LINE...');
         await window._liffReady;
 
