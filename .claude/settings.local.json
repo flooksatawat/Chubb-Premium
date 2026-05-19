@@ -10,7 +10,31 @@
       "Bash(ls \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")",
       "Bash(dir \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View Photo\")",
       "Bash(python -c \"import pdfplumber; pdf=pdfplumber.open\\('3D Health Excellence.pdf'\\); [print\\(f'--- PAGE {i+1} ---\\\\n'+p.extract_text\\(\\)\\) for i,p in enumerate\\(pdf.pages[:15]\\)]\")",
-      "PowerShell(python3 -c \"import pdfplumber; pdf=pdfplumber.open\\(r'C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\3D\\\\3D Health Excellence.pdf'\\); [print\\(f'--- PAGE {i+1} ---\\\\n'+p.extract_text\\(\\)\\) for i,p in enumerate\\(pdf.pages[:20]\\)]\" 2>&1)"
+      "PowerShell(python3 -c \"import pdfplumber; pdf=pdfplumber.open\\(r'C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\3D\\\\3D Health Excellence.pdf'\\); [print\\(f'--- PAGE {i+1} ---\\\\n'+p.extract_text\\(\\)\\) for i,p in enumerate\\(pdf.pages[:20]\\)]\" 2>&1)",
+      "Bash(ls \"C:\\\\Users\\\\sataw\\\\OneDrive\\\\Desktop\\\\Claude View\" 2>&1 | head -50)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git rebase *)",
+      "Bash(git reset *)",
+      "Bash(gh run *)",
+      "WebFetch(domain:github.com)",
+      "Bash(awk -F: '{print $1}')",
+      "Bash(python -c ' *)"
+    ],
+    "deny": [
+      "mcp__Claude_Preview__preview_start",
+      "mcp__Claude_Preview__preview_screenshot",
+      "mcp__Claude_Preview__preview_eval",
+      "mcp__Claude_Preview__preview_click",
+      "mcp__Claude_Preview__preview_fill",
+      "mcp__Claude_Preview__preview_inspect",
+      "mcp__Claude_Preview__preview_list",
+      "mcp__Claude_Preview__preview_logs",
+      "mcp__Claude_Preview__preview_network",
+      "mcp__Claude_Preview__preview_resize",
+      "mcp__Claude_Preview__preview_snapshot",
+      "mcp__Claude_Preview__preview_stop",
+      "mcp__Claude_Preview__preview_console_logs"
     ]
   }
 }

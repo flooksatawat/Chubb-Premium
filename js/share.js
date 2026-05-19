@@ -6,20 +6,17 @@ function triggerInstallmentShare(type) {
     const d = lastCalculationData; const p = d.premium; let amt = 0, label = ''; 
     if(type === 'monthly') { amt = Math.round(p * 0.09); label = 'รายเดือน'; } if(type === '3month') { amt = Math.round(p * 0.27); label = 'ราย 3 เดือน'; } if(type === '6month') { amt = Math.round(p * 0.52); label = 'ราย 6 เดือน'; } 
     
-    const sumStr = formatNum(d.sum); 
+    const sumStr = formatNum(d.sum);
     const premOnlyText = `${amt.toLocaleString()}`;
-    let allText = `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}\n👤 เพศ ${d.gender} | 🎂 อายุ ${d.age} ปี\n💰 ออมเงิน : ${amt.toLocaleString()} บาท (${label})\n⏳ ระยะเวลาออม ${d.years} ปี\n🛡️ วงเงิน ${sumStr} บาท\n`; 
-    
-    const pd = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[currentAppPlan];
-    if (pd && pd.benefits && pd.benefits.length) {
-        allText += `\n--------------------------\n🛡️ ความคุ้มครองหลัก:\n`;
-        pd.benefits.forEach(b => {
-            let calcB = b.replace(/(\d+(?:\.\d+)?)%\s*ของทุน(?:ประกัน)?/g, (match, p1) => { return `${formatNum(d.sum * (parseFloat(p1) / 100))} บาท`; })
-                         .replace(/(\d+(?:\.\d+)?)%\s*ของเบี้ย(?:ประกัน)?/g, (match, p1) => { return `${formatNum(d.premium * (parseFloat(p1) / 100))} บาท`; });
-            allText += `- ${calcB}\n`;
-        });
-        if(pd.remark && currentAppPlan === 'CI Extra Plus') allText += `\nหมายเหตุ: ${pd.remark}\n`;
-    }
+    const genderTh = d.gender === 'male' ? 'ชาย' : 'หญิง';
+    const allText = [
+        `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
+        `👤 เพศ: ${genderTh}`,
+        `🎂 อายุ: ${d.age} ปี`,
+        `💰 ออม: ${amt.toLocaleString()} บาท (${label})`,
+        `🛡️ วงเงิน: ${sumStr} บาท`,
+        d.years ? `⏳ ระยะเวลา: ${d.years} ปี` : '',
+    ].filter(Boolean).join('\n');
 
     pendingInstallmentData = { premOnly: premOnlyText, allText: allText, label: label };
     currentShareType = 'installment';

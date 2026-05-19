@@ -1481,18 +1481,32 @@ function manualTriggerPopup() {
             if (ageInput) ageInput.value = "30";
         }
 
-        let sumVal = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, ''));
-        let premVal = parseInt((document.getElementById('premiumInput')?.value || '').replace(/,/g, ''));
+        const sumEl = document.getElementById('sumInsuredInput');
+        const premEl = document.getElementById('premiumInput');
+        let sumVal = parseInt((sumEl?.value || '').replace(/,/g, ''));
+        let premVal = parseInt((premEl?.value || '').replace(/,/g, ''));
 
         if ((!sumVal || sumVal <= 0) && (!premVal || premVal <= 0)) {
-            let premInput = document.getElementById('premiumInput');
-            if (premInput) premInput.value = "120,000";
+            if (premEl) premEl.value = "120,000";
+            premVal = 120000;
         }
 
-        let activeMode = typeof currentMode !== 'undefined' ? currentMode : 'premium';
+        // ตรวจสอบจาก form ว่าควรใช้ mode ไหน แทนการพึ่ง currentMode จาก voice/text
+        let activeMode;
+        const sumVisible = sumEl && sumEl.closest('[style*="display: none"]') === null && !sumEl.closest('.hidden');
+        const premVisible = premEl && !premEl.readOnly;
+        if (currentAppPlan === 'Whole Life Extra' || currentAppPlan === '868 / 818 Elite Saving' || currentAppPlan === '24 TX') {
+            activeMode = 'premium';
+        } else if (premVal > 0 && sumVal <= 0) {
+            activeMode = 'premium';
+        } else {
+            activeMode = 'sum';
+        }
+
+        lastCalculationData = null; // force fresh calculation
         if (typeof calculate === 'function') calculate(activeMode, true);
 
-        if (typeof lastCalculationData === 'undefined' || !lastCalculationData) {
+        if (!lastCalculationData) {
             console.error("Calculation failed: no data");
             return;
         }
