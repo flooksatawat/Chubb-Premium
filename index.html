@@ -50,11 +50,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 /* Glassmorphism utility */
 .glass-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
 .glass-modal {
-    background: rgba(245, 247, 255, 0.92) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.7) !important;
-    box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.06) !important;
+    background: linear-gradient(160deg, #eef2ff 0%, #f5f3ff 50%, #eff6ff 100%) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+/* Plan card — simple GPU-friendly style */
+.plan-card-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: transform 0.08s ease !important;
+}
+.plan-card-btn:active {
+    transform: scale(0.96) !important;
 }
 .neomorphic-menu-item {
     position: relative;
@@ -544,16 +554,26 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <div id="planSelectModal" class="absolute inset-0 z-[1000] overflow-hidden rounded-[inherit]">
             <!-- ถอด flex ออก เปลี่ยนเป็น absolute เต็มจอ -->
             <div id="planSelectCardWrapper" class="glass-modal absolute inset-0 w-full h-full overflow-hidden opacity-100 translate-y-0" style="transition:transform 0.38s cubic-bezier(0.16,1,0.3,1),opacity 0.38s cubic-bezier(0.16,1,0.3,1);will-change:transform,opacity;">
-                
-                <div class="blob blob-1"></div><div class="blob blob-2"></div>
-                <div class="blob blob-3 absolute pointer-events-none"></div>
-                
-                <!-- 📜 พื้นที่เลื่อนวน (SCROLL CONTAINER) 📜 -->
-                <!-- ใส่ absolute เต็มจอ แล้วตั้ง overflow-y-auto ให้ Scroll ได้อิสระ 100% -->
-                 <div id="planListContainer" class="absolute inset-0 w-full h-full overflow-y-auto no-scrollbar px-5 pt-[140px] pb-[130px] space-y-3.5 z-10" style="-webkit-overflow-scrolling: touch;"></div>
-                <!-- JS จะใส่ข้อมูลที่นี่ -->
 
-                <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white/30 via-white/10 to-transparent pointer-events-none z-20 transition-opacity duration-500"></div>
+                <!-- Floating header -->
+                <div id="planModalHeader" style="position:absolute;top:0;left:0;right:0;z-index:25;padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 0;pointer-events:none;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <div>
+                            <p style="font-size:11px;font-weight:600;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;">แบบประกัน</p>
+                            <h2 style="font-size:22px;font-weight:800;color:#1e1b4b;line-height:1.2;margin-top:1px;">เลือกแบบที่ต้องการ</h2>
+                        </div>
+                        <button onclick="closePlanModal()" style="pointer-events:auto;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.8);border:1px solid rgba(99,102,241,0.15);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);cursor:pointer;">
+                            <i class="fas fa-times" style="font-size:13px;color:#6366f1;"></i>
+                        </button>
+                    </div>
+                    <!-- Fade gradient -->
+                    <div style="height:20px;background:linear-gradient(to bottom,#eef2ff,transparent);margin:0 -20px;"></div>
+                </div>
+
+                <!-- Scroll container — starts below header (top:96px) -->
+                <div id="planListContainer" class="absolute inset-x-0 bottom-0 overflow-y-auto no-scrollbar px-4 pt-3 pb-[120px] space-y-2.5 z-10" style="top:96px;-webkit-overflow-scrolling:touch;"></div>
+
+                <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-36 pointer-events-none z-20 transition-opacity duration-500" style="background:linear-gradient(to top,#eff6ff 20%,transparent);"></div>
 
                 <!-- Floating AI Bottom Bar -->
                 <div id="modalBottomBar" class="absolute bottom-6 left-4 right-4 z-30 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">

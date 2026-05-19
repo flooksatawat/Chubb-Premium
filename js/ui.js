@@ -687,17 +687,16 @@ function closePlanModal() {
     }, 420);
 }
 
-// Build the raw HTML for one full set of plan cards (no animation classes).
-// onclick uses inline string so cloned copies work without re-attaching listeners.
+// Build the raw HTML for one full set of plan cards.
 function _buildOneSetHTML(dataList) {
     let html = '';
     dataList.forEach(plan => {
         const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
         const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
         if (isActive) {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="plan-card-btn w-full flex items-center gap-3.5 p-3.5 rounded-[20px] border-2 border-indigo-400 text-left" style="background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);box-shadow:0 4px 20px rgba(99,102,241,0.18);"><div class="w-12 h-12 rounded-[15px] ${plan.bg} ${plan.text} flex items-center justify-center text-[22px] shrink-0" style="box-shadow:0 2px 8px rgba(0,0,0,0.10);"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-[15px] font-extrabold text-indigo-800 leading-tight truncate">${plan.name}</p><p class="text-[12px] text-indigo-500 font-medium leading-snug mt-0.5 truncate">${plan.desc}</p></div><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(99,102,241,0.35);"><i class="fas fa-check" style="font-size:12px;color:#fff;"></i></div></button></div>`;
         } else {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="plan-card-btn w-full flex items-center gap-3.5 p-3.5 rounded-[20px] text-left" style="background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid rgba(226,232,240,0.8);"><div class="w-12 h-12 rounded-[15px] ${plan.bg} ${plan.text} flex items-center justify-center text-[22px] shrink-0" style="box-shadow:0 2px 8px rgba(0,0,0,0.08);"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-[15px] font-bold text-slate-800 leading-tight truncate">${plan.name}</p><p class="text-[12px] text-slate-400 font-medium leading-snug mt-0.5 truncate">${plan.desc}</p></div><div style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-chevron-right" style="font-size:11px;color:#94a3b8;"></i></div></button></div>`;
         }
     });
     return html;
@@ -715,31 +714,10 @@ function renderModernCards(dataList, isInitialLoad = false) {
     }
 
     if (isModernSearchActive) {
-        // ── Search mode: single finite list with stagger entrance ──
-        let html = '';
-        dataList.forEach((plan, i) => {
-            const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
-            const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
-            const delay = (i + 1) * 0.04;
-            if (isActive) {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
-            } else {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
-            }
-        });
-        container.innerHTML = html;
+        // ── Search mode: single finite list, JS stagger handles animation ──
+        container.innerHTML = _buildOneSetHTML(dataList);
         container.scrollTop = 0;
         _loopOneHeight = 0;
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.remove('scroll-bounce-hidden');
-                    e.target.classList.add('scroll-bounce-visible');
-                    io.unobserve(e.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
-        container.querySelectorAll('.card-3d-container.scroll-bounce-hidden').forEach(el => io.observe(el));
 
     } else {
         // ── Loop mode: render 3 identical copies, anchor scroll to middle copy ──
