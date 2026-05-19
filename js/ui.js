@@ -3415,8 +3415,25 @@ function handlePdfSaveLinkClick(e) {
 
 async function _trySaveViaSW(filename) {
     if (!('serviceWorker' in navigator)) return false;
-    const reg = navigator.serviceWorker.controller || (await navigator.serviceWorker.ready).active;
-    if (!reg) return false;
+
+    // ต้องรอให้ SW claim หน้านี้ก่อน — ไม่งั้น fetch ของ <a download> ไม่ผ่าน SW
+    // (controller จะ null จนกว่า activate + clients.claim() เสร็จ)
+    if (!navigator.serviceWorker.controller) {
+        try { await navigator.serviceWorker.ready; } catch {}
+        if (!navigator.serviceWorker.controller) {
+            await new Promise(resolve => {
+                let done = false;
+                const finish = () => { if (done) return; done = true; resolve(); };
+                navigator.serviceWorker.addEventListener('controllerchange', finish, { once: true });
+                setTimeout(finish, 3000);
+            });
+        }
+    }
+    const controller = navigator.serviceWorker.controller;
+    if (!controller) {
+        console.warn('[Save] SW not controlling this page — cannot intercept fetch');
+        return false;
+    }
 
     const id = 'pdf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
     const channel = new MessageChannel();
@@ -3425,7 +3442,7 @@ async function _trySaveViaSW(filename) {
         setTimeout(() => resolve(false), 3000);
     });
     try {
-        reg.postMessage({ type: 'STORE_BLOB', id, blob: _pdfViewerBlob, filename }, [channel.port2]);
+        controller.postMessage({ type: 'STORE_BLOB', id, blob: _pdfViewerBlob, filename }, [channel.port2]);
     } catch (err) {
         console.warn('[Save] SW postMessage failed:', err);
         return false;
@@ -3433,7 +3450,6 @@ async function _trySaveViaSW(filename) {
     const ok = await stored;
     if (!ok) return false;
 
-    // ใช้ same-origin path ที่ SW intercept — WebView เห็นเป็น HTTPS download ปกติ
     const dlUrl = new URL(`sw-downloads/${id}.pdf`, location.href).toString();
     try {
         const tmp = document.createElement('a');
