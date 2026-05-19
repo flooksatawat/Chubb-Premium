@@ -2038,7 +2038,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         await window._liffReady;
 
         if (!window.LIFF_READY) {
-            setState('loading', 'เชื่อมต่อไม่ได้ กรุณารีเฟรช');
+            // LIFF init ไม่สำเร็จใน external browser → restart ผ่าน liff.line.me
+            window.location.href = 'https://liff.line.me/' + window.LIFF_ID;
             return;
         }
 
@@ -2058,11 +2059,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 if (attempt === 0) {
                     await new Promise(r => setTimeout(r, 1200));
                 } else {
-                    // token หมดอายุหรือ scope ไม่ครบ → login ใหม่
-                    console.warn('[Auth] getProfile failed, re-login:', e);
+                    // token หมดอายุหรือ scope ไม่ครบ → restart ผ่าน liff.line.me
+                    console.warn('[Auth] getProfile failed, restarting LIFF:', e);
                     try { liff.logout(); } catch {}
                     setState('loading', 'กำลังนำไปยืนยันตัวตน...');
-                    liff.login({ redirectUri: location.origin + location.pathname });
+                    window.location.href = 'https://liff.line.me/' + window.LIFF_ID;
                     return;
                 }
             }
