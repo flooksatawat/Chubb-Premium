@@ -1986,8 +1986,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             setState('loading', 'กำลังตรวจสอบรายชื่อ...');
             const inSheet = await checkSheet(cachedProfile.displayName);
             if (!inSheet) {
+                /* ชื่อถูกลบออกจาก Sheet → ล้าง cache แล้วให้ขอสิทธิ์ใหม่ */
                 clearLS();
-                setState('denied');
+                $('authRequestName').textContent = `สวัสดี ${cachedProfile.displayName} 👋`;
+                window.lineProfile = cachedProfile;
+                setState('request');
                 return;
             }
             await window._liffReady;
@@ -2024,25 +2027,25 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         try { profile = await liff.getProfile(); }
         catch { setState('loading', 'โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช'); return; }
 
-        /* 4.5 ตรวจสอบชื่อใน Google Sheets ทุกครั้ง */
-        setState('loading', 'กำลังตรวจสอบรายชื่อ...');
-        const inSheet = await checkSheet(profile.displayName);
-        if (!inSheet) {
-            setState('denied');
-            return;
-        }
-
         window.lineProfile = profile;
         setLS(CACHE_KEY, profile);
 
-        /* 5. ตรวจสอบสิทธิ์ */
+        /* 5. ตรวจสอบสิทธิ์จาก Apps Script */
         setState('loading', 'กำลังตรวจสอบสิทธิ์...');
         const d = await checkAuth(profile.userId);
 
         if (d.authorized) {
+            /* 5.1 อนุมัติแล้ว → ตรวจสอบ Sheet เป็นด่านสุดท้าย */
+            setState('loading', 'กำลังตรวจสอบรายชื่อ...');
+            const inSheet = await checkSheet(profile.displayName);
+            if (!inSheet) {
+                /* ถูกลบออกจาก Sheet → ให้ขอสิทธิ์ใหม่ */
+                $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
+                setState('request');
+                return;
+            }
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
-            /* อนุมัติแล้ว → เปิด Chrome (ครั้งแรก) หรือเข้าแอปตรง (อยู่ใน Chrome แล้ว) */
             if (window.IS_IN_LIFF) {
                 setState('loading', 'กำลังเปิดใน Chrome...');
                 openInChrome();
@@ -2053,11 +2056,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
             setState('pending');
-        } else if (d.status === 'inactive') {
-            $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
-            setState('request');
         } else {
-            /* not_found → แสดงปุ่มขออนุญาต */
+            /* inactive หรือ not_found → แสดงปุ่มขออนุญาตเสมอ */
             $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
             setState('request');
         }
