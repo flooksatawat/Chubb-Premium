@@ -9,6 +9,7 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -531,8 +532,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="openAIPanel()">
                     <i class="fas fa-robot text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">AI</span>
                 </button>
-                <button id="navShareBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="exportTableToPDF('preview')" style="display:none;">
-                    <i class="fas fa-share-alt text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">แชร์</span>
+                <button id="navShareBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="navTableImageView()" style="display:none;">
+                    <i class="fas fa-image text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">บันทึกภาพ</span>
                 </button>
             </div>
             <div class="w-full text-center font-bold text-[8px] text-slate-400/70 tracking-[0.15em] uppercase pointer-events-none leading-none" style="padding: 3px 0 max(env(safe-area-inset-bottom), 4px);">&copy; SATAWAT BUTTRAKAS</div>
@@ -1494,7 +1495,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
         }
-        window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+        window.addEventListener('contextmenu', function(e) { if (e.target.tagName === 'IMG') return; e.preventDefault(); }, false);
         window.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
             if (e.ctrlKey) {

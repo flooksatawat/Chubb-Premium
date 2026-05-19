@@ -4892,3 +4892,75 @@ window.render3DDetailsAccordion = function() {
     // ตัด selector sticky header ออก — left pane มี selector อยู่แล้ว
     body.innerHTML = contentHtml;
 };
+
+// ── ปุ่มแชร์หน้าตาราง: capture → full-screen viewer กดค้างบันทึกภาพ ──
+window.navTableImageView = async function() {
+    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+    if (typeof html2canvas !== 'function') return showCustomError('ไม่พบ html2canvas');
+
+    // loading
+    const loading = document.createElement('div');
+    loading.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.75);display:flex;align-items:center;justify-content:center;';
+    loading.innerHTML = '<div style="background:white;border-radius:18px;padding:24px 32px;text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:28px;color:#3b82f6;display:block;margin-bottom:10px;"></i><span style="font-size:13px;font-weight:700;color:#1e293b;">กำลังสร้างภาพ...</span></div>';
+    document.body.appendChild(loading);
+
+    try {
+        // clone header + table ลง temp div
+        const temp = document.createElement('div');
+        temp.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;background:#ffffff;padding:12px;width:' + (window.innerWidth || 390) + 'px;box-sizing:border-box;';
+        const hdr = document.getElementById('tableHeaderTitle');
+        if (hdr) {
+            const hw = document.createElement('div');
+            hw.style.cssText = 'background:#f1f5f9;border-radius:10px;padding:8px 10px;margin-bottom:8px;';
+            hw.appendChild(hdr.cloneNode(true));
+            temp.appendChild(hw);
+        }
+        const be = document.getElementById('breakevenSummary');
+        if (be && !be.classList.contains('hidden') && be.innerHTML.trim()) temp.appendChild(be.cloneNode(true));
+        const sc = document.getElementById('surrenderContainer');
+        if (sc && !sc.classList.contains('hidden') && sc.innerHTML.trim()) temp.appendChild(sc.cloneNode(true));
+        const tbl = document.querySelector('#pdfTableTarget table');
+        if (!tbl) throw new Error('ไม่พบตาราง');
+        const tblClone = tbl.cloneNode(true);
+        tblClone.style.cssText = 'width:100%;border-collapse:collapse;';
+        const stickyHead = tblClone.querySelector('thead');
+        if (stickyHead) { stickyHead.style.position = 'relative'; stickyHead.style.top = 'auto'; }
+        temp.appendChild(tblClone);
+        document.body.appendChild(temp);
+
+        const scale = Math.max(2, window.devicePixelRatio || 2);
+        const canvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
+        temp.remove();
+        const blobUrl = canvas.toDataURL('image/png');
+        loading.remove();
+
+        // viewer
+        const viewer = document.createElement('div');
+        viewer.id = '_tblImgViewer';
+        viewer.style.cssText = 'position:fixed;inset:0;z-index:99998;background:#0f172a;display:flex;flex-direction:column;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));';
+        viewer.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px 8px;flex-shrink:0;">
+                <button id="_tblClose" style="width:38px;height:38px;background:rgba(255,255,255,0.12);border:none;border-radius:50%;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button>
+                <span style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;">ตารางมูลค่า</span>
+                <div style="width:38px;"></div>
+            </div>
+            <div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;padding:4px 8px;">
+                <img id="_tblImg" src="${blobUrl}" alt="table"
+                    style="display:block;max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.5);
+                           -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
+            </div>
+            <div style="text-align:center;padding:10px 16px 4px;flex-shrink:0;color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;">
+                <i class="fas fa-hand-pointer" style="margin-right:6px;"></i>กดค้างที่ภาพ → บันทึกรูปภาพ
+            </div>`;
+        document.body.appendChild(viewer);
+
+        // ปลดบล็อก contextmenu เฉพาะ img นี้ (ป้องกัน global listener บล็อก)
+        const img = document.getElementById('_tblImg');
+        if (img) img.addEventListener('contextmenu', e => e.stopPropagation(), true);
+
+        document.getElementById('_tblClose').addEventListener('click', () => viewer.remove());
+    } catch (err) {
+        loading.remove();
+        showCustomError('ไม่สามารถสร้างภาพได้: ' + (err.message || err));
+    }
+};
