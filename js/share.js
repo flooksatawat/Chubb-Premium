@@ -324,7 +324,6 @@ function showVoiceResultPopup(d) {
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openBankModal === 'function') openBankModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
     <button onclick="closePopup('voiceResultModal'); Swal.close(); setTimeout(() => { if(typeof openEsubModal === 'function') openEsubModal(); }, 200);" class="${_pillBtn}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
 </div>`;
-        rows += `<button onclick="closePopup('voiceResultModal'); setTimeout(() => { if(typeof switchView === 'function') switchView('main'); }, 200);" class="w-full mt-3 py-3.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 text-[14px] active:scale-95 transition-transform"><i class='fas fa-calculator'></i> คำนวณด้วยตนเอง</button>`;
     }
 
     let modal = document.getElementById('voiceResultModal');
@@ -336,7 +335,7 @@ function showVoiceResultPopup(d) {
     }
     modal.innerHTML = `<div class="modal-content-card p-5" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3 shrink-0">
-            <h3 class="text-[16px] font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-microphone text-rose-500"></i> ผลการคำนวณ</h3>
+            <h3 class="text-[20px] font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-microphone text-rose-500"></i> ผลการคำนวณ</h3>
             <button onclick="closePopup('voiceResultModal')" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-xl font-bold">&times;</button>
         </div>
         <div class="text-center mb-3 shrink-0">
