@@ -2859,11 +2859,10 @@ function generatePolicyTableData() {
     // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
     const _vw = document.documentElement.clientWidth || window.innerWidth;
     const _isMobile = _vw < 700;
-    // ลดขนาด badge — padding/font/radius เล็กลง
-    const _badgeMobile = 'flex-1 py-0.5 px-1 rounded-md text-[10px] font-bold text-center whitespace-nowrap leading-tight';
-    const _badgeDesktop = 'flex-1 py-1 px-2 rounded-lg text-[12px] font-bold text-center whitespace-nowrap leading-tight';
+    const _badgeMobile = 'flex-1 py-1 px-2 rounded-lg text-[13px] font-bold text-center whitespace-nowrap leading-tight';
+    const _badgeDesktop = 'flex-1 py-1.5 px-3 rounded-lg text-[14px] font-bold text-center whitespace-nowrap leading-tight';
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
-        <div class="flex flex-col gap-0.5 py-0.5 w-full">
+        <div class="flex flex-col gap-1 py-1 w-full">
             <div class="flex gap-1 w-full items-stretch">
                 <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
