@@ -3900,22 +3900,6 @@ async function exportTableToPDF(actionType = 'preview') {
     }
 }
 
-// ==================== PDF DROPDOWN MENU ====================
-function togglePdfMenu(e) {
-    e.stopPropagation();
-    const dd = document.getElementById('pdfDropdown');
-    if (!dd) return;
-    const isHidden = dd.classList.contains('hidden');
-    dd.classList.toggle('hidden', !isHidden);
-    if (isHidden) {
-        // ปิดเมื่อคลิกนอก
-        setTimeout(() => document.addEventListener('click', closePdfMenu, { once: true }), 0);
-    }
-}
-function closePdfMenu() {
-    document.getElementById('pdfDropdown')?.classList.add('hidden');
-}
-
 // ============================================================================
 // 🌟 ONLOAD INITIALIZATION (เชื่อมระบบเดิมทั้งหมด + เปิดหน้าแรก) 🌟
 // ============================================================================
