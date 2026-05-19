@@ -318,11 +318,20 @@ function extractAmount(t) {
 // 7. YEARS EXTRACTOR
 // ------------------------------------------------------------------
 function extractYears(t, age) {
+    // ลองจับตัวเลขที่มีคำว่า "ปี" ก่อน
     const all = [...t.matchAll(/(\d{1,3})\s*ปี/g)];
     for (const m of all) {
         const v = parseInt(m[1]);
         if (v === age) continue;
         if (v >= 5 && v <= 100) return v;
+    }
+    // fallback: ตัวเลขสุดท้ายในข้อความ = ระยะเวลาเสมอ (ถ้าอยู่ในช่วงสมเหตุสมผล)
+    const VALID_YEARS = [5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 60, 90, 99, 100];
+    const nums = [...t.matchAll(/\b(\d{1,3})\b/g)].map(m => parseInt(m[1]));
+    for (let i = nums.length - 1; i >= 0; i--) {
+        const v = nums[i];
+        if (v === age) continue;
+        if (VALID_YEARS.includes(v)) return v;
     }
     return null;
 }
