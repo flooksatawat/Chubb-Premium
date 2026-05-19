@@ -4906,7 +4906,7 @@ window.navTableImageView = async function() {
 
     try {
         // A4 dimensions: 794px wide, 1123px tall (96dpi) + margin 28px ทุกด้าน
-        const A4_W = 794, A4_H = 1123, MARGIN = 28;
+        const A4_W = 827, A4_H = 1169, MARGIN = 32; // A4 @ 300dpi: 2481×3507px (scale=3)
         const contentW = A4_W - MARGIN * 2;
 
         // clone header + table ลง temp div ความกว้าง A4
