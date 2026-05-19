@@ -177,7 +177,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <div id="mainView" class="flex flex-col flex-1 overflow-hidden w-full relative">
             
             <!-- App Header -->
-            <div class="w-full z-20 pt-safe px-4 pb-0 shrink-0 relative mt-1.5">
+            <div class="w-full z-20 pt-safe px-4 pb-2 shrink-0 relative mt-2">
                 <button id="mainHeaderBtn" onclick="handleHeaderClick(event)" class="w-full bg-gradient-to-br from-[#243c94] via-[#2a45a3] to-[#1e327a] rounded-[24px] py-4 px-4 flex flex-col items-center justify-center shadow-[0_10px_25px_rgba(36,60,148,0.3)] border border-[#60a5fa]/30 active:scale-[0.97] transition-all relative overflow-hidden group select-none cursor-pointer">
                     <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[24px]"></div>
                     <h1 class="text-[20px] font-normal text-white leading-none tracking-wide mb-1.5 relative z-10 drop-shadow-md flex items-center justify-center gap-1.5">
@@ -196,25 +196,25 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
             <!-- Content Area -->
             <!-- ขยาย pb เพื่อแก้ปัญหาเมนูบังหน้าจอตอนเลื่อน -->
-            <div class="content-area pt-4 no-scrollbar relative z-10 scrollable-view" id="manualInputs">
-                <div class="w-full flex flex-col gap-3 pb-[80px]">
-                    
+            <div class="content-area pt-2 no-scrollbar relative z-10 scrollable-view" id="manualInputs">
+                <div class="w-full flex flex-col gap-3.5 pb-[80px]">
+
                     <!-- Top Toggles -->
-                    <div class="flex flex-col gap-3 shrink-0">
+                    <div class="flex flex-col gap-3.5 shrink-0">
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[50px]">
+                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[54px]">
                                 <div id="genderBg" class="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none" style="left: 4px; width: calc(50% - 4px);"></div>
                                 <button onclick="setGender('male')" id="btnMale" class="flex-1 relative z-10 rounded-[10px] text-[15px] font-bold text-blue-700 transition-all duration-300">ชาย</button>
                                 <button onclick="setGender('female')" id="btnFemale" class="flex-1 relative z-10 rounded-[10px] text-[15px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">หญิง</button>
                             </div>
-                            <div class="premium-card !p-1.5 flex items-center justify-between h-[50px]">
+                            <div class="premium-card !p-1.5 flex items-center justify-between h-[54px]">
                                 <button onclick="adjustAge(-1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-minus text-[14px]"></i></button>
                                 <input type="number" id="ageInput" value="0" min="0" max="75" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)">
                                 <button onclick="adjustAge(1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-plus text-[14px]"></i></button>
                             </div>
                         </div>
                         <div id="planSelectionWrapper" class="shrink-0">
-                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[50px]" id="planSelectionContainer">
+                            <div class="flex p-1 bg-slate-100/80 rounded-[14px] relative shadow-inner border border-slate-200/60 h-[54px]" id="planSelectionContainer">
                                 <div id="planBg" class="absolute top-1 bottom-1 left-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(37,99,235,0.15)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border border-blue-100/80 pointer-events-none"></div>
                                 <button onclick="setPlan('10CX')" id="btnPlan1" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300">10CX</button>
                                 <button onclick="setPlan('20CX')" id="btnPlan2" class="flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">20CX</button>
