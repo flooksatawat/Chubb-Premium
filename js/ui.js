@@ -4933,6 +4933,7 @@ window.navTableImageView = async function() {
         document.body.appendChild(temp);
 
         const scale = 2;
+        const pageH_px = A4_H * scale;
         const fullCanvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false, width: A4_W });
         temp.remove();
 
