@@ -6,7 +6,7 @@
 
 const SHEET_NAME   = 'users';
 const LINE_TOKEN   = '4iywSmI5WCO1DNj6ZKbeX/IEC0z8jolKXPBRNpr1z8PRMNpewEGeHv3CzciQ71jGjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3zSzGgLst8X+An6jf3Bb87YBlAOJd0V5emHgULgOe2zDwdB04t89/1O/w1cDnyilFU=';
-const ADMIN_ID     = 'U4fafa1727e1698c683ad04490fd74beb';
+const ADMIN_ID     = 'U32acf744ebc29839f6639049cb5f3001';
 const SHEET_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/edit';
 
 // ── CORS headers ──────────────────────────────────────────────
