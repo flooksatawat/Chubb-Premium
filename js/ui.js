@@ -3410,35 +3410,60 @@ function handlePdfSaveLinkClick(e) {
                 p.catch(err => {
                     if (!err || err.name === 'AbortError') return;
                     console.warn('[Save] navigator.share rejected:', err);
-                    _showPdfSaveFallback();
+                    _showPdfSaveFallback(`share: ${err && err.name || 'reject'}`);
                 });
                 return;
             }
         } catch (err) {
             console.warn('[Save] navigator.share threw:', err);
+            _showPdfSaveFallback(`share threw: ${err && err.name || 'err'}`);
+            return;
         }
     }
 
-    _showPdfSaveFallback();
+    _showPdfSaveFallback(navigator.share ? 'File ctor unavailable' : 'no navigator.share');
 }
 
-function _showPdfSaveFallback() {
+function _showPdfSaveFallback(errInfo) {
     const existing = document.getElementById('_pdfActionFallbackToast');
     if (existing) existing.remove();
+
+    const hasSharePicker = _liffApi('shareTargetPicker');
     const toast = document.createElement('div');
     toast.id = '_pdfActionFallbackToast';
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">อุปกรณ์ไม่รองรับการบันทึก</div>
-        <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
-            LINE เวอร์ชันนี้ไม่รองรับการแชร์ไฟล์ของระบบ<br>
-            กรุณาอัปเดต LINE เป็นเวอร์ชันล่าสุด แล้วลองอีกครั้ง
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
+        <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.5;">
+            LINE ไม่รองรับการรับไฟล์ PDF โดยตรง<br>
+            ${hasSharePicker ? 'ส่งสรุปข้อความเข้าแชทตัวเองได้แทน' : 'กรุณาอัปเดต LINE แล้วลองใหม่'}
+            ${errInfo ? `<br><span style="color:#94a3b8;font-size:10px;">(${errInfo})</span>` : ''}
         </div>
-        <button id="_pdfCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            ${hasSharePicker ? '<button id="_pdfSendChatBtn" style="background:#06c755;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">ส่งข้อความสรุป</button>' : ''}
+            <button id="_pdfCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
+        </div>
     `;
     document.body.appendChild(toast);
     document.getElementById('_pdfCloseToastBtn').addEventListener('click', () => toast.remove());
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 8000);
+    if (hasSharePicker) {
+        document.getElementById('_pdfSendChatBtn').addEventListener('click', async () => {
+            try {
+                const summary = (typeof generateShortShareText === 'function')
+                    ? generateShortShareText()
+                    : (_pdfViewerFilename || 'รายละเอียดแผนประกัน');
+                const text = `${summary}\n\n📄 ${_pdfViewerFilename}`;
+                const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
+                if (ret) {
+                    Swal.fire({ icon: 'success', title: 'ส่งให้แชทแล้ว', timer: 1200, showConfirmButton: false });
+                }
+            } catch (err) {
+                console.warn('[Save] shareTargetPicker fallback failed:', err);
+            }
+            toast.remove();
+        });
+    }
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
 }
 
 // แชร์ PDF — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ PDF)
