@@ -820,15 +820,26 @@ function handleUnifiedPlanSearch() {
     const input = document.getElementById('unifiedPlanSearchInput');
     if(!input) return;
     const query = input.value.toLowerCase().trim();
-    
+    const clearBtn = document.getElementById('planSearchClearBtn');
+    if (clearBtn) clearBtn.classList.toggle('hidden', query === '');
+
     if (query === '') {
         isModernSearchActive = false;
-        renderModernCards(modernPlansData, true); 
+        renderModernCards(modernPlansData, true);
     } else {
-        isModernSearchActive = true; 
+        isModernSearchActive = true;
         const filtered = modernPlansData.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
-        renderModernCards(filtered, true); 
+        renderModernCards(filtered, true);
     }
+}
+
+function clearPlanSearch() {
+    const input = document.getElementById('unifiedPlanSearchInput');
+    if (input) { input.value = ''; input.focus(); }
+    const clearBtn = document.getElementById('planSearchClearBtn');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    isModernSearchActive = false;
+    renderModernCards(modernPlansData, true);
 }
 
 function updateQuickPills(planName) {
@@ -1419,28 +1430,71 @@ function setPlan(plan) {
     // Refresh sum pills when switching sub-plans (CL/3D share the same pill set)
     if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') updateQuickPills(currentAppPlan);
 
-    const btns = [document.getElementById('btnPlan1'), document.getElementById('btnPlan2'), document.getElementById('btnPlan3'), document.getElementById('btnPlan4')];
-    let activeBtn = null;
-    btns.forEach((btn, idx) => {
-        if (!btn) return;
-        if (idx < currentPlanOptions.length) {
-            let displayLabel = currentPlanOptions[idx];
-            if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
-                displayLabel = displayLabel.replace('CL', ''); 
-            }
-            btn.innerText = displayLabel;
-            btn.classList.remove('hidden');
-            btn.onclick = () => setPlan(currentPlanOptions[idx]);
-            const isTarget = plan === currentPlanOptions[idx];
-            if (isTarget) { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300 plan-pill'; activeBtn = btn; } 
-            else { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300 plan-pill'; }
-        } else { btn.classList.add('hidden'); }
-    });
-    
-    const planBg = document.getElementById('planBg');
-    if (planBg && activeBtn) { setTimeout(() => { planBg.style.width = activeBtn.offsetWidth + 'px'; planBg.style.left = activeBtn.offsetLeft + 'px'; }, 10); }
-    
+    // Update frosted dropdown label
+    _updatePlanDropdown(plan);
+
     calculate(currentMode, true);
+}
+
+function _updatePlanDropdown(activePlan) {
+    const label = document.getElementById('planDropdownLabel');
+    const list  = document.getElementById('planDropdownList');
+    if (!label || !list) return;
+
+    // Build display label for active plan
+    let displayActive = activePlan;
+    if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
+        displayActive = displayActive.replace('CL', '');
+    }
+    label.textContent = displayActive;
+
+    // Rebuild dropdown items
+    list.innerHTML = '';
+    currentPlanOptions.forEach(opt => {
+        let displayOpt = opt;
+        if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
+            displayOpt = displayOpt.replace('CL', '');
+        }
+        const isActive = opt === activePlan;
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = `w-full flex items-center justify-between px-4 py-2.5 text-[14px] transition-colors active:bg-blue-50 ${isActive ? 'font-bold text-blue-700 bg-blue-50/60' : 'font-medium text-slate-600 hover:bg-slate-50'}`;
+        item.innerHTML = `<span>${displayOpt}</span>${isActive ? '<i class="fas fa-check text-blue-500 text-[11px]"></i>' : ''}`;
+        item.onclick = () => { setPlan(opt); closePlanDropdown(); };
+        list.appendChild(item);
+    });
+}
+
+function togglePlanDropdown() {
+    const panel   = document.getElementById('planDropdownPanel');
+    const chevron = document.getElementById('planDropdownChevron');
+    if (!panel) return;
+    const isOpen = !panel.classList.contains('hidden');
+    if (isOpen) {
+        closePlanDropdown();
+    } else {
+        panel.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+        // rebuild items with current options
+        _updatePlanDropdown(currentPlan);
+        // close on outside tap
+        setTimeout(() => {
+            document.addEventListener('click', _planDropdownOutside, { once: true, capture: true });
+        }, 0);
+    }
+}
+
+function closePlanDropdown() {
+    const panel   = document.getElementById('planDropdownPanel');
+    const chevron = document.getElementById('planDropdownChevron');
+    if (panel) panel.classList.add('hidden');
+    if (chevron) chevron.style.transform = '';
+}
+
+function _planDropdownOutside(e) {
+    const wrapper = document.getElementById('planSelectionWrapper');
+    if (wrapper && !wrapper.contains(e.target)) closePlanDropdown();
+    else document.addEventListener('click', _planDropdownOutside, { once: true, capture: true });
 }
 
 // ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
