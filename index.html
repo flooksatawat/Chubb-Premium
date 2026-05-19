@@ -1955,8 +1955,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             }
         } else if (d.status === 'pending') {
             setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
-            $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
-            $('pendingCountdown').textContent = 'ID: ' + profile.userId;
+            $('authRequestName').textContent = `สวัสดี ${profile.displayName} (${profile.userId}) 👋`;
             setState('pending');
         } else if (d.status === 'inactive') {
             setState('denied');
