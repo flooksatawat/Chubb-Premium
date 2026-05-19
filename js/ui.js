@@ -525,6 +525,10 @@ function switchView(targetView) {
     const activeBtn = document.getElementById(activeMap[targetView]);
     if (activeBtn) activeBtn.classList.add('active');
 
+    // ── แสดงปุ่มแชร์เฉพาะหน้าตาราง ──
+    const shareBtn = document.getElementById('navShareBtn');
+    if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
+
     const isWide        = window.innerWidth >= 700;
     const rightPane     = document.getElementById('rightPane');
     const rightPaneMain = document.getElementById('rightPaneMain');
