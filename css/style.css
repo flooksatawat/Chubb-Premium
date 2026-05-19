@@ -516,12 +516,7 @@
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
             .policy-table-wrapper { padding-bottom: 100px !important; }
             .content-area { padding-bottom: 0; padding-top: 0 !important; }
-            /* ตัดพื้นที่ว่างขอบจอด้านบนบนมือถือ */
-            .pt-safe { padding-top: 0 !important; }
-            #mainView > div:first-child {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
-            }
+            .pt-safe { padding-top: env(safe-area-inset-top, 0px) !important; }
             #mainHeaderBtn { padding-top: 8px !important; padding-bottom: 8px !important; }
 
 
