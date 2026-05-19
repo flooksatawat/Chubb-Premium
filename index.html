@@ -1847,7 +1847,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         const d = await checkAuth(profile.userId);
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
-            showProfile(profile); openApp();
+            showProfile(profile);
+            if (window.IS_IN_LIFF) {
+                setState('loading', 'กำลังเปิดใน Chrome...');
+                liff.openWindow({ url: location.href, external: true });
+            } else {
+                openApp();
+            }
         } else if (d.status === 'inactive') {
             setState('denied');
         } else {
