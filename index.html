@@ -1973,11 +1973,18 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             history.replaceState(null, '', location.pathname);
         }
 
-        /* 1. Cache authorized → เปิดแอปทันที */
+        /* 1. Cache authorized → ตรวจสอบ Sheet ก่อนเปิดแอปเสมอ */
         const cachedProfile = getLS(CACHE_KEY);
         const cachedAuth    = getLS(AUTH_CACHE_KEY);
         if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
+            setState('loading', 'กำลังตรวจสอบรายชื่อ...');
+            const inSheet = await checkSheet(cachedProfile.displayName);
+            if (!inSheet) {
+                clearLS();
+                setState('denied');
+                return;
+            }
             await window._liffReady;
             if (window.IS_IN_LIFF) {
                 setState('loading', 'กำลังเปิดใน Chrome...');
