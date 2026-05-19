@@ -1744,12 +1744,15 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     const EXT_SHOWN_KEY    = 'chubb_ext_shown';
     const SHEET_CSV_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/export?format=csv&gid=568338827';
 
-    /* ── ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง ── */
+    /* ── ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง (fail-closed) ── */
     async function checkSheet(displayName) {
         try {
-            const r = await fetch(SHEET_CSV_URL);
-            if (!r.ok) return true; // fail-open ถ้า fetch ไม่ได้
+            // ใช้ apiFetch เพื่อหลีกเลี่ยง CORS ใน LIFF browser
+            const r = await apiFetch(SHEET_CSV_URL);
+            if (!r.ok) return false;
             const text = await r.text();
+            // ถ้า response เป็น HTML (redirect ไป login page) → ถือว่า fetch ไม่ได้
+            if (text.trim().startsWith('<')) return false;
             const nameLower = displayName.trim().toLowerCase();
             return text.split('\n').some(row =>
                 row.split(',').some(cell =>
@@ -1757,7 +1760,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 )
             );
         } catch {
-            return true; // fail-open ถ้า network error
+            return false; // fail-closed — ถ้า error ให้บล็อกไว้ก่อน
         }
     }
 
