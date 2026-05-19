@@ -1742,6 +1742,24 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     const CACHE_KEY        = 'chubb_profile_v2';
     const AUTH_CACHE_KEY   = 'chubb_auth_v2';
     const EXT_SHOWN_KEY    = 'chubb_ext_shown';
+    const SHEET_CSV_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/export?format=csv&gid=568338827';
+
+    /* ── ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง ── */
+    async function checkSheet(displayName) {
+        try {
+            const r = await fetch(SHEET_CSV_URL);
+            if (!r.ok) return true; // fail-open ถ้า fetch ไม่ได้
+            const text = await r.text();
+            const nameLower = displayName.trim().toLowerCase();
+            return text.split('\n').some(row =>
+                row.split(',').some(cell =>
+                    cell.replace(/^"|"$/g, '').trim().toLowerCase() === nameLower
+                )
+            );
+        } catch {
+            return true; // fail-open ถ้า network error
+        }
+    }
 
     const overlay     = document.getElementById('lineLoginOverlay');
     const profileBar  = document.getElementById('lineProfileBar');
@@ -1993,6 +2011,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         let profile;
         try { profile = await liff.getProfile(); }
         catch { setState('loading', 'โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช'); return; }
+
+        /* 4.5 ตรวจสอบชื่อใน Google Sheets ทุกครั้ง */
+        setState('loading', 'กำลังตรวจสอบรายชื่อ...');
+        const inSheet = await checkSheet(profile.displayName);
+        if (!inSheet) {
+            setState('denied');
+            return;
+        }
 
         window.lineProfile = profile;
         setLS(CACHE_KEY, profile);
