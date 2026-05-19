@@ -1938,10 +1938,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
         window.lineProfile = profile;
         setLS(CACHE_KEY, profile);
+        localStorage.setItem('_dbg_uid', profile.userId || 'null');
+
+        /* debug panel */
+        let dbg = document.getElementById('_dbgPanel');
+        if (!dbg) { dbg = document.createElement('div'); dbg.id = '_dbgPanel'; dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font-size:11px;padding:6px 10px;z-index:99999;word-break:break-all;'; document.body.appendChild(dbg); }
+        dbg.textContent = 'UID: ' + (profile.userId || 'undefined') + ' | name: ' + profile.displayName;
 
         /* 5. ตรวจสอบสิทธิ์ */
-        setState('loading', 'ID: ' + profile.userId);
-        await new Promise(r => setTimeout(r, 4000));
         setState('loading', 'กำลังตรวจสอบสิทธิ์...');
         const d = await checkAuth(profile.userId);
 
