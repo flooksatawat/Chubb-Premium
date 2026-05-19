@@ -47,6 +47,14 @@
   <!-- 🌟 CSS สำหรับหน้าต่าง 3D Plan Selection (Ultra-Premium) 🌟 -->
 <style>
 body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+@media print {
+    body * { visibility: hidden !important; }
+    #_printArea, #_printArea * { visibility: visible !important; }
+    #_printArea { position: fixed !important; inset: 0 !important; padding: 10mm !important; background: white !important; z-index: 999999 !important; overflow: visible !important; }
+    #_printArea table { width: 100% !important; border-collapse: collapse !important; font-size: 9pt !important; }
+    #_printArea th, #_printArea td { border: 1px solid #ccc !important; padding: 3px 5px !important; }
+    #_printArea thead { display: table-header-group !important; }
+}
 /* Glassmorphism utility */
 .glass-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
 .glass-modal {
@@ -1485,14 +1493,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <i class="fas fa-share-nodes"></i> แชร์
                 </button>
             </div>
-            <button onclick="openInExternalBrowser()" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:14px;color:white;padding:11px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
-                <i class="fas fa-print" style="color:#fbbf24;"></i> เปิดใน Safari เพื่อบันทึก PDF / พิมพ์
+            <button onclick="printTable()" style="width:100%;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:14px;color:white;padding:11px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+                <i class="fas fa-print" style="color:#fbbf24;"></i> พิมพ์ / บันทึก PDF
             </button>
         </div>
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=43"></script>
+    <script src="js/ui.js?v=44"></script>
     <script src="js/share.js?v=6"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)

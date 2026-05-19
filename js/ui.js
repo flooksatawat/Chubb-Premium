@@ -4948,3 +4948,42 @@ window.openInExternalBrowser = function() {
         window.open(url, '_blank');
     }
 };
+
+// ── พิมพ์ตาราง / บันทึก PDF ผ่าน window.print() — ทำงานใน LIFF iOS ได้ ──
+window.printTable = function() {
+    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+
+    // สร้าง print area จาก header + table ปัจจุบัน
+    const existing = document.getElementById('_printArea');
+    if (existing) existing.remove();
+
+    const area = document.createElement('div');
+    area.id = '_printArea';
+    area.style.cssText = 'position:absolute;left:-9999px;top:0;background:white;';
+
+    const hdr = document.getElementById('tableHeaderTitle');
+    if (hdr) {
+        const hw = document.createElement('div');
+        hw.style.cssText = 'margin-bottom:8px;font-size:10pt;font-weight:700;';
+        hw.appendChild(hdr.cloneNode(true));
+        area.appendChild(hw);
+    }
+    const be = document.getElementById('breakevenSummary');
+    if (be && !be.classList.contains('hidden') && be.innerHTML.trim()) area.appendChild(be.cloneNode(true));
+    const sc = document.getElementById('surrenderContainer');
+    if (sc && !sc.classList.contains('hidden') && sc.innerHTML.trim()) area.appendChild(sc.cloneNode(true));
+    const tbl = document.querySelector('#pdfTableTarget table');
+    if (!tbl) return showCustomError('ไม่พบตาราง');
+    const clone = tbl.cloneNode(true);
+    clone.style.cssText = 'width:100%;border-collapse:collapse;';
+    const stickyHead = clone.querySelector('thead');
+    if (stickyHead) { stickyHead.style.position = 'relative'; stickyHead.style.top = 'auto'; }
+    area.appendChild(clone);
+    document.body.appendChild(area);
+
+    // เรียก print — iOS จะแสดง AirPrint / Save as PDF dialog
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => area.remove(), 2000);
+    }, 100);
+};
