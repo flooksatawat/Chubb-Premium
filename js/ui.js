@@ -2714,7 +2714,7 @@ function generatePolicyTableData() {
                 rightMenuHTML = `
                     <div class="flex items-center gap-2 min-w-0">
                         <i class="fas fa-wallet text-sky-500 text-[16px] w-5 text-center shrink-0"></i>
-                        <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
+                        <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleShowCV" class="sr-only peer" onchange="generatePolicyTableData();">
@@ -2737,7 +2737,7 @@ function generatePolicyTableData() {
                     <div class="${leftMenuClass} flex items-center">
                         <div class="flex items-center gap-2 min-w-0">
                             <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
-                            <span class="text-[13px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
+                            <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
