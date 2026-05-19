@@ -1773,7 +1773,7 @@ function _injectToPearLCanvas(d) {
                 <button onclick="openTableFromModal()" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/70 hover:bg-white/90 border border-white/80 text-slate-600 font-bold text-sm shadow-sm transition-colors">
                     <i class="fas fa-table text-indigo-500"></i>ตาราง
                 </button>
-                <button onclick="openGenericShareModal('all')" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 hover:opacity-90 text-white font-bold text-sm shadow-md transition-opacity">
+                <button onclick="openGenericShareModal('summary')" class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 hover:opacity-90 text-white font-bold text-sm shadow-md transition-opacity">
                     <i class="fas fa-share-nodes"></i>แชร์
                 </button>
             </div>
@@ -1788,7 +1788,7 @@ function _injectToPearLCanvas(d) {
                 <i class="fas fa-table text-lg text-blue-500"></i>
                 <span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span>
             </button>
-            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('all'), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
+            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('summary'), 200);" class="w-full flex items-center gap-3 p-4 bg-white border border-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-[#00A651]/10 active:scale-[0.98] transition-all">
                 <i class="fas fa-share-nodes text-lg text-[#00A651]"></i>
                 <span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span>
             </button>
@@ -4870,7 +4870,7 @@ window.close3DDetailsRightView = function() {
     if (typeof window.resetRightPaneToPlaceholder === 'function') window.resetRightPaneToPlaceholder();
 };
 
-function sharePlan() { if (typeof openGenericShareModal === 'function') openGenericShareModal('all'); }
+function sharePlan() { if (typeof openGenericShareModal === 'function') openGenericShareModal('summary'); }
 function openBankModal() { if (typeof openPopup === 'function') openPopup('paymentModal'); }
 function openEsubModal() { if (typeof openPopup === 'function') openPopup('eSubQniModal'); }
 
