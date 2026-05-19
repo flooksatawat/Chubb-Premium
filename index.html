@@ -1940,6 +1940,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         setLS(CACHE_KEY, profile);
 
         /* 5. ตรวจสอบสิทธิ์ */
+        setState('loading', 'ID: ' + profile.userId);
+        await new Promise(r => setTimeout(r, 4000));
         setState('loading', 'กำลังตรวจสอบสิทธิ์...');
         const d = await checkAuth(profile.userId);
 
