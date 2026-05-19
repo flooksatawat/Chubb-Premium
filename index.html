@@ -1484,6 +1484,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
         }
+        // ── ตั้งค่า --real-vh จาก window.innerHeight จริง — แก้ปัญหา dvh ใน WebView ──
+        function setRealVH() {
+            document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
+        }
+        setRealVH();
+        window.addEventListener('resize', setRealVH);
+        window.addEventListener('orientationchange', function() { setTimeout(setRealVH, 200); });
+
         window.addEventListener('contextmenu', function(e) { if (e.target.tagName === 'IMG') return; e.preventDefault(); }, false);
         window.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
