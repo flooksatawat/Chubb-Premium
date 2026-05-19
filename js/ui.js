@@ -530,6 +530,7 @@ function switchView(targetView) {
     if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
 
     // ── ซ่อนรูปโปรไฟล์เมื่ออยู่หน้าอื่น (บังข้อมูล) ──
+    document.body.setAttribute('data-view', targetView);
     const profileBar = document.getElementById('lineProfileBar');
     if (profileBar) profileBar.style.display = targetView === 'main' ? 'flex' : 'none';
 
@@ -4807,6 +4808,8 @@ window.openTableFromModal = function() {
 window.open3DDetailsView = function() {
     // ปิด popup ที่อาจบังอยู่ก่อน
     if (typeof closePopup === 'function') { closePopup('resultModal'); closePopup('slbResultModal'); }
+    document.body.setAttribute('data-view', 'table');
+    const _pb = document.getElementById('lineProfileBar'); if (_pb) _pb.style.display = 'none';
     const isWide = window.isWideLayout();
     const container = isWide ? document.getElementById('rightPane') : document.body;
 
