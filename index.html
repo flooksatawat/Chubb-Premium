@@ -1484,9 +1484,27 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
         }
-        // ── ตั้งค่า --real-vh จาก window.innerHeight จริง — แก้ปัญหา dvh ใน WebView ──
+        // ── ตั้งค่า --real-vh + แก้ two-pane layout ด้วย inline style (ชนะ Tailwind CDN) ──
         function setRealVH() {
-            document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
+            var vh = window.innerHeight;
+            var vw = window.innerWidth;
+            document.documentElement.style.setProperty('--real-vh', vh + 'px');
+
+            var ac = document.querySelector('.app-container');
+            var rp = document.querySelector('.right-pane');
+            var cl = document.querySelector('.command-center-layout');
+
+            if (vw >= 700 && vh >= 600) {
+                // two-pane (tablet / foldable inner screen)
+                if (cl) { cl.style.height = vh + 'px'; cl.style.alignItems = 'stretch'; }
+                if (ac) { ac.style.cssText = 'flex:0 0 400px;min-width:400px;max-width:400px;width:400px;height:' + vh + 'px;border-radius:0;border:none;margin:0;'; }
+                if (rp) { rp.style.display = 'flex'; rp.style.flex = '1 1 0'; rp.style.height = vh + 'px'; rp.style.minWidth = '0'; }
+            } else {
+                // mobile single-pane
+                if (cl) { cl.style.height = vh + 'px'; cl.style.alignItems = 'flex-start'; }
+                if (ac) { ac.style.cssText = 'height:' + vh + 'px;'; }
+                if (rp) { rp.style.display = 'none'; }
+            }
         }
         setRealVH();
         window.addEventListener('resize', setRealVH);
