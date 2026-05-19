@@ -1993,7 +1993,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         /* 3. ยังไม่ login → redirect */
         if (!liff.isLoggedIn()) {
             setState('loading', 'กำลังนำไปยืนยันตัวตน...');
-            liff.login({ redirectUri: location.href });
+            liff.login({ redirectUri: location.origin + location.pathname });
             return;
         }
 
