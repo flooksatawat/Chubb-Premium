@@ -3396,59 +3396,26 @@ function handlePdfSaveLinkClick(e) {
         return;
     }
 
-    // ===== LIFF: บันทึกลงเครื่อง — ไม่เปิดบราวเซอร์/แท็บใหม่ =====
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    // ===== LIFF: บันทึกลงเครื่องผ่าน native share sheet (Save to Files / Files app) =====
+    // LINE WebView ทั้ง iOS และ Android ไม่ดาวน์โหลด <a download> blob URL จริง
+    // → ต้องเรียก navigator.share แบบ sync (รักษา user gesture) เพื่อให้ OS เปิด share sheet
     const pdfFile = (typeof File !== 'undefined')
         ? new File([_pdfViewerBlob], filename, { type: 'application/pdf' })
         : null;
-    const canWebShareFile = pdfFile && navigator.share
-        && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }));
 
-    // iOS LIFF: <a download> ไม่ทำงาน — ใช้ Web Share API → native share sheet → "Save to Files"
-    if (isIOS) {
-        if (canWebShareFile) {
-            try {
-                navigator.share({ files: [pdfFile], title: filename, text: filename })
-                    .catch(err => {
-                        if (!err || err.name === 'AbortError') return;
-                        console.warn('[Save] navigator.share failed:', err);
-                        _showPdfSaveFallback();
-                    });
-                return;
-            } catch (err) {
-                console.warn('[Save] navigator.share threw:', err);
-            }
-        }
-        _showPdfSaveFallback();
-        return;
-    }
-
-    // Android LIFF: <a download> + blob URL บันทึกลง Downloads ได้
-    try {
-        const url = _pdfViewerBlobUrl || URL.createObjectURL(_pdfViewerBlob);
-        const tmp = document.createElement('a');
-        tmp.href = url;
-        tmp.download = filename;
-        tmp.rel = 'noopener';
-        document.body.appendChild(tmp);
-        tmp.click();
-        tmp.remove();
-        _showQuickToast('กำลังบันทึก...');
-        return;
-    } catch (err) {
-        console.warn('[Save] LIFF <a download> blob failed:', err);
-    }
-
-    // Fallback: Web Share API
-    if (canWebShareFile) {
+    if (pdfFile && navigator.share
+        && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }))) {
         try {
             navigator.share({ files: [pdfFile], title: filename, text: filename })
                 .catch(err => {
                     if (!err || err.name === 'AbortError') return;
+                    console.warn('[Save] navigator.share failed:', err);
                     _showPdfSaveFallback();
                 });
             return;
-        } catch {}
+        } catch (err) {
+            console.warn('[Save] navigator.share threw:', err);
+        }
     }
 
     _showPdfSaveFallback();
