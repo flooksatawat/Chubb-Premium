@@ -318,14 +318,14 @@ function showVoiceResultPopup(d) {
         document.body.appendChild(modal);
     }
     modal.innerHTML = `<div class="modal-content-card p-5" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3 shrink-0">
             <h3 class="text-[16px] font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-microphone text-rose-500"></i> ผลการคำนวณ</h3>
             <button onclick="closePopup('voiceResultModal')" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-xl font-bold">&times;</button>
         </div>
-        <div class="text-center mb-3">
+        <div class="text-center mb-3 shrink-0">
             <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-600 text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm">${currentAppPlan}</span>
         </div>
-        <div>${rows}</div>
+        <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">${rows}</div>
     </div>`;
     openPopup('voiceResultModal');
 }
