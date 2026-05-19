@@ -4459,15 +4459,64 @@ async function exportTableToPDF(actionType = 'preview') {
 }
 
 // ============================================================================
-// 📤 NAV SHARE BOTTOM SHEET — LINE / Messenger / Save
+// 📤 NAV SHARE BOTTOM SHEET — LINE / Messenger / Save (ใช้ภาพ PNG)
 // ============================================================================
-window.navShareAction = function() {
+window.navShareAction = async function() {
     if (!lastCalculationData || lastCalculationData.premium === 0) {
         showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
         return;
     }
-    const ex = document.getElementById('_navShareSheet');
-    if (ex) { ex.remove(); return; }
+
+    // ── แสดง loading ──
+    const loadingEl = document.createElement('div');
+    loadingEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;';
+    loadingEl.innerHTML = `<div style="background:white;border-radius:20px;padding:28px 36px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+        <i class="fas fa-spinner fa-spin" style="font-size:32px;color:#3b82f6;display:block;margin-bottom:12px;"></i>
+        <span style="font-size:14px;font-weight:700;color:#1e293b;">กำลังเตรียมภาพ...</span>
+    </div>`;
+    document.body.appendChild(loadingEl);
+
+    // ── สร้างภาพโดยใช้ pipeline เดิม (hidden viewer) ──
+    try {
+        _pdfViewerImageBlob = null;
+        _pdfViewerImageBlobUrl = null;
+
+        // render PDF viewer แบบซ่อน เพื่อให้ _precomputeImageBlob ทำงาน
+        const viewerModal = document.getElementById('pdfViewerModal');
+        if (viewerModal) viewerModal.style.visibility = 'hidden';
+
+        await exportTableToPDF('preview');
+
+        // รอ image blob สูงสุด 15 วินาที
+        await new Promise((resolve, reject) => {
+            const t0 = Date.now();
+            const check = setInterval(() => {
+                if (_pdfViewerImageBlob) { clearInterval(check); resolve(); return; }
+                if (Date.now() - t0 > 15000) { clearInterval(check); reject(new Error('timeout')); }
+            }, 150);
+        });
+
+        // ซ่อน viewer กลับ
+        if (viewerModal) {
+            viewerModal.style.visibility = '';
+            viewerModal.classList.add('hidden');
+            viewerModal.style.display = '';
+        }
+    } catch (err) {
+        loadingEl.remove();
+        const viewerModal = document.getElementById('pdfViewerModal');
+        if (viewerModal) { viewerModal.style.visibility = ''; viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
+        showCustomError('ไม่สามารถเตรียมภาพได้ กรุณาลองใหม่');
+        return;
+    }
+
+    loadingEl.remove();
+
+    // ── แสดง share sheet พร้อมภาพพร้อม ──
+    const blob = _pdfViewerImageBlob;
+    const inLine = isInLineApp();
+    const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'insurance');
+    const imgName = `${planAbbr}_ตารางมูลค่า.png`;
 
     const sheet = document.createElement('div');
     sheet.id = '_navShareSheet';
@@ -4479,19 +4528,19 @@ window.navShareAction = function() {
                 <button id="_nsClose" style="width:32px;height:32px;background:#f1f5f9;border:none;border-radius:50%;font-size:18px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:4px;">
-                <button id="_nsLine" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                <button id="_nsLine" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:18px;cursor:pointer;">
                     <div style="width:52px;height:52px;background:#06c755;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(6,199,85,0.35);">
                         <i class="fab fa-line" style="color:white;font-size:26px;"></i>
                     </div>
                     <span style="font-size:13px;font-weight:700;color:#166534;">LINE</span>
                 </button>
-                <button id="_nsMsgr" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                <button id="_nsMsgr" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;cursor:pointer;">
                     <div style="width:52px;height:52px;background:linear-gradient(135deg,#0084ff,#a020f0);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,132,255,0.35);">
                         <i class="fab fa-facebook-messenger" style="color:white;font-size:26px;"></i>
                     </div>
                     <span style="font-size:13px;font-weight:700;color:#1d4ed8;">Messenger</span>
                 </button>
-                <button id="_nsSave" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+                <button id="_nsSave" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;cursor:pointer;">
                     <div style="width:52px;height:52px;background:#334155;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(51,65,85,0.3);">
                         <i class="fas fa-download" style="color:white;font-size:24px;"></i>
                     </div>
@@ -4506,18 +4555,65 @@ window.navShareAction = function() {
     sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
     document.getElementById('_nsClose').addEventListener('click', close);
 
-    document.getElementById('_nsLine').addEventListener('click', () => {
+    // ── helper: share image ผ่าน navigator.share หรือ fallback lightbox ──
+    function _shareImgNow(label) {
         close();
-        if (typeof exportTableToPDF === 'function') exportTableToPDF('line');
-    });
-    document.getElementById('_nsMsgr').addEventListener('click', () => {
-        close();
-        if (typeof exportTableToPDF === 'function') exportTableToPDF('messenger');
-    });
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+
+        // ลอง navigator.share file (mobile browser + บางกรณี LIFF Android ใหม่)
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                navigator.share({ files: [imgFile], title: imgName })
+                    .then(() => _showQuickToast('แชร์สำเร็จ'))
+                    .catch(err => {
+                        if (err && err.name === 'AbortError') return;
+                        _fallbackLightbox(label);
+                    });
+                return;
+            } catch (_) {}
+        }
+        _fallbackLightbox(label);
+    }
+
+    function _fallbackLightbox(label) {
+        // ตั้งค่า blob ให้ lightbox ใช้ได้
+        if (_pdfViewerImageBlobUrl) { try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {} }
+        _pdfViewerImageBlobUrl = URL.createObjectURL(blob);
+        _pdfViewerFilename = imgName;
+        const showLine = label === 'line' && _liffApi('shareTargetPicker');
+        _showLongPressSaveModal({ showLineShare: !!showLine });
+    }
+
+    document.getElementById('_nsLine').addEventListener('click', () => _shareImgNow('line'));
+    document.getElementById('_nsMsgr').addEventListener('click', () => _shareImgNow('messenger'));
     document.getElementById('_nsSave').addEventListener('click', () => {
         close();
-        if (typeof exportTableToPDF === 'function') exportTableToPDF('save');
+        // ลอง Web Share ก่อน (iOS/Android มักรองรับ)
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                navigator.share({ files: [imgFile], title: imgName })
+                    .then(() => _showQuickToast('บันทึกสำเร็จ'))
+                    .catch(err => { if (err && err.name !== 'AbortError') _directDownload(); });
+                return;
+            } catch (_) {}
+        }
+        _directDownload();
     });
+
+    function _directDownload() {
+        try {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl; a.download = imgName; a.click();
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+        } catch (_) {
+            if (_pdfViewerImageBlobUrl) { try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {} }
+            _pdfViewerImageBlobUrl = URL.createObjectURL(blob);
+            _pdfViewerFilename = imgName;
+            _showLongPressHintToast();
+        }
+    }
 };
 
 // ============================================================================
