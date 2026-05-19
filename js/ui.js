@@ -4952,9 +4952,10 @@ window.navTableImageView = async function() {
             const srcY = i * pageH_px;
             const srcH = Math.min(pageH_px, fullCanvas.height - srcY);
             ctx.drawImage(fullCanvas, 0, srcY, fullCanvas.width, srcH, 0, 0, pc.width, srcH);
-            const b = await new Promise(r => pc.toBlob(r, 'image/png'));
+            // JPEG 92% — ไฟล์เล็กกว่า PNG, LINE บีบน้อยกว่า ภาพคมชัดกว่าในแชท
+            const b = await new Promise(r => pc.toBlob(r, 'image/jpeg', 0.92));
             const u = URL.createObjectURL(b);
-            const f = new File([b], `${planAbbr}_ตาราง_หน้า${i + 1}.png`, { type: 'image/png' });
+            const f = new File([b], `${planAbbr}_ตาราง_หน้า${i + 1}.jpg`, { type: 'image/jpeg' });
             pages.push({ blob: b, blobUrl: u, file: f });
         }
         loading.remove();
