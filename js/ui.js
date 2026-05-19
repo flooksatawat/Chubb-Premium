@@ -4430,21 +4430,11 @@ async function exportTableToPDF(actionType = 'preview') {
             }
 
         } else if (actionType === 'messenger') {
-            if (inLine) {
-                // LIFF: Messenger deep link ใช้ไม่ได้ — แจ้ง user ให้ใช้ LINE/บันทึกแทน
-                console.log('[LIFF] messenger fallback in LIFF');
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Messenger ไม่รองรับใน LINE',
-                    text: 'กำลังเปิดตัวอย่าง — กดปุ่มแชร์ในนั้นเพื่อส่งผ่าน LINE หรือบันทึก',
-                    timer: 2400,
-                    showConfirmButton: false
-                });
-                setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
-            } else {
-                const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-                if (!shared) window.open(doc.output('bloburl'), '_blank');
-            }
+            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+            if (!shared) window.open(doc.output('bloburl'), '_blank');
+
+        } else if (actionType === 'modal') {
+            await _showTableShareModal(pdfBlob, pdfFile, doc, d);
         }
     } catch (error) { 
         // 4. แสดง Error ที่แท้จริงออกมาในหน้าต่าง (และ Console)
@@ -4930,3 +4920,153 @@ window.printTable = function() {
         setTimeout(() => area.remove(), 2000);
     }, 100);
 };
+
+// ════════════════════════════════════════════════
+//  Share Modal — ส่งภาพ / PDF / พิมพ์ / ดาวน์โหลด
+// ════════════════════════════════════════════════
+async function _showTableShareModal(pdfBlob, pdfFile, doc, d) {
+    const existing = document.getElementById('_tblShareModal');
+    if (existing) existing.remove();
+
+    // ── ชื่อไฟล์ตามรูปแบบ: แบบ_เพศ_อายุ_เบี้ย/ทุน ──
+    const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || '');
+    const genderTh = (d.gender || '').includes('ชาย') ? 'ชาย' : 'หญิง';
+    const isSum = typeof currentMode !== 'undefined' && currentMode === 'sum';
+    const rawAmt  = isSum ? (d.sum || 0) : (d.premium || 0);
+    const amtFmt  = rawAmt >= 1000000
+        ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
+        : rawAmt.toLocaleString('th-TH');
+    const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
+    const cleanName = `${planAbbr}_${genderTh}_${d.age}ปี_${amtLabel}${amtFmt}`;
+    const pdfName   = cleanName + '.pdf';
+    const jpgName   = cleanName + '.jpg';
+
+    // ── Blob URL สำหรับ preview / print ──
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    // ── Overlay ──
+    const overlay = document.createElement('div');
+    overlay.id = '_tblShareModal';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99995;display:flex;align-items:flex-end;';
+    overlay.innerHTML = `
+      <div id="_tblShareBg" style="position:absolute;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);"></div>
+      <div style="position:relative;width:100%;background:#0f172a;border-radius:24px 24px 0 0;padding:18px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom));z-index:1;">
+        <div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>
+        <div style="color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:4px;">ชื่อไฟล์</div>
+        <div style="color:white;font-size:13px;font-weight:700;margin-bottom:18px;word-break:break-all;">${cleanName}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;" id="_tblShareBtns">
+          <button data-action="image"
+            style="width:100%;background:linear-gradient(135deg,#06c755,#059c44);border:none;border-radius:16px;color:white;padding:15px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <i class="fab fa-line" style="font-size:22px;flex-shrink:0;"></i>
+            <div style="text-align:left;"><div>ส่งภาพ A4 ทาง LINE / แชร์</div><div style="font-size:11px;opacity:.75;font-weight:500;margin-top:2px;">แปลงเป็นภาพความละเอียดสูง — เปิด share sheet</div></div>
+          </button>
+          <button data-action="pdf"
+            style="width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:16px;color:white;padding:15px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <i class="fas fa-file-pdf" style="font-size:22px;flex-shrink:0;"></i>
+            <div style="text-align:left;"><div>ส่ง PDF ทาง LINE / Facebook</div><div style="font-size:11px;opacity:.75;font-weight:500;margin-top:2px;">ส่งไฟล์ PDF ผ่าน share sheet — ไม่ต้องดาวน์โหลดก่อน</div></div>
+          </button>
+          <div style="display:flex;gap:10px;">
+            <button data-action="print"
+              style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:white;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <i class="fas fa-print" style="color:#fbbf24;font-size:18px;"></i> พิมพ์
+            </button>
+            <button data-action="download"
+              style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:white;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <i class="fas fa-download" style="color:#60a5fa;font-size:18px;"></i> ดาวน์โหลด
+            </button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('_tblShareBg').addEventListener('click', () => { overlay.remove(); URL.revokeObjectURL(blobUrl); });
+
+    overlay.querySelector('[data-action="image"]').addEventListener('click', async () => {
+        overlay.remove();
+        await _shareTableAsImages(pdfBlob, jpgName);
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="pdf"]').addEventListener('click', async () => {
+        overlay.remove();
+        const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] });
+        if (canShare) {
+            try { await navigator.share({ files: [pdfFile], title: pdfName }); }
+            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(pdfBlob, pdfName); }
+        } else if (navigator.share) {
+            try { await navigator.share({ title: pdfName, url: window.location.href }); }
+            catch {}
+        } else {
+            _fallbackDownload(pdfBlob, pdfName);
+        }
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
+        overlay.remove();
+        doc.autoPrint();
+        window.open(doc.output('bloburl'), '_blank');
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
+        overlay.remove();
+        _fallbackDownload(pdfBlob, pdfName);
+        URL.revokeObjectURL(blobUrl);
+    });
+}
+
+function _fallbackDownload(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 500);
+}
+
+async function _shareTableAsImages(pdfBlob, jpgName) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;background:#1e293b;color:white;padding:20px 28px;border-radius:18px;font-size:13px;font-weight:700;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+    toast.innerHTML = '<i class="fas fa-spinner fa-spin" style="display:block;font-size:26px;margin-bottom:10px;color:#60a5fa;"></i>กำลังสร้างภาพ A4...';
+    document.body.appendChild(toast);
+
+    try {
+        if (typeof pdfjsLib === 'undefined') throw new Error('pdfjsLib not loaded');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const ab  = await pdfBlob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+
+        // เรนเดอร์ทุกหน้า A4 @ 3× (≈ 2481 px wide — คมชัดพอพิมพ์ได้)
+        const SCALE = 3;
+        const files = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const vp   = page.getViewport({ scale: SCALE });
+            const cv   = document.createElement('canvas');
+            cv.width   = vp.width;
+            cv.height  = vp.height;
+            await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+            const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
+            const name = pdf.numPages > 1 ? jpgName.replace('.jpg', `_หน้า${i}.jpg`) : jpgName;
+            files.push(new File([blob], name, { type: 'image/jpeg' }));
+        }
+        toast.remove();
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
+            await navigator.share({ files, title: jpgName });
+        } else if (navigator.share && navigator.canShare && navigator.canShare({ files: [files[0]] })) {
+            // ส่งทีละภาพ (บางอุปกรณ์ไม่รองรับหลายไฟล์พร้อมกัน)
+            for (const f of files) {
+                try { await navigator.share({ files: [f], title: f.name }); } catch {}
+            }
+        } else {
+            // Fallback: ดาวน์โหลดทุกภาพ
+            for (const f of files) _fallbackDownload(f, f.name);
+        }
+    } catch (err) {
+        toast.remove();
+        showCustomError('ไม่สามารถสร้างภาพได้: ' + (err.message || err));
+    }
+}
