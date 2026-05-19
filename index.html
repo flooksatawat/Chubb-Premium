@@ -18,26 +18,20 @@
         window.LIFF_ID = '2010019212-OmM6NuTV';
         window.IS_IN_LIFF = false;
         window.LIFF_READY = false;
-        // timeout 8 วิ — ป้องกัน Chrome ค้างถ้า LIFF init ช้า
         let _liffResolve;
         window._liffReady = new Promise((resolve) => { _liffResolve = resolve; });
-        const _liffTimeout = setTimeout(() => {
-            console.warn('[LIFF] init timeout');
-            _liffResolve();
-        }, 8000);
         const initLiff = () => {
             if (typeof liff === 'undefined') {
-                console.warn('[LIFF] SDK not loaded');
-                clearTimeout(_liffTimeout); _liffResolve(); return;
+                console.warn('[LIFF] SDK not loaded'); _liffResolve(); return;
             }
             liff.init({ liffId: window.LIFF_ID })
                 .then(() => {
                     window.LIFF_READY = true;
                     window.IS_IN_LIFF = !!(liff.isInClient && liff.isInClient());
-                    console.log('[LIFF] ready. isInClient=', window.IS_IN_LIFF);
+                    console.log('[LIFF] ready. isLoggedIn=', liff.isLoggedIn());
                 })
                 .catch(err => { console.warn('[LIFF] init failed:', err); })
-                .finally(() => { clearTimeout(_liffTimeout); _liffResolve(); });
+                .finally(_liffResolve);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initLiff, { once: true });
@@ -1689,163 +1683,145 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 <!-- ══════════════════════════════════════════ -->
 <script>
 (function () {
-    // ── ใส่ URL ของ Apps Script Web App ที่ deploy แล้วที่นี่ ──
-    const APPS_SCRIPT_URL = window.APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+    const CACHE_KEY       = 'chubb_profile_v2';
+    const AUTH_CACHE_KEY  = 'chubb_auth_v2';
 
-    const overlay    = document.getElementById('lineLoginOverlay');
-    const profileBar = document.getElementById('lineProfileBar');
-    const profilePic = document.getElementById('lineProfilePic');
-    const profileName= document.getElementById('lineProfileName');
+    const overlay     = document.getElementById('lineLoginOverlay');
+    const profileBar  = document.getElementById('lineProfileBar');
+    const profilePic  = document.getElementById('lineProfilePic');
+    const profileName = document.getElementById('lineProfileName');
+    const loginBtn    = document.getElementById('lineLoginBtn');
 
-    const CACHE_KEY      = 'line_profile_cache';
-    const AUTH_CACHE_KEY = 'line_auth_cache';
+    /* ── helpers ── */
+    const getLS  = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+    const setLS  = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+    const clearLS = () => { try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTH_CACHE_KEY); } catch {} };
 
-    function loadCachedProfile() {
-        try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; }
-    }
-    function saveProfileCache(p) {
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(p)); } catch {}
-    }
-    function clearProfileCache() {
-        try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTH_CACHE_KEY); } catch {}
-    }
-    function loadAuthCache() {
-        try { return JSON.parse(localStorage.getItem(AUTH_CACHE_KEY)); } catch { return null; }
-    }
-    function saveAuthCache(v) {
-        try { localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify({ authorized: v, ts: Date.now() })); } catch {}
+    function setLoginBtn(text, spin) {
+        if (!loginBtn) return;
+        loginBtn.disabled = spin;
+        loginBtn.innerHTML = spin
+            ? `<svg viewBox="0 0 24 24" width="20" height="20" style="margin-right:8px;animation:spin 1s linear infinite"><path fill="#00A000" d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg>${text}`
+            : text;
     }
 
-    function showApp() {
+    function openApp() {
         if (!overlay) return;
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.style.display = 'none', 400);
+        overlay.style.transition = 'opacity .4s';
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+        setTimeout(() => overlay.style.display = 'none', 420);
     }
 
     function showDenied() {
-        // เปลี่ยน overlay เป็นหน้า "ไม่มีสิทธิ์เข้าใช้งาน"
-        const btn = document.getElementById('lineLoginBtn');
-        if (btn) btn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
         const box = document.createElement('div');
-        box.style.cssText = 'text-align:center;padding:32px 24px;background:rgba(255,255,255,0.15);border-radius:24px;border:1px solid rgba(255,255,255,0.3);max-width:280px;';
-        box.innerHTML = `
-            <div style="font-size:48px;margin-bottom:16px;">🔒</div>
-            <p style="font-size:18px;font-weight:800;color:white;margin-bottom:8px;font-family:'Kanit',sans-serif;">ไม่มีสิทธิ์เข้าใช้งาน</p>
-            <p style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:20px;font-family:'Kanit',sans-serif;">กรุณาติดต่อผู้ดูแลระบบ<br>เพื่อขอสิทธิ์การเข้าใช้</p>
-            <button onclick="lineLogout()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:10px 24px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Kanit',sans-serif;">ออกจากระบบ</button>
-        `;
-        const inner = overlay.querySelector('div') || overlay;
-        inner.appendChild(box);
-        if (overlay) overlay.style.display = 'flex';
-        overlay.classList.remove('fade-out');
+        box.style.cssText = 'text-align:center;padding:28px 24px;background:rgba(0,0,0,0.25);border-radius:20px;max-width:270px;';
+        box.innerHTML = `<div style="font-size:44px;margin-bottom:12px">🔒</div>
+            <p style="font-size:17px;font-weight:800;color:#fff;margin-bottom:6px;font-family:Kanit,sans-serif">ไม่มีสิทธิ์เข้าใช้งาน</p>
+            <p style="font-size:12px;color:rgba(255,255,255,.75);margin-bottom:18px;font-family:Kanit,sans-serif">กรุณาติดต่อผู้ดูแลระบบ</p>
+            <button onclick="lineLogout()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:9px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:Kanit,sans-serif">ออกจากระบบ</button>`;
+        overlay.appendChild(box);
     }
 
-    function showProfile(profile) {
+    function showProfile(p) {
         if (!profileBar) return;
-        if (profile.pictureUrl) profilePic.src = profile.pictureUrl;
-        profileName.textContent = profile.displayName || '';
+        if (p.pictureUrl) { profilePic.src = p.pictureUrl; profilePic.style.display = ''; }
+        profileName.textContent = p.displayName || '';
         profileBar.style.display = 'flex';
     }
 
-    // เช็คสิทธิ์จาก Apps Script
-    async function checkAuthorization(userId, displayName) {
-        if (!APPS_SCRIPT_URL) return true; // ถ้ายังไม่ได้ตั้ง URL ให้ผ่านก่อน
+    async function checkAuth(userId) {
         try {
-            const res  = await fetch(`${APPS_SCRIPT_URL}?action=check&userId=${encodeURIComponent(userId)}`);
-            const data = await res.json();
-            if (data.ok && data.authorized) {
-                // บันทึก/อัปเดต profile ใน Sheet (background)
-                fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'add', userId, displayName })
-                }).catch(() => {});
-                return true;
-            }
-            return false;
+            const r = await fetch(`${APPS_SCRIPT_URL}?action=check&userId=${encodeURIComponent(userId)}`);
+            const d = await r.json();
+            return !!(d.ok && d.authorized);
         } catch {
-            // ถ้าเรียก API ไม่ได้ ให้ดูจาก auth cache แทน
-            const ac = loadAuthCache();
-            return ac && ac.authorized;
+            const c = getLS(AUTH_CACHE_KEY);
+            return !!(c && c.ok);
         }
     }
 
-    window.lineLogin = async function () {
-        const btn = document.getElementById('lineLoginBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>กำลังเชื่อมต่อ...'; }
+    /* ── public ── */
+    window.lineLogout = function () {
+        clearLS();
+        if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.isLoggedIn()) {
+            try { liff.logout(); } catch {}
+        }
+        location.reload();
+    };
 
+    /* ── กดปุ่ม login (fallback เมื่อ auto-redirect ไม่ทำงาน) ── */
+    window.lineLogin = async function () {
+        setLoginBtn('กำลังเชื่อมต่อ...', true);
         try {
             if (typeof liff === 'undefined') { location.reload(); return; }
-
-            // ถ้า LIFF ยังไม่ init — init ใหม่ก่อน
             if (!window.LIFF_READY) {
                 await liff.init({ liffId: window.LIFF_ID });
                 window.LIFF_READY = true;
             }
-
-            if (liff.isLoggedIn()) {
-                // Login อยู่แล้ว — reload เพื่อให้ flow เดิมทำงาน
-                location.reload();
-            } else {
-                liff.login({ redirectUri: location.href });
-            }
-        } catch (e) {
-            console.error('[LIFF] login error', e);
-            // fallback: reload
-            location.reload();
-        }
+            if (liff.isLoggedIn()) { location.reload(); }
+            else { liff.login({ redirectUri: location.href }); }
+        } catch { location.reload(); }
     };
 
-    window.lineLogout = function () {
-        clearProfileCache();
-        if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.isLoggedIn()) liff.logout();
-        location.reload();
-    };
-
-    // เปิดแอปทันทีถ้ามี cache ที่ authorized ไว้แล้ว
-    const cached   = loadCachedProfile();
-    const authCache = loadAuthCache();
-    if (cached && authCache && authCache.authorized) {
-        window.lineProfile = cached;
-        showProfile(cached);
-        showApp();
-    }
-
-    // Run after LIFF is ready
-    window._liffReady.then(async () => {
-        if (typeof liff === 'undefined' || !window.LIFF_READY) {
-            if (!(cached && authCache && authCache.authorized)) {
-                if (overlay) overlay.style.display = 'flex';
-            }
+    /* ── main flow ── */
+    async function run() {
+        /* 1. ถ้ามี cache authorized → เปิดแอปก่อน แล้วค่อย verify background */
+        const cachedProfile = getLS(CACHE_KEY);
+        const cachedAuth    = getLS(AUTH_CACHE_KEY);
+        if (cachedProfile && cachedAuth && cachedAuth.ok) {
+            window.lineProfile = cachedProfile;
+            showProfile(cachedProfile);
+            openApp();
+            /* verify ใน background ถ้า session ยังดีอยู่ */
+            window._liffReady.then(async () => {
+                if (!window.LIFF_READY || !liff.isLoggedIn()) { clearLS(); }
+            });
             return;
         }
 
+        /* 2. รอ LIFF */
+        setLoginBtn('กำลังเชื่อมต่อ LINE...', true);
+        await window._liffReady;
+
+        if (!window.LIFF_READY) {
+            /* LIFF init ล้มเหลว — แสดงปุ่มให้กดเอง */
+            setLoginBtn('เข้าสู่ระบบด้วย LINE', false);
+            return;
+        }
+
+        /* 3. ยังไม่ login → redirect ทันที */
         if (!liff.isLoggedIn()) {
-            clearProfileCache();
             liff.login({ redirectUri: location.href });
             return;
         }
 
-        // ดึง profile
+        /* 4. Login แล้ว → ดึง profile */
+        setLoginBtn('กำลังตรวจสอบสิทธิ์...', true);
         let profile;
         try { profile = await liff.getProfile(); }
-        catch { profile = cached; }
-
-        if (!profile) { liff.login({ redirectUri: location.href }); return; }
+        catch { setLoginBtn('เข้าสู่ระบบด้วย LINE', false); return; }
 
         window.lineProfile = profile;
-        saveProfileCache(profile);
         showProfile(profile);
+        setLS(CACHE_KEY, profile);
 
-        // ตรวจสอบสิทธิ์
-        const authorized = await checkAuthorization(profile.userId, profile.displayName);
-        saveAuthCache(authorized);
+        /* 5. ตรวจสอบสิทธิ์ */
+        const ok = await checkAuth(profile.userId);
+        setLS(AUTH_CACHE_KEY, { ok, ts: Date.now() });
 
-        if (authorized) {
-            if (!(cached && authCache && authCache.authorized)) showApp();
-        } else {
-            showDenied();
-        }
-    });
+        if (ok) { openApp(); }
+        else    { showDenied(); }
+    }
+
+    /* style สำหรับ spin animation */
+    const s = document.createElement('style');
+    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+
+    run();
 })();
 </script>
 </body>
