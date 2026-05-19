@@ -24,7 +24,7 @@ function doGet(e) {
   const key     = (e.parameter.key || '').trim();
 
   if (action === 'check')   return corsOutput(checkUser(userId));
-  if (action === 'request') return corsOutput(requestAccess(userId, name));
+  if (action === 'request') return corsOutput(requestAccess(userId, name, (e.parameter.pictureUrl || '').trim()));
   if (action === 'approve' && key === ADMIN_KEY) return htmlOutput(approveUser(userId));
   if (action === 'reject'  && key === ADMIN_KEY) return htmlOutput(rejectUser(userId));
   return corsOutput({ ok: false, error: 'unknown action' });
@@ -77,7 +77,7 @@ function checkUser(userId) {
 }
 
 // ── ขอสิทธิ์ใหม่ ──────────────────────────────────────────────
-function requestAccess(userId, displayName) {
+function requestAccess(userId, displayName, pictureUrl) {
   if (!userId) return { ok: false, error: 'no_user_id' };
   const sheet = getSheet();
   const data  = sheet.getDataRange().getValues();
@@ -89,12 +89,12 @@ function requestAccess(userId, displayName) {
         sheet.getRange(i + 1, 2).setValue(displayName || data[i][1]);
         sheet.getRange(i + 1, 3).setValue('pending');
       }
-      notifyAdmin(userId, displayName || data[i][1]);
+      notifyAdmin(userId, displayName || data[i][1], pictureUrl);
       return { ok: true, status: 'pending' };
     }
   }
   sheet.appendRow([userId, displayName || '', 'pending', new Date().toISOString().split('T')[0]]);
-  notifyAdmin(userId, displayName || '');
+  notifyAdmin(userId, displayName || '', pictureUrl);
   return { ok: true, status: 'pending' };
 }
 
@@ -129,35 +129,33 @@ function rejectUser(userId) {
 }
 
 // ── แจ้ง admin ผ่าน LINE Push (Flex Message) ──────────────────
-function notifyAdmin(userId, displayName) {
+function notifyAdmin(userId, displayName, pictureUrl) {
   try {
     const approveUrl = GAS_URL + '?action=approve&userId=' + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
     const rejectUrl  = GAS_URL + '?action=reject&userId='  + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
-    const flex = {
-      type: 'flex',
-      altText: '🔔 คำขอใช้งานใหม่: ' + displayName,
-      contents: {
-        type: 'bubble',
-        header: {
-          type: 'box', layout: 'vertical', backgroundColor: '#1a73e8',
-          contents: [{ type: 'text', text: '🔔 คำขอใช้งานใหม่', color: '#ffffff', weight: 'bold', size: 'lg' }]
-        },
-        body: {
-          type: 'box', layout: 'vertical', spacing: 'sm',
-          contents: [
-            { type: 'text', text: '👤 ' + displayName, weight: 'bold', size: 'md' },
-            { type: 'text', text: '🆔 ' + userId, size: 'xs', color: '#888888', wrap: true }
-          ]
-        },
-        footer: {
-          type: 'box', layout: 'horizontal', spacing: 'sm',
-          contents: [
-            { type: 'button', style: 'primary', color: '#2ecc71', action: { type: 'uri', label: '✅ อนุมัติ', uri: approveUrl } },
-            { type: 'button', style: 'primary', color: '#e74c3c', action: { type: 'uri', label: '❌ ปฏิเสธ', uri: rejectUrl } }
-          ]
-        }
+    const bubble = {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: '#1a73e8',
+        contents: [{ type: 'text', text: '🔔 คำขอใช้งานใหม่', color: '#ffffff', weight: 'bold', size: 'lg' }]
+      },
+      body: {
+        type: 'box', layout: 'horizontal', spacing: 'md', alignItems: 'center',
+        contents: [
+          pictureUrl ? { type: 'image', url: pictureUrl, size: '60px', aspectMode: 'cover', aspectRatio: '1:1', flex: 0 } : null,
+          { type: 'box', layout: 'vertical', flex: 1,
+            contents: [{ type: 'text', text: displayName, weight: 'bold', size: 'md', wrap: true }] }
+        ].filter(Boolean)
+      },
+      footer: {
+        type: 'box', layout: 'horizontal', spacing: 'sm',
+        contents: [
+          { type: 'button', style: 'primary', color: '#2ecc71', action: { type: 'uri', label: '✅ อนุมัติ', uri: approveUrl } },
+          { type: 'button', style: 'primary', color: '#e74c3c', action: { type: 'uri', label: '❌ ปฏิเสธ', uri: rejectUrl } }
+        ]
       }
     };
+    const flex = { type: 'flex', altText: '🔔 คำขอใช้งานใหม่: ' + displayName, contents: bubble };
     UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
       method: 'post',
       contentType: 'application/json',

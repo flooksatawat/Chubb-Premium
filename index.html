@@ -1872,7 +1872,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             return;
         }
         try {
-            await callAPI({ action: 'request', userId: profile.userId, displayName: profile.displayName || '' });
+            await callAPI({ action: 'request', userId: profile.userId, displayName: profile.displayName || '', pictureUrl: profile.pictureUrl || '' });
         } catch (err) {
             console.warn('[requestAccess] failed:', err);
         }
