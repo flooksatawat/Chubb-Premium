@@ -4678,9 +4678,20 @@ function _showTableImageViewer(blob, imgName) {
         _showQuickToast('กดค้างที่ภาพ → เลือก "บันทึกภาพ"');
     }
 
+    async function _uploadToTelegraph(imageBlob, name) {
+        const fd = new FormData();
+        fd.append('file', new File([imageBlob], name, { type: 'image/png' }));
+        const res = await fetch('https://telegra.ph/upload', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('upload failed');
+        const json = await res.json();
+        if (!Array.isArray(json) || !json[0] || !json[0].src) throw new Error('bad response');
+        return 'https://telegra.ph' + json[0].src;
+    }
+
     async function _doLineShare() {
         const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
-        // ลอง navigator.share ก่อน — Android LINE + browser รองรับแชร์ไฟล์รูปได้จริง
+
+        // Android LINE / browser ปกติ — navigator.share รองรับไฟล์
         if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
             try {
                 await navigator.share({ files: [imgFile], title: imgName });
@@ -4690,15 +4701,32 @@ function _showTableImageViewer(blob, imgName) {
                 if (err && err.name === 'AbortError') return;
             }
         }
-        // iOS LINE / LIFF: shareTargetPicker ส่งข้อความ + hint
+
+        // iOS LIFF — อัปโหลดรูปแล้วส่ง image message ผ่าน shareTargetPicker
+        if (hasSharePicker) {
+            _showQuickToast('กำลังเตรียมภาพ...');
+            try {
+                const imageUrl = await _uploadToTelegraph(blob, imgName);
+                await liff.shareTargetPicker([{
+                    type: 'image',
+                    originalContentUrl: imageUrl,
+                    previewImageUrl: imageUrl,
+                }]);
+                _showQuickToast('ส่งรูปสำเร็จ');
+                return;
+            } catch (_) {}
+        }
+
+        // fallback: ส่งข้อความแทน
         if (hasSharePicker) {
             try {
                 const summary = typeof generateShortShareText === 'function' ? generateShortShareText() : imgName;
                 await liff.shareTargetPicker([{ type: 'text', text: summary }]);
-                _showQuickToast('ส่งข้อความแล้ว — กดค้างที่ภาพเพื่อบันทึกและแนบในแชท');
+                _showQuickToast('ส่งข้อความแล้ว');
                 return;
             } catch (_) {}
         }
+
         // fallback สุดท้าย
         _showQuickToast('กดค้างที่ภาพ → บันทึก → เปิดแชท LINE แนบรูป');
     }
