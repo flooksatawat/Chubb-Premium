@@ -3453,28 +3453,45 @@ function handlePdfSaveLinkClick(e) {
 // Lightbox สำหรับ "กดค้างเพื่อบันทึกภาพ" — fallback ที่ทำงานได้แน่นอนบน LINE WebView Android
 // เพราะ <img> รองรับ long-press → native context menu → "บันทึกภาพ" / "Save image"
 // ต้อง stopPropagation บน contextmenu เพราะ window มี global preventDefault
-function _showLongPressSaveModal() {
+//
+// opts.showLineShare = true → เพิ่มปุ่ม "ส่งสรุปข้อความใน LINE" (สำหรับ Share button fallback)
+function _showLongPressSaveModal(opts) {
+    opts = opts || {};
     if (!_pdfViewerImageBlobUrl) return false;
     const existing = document.getElementById('_imgSaveLightbox');
     if (existing) existing.remove();
 
     const url = _pdfViewerImageBlobUrl;
+    const hasSharePicker = !!opts.showLineShare && _liffApi('shareTargetPicker');
+    const headlineColor = opts.showLineShare ? '#06c755' : '#fbbf24';
+    const headlineBg = opts.showLineShare ? 'rgba(6,199,85,0.15)' : 'rgba(251,191,36,0.15)';
+    const headlineBorder = opts.showLineShare ? 'rgba(6,199,85,0.4)' : 'rgba(251,191,36,0.4)';
+    const titleText = opts.showLineShare ? 'แชร์ภาพให้คนอื่น' : 'บันทึกภาพ';
+
     const modal = document.createElement('div');
     modal.id = '_imgSaveLightbox';
     modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom));';
     modal.innerHTML = `
-        <div style="text-align:center;color:white;padding:14px 16px 6px;font-size:13px;font-weight:600;line-height:1.6;flex-shrink:0;">
-            <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(251,191,36,0.15);padding:8px 14px;border-radius:12px;border:1px solid rgba(251,191,36,0.4);">
-                <i class="fas fa-hand-pointer" style="color:#fbbf24;font-size:16px;"></i>
-                <span>กดค้างที่ภาพ → เลือก <strong style="color:#fbbf24;">"บันทึกภาพ"</strong></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;flex-shrink:0;">
+            <div style="color:white;font-size:14px;font-weight:700;">${titleText}</div>
+            <button id="_closeImgLightboxTop" style="width:36px;height:36px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:white;font-size:16px;cursor:pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="text-align:center;color:white;padding:0 16px 8px;font-size:12px;font-weight:600;line-height:1.6;flex-shrink:0;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:${headlineBg};padding:8px 14px;border-radius:12px;border:1px solid ${headlineBorder};">
+                <i class="fas fa-hand-pointer" style="color:${headlineColor};font-size:16px;"></i>
+                <span><strong style="color:${headlineColor};">กดค้างที่ภาพ</strong> → เลือก <strong style="color:${headlineColor};">"บันทึกภาพ"</strong></span>
             </div>
+            ${opts.showLineShare ? '<div style="margin-top:8px;color:#cbd5e1;font-size:11px;line-height:1.5;">บันทึกภาพแล้ว เปิดแชท LINE → กด <strong style="color:white;">+</strong> → <strong style="color:white;">รูปภาพ</strong> เพื่อส่งให้ผู้รับ<br>หรือกด <strong style="color:#06c755;">"ส่งสรุปข้อความใน LINE"</strong> ด้านล่าง</div>' : ''}
         </div>
         <div id="_imgSaveLightboxScroll" style="flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;">
             <img id="_imgSaveLightboxImg" src="${url}" alt="image"
                  style="display:block;width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.5);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
         </div>
-        <div style="padding:10px 16px;flex-shrink:0;">
-            <button id="_closeImgLightbox" style="display:block;width:100%;background:#475569;color:white;border:none;padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;">เสร็จสิ้น</button>
+        <div style="padding:10px 16px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
+            ${hasSharePicker ? '<button id="_lineShareTextBtn" style="background:#06c755;color:white;border:none;padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fab fa-line"></i> ส่งสรุปข้อความใน LINE</button>' : ''}
+            <button id="_closeImgLightbox" style="background:#475569;color:white;border:none;padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;">เสร็จสิ้น</button>
         </div>
     `;
     document.body.appendChild(modal);
@@ -3486,7 +3503,29 @@ function _showLongPressSaveModal() {
         img.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
     }
 
-    document.getElementById('_closeImgLightbox').addEventListener('click', () => modal.remove());
+    const closeBtn = document.getElementById('_closeImgLightbox');
+    const closeTopBtn = document.getElementById('_closeImgLightboxTop');
+    if (closeBtn) closeBtn.addEventListener('click', () => modal.remove());
+    if (closeTopBtn) closeTopBtn.addEventListener('click', () => modal.remove());
+
+    if (hasSharePicker) {
+        document.getElementById('_lineShareTextBtn').addEventListener('click', async () => {
+            try {
+                const summary = (typeof generateShortShareText === 'function')
+                    ? generateShortShareText()
+                    : (_pdfViewerFilename || 'รายละเอียดแผนประกัน');
+                const text = `${summary}\n\n📄 ${_pdfViewerFilename}`;
+                const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
+                if (ret) {
+                    Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
+                }
+            } catch (err) {
+                console.warn('[LIFF] shareTargetPicker failed:', err);
+                Swal.fire({ icon: 'error', title: 'ส่งข้อความไม่สำเร็จ', timer: 1500, showConfirmButton: false });
+            }
+            modal.remove();
+        });
+    }
     return true;
 }
 
@@ -3782,6 +3821,8 @@ function _showPdfSaveFallback(errInfo) {
 }
 
 // แชร์รูปภาพ — sync entry เพื่อรักษา user gesture สำหรับ navigator.share
+// ใน LIFF Android: navigator.share อาจไม่แสดง LINE ใน share sheet (intent loop)
+// → fallback เป็น lightbox พร้อมปุ่ม "ส่งสรุปข้อความใน LINE"
 function handlePdfShare() {
     if (!_pdfViewerImageBlob && !_pdfViewerBlob) {
         _showQuickToast('ยังไม่มีรูปภาพ');
@@ -3792,70 +3833,52 @@ function handlePdfShare() {
         return;
     }
 
+    const inLine = isInLineApp();
     const baseName = String(_pdfViewerFilename || 'document').replace(/\.pdf$/i, '');
     const imgName = baseName + '.png';
     const imgFile = (typeof File !== 'undefined')
         ? new File([_pdfViewerImageBlob], imgName, { type: 'image/png' })
         : null;
 
-    // ===== ลอง Web Share API กับไฟล์ก่อน (รักษา gesture — sync call ไม่ await) =====
-    // ทำงานบนทั้ง LIFF iOS, Android Chrome WebView ใหม่ๆ, และ mobile browser ปกติ
-    // System share sheet จะมีตัวเลือก "Save to Photos", "Share to LINE", "Messenger" ฯลฯ
-    if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+    // ===== Browser ปกติ (นอก LIFF): ลอง navigator.share file =====
+    // ใน mobile browser ปกติ share sheet จะมี LINE/Messenger/Save to Photos
+    if (!inLine && imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
         try {
             const p = navigator.share({ files: [imgFile], title: imgName });
             if (p && typeof p.then === 'function') {
-                p.then(() => {
-                    _showQuickToast('แชร์สำเร็จ');
-                }).catch(err => {
+                p.then(() => _showQuickToast('แชร์สำเร็จ'))
+                 .catch(err => {
                     if (err && err.name === 'AbortError') return;
                     console.warn('[Share] navigator.share file failed:', err);
-                    _handleShareFileFallback();
-                });
+                    _handleShareDesktopFallback();
+                 });
                 return;
             }
         } catch (err) {
             console.warn('[Share] navigator.share threw:', err);
-            // ลอง fallback
         }
     }
 
-    _handleShareFileFallback();
+    // ===== LIFF: ข้าม navigator.share เพราะ share sheet ไม่มี LINE
+    //          เปิด lightbox ที่ผู้ใช้:
+    //          1) กดค้างที่ภาพ → บันทึก → ส่งใน LINE chat เอง
+    //          2) กดปุ่ม "ส่งสรุปข้อความใน LINE" — shareTargetPicker text
+    if (inLine) {
+        if (_showLongPressSaveModal({ showLineShare: true })) return;
+    }
+
+    _handleShareDesktopFallback();
 }
 
-// Fallback chain แบบ async — เรียกหลัง navigator.share file ไม่ผ่าน
-async function _handleShareFileFallback() {
-    await _ensureLiffReady();
-    const inLine = isInLineApp();
-
-    // LIFF: shareTargetPicker (text summary — LINE ไม่รับไฟล์ผ่าน LIFF)
-    if (window.LIFF_READY && window.IS_IN_LIFF
-        && typeof liff !== 'undefined'
-        && typeof liff.isApiAvailable === 'function'
-        && liff.isApiAvailable('shareTargetPicker')) {
-        console.log('[LIFF] handlePdfShare → shareTargetPicker (text fallback)');
-        try {
-            const summary = (typeof generateShortShareText === 'function')
-                ? generateShortShareText()
-                : (_pdfViewerFilename || 'รายละเอียดแผนประกัน');
-            const text = `${summary}\n\n📄 ${_pdfViewerFilename}`;
-            const ret = await liff.shareTargetPicker([{ type: 'text', text }]);
-            if (ret) {
-                Swal.fire({ icon: 'success', title: 'ส่งข้อความแล้ว', timer: 1200, showConfirmButton: false });
-            }
-            return;
-        } catch (err) {
-            console.warn('[LIFF] shareTargetPicker failed:', err);
-        }
-    }
-
-    // Desktop: เปิดเมนูแชร์ข้อความ
-    if (!inLine && typeof openGenericShareModal === 'function'
+// Desktop/non-LIFF fallback — เปิดเมนูแชร์ข้อความ
+async function _handleShareDesktopFallback() {
+    if (typeof openGenericShareModal === 'function'
         && typeof lastCalculationData !== 'undefined' && lastCalculationData) {
         openGenericShareModal('all');
         return;
     }
-
+    // สุดท้าย — lightbox + LIFF text share (ถ้า available)
+    if (_showLongPressSaveModal({ showLineShare: true })) return;
     _showPdfActionFallback();
 }
 
