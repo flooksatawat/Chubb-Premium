@@ -4932,12 +4932,31 @@ window.navTableImageView = async function() {
         const canvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
         temp.remove();
 
-        // ใช้ blob URL (ไม่ใช่ data URL) เพื่อให้ iOS long-press save ทำงานได้
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-        const blobUrl = URL.createObjectURL(blob);
+        // แบ่ง canvas เป็นหน้า A4 (ratio 210:297)
         const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'table');
-        const imgFile = new File([blob], `${planAbbr}_ตารางมูลค่า.png`, { type: 'image/png' });
+        const pageH = Math.round(canvas.width * 297 / 210);
+        const pageCount = Math.ceil(canvas.height / pageH);
+        const pages = []; // { blob, blobUrl, file }
+        for (let i = 0; i < pageCount; i++) {
+            const pc = document.createElement('canvas');
+            pc.width = canvas.width;
+            pc.height = Math.min(pageH, canvas.height - i * pageH);
+            pc.getContext('2d').drawImage(canvas, 0, i * pageH, canvas.width, pc.height, 0, 0, canvas.width, pc.height);
+            const b = await new Promise(r => pc.toBlob(r, 'image/png'));
+            const u = URL.createObjectURL(b);
+            const f = new File([b], `${planAbbr}_ตาราง_หน้า${i + 1}.png`, { type: 'image/png' });
+            pages.push({ blob: b, blobUrl: u, file: f });
+        }
         loading.remove();
+
+        // สร้าง thumbnail HTML สำหรับแต่ละหน้า
+        const thumbsHtml = pages.map((p, i) => `
+            <div style="flex-shrink:0;text-align:center;">
+                <div style="color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;margin-bottom:4px;">หน้า ${i + 1}/${pageCount}</div>
+                <img src="${p.blobUrl}" alt="หน้า${i + 1}"
+                    style="display:block;width:calc(100vw - 32px);max-width:480px;height:auto;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);
+                           -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
+            </div>`).join('<div style="height:12px;flex-shrink:0;"></div>');
 
         // viewer
         const viewer = document.createElement('div');
@@ -4946,42 +4965,42 @@ window.navTableImageView = async function() {
         viewer.innerHTML = `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px 8px;flex-shrink:0;">
                 <button id="_tblClose" style="width:38px;height:38px;background:rgba(255,255,255,0.12);border:none;border-radius:50%;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button>
-                <span style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;">ตารางมูลค่า</span>
+                <span style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;">ตารางมูลค่า · ${pageCount} หน้า</span>
                 <div style="width:38px;"></div>
             </div>
-            <div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;padding:4px 8px;">
-                <img id="_tblImg" src="${blobUrl}" alt="table"
-                    style="display:block;max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.5);
-                           -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
+            <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 16px 8px;">
+                ${thumbsHtml}
             </div>
             <div style="padding:10px 14px 4px;flex-shrink:0;">
                 <button id="_tblShare" style="width:100%;padding:14px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fab fa-line" style="font-size:18px;"></i> แชร์ไปที่แชท
+                    <i class="fab fa-line" style="font-size:18px;"></i> แชร์ทั้ง ${pageCount} หน้าไปที่แชท
                 </button>
             </div>`;
         document.body.appendChild(viewer);
 
-        // ปลดบล็อก contextmenu เฉพาะ img นี้
-        const img = document.getElementById('_tblImg');
-        if (img) img.addEventListener('contextmenu', e => e.stopPropagation(), true);
+        // ปลดบล็อก contextmenu เฉพาะรูปทุกใบ
+        viewer.querySelectorAll('img').forEach(img => img.addEventListener('contextmenu', e => e.stopPropagation(), true));
 
-        const closeViewer = () => { viewer.remove(); try { URL.revokeObjectURL(blobUrl); } catch {} };
+        const closeViewer = () => {
+            viewer.remove();
+            pages.forEach(p => { try { URL.revokeObjectURL(p.blobUrl); } catch {} });
+        };
         document.getElementById('_tblClose').addEventListener('click', closeViewer);
 
-        // ปุ่มแชร์ — เปิด native share sheet (iOS เลือกแชท LINE ได้จากตรงนี้)
+        // ปุ่มแชร์ — ส่งทุกหน้าพร้อมกันผ่าน native share sheet
         document.getElementById('_tblShare').addEventListener('click', async () => {
-            if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            const files = pages.map(p => p.file);
+            if (navigator.share && (!navigator.canShare || navigator.canShare({ files }))) {
                 try {
-                    await navigator.share({ files: [imgFile], title: imgFile.name });
+                    await navigator.share({ files, title: `${planAbbr}_ตารางมูลค่า` });
                     return;
                 } catch (err) {
                     if (err && err.name === 'AbortError') return;
                 }
             }
-            // fallback: แจ้งให้กดค้างที่ภาพ
             const t = document.createElement('div');
-            t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 22px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
-            t.textContent = 'กดค้างที่ภาพ → บันทึกรูปภาพ แล้วแนบใน LINE';
+            t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 22px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+            t.textContent = 'กดค้างที่ภาพแต่ละหน้า → บันทึกรูปภาพ';
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 2500);
         });
