@@ -801,65 +801,53 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     
                     <!-- กล่อง 1 ใน 15 โรคเด็ก -->
                     <div id="modalChildRow" class="hidden flex-col bg-blue-50/40 rounded-2xl border border-blue-100 overflow-hidden">
-                        <div class="p-4 pb-3 flex justify-between items-start border-b border-blue-100/50">
-                            <div>
-                                <span class="text-[13px] text-blue-900 font-bold block mb-1">ตรวจพบ 1 ใน 15 โรคเด็ก</span>
-                                <span class="text-[12px] text-blue-600 font-medium">จ่าย</span>
-                            </div>
-                            <span class="text-[16px] font-extrabold text-blue-700"><span id="modalChildCI">0</span> บาท</span>
+                        <div class="px-4 py-3 flex justify-between items-center border-b border-blue-100/50 gap-2">
+                            <span class="text-[13px] text-blue-900 font-bold whitespace-nowrap">ตรวจพบ 1 ใน 15 โรคเด็ก</span>
+                            <span class="text-[14px] font-extrabold text-blue-700 whitespace-nowrap shrink-0"><span id="modalChildCI">0</span> บาท</span>
                         </div>
-                        <button onclick="openPopup('disease15Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-blue-800 font-bold hover:bg-blue-100/50 transition-colors">
+                        <button onclick="openPopup('disease15Modal')" class="w-full flex justify-between items-center px-4 py-2.5 text-[12px] text-blue-800 font-bold hover:bg-blue-100/50 transition-colors">
                             รายชื่อ 15 โรคเด็ก <i class="fas fa-chevron-right text-blue-400 text-[10px]"></i>
                         </button>
                     </div>
-                    
+
                     <!-- กล่อง 1 ใน 5 โรคร้าย -->
                     <div id="modalExtraCIRow" class="flex-col bg-amber-50/40 rounded-2xl border border-amber-100 overflow-hidden">
-                        <div class="p-4 pb-3 flex justify-between items-start border-b border-amber-100/50">
-                            <div>
-                                <span class="text-[13px] text-amber-900 font-bold block mb-1">ตรวจพบ 1 ใน 5 โรคร้าย</span>
-                                <span class="text-[12px] text-amber-600 font-medium">จ่าย (สูงสุด 4 ครั้ง)</span>
-                            </div>
-                            <span class="text-[16px] font-extrabold text-amber-700"><span id="modalExtraCI">0</span> บาท</span>
+                        <div class="px-4 py-3 flex justify-between items-center border-b border-amber-100/50 gap-2">
+                            <span class="text-[13px] text-amber-900 font-bold whitespace-nowrap">ตรวจพบ 1 ใน 5 โรคร้าย</span>
+                            <span class="text-[14px] font-extrabold text-amber-700 whitespace-nowrap shrink-0"><span id="modalExtraCI">0</span> บาท</span>
                         </div>
-                        <button onclick="openPopup('disease5Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
+                        <button onclick="openPopup('disease5Modal')" class="w-full flex justify-between items-center px-4 py-2.5 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
                             รายชื่อ 5 โรคร้าย <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
                         </button>
                     </div>
-                    
+
                     <!-- กล่อง 1 ใน 45 โรคร้าย -->
                     <div id="modalMajorCIRow" class="flex-col bg-amber-50/40 rounded-2xl border border-amber-100 overflow-hidden">
-                        <div class="p-4 pb-3 flex justify-between items-start border-b border-amber-100/50">
-                            <div>
-                                <span class="text-[13px] text-amber-900 font-bold block mb-1">ตรวจพบ 1 ใน 45 โรคร้าย (ภายหลัง)</span>
-                                <span class="text-[12px] text-amber-600 font-medium">จ่าย</span>
-                            </div>
-                            <span class="text-[16px] font-extrabold text-amber-700"><span id="modalMajorCI">0</span> บาท</span>
+                        <div class="px-4 py-3 flex justify-between items-center border-b border-amber-100/50 gap-2">
+                            <span class="text-[13px] text-amber-900 font-bold whitespace-nowrap">ตรวจพบ 1 ใน 45 โรคร้าย</span>
+                            <span class="text-[14px] font-extrabold text-amber-700 whitespace-nowrap shrink-0"><span id="modalMajorCI">0</span> บาท</span>
                         </div>
-                        <button onclick="openPopup('extraPayConditionsModal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold border-b border-amber-100/50 hover:bg-amber-100/50 transition-colors">
+                        <button onclick="openPopup('extraPayConditionsModal')" class="w-full flex justify-between items-center px-4 py-2.5 text-[12px] text-amber-800 font-bold border-b border-amber-100/50 hover:bg-amber-100/50 transition-colors">
                             เงื่อนไขการจ่ายเพิ่มเติม <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
                         </button>
-                        <button onclick="openPopup('disease45Modal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
+                        <button onclick="openPopup('disease45Modal')" class="w-full flex justify-between items-center px-4 py-2.5 text-[12px] text-amber-800 font-bold hover:bg-amber-100/50 transition-colors">
                             รายชื่อ 45 โรคร้าย <i class="fas fa-chevron-right text-amber-400 text-[10px]"></i>
                         </button>
                     </div>
 
                     <!-- ปุ่มแชร์คำนิยาม -->
                     <button id="shareDiseaseListBtn" onclick="openGenericShareModal('diseaseList')" class="w-full flex justify-between items-center p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-800 font-bold text-[12px] active:scale-[0.98] transition-all">
-                        <div class="flex items-center gap-2"><div class="w-7 h-7 bg-emerald-200/50 rounded-full flex items-center justify-center"><i class="fas fa-file-medical text-emerald-600"></i></div>แชร์ คำนิยามโรคร้าย</div>
-                        <i class="fas fa-share-nodes text-emerald-500"></i>
+                        <div class="flex items-center gap-2 whitespace-nowrap"><div class="w-7 h-7 bg-emerald-200/50 rounded-full flex items-center justify-center shrink-0"><i class="fas fa-file-medical text-emerald-600"></i></div>แชร์ คำนิยามโรคร้าย</div>
+                        <i class="fas fa-share-nodes text-emerald-500 shrink-0"></i>
                     </button>
-                    
+
                     <!-- กล่องจากไป หรือ ครบสัญญา -->
                     <div id="modalMaturityRow" class="flex-col bg-indigo-50/40 rounded-2xl border border-indigo-100 overflow-hidden mt-2">
-                        <div class="p-4 pb-3 flex justify-between items-start border-b border-indigo-100/50">
-                            <div>
-                                <span class="text-[13px] text-indigo-900 font-bold block mb-1">จากไปหรือครบสัญญา</span>
-                                <span class="text-[12px] text-indigo-600 font-medium">จ่าย</span>
-                            </div>
-                            <span class="text-[16px] font-extrabold text-indigo-800"><span id="modalMaturity">0</span> บาท</span>
+                        <div class="px-4 py-3 flex justify-between items-center border-b border-indigo-100/50 gap-2">
+                            <span class="text-[13px] text-indigo-900 font-bold whitespace-nowrap">จากไปหรือครบสัญญา</span>
+                            <span class="text-[14px] font-extrabold text-indigo-800 whitespace-nowrap shrink-0"><span id="modalMaturity">0</span> บาท</span>
                         </div>
-                        <button onclick="openPopup('maturityExtraModal')" class="w-full flex justify-between items-center px-4 py-3 text-[12px] text-indigo-800 font-bold hover:bg-indigo-100/50 transition-colors">
+                        <button onclick="openPopup('maturityExtraModal')" class="w-full flex justify-between items-center px-4 py-2.5 text-[12px] text-indigo-800 font-bold hover:bg-indigo-100/50 transition-colors">
                             เงื่อนไขเพิ่มเติม <i class="fas fa-chevron-right text-indigo-400 text-[10px]"></i>
                         </button>
                     </div>
