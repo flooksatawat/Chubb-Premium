@@ -3309,27 +3309,13 @@ async function tryShareFile(file, title, text) {
     }
 }
 
-// ===== PDF VIEWER STATE =====
+// ===== IMAGE VIEWER STATE (เดิมเป็น PDF — เปลี่ยนเป็นภาพความละเอียดสูง) =====
 let _pdfViewerBlob = null;
 let _pdfViewerFilename = '';
 let _pdfViewerDataUri = null;
 let _pdfViewerBlobUrl = null;
-let _pdfViewerImageBlob = null;     // composite PNG ของทุกหน้า — pre-computed สำหรับ sync save
+let _pdfViewerImageBlob = null;     // composite PNG ของทุกหน้า — เป็นไฟล์หลักที่ใช้บันทึก
 let _pdfViewerImageBlobUrl = null;
-let _pdfZoom = 1;
-const _PDF_ZOOM_MIN = 0.5;
-const _PDF_ZOOM_MAX = 4;
-
-function _setPdfZoom(z) {
-    _pdfZoom = Math.max(_PDF_ZOOM_MIN, Math.min(_PDF_ZOOM_MAX, z));
-    const inner = document.getElementById('pdfViewerCanvasInner');
-    if (inner) inner.style.zoom = String(_pdfZoom);
-    const label = document.getElementById('pdfZoomLabel');
-    if (label) label.textContent = Math.round(_pdfZoom * 100) + '%';
-}
-function pdfZoomIn() { _setPdfZoom(_pdfZoom * 1.25); }
-function pdfZoomOut() { _setPdfZoom(_pdfZoom / 1.25); }
-function pdfZoomReset() { _setPdfZoom(1); }
 
 function closePdfViewer() {
     const modal = document.getElementById('pdfViewerModal');
@@ -3352,7 +3338,6 @@ function closePdfViewer() {
     _pdfViewerBlobUrl = null;
     _pdfViewerImageBlob = null;
     _pdfViewerImageBlobUrl = null;
-    _setPdfZoom(1);
 }
 
 async function _ensureLiffReady() {
@@ -3384,60 +3369,93 @@ function _blobToDataUrl(blob) {
     });
 }
 
-// บันทึก PDF — บน LIFF บันทึกลงเครื่องโดยไม่เปิดบราวเซอร์
-// ต้องรักษา user gesture (เรียก navigator.share/click แบบ sync — ห้าม await ก่อนหน้า)
+// บันทึกรูปภาพความละเอียดสูง — ใช้ Web Share API บน LIFF (ผู้ใช้เลือก Save to Photos/Files)
+// ต้องรักษา user gesture: เรียก navigator.share/click แบบ sync — ห้าม await ก่อนหน้า
 function handlePdfSaveLinkClick(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
 
-    if (!_pdfViewerBlob || !_pdfViewerFilename) {
-        _showQuickToast('ยังไม่มีไฟล์ PDF');
+    if (!_pdfViewerImageBlob && !_pdfViewerBlob) {
+        _showQuickToast('ยังไม่มีไฟล์ให้บันทึก');
+        return;
+    }
+    if (!_pdfViewerImageBlob) {
+        _showQuickToast('กำลังเตรียมภาพ — กรุณารอสักครู่');
         return;
     }
 
     const inLine = isInLineApp();
-    const filename = _pdfViewerFilename;
+    const baseName = String(_pdfViewerFilename || 'document').replace(/\.pdf$/i, '');
+    const imgFilename = baseName + '.png';
 
-    // ===== Browser ปกติ: blob URL + <a download> =====
+    // ===== Browser ปกติ: <a download> ของไฟล์ PNG =====
     if (!inLine) {
         try {
-            const url = _pdfViewerBlobUrl || URL.createObjectURL(_pdfViewerBlob);
+            const url = _pdfViewerImageBlobUrl || URL.createObjectURL(_pdfViewerImageBlob);
             const tmp = document.createElement('a');
             tmp.href = url;
-            tmp.download = filename;
+            tmp.download = imgFilename;
             tmp.rel = 'noopener';
             document.body.appendChild(tmp);
             tmp.click();
             setTimeout(() => { tmp.remove(); }, 100);
             _showQuickToast('กำลังดาวน์โหลด...');
         } catch (err) {
-            console.warn('[Save] <a download> with blob URL failed:', err);
+            console.warn('[Save] <a download> with image blob failed:', err);
+            _showPdfSaveFallback('download failed');
         }
         return;
     }
 
-    // ===== LIFF: บันทึกลงเครื่อง โดยไม่หลุดไปบราวเซอร์ภายนอก =====
-    // ลำดับ:
-    //   1) Image download — <a download> กับ MIME image/png (สมมุติว่า LINE block แค่ PDF)
-    //   2) window.print() iframe — Android Print Dialog → "บันทึกเป็น PDF"
-    //   3) Web Share API — OS share sheet → Save to Files
-    //   4) Fallback toast (shareTargetPicker ส่งข้อความสรุป)
+    // ===== LIFF: ใช้ Web Share API กับไฟล์ PNG — เปิด system share sheet
+    //          ผู้ใช้กด "Save to Photos" / "บันทึกในรูปภาพ" จริงๆ ได้
+    // ต้องเรียก navigator.share แบบ sync (ภายในเฟรม user-gesture) — ห้าม await
+    const imgFile = (typeof File !== 'undefined')
+        ? new File([_pdfViewerImageBlob], imgFilename, { type: 'image/png' })
+        : null;
 
-    if (_trySaveViaImageDownload(filename)) {
+    if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+        try {
+            const p = navigator.share({ files: [imgFile], title: imgFilename });
+            if (p && typeof p.then === 'function') {
+                p.then(() => {
+                    _showQuickToast('บันทึกสำเร็จ');
+                }).catch(err => {
+                    if (err && err.name === 'AbortError') return;
+                    console.warn('[Save] navigator.share rejected:', err);
+                    // fallback ลอง <a download> แบบ PNG (LINE WebView บางตัวยอม)
+                    if (!_trySaveViaImageDownload(imgFilename)) {
+                        _showPdfSaveFallback(`share: ${err && err.name || 'reject'}`);
+                    }
+                });
+                return;
+            }
+        } catch (err) {
+            console.warn('[Save] navigator.share threw:', err);
+            // ตกลงไป fallback ด้านล่าง
+        }
+    }
+
+    // Fallback 1: <a download> ของ PNG (บาง LINE WebView อนุญาต)
+    if (_trySaveViaImageDownload(imgFilename)) {
         _showQuickToast('กำลังบันทึกรูปภาพ...');
         return;
     }
+
+    // Fallback 2: print iframe → Android Print Dialog → "บันทึกเป็น PDF"/รูป
     if (_trySaveViaPrint()) {
-        _showQuickToast('เลือก "บันทึกเป็น PDF" ในหน้าต่างที่เปิดขึ้น');
+        _showQuickToast('เลือกบันทึกในหน้าต่างที่เปิดขึ้น');
         return;
     }
-    _trySaveViaShareOrFallback(filename);
+
+    // Fallback 3: toast (เปิดในเบราว์เซอร์ภายนอก / shareTargetPicker)
+    _showPdfSaveFallback(navigator.share ? 'share unavailable' : 'no share API');
 }
 
-// บันทึกเป็นรูป PNG — สมมติฐานว่า LINE WebView block เฉพาะ PDF download แต่ปล่อย image
+// บันทึกเป็นรูป PNG ผ่าน <a download> — ใช้เป็น fallback เมื่อ Web Share API ไม่ทำงาน
 function _trySaveViaImageDownload(filename) {
     if (!_pdfViewerImageBlobUrl) return false;
-    const imgFilename = String(filename || 'document').replace(/\.pdf$/i, '') + '.png';
+    const imgFilename = String(filename || 'document.png');
     try {
         const tmp = document.createElement('a');
         tmp.href = _pdfViewerImageBlobUrl;
@@ -3493,46 +3511,113 @@ async function _precomputeImageBlob() {
     });
 }
 
-// Pinch-to-zoom + double-tap zoom สำหรับ #pdfViewerCanvas
+// Pinch-to-zoom + pan + double-tap — ใช้ CSS transform (ไม่ใช่ style.zoom)
+// ทำงานได้จริงบน LINE WebView/iOS Safari/Android Chrome
+const _IMG_ZOOM_MIN = 1;
+const _IMG_ZOOM_MAX = 5;
 function _setupPdfZoomGestures() {
     const area = document.getElementById('pdfViewerCanvas');
-    if (!area || area.__zoomSetup) return;
+    const inner = document.getElementById('pdfViewerCanvasInner');
+    if (!area || !inner || area.__zoomSetup) return;
     area.__zoomSetup = true;
 
-    let initialDist = 0;
-    let initialZoom = 1;
+    let scale = 1, tx = 0, ty = 0;
+    let startDist = 0, startScale = 1;
+    let startMidX = 0, startMidY = 0;
+    let startTx = 0, startTy = 0;
+    let panStartX = 0, panStartY = 0;
+    let isPanning = false, isPinching = false;
     let lastTap = 0;
+
+    const apply = () => {
+        inner.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+    };
+    const clampPan = () => {
+        const rect = area.getBoundingClientRect();
+        const innerW = inner.offsetWidth * scale;
+        const innerH = inner.offsetHeight * scale;
+        const maxX = Math.max(0, (innerW - rect.width) / 2);
+        const maxY = Math.max(0, (innerH - rect.height) / 2);
+        tx = Math.max(-maxX, Math.min(maxX, tx));
+        ty = Math.max(-maxY, Math.min(maxY, ty));
+    };
+    const reset = () => { scale = 1; tx = 0; ty = 0; apply(); };
+
+    // base styles — transform-origin ที่กลาง inner
+    inner.style.transformOrigin = '50% 0%';
+    inner.style.transition = '';
+    inner.style.willChange = 'transform';
 
     area.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
+            isPinching = true;
+            isPanning = false;
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
-            initialDist = Math.sqrt(dx * dx + dy * dy);
-            initialZoom = _pdfZoom;
+            startDist = Math.hypot(dx, dy);
+            startScale = scale;
+            startMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            startMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            startTx = tx;
+            startTy = ty;
+        } else if (e.touches.length === 1 && scale > 1.01) {
+            isPanning = true;
+            panStartX = e.touches[0].clientX - tx;
+            panStartY = e.touches[0].clientY - ty;
         }
     }, { passive: true });
 
     area.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2 && initialDist > 0) {
+        if (isPinching && e.touches.length === 2) {
             e.preventDefault();
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            _setPdfZoom(initialZoom * (dist / initialDist));
+            const dist = Math.hypot(dx, dy);
+            const newScale = Math.max(_IMG_ZOOM_MIN, Math.min(_IMG_ZOOM_MAX, startScale * (dist / startDist)));
+            // เก็บจุดกลางของ pinch ให้อยู่กับที่ขณะซูม
+            const ratio = newScale / startScale;
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            tx = startTx + (midX - startMidX) + (1 - ratio) * (startMidX - (area.getBoundingClientRect().left + area.clientWidth / 2));
+            ty = startTy + (midY - startMidY) + (1 - ratio) * (startMidY - (area.getBoundingClientRect().top));
+            scale = newScale;
+            clampPan();
+            apply();
+        } else if (isPanning && e.touches.length === 1 && scale > 1.01) {
+            e.preventDefault();
+            tx = e.touches[0].clientX - panStartX;
+            ty = e.touches[0].clientY - panStartY;
+            clampPan();
+            apply();
         }
     }, { passive: false });
 
     area.addEventListener('touchend', (e) => {
-        if (e.touches.length < 2) initialDist = 0;
-        // double-tap toggle zoom
-        if (e.touches.length === 0 && e.changedTouches.length === 1) {
-            const now = Date.now();
-            if (now - lastTap < 300) {
-                _setPdfZoom(_pdfZoom > 1.05 ? 1 : 2);
+        if (e.touches.length < 2) isPinching = false;
+        if (e.touches.length === 0) {
+            isPanning = false;
+            // ถ้าซูมเลย max หรือต่ำกว่า 1 → snap
+            if (scale < 1.01) reset();
+            // double-tap toggle zoom
+            if (e.changedTouches.length === 1) {
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    if (scale > 1.05) reset();
+                    else {
+                        scale = 2.2;
+                        tx = 0; ty = 0;
+                        apply();
+                    }
+                    lastTap = 0;
+                } else {
+                    lastTap = now;
+                }
             }
-            lastTap = now;
         }
     }, { passive: true });
+
+    // expose สำหรับ reset เวลาเปิด viewer ใหม่
+    area.__resetZoom = reset;
 }
 
 // ใช้ Print API → Android Print Dialog มีตัวเลือก "บันทึกเป็น PDF" บันทึกลง Downloads จริง
@@ -3640,10 +3725,10 @@ function _showPdfSaveFallback(errInfo) {
     toast.id = '_pdfActionFallbackToast';
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกรูปภาพได้</div>
         <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.5;">
-            LINE ไม่รองรับการรับไฟล์ PDF โดยตรง<br>
-            ${hasSharePicker ? 'ส่งสรุปข้อความเข้าแชทตัวเองได้แทน' : 'กรุณาอัปเดต LINE แล้วลองใหม่'}
+            อุปกรณ์ไม่รองรับการบันทึกไฟล์โดยตรง<br>
+            ${hasSharePicker ? 'ส่งสรุปข้อความเข้าแชทตัวเองได้แทน' : 'กรุณาอัปเดตแอป LINE แล้วลองใหม่'}
             ${errInfo ? `<br><span style="color:#94a3b8;font-size:10px;">(${errInfo})</span>` : ''}
         </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
@@ -3673,10 +3758,10 @@ function _showPdfSaveFallback(errInfo) {
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
 }
 
-// แชร์ PDF — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ PDF)
+// แชร์ภาพ — LIFF: shareTargetPicker (text summary, LIFF ไม่รับไฟล์ผ่านโดยตรง)
 async function handlePdfShare() {
     if (!_pdfViewerBlob || !_pdfViewerFilename) {
-        _showQuickToast('ยังไม่มีไฟล์ PDF');
+        _showQuickToast('ยังไม่มีรูปภาพ');
         return;
     }
 
@@ -3712,9 +3797,13 @@ async function handlePdfShare() {
         }
     }
 
-    // ===== Mobile browser: Web Share API กับไฟล์ PDF =====
-    const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-    if (!inLine && await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
+    // ===== Mobile browser: Web Share API กับไฟล์รูปภาพ =====
+    if (!inLine && _pdfViewerImageBlob) {
+        const baseName = String(_pdfViewerFilename || 'document').replace(/\.pdf$/i, '');
+        const imgName = baseName + '.png';
+        const imgFile = new File([_pdfViewerImageBlob], imgName, { type: 'image/png' });
+        if (await tryShareFile(imgFile, imgName, imgName)) return;
+    }
 
     // ===== Desktop browser: เปิดเมนูแชร์ข้อความ (LINE/Messenger/Copy) =====
     if (!inLine && typeof openGenericShareModal === 'function'
@@ -3740,7 +3829,7 @@ function _showPdfActionFallback() {
         <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
         <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
             ${headline}<br>
-            ${canOpenWindow ? 'เปิดในเบราว์เซอร์ภายนอกเพื่อบันทึก PDF ได้' : (hasSharePicker ? 'สามารถส่งสรุปแผนเป็นข้อความใน LINE ได้' : 'ลองเปิดบนเบราว์เซอร์ปกติ')}
+            ${canOpenWindow ? 'เปิดในเบราว์เซอร์ภายนอกเพื่อบันทึกรูปภาพได้' : (hasSharePicker ? 'สามารถส่งสรุปแผนเป็นข้อความใน LINE ได้' : 'ลองเปิดบนเบราว์เซอร์ปกติ')}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
             ${canOpenWindow ? '<button id="_pdfOpenExtBtn" style="background:#0ea5e9;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">เปิดในเบราว์เซอร์</button>' : ''}
@@ -3801,12 +3890,13 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
     if (canvasArea) {
         canvasArea.innerHTML = `<div style="text-align:center;padding:40px 16px;color:#94a3b8;">
             <i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:12px;"></i>
-            <span style="font-size:13px;">กำลังโหลด PDF...</span>
+            <span style="font-size:13px;">กำลังเตรียมภาพความละเอียดสูง...</span>
         </div>`;
+        // reset zoom transform จากครั้งก่อน (ถ้ามี)
+        if (canvasArea.__resetZoom) canvasArea.__resetZoom();
     }
-    _setPdfZoom(1);
 
-    // Render PDF.js ถ้ามี — เป็น enhancement เท่านั้น
+    // Render PDF.js ถ้ามี — composite เป็นภาพความละเอียดสูง
     if (canvasArea && typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -3814,18 +3904,20 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
             const ab = await pdfBlob.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
             canvasArea.innerHTML = '';
-            // wrap canvases ใน inner — สำหรับ apply CSS zoom
+            // wrap canvases ใน inner — สำหรับ apply transform (pinch zoom)
             const inner = document.createElement('div');
             inner.id = 'pdfViewerCanvasInner';
-            inner.style.cssText = 'display:flex;flex-direction:column;gap:10px;transform-origin:top left;zoom:1;';
+            inner.style.cssText = 'display:flex;flex-direction:column;gap:10px;transform-origin:50% 0%;transform:translate(0,0) scale(1);will-change:transform;';
             canvasArea.appendChild(inner);
 
+            // เรนเดอร์ความละเอียดสูง — บูสต์เพิ่มจาก DPR ×2 เพื่อให้ภาพคมชัดขณะซูม
+            const HI_RES_BOOST = 2.5;
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const dpr = window.devicePixelRatio || 1;
                 const vw = page.getViewport({ scale: 1 });
-                const scale = ((canvasArea.clientWidth || 300) / vw.width) * dpr;
-                const vp = page.getViewport({ scale });
+                const fitScale = ((canvasArea.clientWidth || 300) / vw.width) * dpr * HI_RES_BOOST;
+                const vp = page.getViewport({ scale: fitScale });
                 const canvas = document.createElement('canvas');
                 canvas.width = vp.width;
                 canvas.height = vp.height;
@@ -3835,15 +3927,15 @@ async function showPdfViewer(pdfBlob, filename, planLabel) {
             }
 
             // หลัง render เสร็จ — composite รูปไว้ใช้ตอน save + setup pinch zoom
-            _precomputeImageBlob().catch(err => console.warn('[PDF] image composite failed:', err));
+            _precomputeImageBlob().catch(err => console.warn('[Image] composite failed:', err));
             _setupPdfZoomGestures();
         } catch {
             canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
-                PDF พร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึก PDF</strong> ด้านล่าง</div>`;
+                เอกสารพร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึกรูปภาพ</strong> ด้านล่าง</div>`;
         }
     } else if (canvasArea) {
         canvasArea.innerHTML = `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
-            PDF พร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึก PDF</strong> ด้านล่าง</div>`;
+            เอกสารพร้อมแล้ว — กดปุ่ม <strong style="color:white;">บันทึกรูปภาพ</strong> ด้านล่าง</div>`;
     }
 }
 
@@ -3893,7 +3985,7 @@ async function _export3DPDF(actionType = 'preview') {
 
     const toast = document.createElement('div');
     toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-900 text-white px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all";
-    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างเอกสาร PDF...</span>`;
+    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างภาพความละเอียดสูง...</span>`;
     document.body.appendChild(toast);
 
     try {
@@ -4026,7 +4118,7 @@ async function exportTableToPDF(actionType = 'preview') {
     
     const toast = document.createElement('div'); 
     toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-900 text-white px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all"; 
-    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างเอกสาร PDF...</span>`; 
+    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างภาพความละเอียดสูง...</span>`; 
     document.body.appendChild(toast); 
     
     try {
@@ -4173,7 +4265,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 Swal.fire({
                     icon: 'info',
                     title: 'LINE ไม่รองรับการพิมพ์โดยตรง',
-                    text: 'กำลังเปิดตัวอย่าง PDF — กรุณาบันทึกแล้วพิมพ์จากแอป Files / Photos',
+                    text: 'กำลังเปิดตัวอย่าง — กรุณาบันทึกรูปภาพแล้วพิมพ์จากแอป Photos',
                     timer: 2400,
                     showConfirmButton: false
                 });
@@ -4216,7 +4308,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 Swal.fire({
                     icon: 'info',
                     title: 'Messenger ไม่รองรับใน LINE',
-                    text: 'กำลังเปิดตัวอย่าง PDF — กดปุ่มแชร์ในนั้นเพื่อส่งผ่าน LINE หรือบันทึก',
+                    text: 'กำลังเปิดตัวอย่าง — กดปุ่มแชร์ในนั้นเพื่อส่งผ่าน LINE หรือบันทึก',
                     timer: 2400,
                     showConfirmButton: false
                 });
@@ -4334,7 +4426,7 @@ window.open3DDetailsView = function() {
             </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-            <button onclick="exportTableToPDF()" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button onclick="exportTableToPDF()" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-image"></i> รูปภาพ</button>
             <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
         </div>
     </div>`;
