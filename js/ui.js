@@ -4892,63 +4892,6 @@ window.render3DDetailsAccordion = function() {
     // ตัด selector sticky header ออก — left pane มี selector อยู่แล้ว
     body.innerHTML = contentHtml;
 };
-// ── Screenshot mode: ซ่อน UI แสดงเฉพาะตาราง ให้ user ถ่าย screenshot ──
-window.enterTableScreenshotMode = function() {
-    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
-
-    // หา element ที่ต้องซ่อน
-    const toHide = [
-        document.getElementById('navBar'),
-        document.getElementById('navShareBtn'),
-        document.querySelector('.fixed.bottom-0'),
-        document.querySelector('[id*="bottomNav"]'),
-    ].filter(Boolean);
-
-    // สร้าง overlay แสดง instruction
-    const overlay = document.createElement('div');
-    overlay.id = '_ssOverlay';
-    overlay.style.cssText = [
-        'position:fixed;top:0;left:0;right:0;z-index:99999',
-        'background:linear-gradient(135deg,#0ea5e9,#0284c7)',
-        'display:flex;align-items:center;justify-content:space-between',
-        'padding:max(12px,env(safe-area-inset-top)) 14px 10px',
-        'box-shadow:0 2px 12px rgba(0,0,0,0.25)',
-    ].join(';');
-    overlay.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:2px;">
-            <span style="color:white;font-size:13px;font-weight:700;"><i class="fas fa-camera" style="margin-right:6px;"></i>Screenshot Mode</span>
-            <span style="color:rgba(255,255,255,0.85);font-size:11px;">ถ่ายหน้าจอ → แชร์ใน LINE ได้เลย</span>
-        </div>
-        <button id="_ssExitBtn" style="background:rgba(255,255,255,0.2);border:none;border-radius:20px;color:white;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">ออก</button>
-    `;
-    document.body.appendChild(overlay);
-
-    // ซ่อน nav bar
-    const navBar = document.getElementById('navBar');
-    let navBarWasHidden = false;
-    if (navBar) { navBarWasHidden = navBar.style.display === 'none'; navBar.style.display = 'none'; }
-
-    // Scroll ไปที่ tableView
-    const tableView = document.getElementById('tableView');
-    if (tableView) tableView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    const exit = () => {
-        overlay.remove();
-        if (navBar) navBar.style.display = navBarWasHidden ? 'none' : '';
-    };
-    document.getElementById('_ssExitBtn').addEventListener('click', exit);
-};
-
-// ── เปิดหน้าเว็บใน Safari เพื่อดาวน์โหลด PDF / พิมพ์ ──
-window.openInExternalBrowser = function() {
-    const url = window.location.href;
-    if (typeof liff !== 'undefined' && liff.openWindow) {
-        liff.openWindow({ url: url, external: true });
-    } else {
-        window.open(url, '_blank');
-    }
-};
-
 // ── พิมพ์ตาราง / บันทึก PDF ผ่าน window.print() — ทำงานใน LIFF iOS ได้ ──
 window.printTable = function() {
     if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
@@ -4986,4 +4929,35 @@ window.printTable = function() {
         window.print();
         setTimeout(() => area.remove(), 2000);
     }, 100);
+};
+
+// ── Bottom sheet: แชร์ภาพ + พิมพ์ PDF ──
+window.openTableShareSheet = function() {
+    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+    const existing = document.getElementById('_tableShareSheet');
+    if (existing) { existing.remove(); return; }
+
+    const sheet = document.createElement('div');
+    sheet.id = '_tableShareSheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:99990;';
+    sheet.innerHTML = `
+        <div id="_tableShareBg" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:#1e293b;border-radius:20px 20px 0 0;padding:18px 16px;padding-bottom:max(22px,env(safe-area-inset-bottom));">
+            <div style="width:40px;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;margin:0 auto 16px;"></div>
+            <div style="color:white;font-size:14px;font-weight:700;margin-bottom:14px;text-align:center;"><i class="fas fa-table" style="margin-right:8px;color:#93c5fd;"></i>ตารางมูลค่า</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button onclick="document.getElementById('_tableShareSheet').remove();exportTableToPDF('preview');"
+                    style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:14px;color:white;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;">
+                    <i class="fas fa-image" style="font-size:20px;flex-shrink:0;"></i>
+                    <div><div>ดูภาพตาราง</div><div style="font-size:11px;opacity:0.75;font-weight:500;margin-top:2px;">แสดงภาพความละเอียดสูง → ถ่ายหน้าจอส่ง LINE</div></div>
+                </button>
+                <button onclick="document.getElementById('_tableShareSheet').remove();printTable();"
+                    style="width:100%;background:linear-gradient(135deg,#d97706,#b45309);border:none;border-radius:14px;color:white;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;">
+                    <i class="fas fa-print" style="font-size:20px;flex-shrink:0;"></i>
+                    <div><div>พิมพ์ / บันทึก PDF</div><div style="font-size:11px;opacity:0.75;font-weight:500;margin-top:2px;">AirPrint หรือ Save to Files</div></div>
+                </button>
+            </div>
+        </div>`;
+    document.body.appendChild(sheet);
+    document.getElementById('_tableShareBg').addEventListener('click', () => sheet.remove());
 };
