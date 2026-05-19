@@ -3396,13 +3396,65 @@ function handlePdfSaveLinkClick(e) {
         return;
     }
 
-    // ===== LIFF: บันทึกผ่าน OS share sheet เท่านั้น — ไม่เปิดบราวเซอร์ภายนอก =====
-    // ห้าม fallback เป็น <a download>/data URI/window.open ใด ๆ — LINE WebView จะส่งต่อให้ external browser
+    // ===== LIFF: บันทึกลงเครื่อง โดยไม่หลุดไปบราวเซอร์ภายนอก =====
+    // ลำดับ:
+    //   1) Service Worker download — สร้าง HTTPS URL + Content-Disposition: attachment
+    //      → WebView ส่งให้ Android Download Manager (ไม่ผ่าน LINE intent)
+    //   2) Web Share API — OS share sheet → Save to Files
+    //   3) Fallback toast (shareTargetPicker ส่งข้อความสรุปเข้าแชท)
+
+    // 1) ลอง Service Worker ก่อน — รักษา user gesture: เรียก <a>.click() ทันทีหลัง SW ตอบ
+    _trySaveViaSW(filename).then(ok => {
+        if (ok) { _showQuickToast('กำลังบันทึก...'); return; }
+        _trySaveViaShareOrFallback(filename);
+    }).catch(err => {
+        console.warn('[Save] SW path threw:', err);
+        _trySaveViaShareOrFallback(filename);
+    });
+}
+
+async function _trySaveViaSW(filename) {
+    if (!('serviceWorker' in navigator)) return false;
+    const reg = navigator.serviceWorker.controller || (await navigator.serviceWorker.ready).active;
+    if (!reg) return false;
+
+    const id = 'pdf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    const channel = new MessageChannel();
+    const stored = new Promise((resolve) => {
+        channel.port1.onmessage = (e) => resolve(!!(e.data && e.data.ok));
+        setTimeout(() => resolve(false), 3000);
+    });
+    try {
+        reg.postMessage({ type: 'STORE_BLOB', id, blob: _pdfViewerBlob, filename }, [channel.port2]);
+    } catch (err) {
+        console.warn('[Save] SW postMessage failed:', err);
+        return false;
+    }
+    const ok = await stored;
+    if (!ok) return false;
+
+    // ใช้ same-origin path ที่ SW intercept — WebView เห็นเป็น HTTPS download ปกติ
+    const dlUrl = new URL(`sw-downloads/${id}.pdf`, location.href).toString();
+    try {
+        const tmp = document.createElement('a');
+        tmp.href = dlUrl;
+        tmp.download = filename;
+        tmp.rel = 'noopener';
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        return true;
+    } catch (err) {
+        console.warn('[Save] SW <a download> failed:', err);
+        return false;
+    }
+}
+
+function _trySaveViaShareOrFallback(filename) {
     const pdfFile = (typeof File !== 'undefined' && _pdfViewerBlob)
         ? new File([_pdfViewerBlob], filename, { type: 'application/pdf' })
         : null;
 
-    // ข้าม canShare (คืน false ผิดใน LIFF บ่อย) — ปล่อยให้ share เองตัดสิน
     if (pdfFile && navigator.share) {
         try {
             const p = navigator.share({ files: [pdfFile], title: filename, text: filename });
@@ -3420,8 +3472,7 @@ function handlePdfSaveLinkClick(e) {
             return;
         }
     }
-
-    _showPdfSaveFallback(navigator.share ? 'File ctor unavailable' : 'no navigator.share');
+    _showPdfSaveFallback(navigator.share ? 'File unavailable' : 'no share API');
 }
 
 function _showPdfSaveFallback(errInfo) {

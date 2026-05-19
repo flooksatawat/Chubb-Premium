@@ -1490,9 +1490,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=16"></script>
+    <script src="js/ui.js?v=17"></script>
     <script src="js/share.js?v=5"></script>
     <script>
+        // Register Service Worker เพื่อให้บันทึก PDF ทำงานบน LIFF WebView
+        // (SW serve HTTPS URL + Content-Disposition: attachment → WebView ใช้ Download Manager)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('[SW] register failed:', err));
+        }
         window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
         window.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
