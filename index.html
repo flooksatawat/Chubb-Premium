@@ -1940,6 +1940,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         /* ล้าง pending cache เก่า — ไม่ใช้ pending จาก cache เพราะอาจ stale */
         if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
+            /* ถ้าอยู่ใน LINE in-app browser → redirect Chrome ก่อน */
+            await window._liffReady;
+            if (window.IS_IN_LIFF) {
+                setState('loading', 'กำลังเปิดใน Chrome...');
+                openInChrome();
+                return;
+            }
             window.lineProfile = cachedProfile;
             showProfile(cachedProfile);
             openApp();
