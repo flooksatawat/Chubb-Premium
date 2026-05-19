@@ -192,7 +192,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <div id="mainView" class="flex flex-col flex-1 overflow-hidden w-full relative">
             
             <!-- App Header -->
-            <div class="w-full z-20 px-4 pb-2 shrink-0 relative" style="padding-top:16px;">
+            <div class="w-full z-20 px-4 pb-2 shrink-0 relative" style="padding-top:calc(env(safe-area-inset-top,0px) + 14px);">
                 <button id="mainHeaderBtn" onclick="handleHeaderClick(event)" class="w-full bg-gradient-to-br from-[#243c94] via-[#2a45a3] to-[#1e327a] rounded-[24px] py-4 px-4 flex flex-col items-center justify-center shadow-[0_10px_25px_rgba(36,60,148,0.3)] border border-[#60a5fa]/30 active:scale-[0.97] transition-all relative overflow-hidden group select-none cursor-pointer">
                     <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[24px]"></div>
                     <h1 class="text-[20px] font-normal text-white leading-none tracking-wide mb-1.5 relative z-10 drop-shadow-md flex items-center justify-center gap-1.5">
