@@ -4678,21 +4678,33 @@ function _showTableImageViewer(blob, imgName) {
         _showQuickToast('กดค้างที่ภาพ → เลือก "บันทึกภาพ"');
     }
 
-    async function _doLineLiff() {
-        // LIFF: ส่งสรุปข้อความ + แจ้งให้กดค้างบันทึกภาพ
-        _showQuickToast('กดค้างที่ภาพ → บันทึก → เปิดแชท LINE แนบรูป');
+    async function _doLineShare() {
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+        // ลอง navigator.share ก่อน — Android LINE + browser รองรับแชร์ไฟล์รูปได้จริง
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                await navigator.share({ files: [imgFile], title: imgName });
+                _showQuickToast('แชร์สำเร็จ');
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+            }
+        }
+        // iOS LINE / LIFF: shareTargetPicker ส่งข้อความ + hint
         if (hasSharePicker) {
             try {
                 const summary = typeof generateShortShareText === 'function' ? generateShortShareText() : imgName;
                 await liff.shareTargetPicker([{ type: 'text', text: summary }]);
+                _showQuickToast('ส่งข้อความแล้ว — กดค้างที่ภาพเพื่อบันทึกและแนบในแชท');
+                return;
             } catch (_) {}
         }
+        // fallback สุดท้าย
+        _showQuickToast('กดค้างที่ภาพ → บันทึก → เปิดแชท LINE แนบรูป');
     }
 
     document.getElementById('_tvShareBtn').addEventListener('click', _doShare);
-    document.getElementById('_tvLine').addEventListener('click', async () => {
-        if (inLine) { _doLineLiff(); } else { await _doShare(); }
-    });
+    document.getElementById('_tvLine').addEventListener('click', _doLineShare);
     document.getElementById('_tvMsgr').addEventListener('click', _doShare);
     document.getElementById('_tvSave').addEventListener('click', _doSave);
 }
