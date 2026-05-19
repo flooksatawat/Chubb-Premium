@@ -199,8 +199,22 @@ const HX_LIMITS = {
 // ==================== UI HELPERS & NOTIFICATIONS ====================
 // ฟังก์ชันสำหรับเปิดหน้าต่าง ค่ารักษาพิเศษ ซ้อนขึ้นมา
 function showMedExtraDef() { openPopup('medExtraDefModal'); }
-function openPopup(id) { const modal = document.getElementById(id); if (modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.add('show'); }, 10); } }
-function closePopup(id) { const modal = document.getElementById(id); if (modal) { modal.classList.remove('show'); setTimeout(() => { modal.classList.add('hidden'); }, 300); } }
+function _syncProfileBar() {
+    const pb = document.getElementById('lineProfileBar');
+    if (!pb) return;
+    const anyOpen = document.querySelector('.modal-overlay.show');
+    const swalOpen = document.body.classList.contains('swal2-shown');
+    const notMain  = document.body.getAttribute('data-view') && document.body.getAttribute('data-view') !== 'main';
+    pb.style.display = (anyOpen || swalOpen || notMain) ? 'none' : 'flex';
+}
+function openPopup(id) {
+    const modal = document.getElementById(id);
+    if (modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.add('show'); _syncProfileBar(); }, 10); }
+}
+function closePopup(id) {
+    const modal = document.getElementById(id);
+    if (modal) { modal.classList.remove('show'); setTimeout(() => { modal.classList.add('hidden'); _syncProfileBar(); }, 300); }
+}
 function handleModalClick(e, modalId) { if (e.target.closest('button, input, select, textarea, a, .list-row, .interactive-btn, .prevent-close')) return; closePopup(modalId); }
 
 function showCustomError(msg) {
@@ -4747,6 +4761,9 @@ window.navShareAction = async function() {
 // 🌟 ONLOAD INITIALIZATION (เชื่อมระบบเดิมทั้งหมด + เปิดหน้าแรก) 🌟
 // ============================================================================
 window.onload = async () => {
+    // watch swal2-shown บน body เพื่อซ่อน/แสดง profile bar
+    new MutationObserver(_syncProfileBar).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
     // แสดงเมนู 11 แผนก่อนเลย ไม่รอโหลด
     if (typeof openPlanModal === 'function') openPlanModal();
 
