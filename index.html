@@ -1799,7 +1799,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     /* ── API calls ── */
     async function callAPI(params) {
         const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params);
-        const r   = await fetch(url);
+        const r   = await fetch(url, { redirect: 'follow' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
     }
 
@@ -1855,7 +1856,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if (!profile) { location.reload(); return; }
         try {
             await callAPI({ action: 'request', userId: profile.userId, displayName: profile.displayName });
-        } catch {}
+        } catch (err) { console.warn('[requestAccess] failed:', err); }
         setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
         setState('pending');
     };
