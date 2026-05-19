@@ -30,6 +30,25 @@ function doGet(e) {
 function doPost(e) {
   try {
     const body   = JSON.parse(e.postData.contents);
+
+    // LINE Webhook events
+    if (body.events) {
+      body.events.forEach(ev => {
+        if (ev.type === 'follow' || ev.type === 'message') {
+          const uid = ev.source && ev.source.userId;
+          const name = ev.type === 'follow' ? 'follow event' : (ev.message && ev.message.text || 'message');
+          if (uid) {
+            // บันทึก userId ลง Sheet แถว webhook log
+            const ss = SpreadsheetApp.getActiveSpreadsheet();
+            let log = ss.getSheetByName('webhook_log');
+            if (!log) { log = ss.insertSheet('webhook_log'); log.appendRow(['userId','event','time']); }
+            log.appendRow([uid, name, new Date().toISOString()]);
+          }
+        }
+      });
+      return corsOutput({ ok: true });
+    }
+
     const action = body.action || '';
     if (action === 'add')    return corsOutput(addUser(body.userId, body.displayName));
     if (action === 'remove') return corsOutput(removeUser(body.userId));
