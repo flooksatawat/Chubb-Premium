@@ -2049,11 +2049,24 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             return;
         }
 
-        /* 4. ดึง profile */
+        /* 4. ดึง profile — retry 2 ครั้ง ถ้ายังไม่ได้ re-login */
         setState('loading', 'กำลังโหลดข้อมูล...');
         let profile;
-        try { profile = await liff.getProfile(); }
-        catch { setState('loading', 'โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช'); return; }
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try { profile = await liff.getProfile(); break; }
+            catch (e) {
+                if (attempt === 0) {
+                    await new Promise(r => setTimeout(r, 1200));
+                } else {
+                    // token หมดอายุหรือ scope ไม่ครบ → login ใหม่
+                    console.warn('[Auth] getProfile failed, re-login:', e);
+                    try { liff.logout(); } catch {}
+                    setState('loading', 'กำลังนำไปยืนยันตัวตน...');
+                    liff.login({ redirectUri: location.origin + location.pathname });
+                    return;
+                }
+            }
+        }
 
         window.lineProfile = profile;
         setLS(CACHE_KEY, profile);
