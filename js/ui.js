@@ -4931,7 +4931,12 @@ window.navTableImageView = async function() {
         const scale = Math.max(2, window.devicePixelRatio || 2);
         const canvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
         temp.remove();
-        const blobUrl = canvas.toDataURL('image/png');
+
+        // ใช้ blob URL (ไม่ใช่ data URL) เพื่อให้ iOS long-press save ทำงานได้
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        const blobUrl = URL.createObjectURL(blob);
+        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'table');
+        const imgFile = new File([blob], `${planAbbr}_ตารางมูลค่า.png`, { type: 'image/png' });
         loading.remove();
 
         // viewer
@@ -4949,16 +4954,37 @@ window.navTableImageView = async function() {
                     style="display:block;max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.5);
                            -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
             </div>
-            <div style="text-align:center;padding:10px 16px 4px;flex-shrink:0;color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;">
-                <i class="fas fa-hand-pointer" style="margin-right:6px;"></i>กดค้างที่ภาพ → บันทึกรูปภาพ
+            <div style="padding:10px 14px 4px;flex-shrink:0;">
+                <button id="_tblShare" style="width:100%;padding:14px;background:#06c755;border:none;border-radius:16px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fab fa-line" style="font-size:18px;"></i> แชร์ไปที่แชท
+                </button>
             </div>`;
         document.body.appendChild(viewer);
 
-        // ปลดบล็อก contextmenu เฉพาะ img นี้ (ป้องกัน global listener บล็อก)
+        // ปลดบล็อก contextmenu เฉพาะ img นี้
         const img = document.getElementById('_tblImg');
         if (img) img.addEventListener('contextmenu', e => e.stopPropagation(), true);
 
-        document.getElementById('_tblClose').addEventListener('click', () => viewer.remove());
+        const closeViewer = () => { viewer.remove(); try { URL.revokeObjectURL(blobUrl); } catch {} };
+        document.getElementById('_tblClose').addEventListener('click', closeViewer);
+
+        // ปุ่มแชร์ — เปิด native share sheet (iOS เลือกแชท LINE ได้จากตรงนี้)
+        document.getElementById('_tblShare').addEventListener('click', async () => {
+            if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+                try {
+                    await navigator.share({ files: [imgFile], title: imgFile.name });
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                }
+            }
+            // fallback: แจ้งให้กดค้างที่ภาพ
+            const t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.92);color:white;padding:14px 22px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+            t.textContent = 'กดค้างที่ภาพ → บันทึกรูปภาพ แล้วแนบใน LINE';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        });
     } catch (err) {
         loading.remove();
         showCustomError('ไม่สามารถสร้างภาพได้: ' + (err.message || err));
