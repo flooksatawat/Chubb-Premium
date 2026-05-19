@@ -3396,14 +3396,13 @@ function handlePdfSaveLinkClick(e) {
         return;
     }
 
-    // ===== LIFF: บันทึกลงเครื่อง — ไม่เปิดบราวเซอร์ภายนอก =====
-    // ลำดับ: Web Share (share sheet → Save to Files) → data URI inline (PDF viewer ใน LIFF)
-    // ทั้งหมดต้องเริ่มแบบ sync เพื่อรักษา user gesture
+    // ===== LIFF: บันทึกผ่าน OS share sheet เท่านั้น — ไม่เปิดบราวเซอร์ภายนอก =====
+    // ห้าม fallback เป็น <a download>/data URI/window.open ใด ๆ — LINE WebView จะส่งต่อให้ external browser
     const pdfFile = (typeof File !== 'undefined' && _pdfViewerBlob)
         ? new File([_pdfViewerBlob], filename, { type: 'application/pdf' })
         : null;
 
-    // 1) navigator.share — ข้าม canShare (คืนค่าผิดบ่อยใน LIFF) ปล่อยให้ share เป็นคนตัดสิน
+    // ข้าม canShare (คืน false ผิดใน LIFF บ่อย) — ปล่อยให้ share เองตัดสิน
     if (pdfFile && navigator.share) {
         try {
             const p = navigator.share({ files: [pdfFile], title: filename, text: filename });
@@ -3411,7 +3410,7 @@ function handlePdfSaveLinkClick(e) {
                 p.catch(err => {
                     if (!err || err.name === 'AbortError') return;
                     console.warn('[Save] navigator.share rejected:', err);
-                    _liffSaveFallback(filename);
+                    _showPdfSaveFallback();
                 });
                 return;
             }
@@ -3420,28 +3419,6 @@ function handlePdfSaveLinkClick(e) {
         }
     }
 
-    // 2) Sync fallback (กรณี Web Share ไม่รองรับ)
-    _liffSaveFallback(filename);
-}
-
-function _liffSaveFallback(filename) {
-    // data URI inline — เปิด PDF viewer ของ LIFF ที่มีปุ่ม Share → Save to Files
-    // (ไม่ใช่บราวเซอร์ภายนอก — เปิดใน LIFF context)
-    if (_pdfViewerDataUri) {
-        try {
-            const tmp = document.createElement('a');
-            tmp.href = _pdfViewerDataUri;
-            tmp.download = filename;
-            tmp.rel = 'noopener';
-            document.body.appendChild(tmp);
-            tmp.click();
-            tmp.remove();
-            _showQuickToast('แตะปุ่มแชร์ในมุมเพื่อบันทึก');
-            return;
-        } catch (err) {
-            console.warn('[Save] dataURI <a download> failed:', err);
-        }
-    }
     _showPdfSaveFallback();
 }
 
@@ -3452,10 +3429,10 @@ function _showPdfSaveFallback() {
     toast.id = '_pdfActionFallbackToast';
     toast.style.cssText = 'position:fixed;bottom:90px;left:16px;right:16px;background:#1e293b;color:white;padding:16px;border-radius:16px;font-size:13px;z-index:99999;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.6);border:1px solid #475569;';
     toast.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">ไม่สามารถบันทึกไฟล์ได้</div>
+        <div style="font-weight:700;margin-bottom:6px;font-size:14px;">อุปกรณ์ไม่รองรับการบันทึก</div>
         <div style="color:#cbd5e1;margin-bottom:12px;font-size:12px;line-height:1.6;">
-            อุปกรณ์/LINE เวอร์ชันนี้ไม่อนุญาตให้บันทึกไฟล์โดยตรง<br>
-            กรุณาใช้ปุ่ม <strong style="color:white;">แชร์</strong> เพื่อส่งไฟล์ไปแอปอื่น
+            LINE เวอร์ชันนี้ไม่รองรับการแชร์ไฟล์ของระบบ<br>
+            กรุณาอัปเดต LINE เป็นเวอร์ชันล่าสุด แล้วลองอีกครั้ง
         </div>
         <button id="_pdfCloseToastBtn" style="background:#475569;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:12px;cursor:pointer;">ปิด</button>
     `;
