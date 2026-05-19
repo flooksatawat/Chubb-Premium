@@ -59,44 +59,34 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .neomorphic-menu-item {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 255, 0.88) 100%) !important;
     border-top: 2px solid rgba(255, 255, 255, 1) !important;
     border-left: 2px solid rgba(255, 255, 255, 1) !important;
     border-bottom: 1.5px solid rgba(200, 200, 200, 0.4) !important;
     border-right: 1.5px solid rgba(200, 200, 200, 0.4) !important;
     border-radius: 20px !important;
     box-shadow:
-        6px 8px 20px rgba(0, 0, 0, 0.08),
-        -4px -4px 12px rgba(255, 255, 255, 0.9),
+        6px 8px 20px rgba(0, 0, 0, 0.07),
+        -3px -3px 10px rgba(255, 255, 255, 0.85),
         inset 1px 1px 3px rgba(255, 255, 255, 0.9) !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transition: transform 0.22s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.22s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     transform-style: preserve-3d !important;
+    will-change: transform !important;
 }
 .neomorphic-menu-item::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
-    transform: skewX(-25deg);
-    animation: glassShimmer 12s infinite;
-}
-@keyframes glassShimmer {
-    0% { left: -150%; }
-    20% { left: 150%; }
-    100% { left: 150%; }
+    content: none;
 }
 .neomorphic-menu-item:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 100%) !important;
-    transform: translateY(-5px) scale(1.02) !important;
+    transform: translateY(-4px) scale(1.015) !important;
     box-shadow:
-        0 15px 30px rgba(0, 0, 0, 0.08),
-        0 0 25px rgba(255, 255, 255, 0.9),
-        -4px -4px 12px rgba(255, 255, 255, 1) !important;
+        0 14px 28px rgba(0, 0, 0, 0.08),
+        -3px -3px 10px rgba(255, 255, 255, 1) !important;
+}
+.neomorphic-menu-item:active {
+    transform: scale(0.97) !important;
+    box-shadow:
+        2px 4px 10px rgba(0, 0, 0, 0.06),
+        -2px -2px 6px rgba(255, 255, 255, 0.8) !important;
 }
 /* Truncate text utility */
 .truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
@@ -154,10 +144,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0.15), 0 0 30px rgba(239,68,68,0.7); }
 }
 @keyframes bounceInUp {
-    0% { opacity: 0; transform: translateY(50px) scale(0.9); }
-    60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
-    80% { transform: translateY(2px) scale(0.99); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 .scroll-bounce-hidden {
     opacity: 0;
@@ -165,7 +153,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 }
 .scroll-bounce-visible {
     visibility: visible;
-    animation: bounceInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    animation: bounceInUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes cfSlideDown {
     from { opacity: 0; transform: translateY(-10px); }
@@ -540,7 +528,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <!-- 🌟 THE NEW ULTRA-MODERN PLAN SELECTION MODAL 🌟 -->
         <div id="planSelectModal" class="absolute inset-0 z-[1000] overflow-hidden rounded-[inherit]">
             <!-- ถอด flex ออก เปลี่ยนเป็น absolute เต็มจอ -->
-            <div id="planSelectCardWrapper" class="glass-modal absolute inset-0 w-full h-full overflow-hidden transition-all duration-500 opacity-100 translate-y-0">
+            <div id="planSelectCardWrapper" class="glass-modal absolute inset-0 w-full h-full overflow-hidden opacity-100 translate-y-0" style="transition:transform 0.38s cubic-bezier(0.16,1,0.3,1),opacity 0.38s cubic-bezier(0.16,1,0.3,1);will-change:transform,opacity;">
                 
                 <div class="blob blob-1"></div><div class="blob blob-2"></div>
                 <div class="blob blob-3 absolute pointer-events-none"></div>

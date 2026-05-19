@@ -660,7 +660,7 @@ function closePlanModal() {
     setTimeout(() => {
         const modal = document.getElementById('planSelectModal');
         if (modal) modal.classList.add('hidden');
-    }, 400); 
+    }, 420);
 }
 
 // Build the raw HTML for one full set of plan cards (no animation classes).
