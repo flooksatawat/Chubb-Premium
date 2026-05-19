@@ -161,25 +161,30 @@ async function shareToLine() {
     window.open('https://line.me/R/msg/text/?' + encodeURIComponent(text), '_blank');
 }
 
-function shareToMessenger() {
+async function shareToMessenger() {
     _closeResultModals();
+    const text = _getShareText();
 
-    // LIFF: deep link fb-messenger:// ถูกบล็อก → fallback ไปคัดลอก
-    if (window.LIFF_READY && window.IS_IN_LIFF) {
-        console.log('[LIFF] shareToMessenger fallback to copy');
-        Swal.fire({
-            icon: 'info',
-            title: 'Messenger ไม่รองรับใน LINE',
-            text: 'คัดลอกข้อความให้แทน — แล้ววางใน Messenger ได้เลย',
-            timer: 2200,
-            showConfirmButton: false
-        });
-        setTimeout(() => copyShareData(), 800);
-        return;
+    // Web Share API (Android Chrome / iOS Safari) — วิธีที่ดีที่สุด
+    if (navigator.share) {
+        try {
+            await navigator.share({ text });
+            return;
+        } catch (e) {
+            if (e.name === 'AbortError') return; // ผู้ใช้กดยกเลิก
+        }
     }
 
-    // Browser ปกติ: คงโค้ดเดิม
-    window.open('fb-messenger://share/?link=' + encodeURIComponent(_getShareText()), '_blank');
+    // Fallback: คัดลอกแล้วแจ้ง
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความใน Messenger ได้เลย', timer: 1800, showConfirmButton: false });
 }
 
 async function copyShareData() {
