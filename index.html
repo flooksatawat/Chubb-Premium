@@ -1715,24 +1715,24 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         location.reload();
     };
 
-    // Run after LIFF is ready
+    // Run after LIFF is ready — บังคับ login เสมอ ไม่มี fallback
     window._liffReady.then(() => {
         if (typeof liff === 'undefined' || !window.LIFF_READY) {
-            // LIFF ไม่พร้อม (เปิดนอก LINE) — ข้ามการ login แสดงแอปเลย
-            showApp();
+            // LIFF SDK โหลดไม่ได้ — แสดงปุ่ม login ไว้รอ reload
+            if (overlay) overlay.style.display = 'flex';
             return;
         }
 
         if (!liff.isLoggedIn()) {
-            // ยังไม่ได้ login — แสดง overlay รอกด
-            if (overlay) overlay.style.display = 'flex';
+            // ไม่ได้ login → redirect LINE Login ทันที
+            liff.login({ redirectUri: location.href });
         } else {
             // Login แล้ว — ดึง profile แล้วเปิดแอป
-            showApp();
             liff.getProfile().then(profile => {
                 window.lineProfile = profile;
                 showProfile(profile);
-            }).catch(() => {});
+                showApp();
+            }).catch(() => showApp());
         }
     });
 })();
