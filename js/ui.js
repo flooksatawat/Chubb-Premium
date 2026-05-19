@@ -2862,16 +2862,12 @@ function generatePolicyTableData() {
     // ลดขนาด badge — padding/font/radius เล็กลง
     const _badgeMobile = 'flex-1 py-0.5 px-1 rounded-md text-[10px] font-bold text-center whitespace-nowrap leading-tight';
     const _badgeDesktop = 'flex-1 py-1 px-2 rounded-lg text-[12px] font-bold text-center whitespace-nowrap leading-tight';
-    // ปุ่ม "แชร์" — มี text บน desktop, icon-only บน mobile แคบ
-    const _shareBtnMobile = `<button onclick="exportTableToPDF('preview')" aria-label="แชร์" title="แชร์" class="flex-shrink-0 inline-flex items-center justify-center bg-red-500 active:bg-red-600 text-white rounded-md shadow-sm active:scale-95 transition-transform" style="height:22px;min-width:28px;padding:0 7px;"><i class="fas fa-share-alt text-[11px]"></i></button>`;
-    const _shareBtnDesktop = `<button onclick="exportTableToPDF('preview')" aria-label="แชร์" title="แชร์" class="flex-shrink-0 inline-flex items-center justify-center gap-1 bg-red-500 active:bg-red-600 hover:bg-red-600 text-white rounded-lg shadow-sm active:scale-95 transition-transform" style="height:28px;padding:0 12px;font-size:12px;font-weight:700;"><i class="fas fa-share-alt text-[12px]"></i><span>แชร์</span></button>`;
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-0.5 py-0.5 w-full">
             <div class="flex gap-1 w-full items-stretch">
                 <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
-                ${_shareBtnMobile}
             </div>
             <div class="flex gap-1 w-full">
                 <span class="${_badgeMobile} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
@@ -2882,7 +2878,6 @@ function generatePolicyTableData() {
             <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
-            ${_shareBtnDesktop}
             <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
             <span class="${_badgeDesktop} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุนประกัน: ${sumDisplay}</span>
         </div>`;
