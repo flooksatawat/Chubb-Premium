@@ -4938,3 +4938,13 @@ window.enterTableScreenshotMode = function() {
     };
     document.getElementById('_ssExitBtn').addEventListener('click', exit);
 };
+
+// ── เปิดหน้าเว็บใน Safari เพื่อดาวน์โหลด PDF / พิมพ์ ──
+window.openInExternalBrowser = function() {
+    const url = window.location.href;
+    if (typeof liff !== 'undefined' && liff.openWindow) {
+        liff.openWindow({ url: url, external: true });
+    } else {
+        window.open(url, '_blank');
+    }
+};

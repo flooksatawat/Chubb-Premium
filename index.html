@@ -1473,21 +1473,26 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             </div>
         </div>
         <!-- Footer actions -->
-        <div style="background:#1e293b;border-top:1px solid #334155;padding:12px 16px;display:flex;gap:10px;flex-shrink:0;padding-bottom:max(12px,env(safe-area-inset-bottom));">
-            <a id="pdfSaveLink" href="#" download=""
-               style="flex:1;background:#dc2626;color:white;padding:13px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;-webkit-tap-highlight-color:transparent;"
-               onclick="handlePdfSaveLinkClick(event)">
-                <i class="fas fa-image"></i> บันทึกรูปภาพ
-            </a>
-            <button id="pdfShareBtn" onclick="handlePdfShare()"
-               style="flex:1;background:#059669;color:white;padding:13px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;">
-                <i class="fas fa-share-nodes"></i> แชร์
+        <div style="background:#1e293b;border-top:1px solid #334155;padding:10px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom));">
+            <div style="display:flex;gap:10px;">
+                <a id="pdfSaveLink" href="#" download=""
+                   style="flex:1;background:#dc2626;color:white;padding:12px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;-webkit-tap-highlight-color:transparent;"
+                   onclick="handlePdfSaveLinkClick(event)">
+                    <i class="fas fa-image"></i> บันทึกรูปภาพ
+                </a>
+                <button id="pdfShareBtn" onclick="handlePdfShare()"
+                   style="flex:1;background:#059669;color:white;padding:12px 8px;border-radius:14px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;">
+                    <i class="fas fa-share-nodes"></i> แชร์
+                </button>
+            </div>
+            <button onclick="openInExternalBrowser()" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:14px;color:white;padding:11px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+                <i class="fas fa-print" style="color:#fbbf24;"></i> เปิดใน Safari เพื่อบันทึก PDF / พิมพ์
             </button>
         </div>
     </div>
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
-    <script src="js/ui.js?v=42"></script>
+    <script src="js/ui.js?v=43"></script>
     <script src="js/share.js?v=6"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
