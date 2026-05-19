@@ -1838,39 +1838,42 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    /* ── Pending polling ── */
-    let _pollTimer, _countTimer, _pollCount = 15;
+    /* ── เปิด Chrome พร้อม auth params ── */
+    function openInChrome() {
+        const p = getLS(CACHE_KEY);
+        const a = getLS(AUTH_CACHE_KEY);
+        if (!p || !a) { openApp(); return; }
+        const base = location.origin + location.pathname;
+        const url  = base + '?_lp=' + encodeURIComponent(JSON.stringify(p)) + '&_la=' + encodeURIComponent(JSON.stringify(a));
+        if (window.IS_IN_LIFF && typeof liff !== 'undefined' && liff.openWindow) {
+            liff.openWindow({ url, external: true });
+        } else {
+            openApp();
+        }
+    }
+
+    /* ── Pending polling (ทุก 10 วิ) ── */
+    let _pollTimer;
 
     function startPendingPolling() {
-        clearInterval(_pollTimer); clearInterval(_countTimer);
-        _pollCount = 15;
-        $('pendingCountdown').textContent = `ตรวจสอบใน ${_pollCount} วิ...`;
-        _countTimer = setInterval(() => {
-            _pollCount--;
-            $('pendingCountdown').textContent = _pollCount > 0
-                ? `ตรวจสอบใน ${_pollCount} วิ...`
-                : 'กำลังตรวจสอบ...';
-            if (_pollCount <= 0) { clearInterval(_countTimer); }
-        }, 1000);
-        _pollTimer = setInterval(() => checkPendingNow(), 15000);
+        clearInterval(_pollTimer);
+        _pollTimer = setInterval(() => checkPendingNow(), 10000);
     }
 
     window.checkPendingNow = async function () {
-        clearInterval(_pollTimer); clearInterval(_countTimer);
-        $('pendingCountdown').textContent = 'กำลังตรวจสอบ...';
+        clearInterval(_pollTimer);
         const profile = getLS(CACHE_KEY);
         if (!profile) { location.reload(); return; }
         const d = await checkAuth(profile.userId);
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
-            openApp();
+            openInChrome();
         } else if (d.status === 'inactive') {
-            const profile = getLS(CACHE_KEY);
-            if (profile) $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
+            const p = getLS(CACHE_KEY);
+            if (p) $('authRequestName').textContent = `สวัสดี ${p.displayName} 👋`;
             setState('request');
         } else {
-            _pollCount = 15;
             startPendingPolling();
         }
     };
