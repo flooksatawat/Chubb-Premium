@@ -4932,7 +4932,7 @@ window.navTableImageView = async function() {
         temp.appendChild(tblClone);
         document.body.appendChild(temp);
 
-        const scale = 2;
+        const scale = 3;
         const pageH_px = A4_H * scale;
         const fullCanvas = await html2canvas(temp, { scale, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false, width: A4_W });
         temp.remove();
