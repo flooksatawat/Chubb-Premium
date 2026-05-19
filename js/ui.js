@@ -4476,36 +4476,32 @@ window.navShareAction = async function() {
     </div>`;
     document.body.appendChild(loadingEl);
 
-    // ── สร้างภาพโดยใช้ pipeline เดิม (hidden viewer) ──
+    // ── สร้างภาพผ่าน pipeline เดิม — เปิด viewer จริงแต่ loading overlay บัง ──
     try {
         _pdfViewerImageBlob = null;
         _pdfViewerImageBlobUrl = null;
 
-        // render PDF viewer แบบซ่อน เพื่อให้ _precomputeImageBlob ทำงาน
-        const viewerModal = document.getElementById('pdfViewerModal');
-        if (viewerModal) viewerModal.style.visibility = 'hidden';
-
+        // เปิด viewer ปกติ (ต้องมี layout จริงเพื่อให้ clientWidth ถูกต้อง)
+        // loadingEl z-index 99999 บัง viewer ไว้ — user ไม่เห็น viewer
         await exportTableToPDF('preview');
 
-        // รอ image blob สูงสุด 15 วินาที
+        // รอ image blob สูงสุด 20 วินาที
         await new Promise((resolve, reject) => {
             const t0 = Date.now();
             const check = setInterval(() => {
                 if (_pdfViewerImageBlob) { clearInterval(check); resolve(); return; }
-                if (Date.now() - t0 > 15000) { clearInterval(check); reject(new Error('timeout')); }
-            }, 150);
+                if (Date.now() - t0 > 20000) { clearInterval(check); reject(new Error('timeout')); }
+            }, 200);
         });
 
-        // ซ่อน viewer กลับ
-        if (viewerModal) {
-            viewerModal.style.visibility = '';
-            viewerModal.classList.add('hidden');
-            viewerModal.style.display = '';
-        }
+        // ซ่อน viewer หลัง blob พร้อม
+        const viewerModal = document.getElementById('pdfViewerModal');
+        if (viewerModal) { viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
+
     } catch (err) {
         loadingEl.remove();
         const viewerModal = document.getElementById('pdfViewerModal');
-        if (viewerModal) { viewerModal.style.visibility = ''; viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
+        if (viewerModal) { viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
         showCustomError('ไม่สามารถเตรียมภาพได้ กรุณาลองใหม่');
         return;
     }
