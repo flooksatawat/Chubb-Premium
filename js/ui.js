@@ -4464,6 +4464,9 @@ async function exportTableToPDF(actionType = 'preview') {
 // 🌟 ONLOAD INITIALIZATION (เชื่อมระบบเดิมทั้งหมด + เปิดหน้าแรก) 🌟
 // ============================================================================
 window.onload = async () => {
+    // แสดงเมนู 11 แผนก่อนเลย ไม่รอโหลด
+    if (typeof openPlanModal === 'function') openPlanModal();
+
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
     const oldCompare = document.getElementById('comparePanelView');
     if (oldCompare) oldCompare.remove();
@@ -4505,7 +4508,6 @@ window.onload = async () => {
 
     if (typeof setGender === 'function') setGender('male');
     fitHeaderTitle();
-    if (typeof openPlanModal === 'function') openPlanModal();
 };
 
 document.addEventListener('input', function(e) {
