@@ -4476,32 +4476,29 @@ window.navShareAction = async function() {
     </div>`;
     document.body.appendChild(loadingEl);
 
-    // ── สร้างภาพผ่าน pipeline เดิม — เปิด viewer จริงแต่ loading overlay บัง ──
+    // ── จับภาพ tableView โดยตรงด้วย html2canvas (เร็วกว่า PDF pipeline มาก) ──
+    let blob = null;
     try {
-        _pdfViewerImageBlob = null;
-        _pdfViewerImageBlobUrl = null;
+        const target = document.getElementById('pdfTableTarget') || document.getElementById('tableView');
+        if (!target || typeof html2canvas !== 'function') throw new Error('html2canvas not ready');
 
-        // เปิด viewer ปกติ (ต้องมี layout จริงเพื่อให้ clientWidth ถูกต้อง)
-        // loadingEl z-index 99999 บัง viewer ไว้ — user ไม่เห็น viewer
-        await exportTableToPDF('preview');
-
-        // รอ image blob สูงสุด 20 วินาที
-        await new Promise((resolve, reject) => {
-            const t0 = Date.now();
-            const check = setInterval(() => {
-                if (_pdfViewerImageBlob) { clearInterval(check); resolve(); return; }
-                if (Date.now() - t0 > 20000) { clearInterval(check); reject(new Error('timeout')); }
-            }, 200);
+        const canvas = await html2canvas(target, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: -window.scrollY,
+            windowWidth: target.scrollWidth,
+            windowHeight: target.scrollHeight,
+            width: target.scrollWidth,
+            height: target.scrollHeight,
         });
 
-        // ซ่อน viewer หลัง blob พร้อม
-        const viewerModal = document.getElementById('pdfViewerModal');
-        if (viewerModal) { viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
-
+        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('toBlob failed');
     } catch (err) {
         loadingEl.remove();
-        const viewerModal = document.getElementById('pdfViewerModal');
-        if (viewerModal) { viewerModal.classList.add('hidden'); viewerModal.style.display = ''; }
         showCustomError('ไม่สามารถเตรียมภาพได้ กรุณาลองใหม่');
         return;
     }
@@ -4509,7 +4506,7 @@ window.navShareAction = async function() {
     loadingEl.remove();
 
     // ── แสดง share sheet พร้อมภาพพร้อม ──
-    const blob = _pdfViewerImageBlob;
+    // blob มาจาก html2canvas แล้ว (กำหนดไว้ข้างบน)
     const inLine = isInLineApp();
     const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'insurance');
     const imgName = `${planAbbr}_ตารางมูลค่า.png`;
