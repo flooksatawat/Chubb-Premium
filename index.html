@@ -1850,7 +1850,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             showProfile(profile);
             if (window.IS_IN_LIFF) {
                 setState('loading', 'กำลังเปิดใน Chrome...');
-                liff.openWindow({ url: location.href, external: true });
+                openInChrome();
             } else {
                 openApp();
             }
@@ -1880,12 +1880,27 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         setState('pending');
     };
 
+    /* ── สร้าง Chrome URL พร้อม auth params ── */
+    function chromeUrl() {
+        const p = getLS(CACHE_KEY);
+        const a = getLS(AUTH_CACHE_KEY);
+        if (!p || !a) return location.href;
+        const base = location.origin + location.pathname;
+        return base + '?_lp=' + encodeURIComponent(JSON.stringify(p)) + '&_la=' + encodeURIComponent(JSON.stringify(a));
+    }
+
+    function openInChrome() {
+        if (typeof liff !== 'undefined' && liff.openWindow) {
+            liff.openWindow({ url: chromeUrl(), external: true });
+        }
+    }
+
     /* ── Open External Browser ── */
     window.doOpenExternal = function () {
         setLS(EXT_SHOWN_KEY, true);
         $('openExternalPrompt').style.display = 'none';
         if (typeof liff !== 'undefined' && liff.openWindow) {
-            liff.openWindow({ url: location.href, external: true });
+            liff.openWindow({ url: chromeUrl(), external: true });
         }
     };
     window.dismissExternal = function () {
@@ -1904,6 +1919,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
     /* ── Main flow ── */
     async function run() {
+        /* 0. รับ auth จาก URL params (กรณี redirect จาก LINE in-app browser) */
+        const urlParams = new URLSearchParams(location.search);
+        const paramProfile = urlParams.get('_lp');
+        const paramAuth    = urlParams.get('_la');
+        if (paramProfile && paramAuth) {
+            try {
+                const p = JSON.parse(decodeURIComponent(paramProfile));
+                const a = JSON.parse(decodeURIComponent(paramAuth));
+                setLS(CACHE_KEY, p);
+                setLS(AUTH_CACHE_KEY, a);
+            } catch {}
+            /* ลบ params ออกจาก URL โดยไม่ reload */
+            history.replaceState(null, '', location.pathname);
+        }
+
         /* 1. Cache authorized → เปิดแอปทันที */
         const cachedProfile = getLS(CACHE_KEY);
         const cachedAuth    = getLS(AUTH_CACHE_KEY);
@@ -1951,7 +1981,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             /* อนุมัติแล้ว → เปิด Chrome (ครั้งแรก) หรือเข้าแอปตรง (อยู่ใน Chrome แล้ว) */
             if (window.IS_IN_LIFF) {
                 setState('loading', 'กำลังเปิดใน Chrome...');
-                liff.openWindow({ url: location.href, external: true });
+                openInChrome();
             } else {
                 openApp();
             }
