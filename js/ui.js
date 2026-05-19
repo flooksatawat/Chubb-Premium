@@ -2091,7 +2091,6 @@ const _MODAL_ACTION_HTML = `
     <button onclick="openInstallmentModal()" class="${_PILL_BTN}"><i class="fas fa-credit-card text-lg text-purple-500"></i><span class="text-slate-700 font-medium">ตัวเลือกชำระ</span></button>
     <button onclick="openBankModal()" class="${_PILL_BTN}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
     <button onclick="openEsubModal()" class="${_PILL_BTN}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
-    <button onclick="closePopup('resultModal'); setTimeout(() => switchView('main'), 200);" class="${_PILL_BTN}"><i class="fas fa-calculator text-lg text-slate-500"></i><span class="text-slate-700 font-medium">คำนวณด้วยตนเอง</span></button>
 </div>`;
 
 function openUniversalModal(d) {
