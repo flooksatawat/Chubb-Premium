@@ -1853,7 +1853,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         const btn = $('authRequestBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'กำลังส่งคำขอ...'; }
         const profile = getLS(CACHE_KEY) || window.lineProfile;
-        if (!profile) { location.reload(); return; }
+        if (!profile) { alert('DEBUG: ไม่มี profile — กำลัง reload'); location.reload(); return; }
+        alert('DEBUG userId: ' + profile.userId + '\nname: ' + profile.displayName);
         const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({
             action: 'request',
             userId: profile.userId,
