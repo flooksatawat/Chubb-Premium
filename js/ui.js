@@ -3088,12 +3088,12 @@ function generatePolicyTableData() {
     // --- 5. Summary Text ---
     if (foundBreakeven) {
         document.getElementById('breakevenSummary').innerHTML = `
-            <div class="bg-emerald-100 border border-emerald-300 rounded-xl py-3 px-4 m-3 text-[14px] text-emerald-800 font-bold shadow-sm flex items-center justify-center gap-2">
+            <div class="bg-emerald-100 border border-emerald-300 rounded-xl py-3 px-4 m-3 text-[11px] text-emerald-800 font-bold shadow-sm flex items-center justify-center gap-2">
                 <i class="fas fa-bullseye text-emerald-600 text-lg"></i>
                 <span>จุดคุ้มทุน : อายุ <span class="text-emerald-800">${beAge}</span> ปี / <span class="text-emerald-800">${beAmount.toLocaleString()}</span> บาท</span>
             </div>`;
     } else {
-        document.getElementById('breakevenSummary').innerHTML = `<div class="bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 m-3 text-[13px] text-slate-500 font-bold flex items-center justify-center gap-2"><i class="fas fa-info-circle text-slate-400 text-lg"></i> ไม่พบจุดคุ้มทุนก่อนครบกำหนดสัญญา</div>`;
+        document.getElementById('breakevenSummary').innerHTML = `<div class="bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 m-3 text-[11px] text-slate-500 font-bold flex items-center justify-center gap-2"><i class="fas fa-info-circle text-slate-400 text-lg"></i> ไม่พบจุดคุ้มทุนก่อนครบกำหนดสัญญา</div>`;
     }
     if (isBreakevenActive && foundBreakeven) {
         setTimeout(() => document.getElementById('breakevenRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
