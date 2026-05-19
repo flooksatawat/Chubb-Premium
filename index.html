@@ -245,13 +245,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <!-- State: pending (รออนุมัติ) -->
     <div id="authStatePending" style="display:none;flex-direction:column;align-items:center;gap:14px;text-align:center;max-width:280px;">
         <div style="font-size:40px;">⏳</div>
-        <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;">รอการอนุมัติ</p>
-        <p style="font-size:13px;color:rgba(255,255,255,0.8);font-family:Kanit,sans-serif;line-height:1.8;">ส่งคำขอแล้ว รอ admin อนุมัติ<br>ระบบจะตรวจสอบอัตโนมัติทุก 15 วิ</p>
-        <div style="display:flex;align-items:center;gap:6px;">
-            <svg viewBox="0 0 24 24" width="14" height="14" id="pendingSpinner" style="animation:spin 1.5s linear infinite"><path fill="rgba(255,255,255,0.7)" d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg>
-            <span id="pendingCountdown" style="font-size:11px;color:rgba(255,255,255,0.6);font-family:Kanit,sans-serif;">ตรวจสอบใน 15 วิ...</span>
-        </div>
-        <button onclick="checkPendingNow()" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);padding:9px 22px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:Kanit,sans-serif;">ตรวจสอบเดี๋ยวนี้</button>
+        <p style="font-size:16px;font-weight:700;color:white;font-family:Kanit,sans-serif;">รอสักครู่นะครับ</p>
     </div>
 
     <!-- State: denied -->
@@ -1891,7 +1885,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     /* ── Request access ── */
     window.requestAccess = async function () {
         const btn = $('authRequestBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'กำลังส่งคำขอ...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'รอสักครู่นะครับ...'; }
         const profile = getLS(CACHE_KEY) || window.lineProfile;
         if (!profile) {
             if (btn) btn.textContent = 'ไม่พบข้อมูล LINE กรุณารีเฟรช';
