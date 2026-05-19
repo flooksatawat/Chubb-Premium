@@ -2083,27 +2083,16 @@ function _injectModalToRightPane(modalId) {
     canvas.appendChild(wrapper);
 }
 
+const _PILL_BTN = `w-full flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] active:scale-[0.98] transition-all`;
 const _MODAL_ACTION_HTML = `
-<div class="grid grid-cols-2 gap-2.5 mb-2.5">
-    <button onclick="openTableFromModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(168,85,247,0.35)] active:scale-[0.97] transition-all">
-        <i class="fas fa-table-list text-[18px]"></i>ตารางมูลค่า
-    </button>
-    <button onclick="openInstallmentModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(99,102,241,0.35)] active:scale-[0.97] transition-all">
-        <i class="fas fa-credit-card text-[18px]"></i>ตัวเลือกชำระ
-    </button>
-    <button onclick="openBankModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(251,146,60,0.35)] active:scale-[0.97] transition-all">
-        <i class="fas fa-building-columns text-[18px]"></i>บัญชีโอนเงิน
-    </button>
-    <button onclick="openGenericShareModal('premium')" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(37,99,235,0.35)] active:scale-[0.97] transition-all">
-        <i class="fas fa-coins text-[18px]"></i>แชร์เบี้ย
-    </button>
-</div>
-<button onclick="openGenericShareModal('all')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all mb-2.5">
-    <i class="fas fa-share-nodes text-[18px]"></i>แชร์สรุปทั้งหมด
-</button>
-<button onclick="openEsubModal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(244,63,94,0.35)] active:scale-[0.97] transition-all">
-    <i class="fas fa-file-signature text-[18px]"></i>E-sub &amp; QNI
-</button>`;
+<div class="flex flex-col gap-3 mt-4">
+    <button onclick="openTableFromModal()" class="${_PILL_BTN}"><i class="fas fa-table text-lg text-blue-500"></i><span class="text-slate-700 font-medium">ดูตารางผลประโยชน์</span></button>
+    <button onclick="openGenericShareModal('summary')" class="${_PILL_BTN}"><i class="fas fa-share-nodes text-lg text-[#00A651]"></i><span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span></button>
+    <button onclick="openInstallmentModal()" class="${_PILL_BTN}"><i class="fas fa-credit-card text-lg text-purple-500"></i><span class="text-slate-700 font-medium">ตัวเลือกชำระ</span></button>
+    <button onclick="openBankModal()" class="${_PILL_BTN}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
+    <button onclick="openEsubModal()" class="${_PILL_BTN}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
+    <button onclick="closePopup('resultModal'); setTimeout(() => switchView('main'), 200);" class="${_PILL_BTN}"><i class="fas fa-calculator text-lg text-slate-500"></i><span class="text-slate-700 font-medium">คำนวณด้วยตนเอง</span></button>
+</div>`;
 
 function openUniversalModal(d) {
     if(!d) return;
