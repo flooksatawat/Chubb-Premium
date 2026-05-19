@@ -4678,21 +4678,32 @@ function _showTableImageViewer(blob, imgName) {
         _showQuickToast('กดค้างที่ภาพ → เลือก "บันทึกภาพ"');
     }
 
-    async function _uploadToTelegraph(imageBlob, name) {
-        const fd = new FormData();
-        fd.append('file', new File([imageBlob], name, { type: 'image/png' }));
-        const res = await fetch('https://telegra.ph/upload', { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('upload failed');
-        const json = await res.json();
-        if (!Array.isArray(json) || !json[0] || !json[0].src) throw new Error('bad response');
-        return 'https://telegra.ph' + json[0].src;
+    async function _tryUploadImage(imageBlob, name) {
+        // ลอง catbox.moe ก่อน (CORS OK, anonymous)
+        try {
+            const fd = new FormData();
+            fd.append('reqtype', 'fileupload');
+            fd.append('fileToUpload', new File([imageBlob], name, { type: 'image/png' }));
+            const res = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: fd });
+            const url = (await res.text()).trim();
+            if (url.startsWith('https://')) return url;
+        } catch (_) {}
+        // ลอง 0x0.st
+        try {
+            const fd = new FormData();
+            fd.append('file', new File([imageBlob], name, { type: 'image/png' }));
+            const res = await fetch('https://0x0.st', { method: 'POST', body: fd });
+            const url = (await res.text()).trim();
+            if (url.startsWith('https://')) return url;
+        } catch (_) {}
+        return null;
     }
 
     async function _doLineShare() {
         const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
 
-        // Android LINE / browser ปกติ — navigator.share รองรับไฟล์
-        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+        // ลอง navigator.share ก่อน (Android LINE + iOS Safari รองรับแชร์ไฟล์)
+        if (imgFile && navigator.share) {
             try {
                 await navigator.share({ files: [imgFile], title: imgName });
                 _showQuickToast('แชร์สำเร็จ');
@@ -4705,20 +4716,19 @@ function _showTableImageViewer(blob, imgName) {
         // iOS LIFF — อัปโหลดรูปแล้วส่ง image message ผ่าน shareTargetPicker
         if (hasSharePicker) {
             _showQuickToast('กำลังเตรียมภาพ...');
-            try {
-                const imageUrl = await _uploadToTelegraph(blob, imgName);
-                await liff.shareTargetPicker([{
-                    type: 'image',
-                    originalContentUrl: imageUrl,
-                    previewImageUrl: imageUrl,
-                }]);
-                _showQuickToast('ส่งรูปสำเร็จ');
-                return;
-            } catch (_) {}
-        }
-
-        // fallback: ส่งข้อความแทน
-        if (hasSharePicker) {
+            const imageUrl = await _tryUploadImage(blob, imgName);
+            if (imageUrl) {
+                try {
+                    await liff.shareTargetPicker([{
+                        type: 'image',
+                        originalContentUrl: imageUrl,
+                        previewImageUrl: imageUrl,
+                    }]);
+                    _showQuickToast('ส่งรูปสำเร็จ');
+                    return;
+                } catch (_) {}
+            }
+            // upload ล้มเหลว — ส่งข้อความสรุปแทน
             try {
                 const summary = typeof generateShortShareText === 'function' ? generateShortShareText() : imgName;
                 await liff.shareTargetPicker([{ type: 'text', text: summary }]);
@@ -4727,7 +4737,21 @@ function _showTableImageViewer(blob, imgName) {
             } catch (_) {}
         }
 
-        // fallback สุดท้าย
+        // fallback: บันทึกรูปลงเครื่อง แล้วเปิด LINE ให้เลย
+        if (imgFile) {
+            try {
+                const u = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = u; a.download = imgName; a.click();
+                setTimeout(() => URL.revokeObjectURL(u), 5000);
+                setTimeout(() => {
+                    window.open('https://line.me/R/nv/chat', '_blank');
+                }, 800);
+                _showQuickToast('รูปถูกบันทึกแล้ว — เปิด LINE เพื่อแนบรูปส่ง');
+                return;
+            } catch (_) {}
+        }
+
         _showQuickToast('กดค้างที่ภาพ → บันทึก → เปิดแชท LINE แนบรูป');
     }
 
