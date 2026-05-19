@@ -1715,24 +1715,48 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         location.reload();
     };
 
-    // Run after LIFF is ready — บังคับ login เสมอ ไม่มี fallback
+    const CACHE_KEY = 'line_profile_cache';
+
+    function loadCachedProfile() {
+        try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; }
+    }
+    function saveProfileCache(p) {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(p)); } catch {}
+    }
+    function clearProfileCache() {
+        try { localStorage.removeItem(CACHE_KEY); } catch {}
+    }
+
+    // เปิดแอปทันทีถ้ามี cache (ไม่รอ LIFF)
+    const cached = loadCachedProfile();
+    if (cached) {
+        window.lineProfile = cached;
+        showProfile(cached);
+        showApp();
+    }
+
+    // Run after LIFF is ready
     window._liffReady.then(() => {
         if (typeof liff === 'undefined' || !window.LIFF_READY) {
-            // LIFF SDK โหลดไม่ได้ — แสดงปุ่ม login ไว้รอ reload
-            if (overlay) overlay.style.display = 'flex';
+            if (!cached) {
+                if (overlay) overlay.style.display = 'flex';
+            }
             return;
         }
 
         if (!liff.isLoggedIn()) {
-            // ไม่ได้ login → redirect LINE Login ทันที
+            // session หมด — ล้าง cache แล้ว login ใหม่
+            clearProfileCache();
+            if (cached) { overlay.classList.remove('fade-out'); overlay.style.display = 'flex'; }
             liff.login({ redirectUri: location.href });
         } else {
-            // Login แล้ว — ดึง profile แล้วเปิดแอป
+            // login อยู่ — refresh profile แล้วเก็บ cache
             liff.getProfile().then(profile => {
                 window.lineProfile = profile;
+                saveProfileCache(profile);
                 showProfile(profile);
-                showApp();
-            }).catch(() => showApp());
+                if (!cached) showApp();
+            }).catch(() => { if (!cached) showApp(); });
         }
     });
 })();
