@@ -3398,70 +3398,84 @@ function handlePdfSaveLinkClick(e) {
 
     // ===== LIFF: บันทึกลงเครื่อง โดยไม่หลุดไปบราวเซอร์ภายนอก =====
     // ลำดับ:
-    //   1) Service Worker download — สร้าง HTTPS URL + Content-Disposition: attachment
-    //      → WebView ส่งให้ Android Download Manager (ไม่ผ่าน LINE intent)
+    //   1) window.print() ผ่าน iframe — Android Print Dialog มี "บันทึกเป็น PDF" → Downloads
     //   2) Web Share API — OS share sheet → Save to Files
     //   3) Fallback toast (shareTargetPicker ส่งข้อความสรุปเข้าแชท)
 
-    // 1) ลอง Service Worker ก่อน — รักษา user gesture: เรียก <a>.click() ทันทีหลัง SW ตอบ
-    _trySaveViaSW(filename).then(ok => {
-        if (ok) { _showQuickToast('กำลังบันทึก...'); return; }
-        _trySaveViaShareOrFallback(filename);
-    }).catch(err => {
-        console.warn('[Save] SW path threw:', err);
-        _trySaveViaShareOrFallback(filename);
-    });
+    if (_trySaveViaPrint()) {
+        _showQuickToast('เลือก "บันทึกเป็น PDF" ในหน้าต่างที่เปิดขึ้น');
+        return;
+    }
+    _trySaveViaShareOrFallback(filename);
 }
 
-async function _trySaveViaSW(filename) {
-    if (!('serviceWorker' in navigator)) return false;
+// ใช้ Print API → Android Print Dialog มีตัวเลือก "บันทึกเป็น PDF" บันทึกลง Downloads จริง
+// (Print Dialog เป็น system overlay ของ Android — ไม่ใช่บราวเซอร์ภายนอก)
+function _trySaveViaPrint() {
+    if (typeof window.print !== 'function') return false;
+    const canvasArea = document.getElementById('pdfViewerCanvas');
+    if (!canvasArea) return false;
+    const canvases = canvasArea.querySelectorAll('canvas');
+    if (canvases.length === 0) return false;
 
-    // ต้องรอให้ SW claim หน้านี้ก่อน — ไม่งั้น fetch ของ <a download> ไม่ผ่าน SW
-    // (controller จะ null จนกว่า activate + clients.claim() เสร็จ)
-    if (!navigator.serviceWorker.controller) {
-        try { await navigator.serviceWorker.ready; } catch {}
-        if (!navigator.serviceWorker.controller) {
-            await new Promise(resolve => {
-                let done = false;
-                const finish = () => { if (done) return; done = true; resolve(); };
-                navigator.serviceWorker.addEventListener('controllerchange', finish, { once: true });
-                setTimeout(finish, 3000);
-            });
+    let imgsHtml = '';
+    canvases.forEach(c => {
+        try {
+            imgsHtml += `<img src="${c.toDataURL('image/jpeg', 0.92)}">`;
+        } catch (err) {
+            console.warn('[Print] canvas.toDataURL failed:', err);
         }
-    }
-    const controller = navigator.serviceWorker.controller;
-    if (!controller) {
-        console.warn('[Save] SW not controlling this page — cannot intercept fetch');
-        return false;
-    }
-
-    const id = 'pdf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-    const channel = new MessageChannel();
-    const stored = new Promise((resolve) => {
-        channel.port1.onmessage = (e) => resolve(!!(e.data && e.data.ok));
-        setTimeout(() => resolve(false), 3000);
     });
-    try {
-        controller.postMessage({ type: 'STORE_BLOB', id, blob: _pdfViewerBlob, filename }, [channel.port2]);
-    } catch (err) {
-        console.warn('[Save] SW postMessage failed:', err);
-        return false;
-    }
-    const ok = await stored;
-    if (!ok) return false;
+    if (!imgsHtml) return false;
 
-    const dlUrl = new URL(`sw-downloads/${id}.pdf`, location.href).toString();
+    const oldFrame = document.getElementById('_printFrame');
+    if (oldFrame) { try { oldFrame.remove(); } catch {} }
+    const iframe = document.createElement('iframe');
+    iframe.id = '_printFrame';
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;left:-9999px;top:-9999px;opacity:0;';
+    document.body.appendChild(iframe);
+
+    const safeTitle = String(_pdfViewerFilename || 'PDF').replace(/[<>&"']/g, '');
+    const html = `<!DOCTYPE html><html><head>
+        <title>${safeTitle}</title>
+        <meta charset="utf-8">
+        <style>
+            @page { margin: 8mm; size: A4; }
+            html, body { margin: 0; padding: 0; background: #fff; }
+            img { display: block; width: 100%; page-break-after: always; }
+            img:last-child { page-break-after: auto; }
+        </style>
+    </head><body>${imgsHtml}</body></html>`;
+
     try {
-        const tmp = document.createElement('a');
-        tmp.href = dlUrl;
-        tmp.download = filename;
-        tmp.rel = 'noopener';
-        document.body.appendChild(tmp);
-        tmp.click();
-        tmp.remove();
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open(); doc.write(html); doc.close();
+
+        const imgs = doc.querySelectorAll('img');
+        let loaded = 0;
+        let printed = false;
+        const doPrint = () => {
+            if (printed) return;
+            printed = true;
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.warn('[Print] print() failed:', err);
+            }
+            setTimeout(() => { try { iframe.remove(); } catch {} }, 60000);
+        };
+        const tick = () => { loaded++; if (loaded >= imgs.length) doPrint(); };
+        if (imgs.length === 0) { doPrint(); return true; }
+        imgs.forEach(img => {
+            if (img.complete && img.naturalWidth > 0) setTimeout(tick, 0);
+            else { img.addEventListener('load', tick); img.addEventListener('error', tick); }
+        });
+        setTimeout(doPrint, 3000);
         return true;
     } catch (err) {
-        console.warn('[Save] SW <a download> failed:', err);
+        console.warn('[Print] iframe setup failed:', err);
+        try { iframe.remove(); } catch {}
         return false;
     }
 }
