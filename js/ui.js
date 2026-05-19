@@ -649,6 +649,30 @@ function openPlanModal() {
     renderModernCards(modernPlansData, true);
     initSwipeToDismiss();
     initModernScrollInteractions();
+    // Stagger entrance after wrapper slide starts + scroll jump settles
+    setTimeout(_animateModalCards, 90);
+}
+
+function _animateModalCards() {
+    const container = document.getElementById('planListContainer');
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.card-3d-container'));
+    if (!cards.length) return;
+    const n = modernPlansData.length; // 11
+    // Loop mode: second copy (index n..2n-1) is the visible one after scrollTop jump
+    // Search mode: first n cards visible
+    const startIdx = isModernSearchActive ? 0 : n;
+    for (let i = 0; i < n; i++) {
+        const card = cards[startIdx + i];
+        if (!card) continue;
+        const isActive = card.querySelector('button[data-plan]')?.getAttribute('data-plan') === currentAppPlan;
+        const delay = i * 32;
+        const anim = isActive
+            ? `cardInActive 340ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`
+            : `cardIn 280ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`;
+        card.style.animation = anim;
+        card.addEventListener('animationend', () => { card.style.animation = ''; }, { once: true });
+    }
 }
 
 function closePlanModal() {
@@ -660,20 +684,19 @@ function closePlanModal() {
     setTimeout(() => {
         const modal = document.getElementById('planSelectModal');
         if (modal) modal.classList.add('hidden');
-    }, 400); 
+    }, 420);
 }
 
-// Build the raw HTML for one full set of plan cards (no animation classes).
-// onclick uses inline string so cloned copies work without re-attaching listeners.
+// Build the raw HTML for one full set of plan cards.
 function _buildOneSetHTML(dataList) {
     let html = '';
     dataList.forEach(plan => {
         const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
         const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
         if (isActive) {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="plan-card-btn w-full flex items-center gap-3.5 p-3.5 rounded-[20px] border-2 border-indigo-400 text-left" style="background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);box-shadow:0 4px 20px rgba(99,102,241,0.18);"><div class="w-12 h-12 rounded-[15px] ${plan.bg} ${plan.text} flex items-center justify-center text-[22px] shrink-0" style="box-shadow:0 2px 8px rgba(0,0,0,0.10);"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-[15px] font-extrabold text-indigo-800 leading-tight truncate">${plan.name}</p><p class="text-[12px] text-indigo-500 font-medium leading-snug mt-0.5 truncate">${plan.desc}</p></div><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(99,102,241,0.35);"><i class="fas fa-check" style="font-size:12px;color:#fff;"></i></div></button></div>`;
         } else {
-            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
+            html += `<div class="card-3d-container"><button data-plan="${plan.name}" onclick="${onClick}" class="plan-card-btn w-full flex items-center gap-3.5 p-3.5 rounded-[20px] text-left" style="background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid rgba(226,232,240,0.8);"><div class="w-12 h-12 rounded-[15px] ${plan.bg} ${plan.text} flex items-center justify-center text-[22px] shrink-0" style="box-shadow:0 2px 8px rgba(0,0,0,0.08);"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-[15px] font-bold text-slate-800 leading-tight truncate">${plan.name}</p><p class="text-[12px] text-slate-400 font-medium leading-snug mt-0.5 truncate">${plan.desc}</p></div><div style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-chevron-right" style="font-size:11px;color:#94a3b8;"></i></div></button></div>`;
         }
     });
     return html;
@@ -691,31 +714,10 @@ function renderModernCards(dataList, isInitialLoad = false) {
     }
 
     if (isModernSearchActive) {
-        // ── Search mode: single finite list with stagger entrance ──
-        let html = '';
-        dataList.forEach((plan, i) => {
-            const onClick = `if(typeof selectAppPlan==='function'){selectAppPlan('${plan.name}');}closePlanModal();`;
-            const isActive = currentAppPlan !== '' && plan.name === currentAppPlan;
-            const delay = (i + 1) * 0.04;
-            if (isActive) {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item w-full flex items-center text-left p-4 rounded-[24px] border-2 border-blue-400 bg-gradient-to-br from-blue-50/90 to-white/90 shadow-[0_8px_20px_rgba(37,99,235,0.15)] group relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full transition-transform group-hover:translate-x-full duration-[1500ms] ease-in-out"></div><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[32px] shrink-0 mr-4 ${plan.iconBorder} border transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><i class="${plan.icon} drop-shadow-md"></i></div><div class="flex-1 relative z-10 min-w-0 overflow-hidden"><h4 class="text-[17px] font-bold text-[#1e3a8a] leading-tight mb-0.5 tracking-wide break-words">${plan.name}</h4><p class="text-[14px] text-blue-600/80 font-semibold leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-md relative z-10 transform group-hover:scale-110 transition-transform shrink-0"><i class="fas fa-check text-[14px]"></i></div></button></div>`;
-            } else {
-                html += `<div class="card-3d-container scroll-bounce-hidden stagger-enter show-anim" style="animation-delay:${delay}s"><button data-plan="${plan.name}" onclick="${onClick}" class="card-3d-item neomorphic-menu-item w-full flex items-center text-left p-4 group"><div class="w-16 h-16 rounded-[20px] ${plan.bg} ${plan.text} flex items-center justify-center text-[30px] shrink-0 mr-4 border ${plan.iconBorder} transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500"><i class="${plan.icon}"></i></div><div class="flex-1 min-w-0 overflow-hidden" style="transform:translateZ(10px)"><h4 class="text-[17px] font-bold ${plan.title} leading-tight mb-0.5 transition-colors break-words">${plan.name}</h4><p class="text-[14px] ${plan.sub} font-medium leading-tight break-words">${plan.desc}</p></div><div class="w-9 h-9 rounded-full ${plan.btn} flex items-center justify-center transition-all transform group-hover:translate-x-1 shrink-0" style="transform:translateZ(10px)"><i class="fas fa-arrow-right text-[12px]"></i></div></button></div>`;
-            }
-        });
-        container.innerHTML = html;
+        // ── Search mode: single finite list, JS stagger handles animation ──
+        container.innerHTML = _buildOneSetHTML(dataList);
         container.scrollTop = 0;
         _loopOneHeight = 0;
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.remove('scroll-bounce-hidden');
-                    e.target.classList.add('scroll-bounce-visible');
-                    io.unobserve(e.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
-        container.querySelectorAll('.card-3d-container.scroll-bounce-hidden').forEach(el => io.observe(el));
 
     } else {
         // ── Loop mode: render 3 identical copies, anchor scroll to middle copy ──
@@ -4484,21 +4486,11 @@ async function exportTableToPDF(actionType = 'preview') {
             }
 
         } else if (actionType === 'messenger') {
-            if (inLine) {
-                // LIFF: Messenger deep link ใช้ไม่ได้ — แจ้ง user ให้ใช้ LINE/บันทึกแทน
-                console.log('[LIFF] messenger fallback in LIFF');
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Messenger ไม่รองรับใน LINE',
-                    text: 'กำลังเปิดตัวอย่าง — กดปุ่มแชร์ในนั้นเพื่อส่งผ่าน LINE หรือบันทึก',
-                    timer: 2400,
-                    showConfirmButton: false
-                });
-                setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
-            } else {
-                const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-                if (!shared) window.open(doc.output('bloburl'), '_blank');
-            }
+            const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
+            if (!shared) window.open(doc.output('bloburl'), '_blank');
+
+        } else if (actionType === 'modal') {
+            await _showTableShareModal(pdfBlob, pdfFile, doc, d);
         }
     } catch (error) { 
         // 4. แสดง Error ที่แท้จริงออกมาในหน้าต่าง (และ Console)
@@ -5218,3 +5210,191 @@ window.render3DDetailsAccordion = function() {
     // ตัด selector sticky header ออก — left pane มี selector อยู่แล้ว
     body.innerHTML = contentHtml;
 };
+// ── พิมพ์ตาราง / บันทึก PDF ผ่าน window.print() — ทำงานใน LIFF iOS ได้ ──
+window.printTable = function() {
+    if (!lastCalculationData) return showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
+
+    // สร้าง print area จาก header + table ปัจจุบัน
+    const existing = document.getElementById('_printArea');
+    if (existing) existing.remove();
+
+    const area = document.createElement('div');
+    area.id = '_printArea';
+    area.style.cssText = 'position:absolute;left:-9999px;top:0;background:white;';
+
+    const hdr = document.getElementById('tableHeaderTitle');
+    if (hdr) {
+        const hw = document.createElement('div');
+        hw.style.cssText = 'margin-bottom:8px;font-size:10pt;font-weight:700;';
+        hw.appendChild(hdr.cloneNode(true));
+        area.appendChild(hw);
+    }
+    const be = document.getElementById('breakevenSummary');
+    if (be && !be.classList.contains('hidden') && be.innerHTML.trim()) area.appendChild(be.cloneNode(true));
+    const sc = document.getElementById('surrenderContainer');
+    if (sc && !sc.classList.contains('hidden') && sc.innerHTML.trim()) area.appendChild(sc.cloneNode(true));
+    const tbl = document.querySelector('#pdfTableTarget table');
+    if (!tbl) return showCustomError('ไม่พบตาราง');
+    const clone = tbl.cloneNode(true);
+    clone.style.cssText = 'width:100%;border-collapse:collapse;';
+    const stickyHead = clone.querySelector('thead');
+    if (stickyHead) { stickyHead.style.position = 'relative'; stickyHead.style.top = 'auto'; }
+    area.appendChild(clone);
+    document.body.appendChild(area);
+
+    // เรียก print — iOS จะแสดง AirPrint / Save as PDF dialog
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => area.remove(), 2000);
+    }, 100);
+};
+
+// ════════════════════════════════════════════════
+//  Share Modal — ส่งภาพ / PDF / พิมพ์ / ดาวน์โหลด
+// ════════════════════════════════════════════════
+async function _showTableShareModal(pdfBlob, pdfFile, doc, d) {
+    const existing = document.getElementById('_tblShareModal');
+    if (existing) existing.remove();
+
+    // ── ชื่อไฟล์ตามรูปแบบ: แบบ_เพศ_อายุ_เบี้ย/ทุน ──
+    const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || '');
+    const genderTh = (d.gender || '').includes('ชาย') ? 'ชาย' : 'หญิง';
+    const isSum = typeof currentMode !== 'undefined' && currentMode === 'sum';
+    const rawAmt  = isSum ? (d.sum || 0) : (d.premium || 0);
+    const amtFmt  = rawAmt >= 1000000
+        ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
+        : rawAmt.toLocaleString('th-TH');
+    const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
+    const cleanName = `${planAbbr} ${genderTh} ${d.age}ปี ${amtLabel}${amtFmt}`;
+    const pdfName   = cleanName + '.pdf';
+    const jpgName   = cleanName + '.jpg';
+
+    // ── Blob URL สำหรับ preview / print ──
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    // ── Overlay ──
+    const overlay = document.createElement('div');
+    overlay.id = '_tblShareModal';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99995;display:flex;align-items:flex-end;';
+    overlay.innerHTML = `
+      <div id="_tblShareBg" style="position:absolute;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);"></div>
+      <div style="position:relative;width:100%;background:#0f172a;border-radius:24px 24px 0 0;padding:18px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom));z-index:1;">
+        <div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>
+        <div style="color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:4px;">ชื่อไฟล์</div>
+        <div style="color:white;font-size:13px;font-weight:700;margin-bottom:18px;word-break:break-all;">${cleanName}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;" id="_tblShareBtns">
+          <button data-action="image"
+            style="width:100%;background:linear-gradient(135deg,#06c755,#059c44);border:none;border-radius:16px;color:white;padding:15px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <i class="fab fa-line" style="font-size:22px;flex-shrink:0;"></i>
+            <div style="text-align:left;"><div>ส่งภาพ A4 ทาง LINE / แชร์</div><div style="font-size:11px;opacity:.75;font-weight:500;margin-top:2px;">แปลงเป็นภาพความละเอียดสูง — เปิด share sheet</div></div>
+          </button>
+          <button data-action="pdf"
+            style="width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:16px;color:white;padding:15px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <i class="fas fa-file-pdf" style="font-size:22px;flex-shrink:0;"></i>
+            <div style="text-align:left;"><div>ส่ง PDF ทาง LINE / Facebook</div><div style="font-size:11px;opacity:.75;font-weight:500;margin-top:2px;">ส่งไฟล์ PDF ผ่าน share sheet — ไม่ต้องดาวน์โหลดก่อน</div></div>
+          </button>
+          <div style="display:flex;gap:10px;">
+            <button data-action="print"
+              style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:white;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <i class="fas fa-print" style="color:#fbbf24;font-size:18px;"></i> พิมพ์
+            </button>
+            <button data-action="download"
+              style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:white;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <i class="fas fa-download" style="color:#60a5fa;font-size:18px;"></i> ดาวน์โหลด
+            </button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('_tblShareBg').addEventListener('click', () => { overlay.remove(); URL.revokeObjectURL(blobUrl); });
+
+    overlay.querySelector('[data-action="image"]').addEventListener('click', async () => {
+        overlay.remove();
+        await _shareTableAsImages(pdfBlob, jpgName);
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="pdf"]').addEventListener('click', async () => {
+        overlay.remove();
+        const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] });
+        if (canShare) {
+            try { await navigator.share({ files: [pdfFile], title: pdfName }); }
+            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(pdfBlob, pdfName); }
+        } else if (navigator.share) {
+            try { await navigator.share({ title: pdfName, url: window.location.href }); }
+            catch {}
+        } else {
+            _fallbackDownload(pdfBlob, pdfName);
+        }
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
+        overlay.remove();
+        doc.autoPrint();
+        window.open(doc.output('bloburl'), '_blank');
+        URL.revokeObjectURL(blobUrl);
+    });
+
+    overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
+        overlay.remove();
+        _fallbackDownload(pdfBlob, pdfName);
+        URL.revokeObjectURL(blobUrl);
+    });
+}
+
+function _fallbackDownload(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 500);
+}
+
+async function _shareTableAsImages(pdfBlob, jpgName) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;background:#1e293b;color:white;padding:20px 28px;border-radius:18px;font-size:13px;font-weight:700;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+    toast.innerHTML = '<i class="fas fa-spinner fa-spin" style="display:block;font-size:26px;margin-bottom:10px;color:#60a5fa;"></i>กำลังสร้างภาพ A4...';
+    document.body.appendChild(toast);
+
+    try {
+        if (typeof pdfjsLib === 'undefined') throw new Error('pdfjsLib not loaded');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const ab  = await pdfBlob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+
+        // เรนเดอร์ทุกหน้า A4 @ 3× (≈ 2481 px wide — คมชัดพอพิมพ์ได้)
+        const SCALE = 3;
+        const files = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const vp   = page.getViewport({ scale: SCALE });
+            const cv   = document.createElement('canvas');
+            cv.width   = vp.width;
+            cv.height  = vp.height;
+            await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+            const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
+            const name = pdf.numPages > 1 ? jpgName.replace('.jpg', `_หน้า${i}.jpg`) : jpgName;
+            files.push(new File([blob], name, { type: 'image/jpeg' }));
+        }
+        toast.remove();
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
+            await navigator.share({ files, title: jpgName });
+        } else if (navigator.share && navigator.canShare && navigator.canShare({ files: [files[0]] })) {
+            // ส่งทีละภาพ (บางอุปกรณ์ไม่รองรับหลายไฟล์พร้อมกัน)
+            for (const f of files) {
+                try { await navigator.share({ files: [f], title: f.name }); } catch {}
+            }
+        } else {
+            // Fallback: ดาวน์โหลดทุกภาพ
+            for (const f of files) _fallbackDownload(f, f.name);
+        }
+    } catch (err) {
+        toast.remove();
+        showCustomError('ไม่สามารถสร้างภาพได้: ' + (err.message || err));
+    }
+}

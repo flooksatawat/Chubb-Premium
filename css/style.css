@@ -2,22 +2,23 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         /* ซ่อนปุ่ม/element ที่ไม่รองรับใน LIFF (LINE in-app browser) */
         body.in-liff .hide-in-liff { display: none !important; }
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            background-color: #f4f7fb; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; min-height: 100dvh; margin: 0; color: #0f172a; 
-            overscroll-behavior-y: none; 
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f4f7fb;
+            display: flex; justify-content: center; align-items: flex-start;
+            height: 100vh; height: var(--real-vh, 100dvh); margin: 0; color: #0f172a;
+            overscroll-behavior-y: none; overflow: hidden;
         }
         
         /* ==================== APP CONTAINER ==================== */
-        .app-container { 
-            width: 100%; max-width: 440px; height: 100vh; height: 100dvh; 
-            background-color: #f8fafc; display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; margin: 0 auto; 
-            box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.15); 
+        .app-container {
+            width: 100%; max-width: 440px;
+            height: 100vh; height: var(--real-vh, 100dvh);
+            background-color: #f8fafc; display: flex; flex-direction: column;
+            position: relative; overflow: hidden; margin: 0 auto;
+            box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.15);
         }
-        @media (min-width: 700px) { .app-container { height: 95vh; border-radius: 40px; border: 6px solid #ffffff; } }
+        @media (min-width: 700px) { .app-container { height: 95vh; height: calc(var(--real-vh, 100dvh) * 0.95); border-radius: 40px; border: 6px solid #ffffff; } }
         
         .content-area { flex: 1; overflow-y: auto; padding: 0 16px; display: flex; flex-direction: column; position: relative; z-index: 10; }
         
@@ -117,10 +118,11 @@
         .command-center-layout {
             display: flex;
             width: 100%;
+            height: 100vh;
+            height: var(--real-vh, 100dvh);
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            min-height: 100dvh;
+            align-items: flex-start;
+            overflow: hidden;
         }
 
         .right-pane { display: none; }
@@ -142,8 +144,7 @@
                 align-items: stretch;
                 width: 100vw;
                 height: 100vh;
-                height: 100dvh;
-                min-height: unset;
+                height: var(--real-vh, 100dvh);
                 overflow: hidden;
             }
             .app-container {
@@ -152,7 +153,7 @@
                 max-width: 400px !important;
                 width: 400px !important;
                 height: 100vh !important;
-                height: 100dvh !important;
+                height: var(--real-vh, 100dvh) !important;
                 border-radius: 0 !important;
                 border: none !important;
                 margin: 0 !important;
@@ -515,12 +516,7 @@
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
             .policy-table-wrapper { padding-bottom: 100px !important; }
             .content-area { padding-bottom: 0; padding-top: 0 !important; }
-            /* ตัดพื้นที่ว่างขอบจอด้านบนบนมือถือ */
-            .pt-safe { padding-top: 0 !important; }
-            #mainView > div:first-child {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
-            }
+            .pt-safe { padding-top: env(safe-area-inset-top, 0px) !important; }
             #mainHeaderBtn { padding-top: 8px !important; padding-bottom: 8px !important; }
 
 
