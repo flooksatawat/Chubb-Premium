@@ -649,6 +649,30 @@ function openPlanModal() {
     renderModernCards(modernPlansData, true);
     initSwipeToDismiss();
     initModernScrollInteractions();
+    // Stagger entrance after wrapper slide starts + scroll jump settles
+    setTimeout(_animateModalCards, 90);
+}
+
+function _animateModalCards() {
+    const container = document.getElementById('planListContainer');
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.card-3d-container'));
+    if (!cards.length) return;
+    const n = modernPlansData.length; // 11
+    // Loop mode: second copy (index n..2n-1) is the visible one after scrollTop jump
+    // Search mode: first n cards visible
+    const startIdx = isModernSearchActive ? 0 : n;
+    for (let i = 0; i < n; i++) {
+        const card = cards[startIdx + i];
+        if (!card) continue;
+        const isActive = card.querySelector('button[data-plan]')?.getAttribute('data-plan') === currentAppPlan;
+        const delay = i * 32;
+        const anim = isActive
+            ? `cardInActive 340ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`
+            : `cardIn 280ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`;
+        card.style.animation = anim;
+        card.addEventListener('animationend', () => { card.style.animation = ''; }, { once: true });
+    }
 }
 
 function closePlanModal() {
