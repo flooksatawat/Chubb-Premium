@@ -249,6 +249,7 @@ function startVoiceRecognition() {
             if (final) {
                 _voiceAnalyzing = true;
                 document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+                const _old = document.getElementById('voiceAnalyzingLabel'); if (_old) _old.remove();
                 if (lt) { lt.insertAdjacentHTML('afterend', '<br><span id="voiceAnalyzingLabel" style="color:#00A651;font-size:12px;opacity:0.8;">กำลังวิเคราะห์...</span>'); }
                 setTimeout(() => {
                     _voiceAnalyzing = false;
