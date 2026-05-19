@@ -4459,154 +4459,275 @@ async function exportTableToPDF(actionType = 'preview') {
 }
 
 // ============================================================================
-// 📤 NAV SHARE BOTTOM SHEET — LINE / Messenger / Save (ใช้ภาพ PNG)
+// 📤 NAV SHARE — จับภาพตารางความละเอียดสูง → viewer + share/save
 // ============================================================================
+
+// ── จับภาพ full table (scroll content ทั้งหมด) ──
+async function _captureTableHighRes() {
+    if (typeof html2canvas !== 'function') throw new Error('html2canvas not loaded');
+
+    // clone ทั้ง table รวม header + breakevenSummary + surrenderContainer
+    const temp = document.createElement('div');
+    temp.style.cssText = [
+        'position:fixed', 'left:-9999px', 'top:0', 'z-index:-1',
+        'background:#ffffff', 'padding:12px',
+        'width:' + (window.innerWidth || 390) + 'px',
+        'box-sizing:border-box',
+    ].join(';');
+
+    // header title
+    const hdr = document.getElementById('tableHeaderTitle');
+    if (hdr) {
+        const hw = document.createElement('div');
+        hw.style.cssText = 'background:#f1f5f9;border-radius:10px;padding:8px 10px;margin-bottom:8px;';
+        hw.appendChild(hdr.cloneNode(true));
+        temp.appendChild(hw);
+    }
+
+    // breakeven summary (ถ้าแสดงอยู่)
+    const be = document.getElementById('breakevenSummary');
+    if (be && !be.classList.contains('hidden') && be.innerHTML.trim()) {
+        temp.appendChild(be.cloneNode(true));
+    }
+
+    // surrender/toggle row (ถ้าแสดงอยู่)
+    const sc = document.getElementById('surrenderContainer');
+    if (sc && !sc.classList.contains('hidden') && sc.innerHTML.trim()) {
+        temp.appendChild(sc.cloneNode(true));
+    }
+
+    // table เต็ม (ไม่ผ่าน scroll wrapper)
+    const tbl = document.querySelector('#pdfTableTarget table');
+    if (!tbl) throw new Error('table element not found');
+    const tblClone = tbl.cloneNode(true);
+    tblClone.style.cssText = 'width:100%;border-collapse:collapse;';
+    // ลบ sticky thead เพื่อให้ clone render ถูก
+    const stickyHead = tblClone.querySelector('thead');
+    if (stickyHead) { stickyHead.style.position = 'relative'; stickyHead.style.top = 'auto'; }
+    temp.appendChild(tblClone);
+
+    document.body.appendChild(temp);
+
+    try {
+        const scale = Math.max(2, window.devicePixelRatio || 2);
+        const canvas = await html2canvas(temp, {
+            scale,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            removeContainer: false,
+        });
+        const blob = await new Promise((res, rej) =>
+            canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob null')), 'image/png')
+        );
+        return { blob, canvas };
+    } finally {
+        temp.remove();
+    }
+}
+
+// ── full-screen image viewer พร้อม pinch-zoom + share/save ──
+function _showTableImageViewer(blob, imgName) {
+    const existing = document.getElementById('_tableImgViewer');
+    if (existing) existing.remove();
+
+    const blobUrl = URL.createObjectURL(blob);
+    const inLine  = isInLineApp();
+    const hasSharePicker = inLine && _liffApi('shareTargetPicker');
+    const canWebShare = !!(navigator.share);
+
+    const viewer = document.createElement('div');
+    viewer.id = '_tableImgViewer';
+    viewer.style.cssText = [
+        'position:fixed', 'inset:0', 'z-index:99998',
+        'background:#0f172a',
+        'display:flex', 'flex-direction:column',
+        'padding-top:max(12px,env(safe-area-inset-top))',
+        'padding-bottom:max(12px,env(safe-area-inset-bottom))',
+    ].join(';');
+
+    viewer.innerHTML = `
+        <!-- top bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;flex-shrink:0;">
+            <button id="_tvClose" style="width:38px;height:38px;background:rgba(255,255,255,0.12);border:none;border-radius:50%;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-times"></i>
+            </button>
+            <span style="color:white;font-size:13px;font-weight:700;opacity:0.7;">${imgName.replace('.png','')}</span>
+            <button id="_tvShareBtn" style="height:36px;padding:0 14px;background:#3b82f6;border:none;border-radius:20px;color:white;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-share-alt"></i> แชร์
+            </button>
+        </div>
+
+        <!-- image scroll area -->
+        <div id="_tvScroll" style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;display:flex;align-items:flex-start;justify-content:center;padding:8px;">
+            <img id="_tvImg" src="${blobUrl}" alt="table"
+                style="display:block;max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.6);transform-origin:top center;
+                       -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;pointer-events:auto;" />
+        </div>
+
+        <!-- hint -->
+        <div id="_tvHint" style="text-align:center;padding:6px 16px 2px;flex-shrink:0;color:rgba(255,255,255,0.5);font-size:11px;font-weight:600;">
+            <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>กดค้างที่ภาพ → บันทึกภาพ &nbsp;|&nbsp; <i class="fas fa-search-plus" style="margin-right:4px;"></i>Pinch ซูมได้
+        </div>
+
+        <!-- bottom action bar -->
+        <div style="display:flex;gap:10px;padding:10px 16px;flex-shrink:0;">
+            <button id="_tvLine" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(6,199,85,0.15);border:1.5px solid #06c755;border-radius:16px;cursor:pointer;">
+                <i class="fab fa-line" style="color:#06c755;font-size:22px;"></i>
+                <span style="color:#06c755;font-size:11px;font-weight:700;">LINE</span>
+            </button>
+            <button id="_tvMsgr" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(0,132,255,0.15);border:1.5px solid #0084ff;border-radius:16px;cursor:pointer;">
+                <i class="fab fa-facebook-messenger" style="color:#0084ff;font-size:22px;"></i>
+                <span style="color:#0084ff;font-size:11px;font-weight:700;">Messenger</span>
+            </button>
+            <button id="_tvSave" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);border-radius:16px;cursor:pointer;">
+                <i class="fas fa-download" style="color:white;font-size:22px;"></i>
+                <span style="color:white;font-size:11px;font-weight:700;">บันทึก</span>
+            </button>
+        </div>
+    `;
+    document.body.appendChild(viewer);
+
+    // block contextmenu global blocker สำหรับรูป
+    const img = document.getElementById('_tvImg');
+    if (img) img.addEventListener('contextmenu', e => e.stopPropagation(), true);
+
+    // close
+    const closeViewer = () => {
+        viewer.remove();
+        try { URL.revokeObjectURL(blobUrl); } catch {}
+    };
+    document.getElementById('_tvClose').addEventListener('click', closeViewer);
+
+    // pinch-zoom ด้วย CSS transform scale
+    let scale = 1, startDist = 0, startScale = 1;
+    const scroll = document.getElementById('_tvScroll');
+    if (scroll) {
+        scroll.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+                startDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                startScale = scale;
+                e.preventDefault();
+            }
+        }, { passive: false });
+        scroll.addEventListener('touchmove', e => {
+            if (e.touches.length === 2 && startDist > 0) {
+                const d = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.min(5, Math.max(1, startScale * (d / startDist)));
+                if (img) img.style.transform = `scale(${scale})`;
+                e.preventDefault();
+            }
+        }, { passive: false });
+        scroll.addEventListener('touchend', e => {
+            if (e.touches.length < 2) startDist = 0;
+        });
+        // double tap reset zoom
+        let lastTap = 0;
+        scroll.addEventListener('touchend', e => {
+            const now = Date.now();
+            if (now - lastTap < 300) { scale = 1; if (img) img.style.transform = 'scale(1)'; }
+            lastTap = now;
+        });
+    }
+
+    // ── share helper ──
+    async function _doShare() {
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                await navigator.share({ files: [imgFile], title: imgName });
+                _showQuickToast('แชร์สำเร็จ');
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+            }
+        }
+        // fallback: แจ้งกดค้าง
+        _showQuickToast('กดค้างที่ภาพ → เลือก "บันทึกภาพ"');
+    }
+
+    async function _doSave() {
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+        // ลอง Web Share (iOS รองรับ "Save to Photos" ใน share sheet)
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                await navigator.share({ files: [imgFile], title: imgName });
+                _showQuickToast('บันทึกสำเร็จ');
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+            }
+        }
+        // ลอง <a download> (browser ปกติ)
+        try {
+            const u = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = u; a.download = imgName; a.click();
+            setTimeout(() => URL.revokeObjectURL(u), 5000);
+            _showQuickToast('กำลังดาวน์โหลด...');
+            return;
+        } catch (_) {}
+        // สุดท้าย: กดค้าง
+        _showQuickToast('กดค้างที่ภาพ → เลือก "บันทึกภาพ"');
+    }
+
+    async function _doLineLiff() {
+        // LIFF: ส่งสรุปข้อความ + แจ้งให้กดค้างบันทึกภาพ
+        _showQuickToast('กดค้างที่ภาพ → บันทึก → เปิดแชท LINE แนบรูป');
+        if (hasSharePicker) {
+            try {
+                const summary = typeof generateShortShareText === 'function' ? generateShortShareText() : imgName;
+                await liff.shareTargetPicker([{ type: 'text', text: summary }]);
+            } catch (_) {}
+        }
+    }
+
+    document.getElementById('_tvShareBtn').addEventListener('click', _doShare);
+    document.getElementById('_tvLine').addEventListener('click', async () => {
+        if (inLine) { _doLineLiff(); } else { await _doShare(); }
+    });
+    document.getElementById('_tvMsgr').addEventListener('click', _doShare);
+    document.getElementById('_tvSave').addEventListener('click', _doSave);
+}
+
 window.navShareAction = async function() {
     if (!lastCalculationData || lastCalculationData.premium === 0) {
         showCustomError('กรุณาคำนวณเบี้ยประกันก่อน');
         return;
     }
 
-    // ── แสดง loading ──
+    // loading overlay
     const loadingEl = document.createElement('div');
-    loadingEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;';
-    loadingEl.innerHTML = `<div style="background:white;border-radius:20px;padding:28px 36px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+    loadingEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.7);display:flex;align-items:center;justify-content:center;';
+    loadingEl.innerHTML = `<div style="background:white;border-radius:20px;padding:28px 36px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
         <i class="fas fa-spinner fa-spin" style="font-size:32px;color:#3b82f6;display:block;margin-bottom:12px;"></i>
         <span style="font-size:14px;font-weight:700;color:#1e293b;">กำลังเตรียมภาพ...</span>
     </div>`;
     document.body.appendChild(loadingEl);
 
-    // ── จับภาพ tableView โดยตรงด้วย html2canvas (เร็วกว่า PDF pipeline มาก) ──
     let blob = null;
     try {
-        const target = document.getElementById('pdfTableTarget') || document.getElementById('tableView');
-        if (!target || typeof html2canvas !== 'function') throw new Error('html2canvas not ready');
-
-        const canvas = await html2canvas(target, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: -window.scrollY,
-            windowWidth: target.scrollWidth,
-            windowHeight: target.scrollHeight,
-            width: target.scrollWidth,
-            height: target.scrollHeight,
-        });
-
-        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        if (!blob) throw new Error('toBlob failed');
+        const result = await _captureTableHighRes();
+        blob = result.blob;
     } catch (err) {
         loadingEl.remove();
-        showCustomError('ไม่สามารถเตรียมภาพได้ กรุณาลองใหม่');
+        console.error('[navShare] capture failed:', err);
+        showCustomError('ไม่สามารถสร้างภาพได้: ' + (err.message || err));
         return;
     }
 
     loadingEl.remove();
 
-    // ── แสดง share sheet พร้อมภาพพร้อม ──
-    // blob มาจาก html2canvas แล้ว (กำหนดไว้ข้างบน)
-    const inLine = isInLineApp();
     const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'insurance');
     const imgName = `${planAbbr}_ตารางมูลค่า.png`;
-
-    const sheet = document.createElement('div');
-    sheet.id = '_navShareSheet';
-    sheet.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;';
-    sheet.innerHTML = `
-        <div style="width:100%;background:white;border-radius:24px 24px 0 0;padding:20px 20px max(24px,env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,0.25);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <span style="font-size:16px;font-weight:700;color:#1e293b;"><i class="fas fa-share-alt" style="margin-right:8px;color:#3b82f6;"></i>แชร์ตารางให้ลูกค้า</span>
-                <button id="_nsClose" style="width:32px;height:32px;background:#f1f5f9;border:none;border-radius:50%;font-size:18px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:4px;">
-                <button id="_nsLine" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:18px;cursor:pointer;">
-                    <div style="width:52px;height:52px;background:#06c755;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(6,199,85,0.35);">
-                        <i class="fab fa-line" style="color:white;font-size:26px;"></i>
-                    </div>
-                    <span style="font-size:13px;font-weight:700;color:#166534;">LINE</span>
-                </button>
-                <button id="_nsMsgr" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;cursor:pointer;">
-                    <div style="width:52px;height:52px;background:linear-gradient(135deg,#0084ff,#a020f0);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,132,255,0.35);">
-                        <i class="fab fa-facebook-messenger" style="color:white;font-size:26px;"></i>
-                    </div>
-                    <span style="font-size:13px;font-weight:700;color:#1d4ed8;">Messenger</span>
-                </button>
-                <button id="_nsSave" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;cursor:pointer;">
-                    <div style="width:52px;height:52px;background:#334155;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(51,65,85,0.3);">
-                        <i class="fas fa-download" style="color:white;font-size:24px;"></i>
-                    </div>
-                    <span style="font-size:13px;font-weight:700;color:#334155;">บันทึก</span>
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(sheet);
-
-    const close = () => sheet.remove();
-    sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
-    document.getElementById('_nsClose').addEventListener('click', close);
-
-    // ── helper: share image ผ่าน navigator.share หรือ fallback lightbox ──
-    function _shareImgNow(label) {
-        close();
-        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
-
-        // ลอง navigator.share file (mobile browser + บางกรณี LIFF Android ใหม่)
-        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
-            try {
-                navigator.share({ files: [imgFile], title: imgName })
-                    .then(() => _showQuickToast('แชร์สำเร็จ'))
-                    .catch(err => {
-                        if (err && err.name === 'AbortError') return;
-                        _fallbackLightbox(label);
-                    });
-                return;
-            } catch (_) {}
-        }
-        _fallbackLightbox(label);
-    }
-
-    function _fallbackLightbox(label) {
-        // ตั้งค่า blob ให้ lightbox ใช้ได้
-        if (_pdfViewerImageBlobUrl) { try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {} }
-        _pdfViewerImageBlobUrl = URL.createObjectURL(blob);
-        _pdfViewerFilename = imgName;
-        const showLine = label === 'line' && _liffApi('shareTargetPicker');
-        _showLongPressSaveModal({ showLineShare: !!showLine });
-    }
-
-    document.getElementById('_nsLine').addEventListener('click', () => _shareImgNow('line'));
-    document.getElementById('_nsMsgr').addEventListener('click', () => _shareImgNow('messenger'));
-    document.getElementById('_nsSave').addEventListener('click', () => {
-        close();
-        // ลอง Web Share ก่อน (iOS/Android มักรองรับ)
-        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
-        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
-            try {
-                navigator.share({ files: [imgFile], title: imgName })
-                    .then(() => _showQuickToast('บันทึกสำเร็จ'))
-                    .catch(err => { if (err && err.name !== 'AbortError') _directDownload(); });
-                return;
-            } catch (_) {}
-        }
-        _directDownload();
-    });
-
-    function _directDownload() {
-        try {
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl; a.download = imgName; a.click();
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-        } catch (_) {
-            if (_pdfViewerImageBlobUrl) { try { URL.revokeObjectURL(_pdfViewerImageBlobUrl); } catch {} }
-            _pdfViewerImageBlobUrl = URL.createObjectURL(blob);
-            _pdfViewerFilename = imgName;
-            _showLongPressHintToast();
-        }
-    }
+    _showTableImageViewer(blob, imgName);
 };
 
 // ============================================================================
