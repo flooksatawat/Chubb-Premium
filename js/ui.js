@@ -3350,6 +3350,15 @@ function _showQuickToast(msg) {
     setTimeout(() => t.remove(), 1500);
 }
 
+function _blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = () => reject(fr.error);
+        fr.readAsDataURL(blob);
+    });
+}
+
 async function handlePdfSaveLinkClick(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -3379,9 +3388,51 @@ async function handlePdfSaveLinkClick(e) {
 
     _showQuickToast('กำลังเตรียมไฟล์...');
 
-    // Web Share API กับไฟล์ PDF — ผู้ใช้กด "Save to Files" / "บันทึกในไฟล์"
+    // ===== LIFF Save flow — ลำดับวิธีบันทึก =====
+    // 1) Web Share API กับไฟล์ PDF (บาง LIFF version รองรับ → user เลือก "Save to Files" / "บันทึกใน LINE")
     const pdfFile = new File([_pdfViewerBlob], _pdfViewerFilename, { type: 'application/pdf' });
-    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) return;
+    if (await tryShareFile(pdfFile, _pdfViewerFilename, _pdfViewerFilename)) {
+        console.log('[LIFF] save → Web Share API success');
+        return;
+    }
+
+    // 2) แปลงเป็น data URI แล้วลอง <a download> (Android WebView รองรับ)
+    let dataUri = null;
+    try {
+        dataUri = await _blobToDataUrl(_pdfViewerBlob);
+    } catch (err) {
+        console.warn('[LIFF] blob → dataURI failed:', err);
+    }
+
+    if (dataUri) {
+        try {
+            const tmp = document.createElement('a');
+            tmp.href = dataUri;
+            tmp.download = _pdfViewerFilename;
+            tmp.rel = 'noopener';
+            document.body.appendChild(tmp);
+            tmp.click();
+            tmp.remove();
+            console.log('[LIFF] save → <a download> with data URI triggered');
+        } catch (err) {
+            console.warn('[LIFF] <a download> failed:', err);
+        }
+
+        // 3) Fallback หลังสุด: navigate ไป data URI ในแท็บปัจจุบัน
+        //    iOS LIFF: PDF จะเปิดด้วย native PDF viewer มีปุ่ม Share → "Save to Files"
+        //    Android LIFF: มักจะแสดง "Open with" dialog → เลือก app เพื่อบันทึก
+        //    ใช้ setTimeout เผื่อ <a download> ทำงานก่อน (Android), ถ้าทำได้แล้ว user จะไม่เห็นการ navigate
+        setTimeout(() => {
+            try {
+                console.log('[LIFF] save → navigate to data URI (inline PDF viewer)');
+                window.location.href = dataUri;
+            } catch (err) {
+                console.warn('[LIFF] data URI navigation failed:', err);
+                _showLiffPdfFallback();
+            }
+        }, 600);
+        return;
+    }
 
     _showLiffPdfFallback();
 }
