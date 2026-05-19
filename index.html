@@ -1690,15 +1690,55 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 <!-- ══════════════════════════════════════════ -->
 <script>
 (function () {
+    // ── ใส่ URL ของ Apps Script Web App ที่ deploy แล้วที่นี่ ──
+    const APPS_SCRIPT_URL = window.APPS_SCRIPT_URL || '';
+
     const overlay    = document.getElementById('lineLoginOverlay');
     const profileBar = document.getElementById('lineProfileBar');
     const profilePic = document.getElementById('lineProfilePic');
     const profileName= document.getElementById('lineProfileName');
 
+    const CACHE_KEY      = 'line_profile_cache';
+    const AUTH_CACHE_KEY = 'line_auth_cache';
+
+    function loadCachedProfile() {
+        try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; }
+    }
+    function saveProfileCache(p) {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(p)); } catch {}
+    }
+    function clearProfileCache() {
+        try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTH_CACHE_KEY); } catch {}
+    }
+    function loadAuthCache() {
+        try { return JSON.parse(localStorage.getItem(AUTH_CACHE_KEY)); } catch { return null; }
+    }
+    function saveAuthCache(v) {
+        try { localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify({ authorized: v, ts: Date.now() })); } catch {}
+    }
+
     function showApp() {
         if (!overlay) return;
         overlay.classList.add('fade-out');
         setTimeout(() => overlay.style.display = 'none', 400);
+    }
+
+    function showDenied() {
+        // เปลี่ยน overlay เป็นหน้า "ไม่มีสิทธิ์เข้าใช้งาน"
+        const btn = document.getElementById('lineLoginBtn');
+        if (btn) btn.style.display = 'none';
+        const box = document.createElement('div');
+        box.style.cssText = 'text-align:center;padding:32px 24px;background:rgba(255,255,255,0.15);border-radius:24px;border:1px solid rgba(255,255,255,0.3);max-width:280px;';
+        box.innerHTML = `
+            <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+            <p style="font-size:18px;font-weight:800;color:white;margin-bottom:8px;font-family:'Kanit',sans-serif;">ไม่มีสิทธิ์เข้าใช้งาน</p>
+            <p style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:20px;font-family:'Kanit',sans-serif;">กรุณาติดต่อผู้ดูแลระบบ<br>เพื่อขอสิทธิ์การเข้าใช้</p>
+            <button onclick="lineLogout()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:10px 24px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Kanit',sans-serif;">ออกจากระบบ</button>
+        `;
+        const inner = overlay.querySelector('div') || overlay;
+        inner.appendChild(box);
+        if (overlay) overlay.style.display = 'flex';
+        overlay.classList.remove('fade-out');
     }
 
     function showProfile(profile) {
@@ -1708,59 +1748,82 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         profileBar.style.display = 'flex';
     }
 
+    // เช็คสิทธิ์จาก Apps Script
+    async function checkAuthorization(userId, displayName) {
+        if (!APPS_SCRIPT_URL) return true; // ถ้ายังไม่ได้ตั้ง URL ให้ผ่านก่อน
+        try {
+            const res  = await fetch(`${APPS_SCRIPT_URL}?action=check&userId=${encodeURIComponent(userId)}`);
+            const data = await res.json();
+            if (data.ok && data.authorized) {
+                // บันทึก/อัปเดต profile ใน Sheet (background)
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'add', userId, displayName })
+                }).catch(() => {});
+                return true;
+            }
+            return false;
+        } catch {
+            // ถ้าเรียก API ไม่ได้ ให้ดูจาก auth cache แทน
+            const ac = loadAuthCache();
+            return ac && ac.authorized;
+        }
+    }
+
     window.lineLogin = function () {
         if (typeof liff === 'undefined') return;
         liff.login({ redirectUri: location.href });
     };
 
     window.lineLogout = function () {
-        if (typeof liff === 'undefined') return;
-        liff.logout();
+        clearProfileCache();
+        if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.isLoggedIn()) liff.logout();
         location.reload();
     };
 
-    const CACHE_KEY = 'line_profile_cache';
-
-    function loadCachedProfile() {
-        try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; }
-    }
-    function saveProfileCache(p) {
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(p)); } catch {}
-    }
-    function clearProfileCache() {
-        try { localStorage.removeItem(CACHE_KEY); } catch {}
-    }
-
-    // เปิดแอปทันทีถ้ามี cache (ไม่รอ LIFF)
-    const cached = loadCachedProfile();
-    if (cached) {
+    // เปิดแอปทันทีถ้ามี cache ที่ authorized ไว้แล้ว
+    const cached   = loadCachedProfile();
+    const authCache = loadAuthCache();
+    if (cached && authCache && authCache.authorized) {
         window.lineProfile = cached;
         showProfile(cached);
         showApp();
     }
 
     // Run after LIFF is ready
-    window._liffReady.then(() => {
+    window._liffReady.then(async () => {
         if (typeof liff === 'undefined' || !window.LIFF_READY) {
-            if (!cached) {
+            if (!(cached && authCache && authCache.authorized)) {
                 if (overlay) overlay.style.display = 'flex';
             }
             return;
         }
 
         if (!liff.isLoggedIn()) {
-            // session หมด — ล้าง cache แล้ว login ใหม่
             clearProfileCache();
-            if (cached) { overlay.classList.remove('fade-out'); overlay.style.display = 'flex'; }
             liff.login({ redirectUri: location.href });
+            return;
+        }
+
+        // ดึง profile
+        let profile;
+        try { profile = await liff.getProfile(); }
+        catch { profile = cached; }
+
+        if (!profile) { liff.login({ redirectUri: location.href }); return; }
+
+        window.lineProfile = profile;
+        saveProfileCache(profile);
+        showProfile(profile);
+
+        // ตรวจสอบสิทธิ์
+        const authorized = await checkAuthorization(profile.userId, profile.displayName);
+        saveAuthCache(authorized);
+
+        if (authorized) {
+            if (!(cached && authCache && authCache.authorized)) showApp();
         } else {
-            // login อยู่ — refresh profile แล้วเก็บ cache
-            liff.getProfile().then(profile => {
-                window.lineProfile = profile;
-                saveProfileCache(profile);
-                showProfile(profile);
-                if (!cached) showApp();
-            }).catch(() => { if (!cached) showApp(); });
+            showDenied();
         }
     });
 })();
