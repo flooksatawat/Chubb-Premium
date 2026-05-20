@@ -3066,8 +3066,8 @@ function generatePolicyTableData() {
             }
         }
         
-        let cvTotal = Math.round((slpaEffectiveSA * cvRate) / 1000);
-        if (slpaEffectiveSA <= 0) cvTotal = 0;
+        let cvTotal = Math.round((currentSA * cvRate) / 1000);
+        if (currentSA <= 0) cvTotal = 0;
 
         let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt;
         
