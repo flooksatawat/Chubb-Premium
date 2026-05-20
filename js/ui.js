@@ -1986,6 +1986,7 @@ function _aiMenuHTML() {
             <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#6d28d9;">Notebook LM</div><div style="font-size:11px;color:#64748b;">AI สำหรับสรุปเอกสาร</div></div>
             <i class="fas fa-external-link-alt" style="color:#c4b5fd;font-size:11px;"></i>
         </button>
+        <!-- เมนูเทียบแบบ (ซ่อนชั่วคราว)
         <button onclick="window._aiShowCompare()" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
             <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-scale-balanced" style="color:#0d9488;font-size:17px;"></i></div>
             <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#0f766e;">เทียบแบบประกัน</div><div style="font-size:11px;color:#64748b;">เปรียบเทียบหลายแผนพร้อมกัน</div></div>
@@ -1996,6 +1997,7 @@ function _aiMenuHTML() {
             <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#be123c;">เทียบแผน 3D Health</div><div style="font-size:11px;color:#64748b;">เปรียบเทียบแพ็กเกจ HX</div></div>
             <i class="fas fa-chevron-right" style="color:#fda4af;font-size:11px;"></i>
         </button>
+        -->
     </div>`;
 }
 
