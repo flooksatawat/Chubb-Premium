@@ -1518,15 +1518,15 @@ function manualTriggerPopup() {
         }
 
         let activeMode = typeof currentMode !== 'undefined' ? currentMode : 'sum';
-        lastCalculationData = null; // force fresh calculation ไม่ใช้ค่าเก่าจาก voice/text
-        if (typeof calculate === 'function') calculate(activeMode, true);
+        const freshData = (typeof calculate === 'function') ? calculate(activeMode, true) : null;
+        const dataToShow = freshData || lastCalculationData;
 
-        if (!lastCalculationData) {
+        if (!dataToShow) {
             console.error("Calculation failed: no data");
             return;
         }
 
-        if (typeof openUniversalModal === 'function') openUniversalModal(lastCalculationData);
+        if (typeof openUniversalModal === 'function') openUniversalModal(dataToShow);
     } catch(e) {
         console.error("manualTriggerPopup Error:", e);
     }
