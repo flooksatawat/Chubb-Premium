@@ -161,26 +161,25 @@ async function shareToMessenger() {
     _closeResultModals();
     const text = _getShareText();
 
-    // Web Share API (Android Chrome / iOS Safari) — วิธีที่ดีที่สุด
-    if (navigator.share) {
-        try {
-            await navigator.share({ text });
-            return;
-        } catch (e) {
-            if (e.name === 'AbortError') return; // ผู้ใช้กดยกเลิก
-        }
-    }
-
-    // Fallback: คัดลอกแล้วแจ้ง
+    // คัดลอกข้อความก่อน แล้วเปิด Messenger ตรงๆ
     try {
-        await navigator.clipboard.writeText(text);
-    } catch {
-        const ta = document.createElement('textarea');
-        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-    }
-    Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความใน Messenger ได้เลย', timer: 1800, showConfirmButton: false });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+        }
+    } catch {}
+
+    // เปิด Messenger app ตรงๆ
+    window.location.href = 'fb-messenger://';
+
+    // แจ้งให้วางข้อความ (แสดงสั้นๆ ก่อน Messenger เปิด)
+    setTimeout(() => {
+        Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความใน Messenger ได้เลย', timer: 2000, showConfirmButton: false });
+    }, 300);
 }
 
 async function copyShareData() {
