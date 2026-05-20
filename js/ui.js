@@ -3076,7 +3076,7 @@ function generatePolicyTableData() {
         accCashFlow += cashFlowAmt; 
 
         // 6. สร้างแถวตาราง
-        const saCompact = formatThaiMillion(deathBenefit);
+        const saCompact = (isLPB || isSLPA) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
         const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
