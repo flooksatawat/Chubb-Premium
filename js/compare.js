@@ -181,3 +181,101 @@ window.openCompareModal = function() {
         }
     });
 };
+
+// ==================== เทียบแผน 3D Health Excellence ====================
+
+const _3D_HX_PACKAGES = [
+    { code: 'HX15',  label: 'HX 15',  room: '1,500',  limit: '1,000,000',  color: '#0ea5e9', bg: '#f0f9ff' },
+    { code: 'HX20',  label: 'HX 20',  room: '2,000',  limit: '3,000,000',  color: '#6366f1', bg: '#eef2ff' },
+    { code: 'HX40',  label: 'HX 40',  room: '4,000',  limit: '5,000,000',  color: '#8b5cf6', bg: '#f5f3ff' },
+    { code: 'HX60',  label: 'HX 60',  room: '6,000',  limit: '10,000,000', color: '#d97706', bg: '#fffbeb' },
+    { code: 'HX150', label: 'HX 150', room: '15,000', limit: '60,000,000', color: '#dc2626', bg: '#fef2f2' },
+    { code: 'HX300', label: 'HX 300', room: '30,000', limit: '120,000,000',color: '#be185d', bg: '#fdf2f8' },
+];
+
+window.openCompare3DModal = function() {
+    const age    = parseInt(document.getElementById('ageInput')?.value) || 35;
+    const gender = window.currentGender || 'male';
+
+    // base CL rate for 3D (uses 20CL)
+    const clPlanCode = '20CL';
+    const clRate = (typeof LIFE_RATES !== 'undefined') ? (LIFE_RATES[clPlanCode]?.[gender]?.[age] || 0) : 0;
+
+    // คำนวณเบี้ยแต่ละ package
+    function getPkgData(pkg) {
+        const hxPrem = (typeof getHealthRate === 'function') ? getHealthRate('HX', pkg.code, age, gender) : 0;
+        if (!hxPrem && !clRate) return null;
+        // ทุนประกัน CL ขั้นต่ำ 150,000 (3D minSum)
+        const minSum = 150000;
+        const basePrem = clRate > 0 ? Math.round((minSum / 1000) * (clRate - (typeof getDiscount === 'function' ? getDiscount(minSum, clPlanCode) : 0))) : 0;
+        const totalPrem = basePrem + hxPrem;
+        return { hxPrem, basePrem, totalPrem };
+    }
+
+    function buildHTML() {
+        const results = _3D_HX_PACKAGES.map(pkg => ({ pkg, data: getPkgData(pkg) })).filter(r => r.data);
+
+        if (!results.length) {
+            return `<div style="padding:20px;text-align:center;color:#94a3b8;font-family:'Kanit',sans-serif;">ไม่พบข้อมูลสำหรับอายุ ${age} ปี</div>`;
+        }
+
+        const rows = [
+            { label: 'ค่าห้อง (บาท/วัน)',        getVal: r => parseInt(r.pkg.room.replace(/,/g,'')),    fmt: (v, r) => r.pkg.room,   best: 'max' },
+            { label: 'วงเงินเหมาจ่าย (บาท/ปี)',  getVal: r => parseInt(r.pkg.limit.replace(/,/g,'')),   fmt: (v, r) => r.pkg.limit,  best: 'max' },
+            { label: 'เบี้ย HX (บาท/ปี)',         getVal: r => r.data.hxPrem,   fmt: (v) => v > 0 ? v.toLocaleString() : '-',  best: 'min' },
+            { label: 'เบี้ย CL ฐาน* (บาท/ปี)',   getVal: r => r.data.basePrem,  fmt: (v) => v > 0 ? v.toLocaleString() : '-', best: null },
+            { label: 'รวมเบี้ย/ปี (บาท)',         getVal: r => r.data.totalPrem, fmt: (v) => v > 0 ? v.toLocaleString() : '-', best: 'min' },
+        ];
+
+        const hdrCells = results.map(r =>
+            `<th style="padding:8px 10px;background:${r.pkg.color};color:white;font-size:11px;font-family:'Kanit',sans-serif;min-width:90px;text-align:center;white-space:nowrap;">${r.pkg.label}</th>`
+        ).join('');
+
+        const bodyRows = rows.map(row => {
+            const vals = results.map(r => row.getVal(r));
+            const positiveVals = vals.filter(v => v > 0);
+            const bestVal = row.best && positiveVals.length > 0
+                ? (row.best === 'max' ? Math.max(...positiveVals) : Math.min(...positiveVals))
+                : null;
+
+            const cells = results.map((r, i) => {
+                const val = vals[i];
+                const isBest = bestVal !== null && val === bestVal && results.length > 1;
+                const bgCell = isBest ? r.pkg.bg : 'white';
+                const fw = isBest ? '800' : '500';
+                const star = isBest ? '<span style="color:' + r.pkg.color + ';font-size:9px;margin-right:2px;">★</span>' : '';
+                return `<td style="padding:6px 10px;background:${bgCell};text-align:right;font-size:12px;font-weight:${fw};font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;">${star}${row.fmt(val, r)}</td>`;
+            }).join('');
+
+            return `<tr><td style="padding:6px 10px;font-size:11px;font-weight:600;color:#64748b;font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${row.label}</td>${cells}</tr>`;
+        }).join('');
+
+        return `<div style="font-family:'Kanit',sans-serif;">
+            <div style="overflow-x:auto;border-radius:12px;border:1px solid #e2e8f0;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="padding:8px 10px;background:#f8fafc;font-size:10px;color:#94a3b8;font-family:'Kanit',sans-serif;text-align:left;">รายการ</th>
+                        ${hdrCells}
+                    </tr></thead>
+                    <tbody>${bodyRows}</tbody>
+                </table>
+            </div>
+            <div style="margin-top:8px;font-size:10px;color:#94a3b8;font-family:'Kanit',sans-serif;text-align:left;line-height:1.6;">
+                ★ = ดีที่สุดในกลุ่ม &nbsp;|&nbsp; อายุ ${age} ปี &nbsp;${gender === 'male' ? 'ชาย' : 'หญิง'}<br>
+                * เบี้ย CL ฐาน = ทุนประกัน 150,000 บ. (ขั้นต่ำ 3D) &nbsp;|&nbsp; ยังไม่รวม OPD / ชดเชยรายวัน
+            </div>
+        </div>`;
+    }
+
+    Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:17px;">🏥 เทียบแผน 3D Health Excellence</span>',
+        html: buildHTML(),
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: Math.min(window.innerWidth - 20, 780),
+        didOpen: () => {
+            const popup = Swal.getPopup();
+            if (popup) popup.style.borderRadius = '20px';
+        }
+    });
+};

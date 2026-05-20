@@ -2010,6 +2010,26 @@ window.openAIPanel = function() {
                 </div>
                 <i class="fas fa-external-link-alt" style="color:#c4b5fd;font-size:12px;"></i>
             </button>
+            <button onclick="window.openCompareModal && window.openCompareModal()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
+                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
+                    <i class="fas fa-scale-balanced" style="color:#0d9488;font-size:18px;"></i>
+                </div>
+                <div style="text-align:left;flex:1;">
+                    <div style="font-size:15px;font-weight:700;color:#0f766e;">เทียบแบบประกัน</div>
+                    <div style="font-size:11px;color:#64748b;">เปรียบเทียบหลายแผนพร้อมกัน</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#5eead4;font-size:12px;"></i>
+            </button>
+            <button onclick="window.openCompare3DModal && window.openCompare3DModal()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
+                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
+                    <i class="fas fa-hand-holding-medical" style="color:#e11d48;font-size:18px;"></i>
+                </div>
+                <div style="text-align:left;flex:1;">
+                    <div style="font-size:15px;font-weight:700;color:#be123c;">เทียบแผน 3D Health</div>
+                    <div style="font-size:11px;color:#64748b;">เปรียบเทียบแพ็กเกจ HX</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#fda4af;font-size:12px;"></i>
+            </button>
         </div>
     </div>`;
     if (window.injectToWorkspace) window.injectToWorkspace(html);
