@@ -1228,7 +1228,11 @@ function selectAppPlan(planName) {
             window.renderCompareView(planA, planName);
             return;
         } else {
+            // กดแบบเดิมหลัง long-press — ถ้า long-press เพิ่งยิง ให้ยกเลิก แต่ไม่ select
+            const justFired = window.__compareLongPressJustFired;
+            window.__compareLongPressJustFired = false;
             window.cancelCompareMode();
+            if (justFired) return;
         }
     }
 
@@ -1603,13 +1607,11 @@ window.renderCompareView = function(planA, planB) {
     window.injectToWorkspace(html);
 };
 
-// Long-press delegation — เริ่ม compare mode บน wide layout เท่านั้น
+// Long-press delegation — เริ่ม compare mode (ทุก layout)
 (function initCompareLongPress() {
     const THRESHOLD = 500;
     const MOVE_DEAD_ZONE = 8;
     let _timer = null, _downPlan = null, _startX = 0, _startY = 0;
-    let _longPressFired = false;
-
     function getTargetPlan(e) {
         const btn = e.target.closest('[data-plan]');
         return btn ? btn.getAttribute('data-plan') : null;
@@ -1624,9 +1626,9 @@ window.renderCompareView = function(planA, planB) {
         if (!_downPlan) return;
         _startX = e.touches[0].clientX;
         _startY = e.touches[0].clientY;
-        _longPressFired = false;
+        window.__compareLongPressJustFired = false;
         _timer = setTimeout(() => {
-            _longPressFired = true;
+            window.__compareLongPressJustFired = true;
             window.startCompareMode(_downPlan);
             _downPlan = null;
             if (navigator.vibrate) navigator.vibrate(40);
@@ -1640,13 +1642,7 @@ window.renderCompareView = function(planA, planB) {
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     }, { passive: true });
 
-    document.addEventListener('touchend', e => {
-        if (_longPressFired) {
-            e.preventDefault();
-            _longPressFired = false;
-        }
-        cancel();
-    }, { passive: false });
+    document.addEventListener('touchend',    cancel, { passive: true });
     document.addEventListener('touchcancel', cancel, { passive: true });
 
     // mouse long-press for desktop/notebook
