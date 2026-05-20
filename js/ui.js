@@ -2640,6 +2640,7 @@ function _updateTPDUI() {
     if (!toggle) return;
     const enabled = toggle.checked;
     if (area) area.classList.toggle('hidden', !enabled);
+    if (enabled) window.refreshTPDPills && window.refreshTPDPills();
     if (enabled && display && lastCalculationData && lastCalculationData.tpdPrem > 0) {
         display.textContent = `เบี้ย TPD: ${lastCalculationData.tpdPrem.toLocaleString()} บาท/ปี`;
     } else if (display) {

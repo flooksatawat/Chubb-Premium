@@ -381,6 +381,44 @@ window.adjustCashFlow = function(delta, type) {
     else calculate('cashflow', true);
 };
 
+window.adjustTPD = function(delta) {
+    const el = document.getElementById('tpdSAInput');
+    if (!el) return;
+    const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
+    const next = Math.max(0, cur + delta);
+    el.value = next.toLocaleString('en-US');
+    window.currentTPDSA = String(next);
+    window.refreshTPDPills && window.refreshTPDPills();
+    calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+window.setTPDMultiplier = function(mult) {
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    const v = Math.round(mainSum * mult);
+    const el = document.getElementById('tpdSAInput');
+    if (el) el.value = v.toLocaleString('en-US');
+    window.currentTPDSA = String(v);
+    window.refreshTPDPills && window.refreshTPDPills();
+    calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+window.refreshTPDPills = function() {
+    const pillRow = document.getElementById('tpdPillRow');
+    if (!pillRow) return;
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    const curTPD = parseInt((document.getElementById('tpdSAInput')?.value || '').replace(/,/g, '')) || 0;
+    const mults = [0.5, 1, 1.5, 2];
+    const labels = ['×½', '×1', '×1.5', '×2'];
+    pillRow.innerHTML = mults.map((m, i) => {
+        const v = Math.round(mainSum * m);
+        const isSel = curTPD === v && v > 0;
+        const cls = isSel
+            ? 'w-full text-center py-1.5 text-[11px] font-bold text-orange-600 bg-white shadow rounded-xl border border-orange-200/60 transition-all'
+            : 'w-full text-center py-1.5 text-[11px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
+        return `<button onclick="window.setTPDMultiplier(${m})" class="${cls}">${labels[i]}</button>`;
+    }).join('');
+};
+
 // ==================== LOGIC: คำนวณหลัก (MASTER CALCULATION) ====================
 function calculate(source, enforceMin = false) { 
     try {
