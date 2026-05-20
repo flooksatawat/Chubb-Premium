@@ -1219,23 +1219,6 @@ function replacePercentWithAmount(text, sum, premium) {
 function selectAppPlan(planName) {
     if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
 
-    // ── Compare mode intercept ──
-    if (window.__compareMode && window.__comparePlanA) {
-        const planA = window.__comparePlanA;
-        if (planName !== planA) {
-            closePopup('planSelectModal');
-            window.cancelCompareMode();
-            window.renderCompareView(planA, planName);
-            return;
-        } else {
-            // กดแบบเดิมหลัง long-press — ถ้า long-press เพิ่งยิง ให้ยกเลิก แต่ไม่ select
-            const justFired = window.__compareLongPressJustFired;
-            window.__compareLongPressJustFired = false;
-            window.cancelCompareMode();
-            if (justFired) return;
-        }
-    }
-
     _cachedForPlan = null; // invalidate card cache so active highlight updates
 
     const _rp = document.getElementById('rightPane');
@@ -1626,12 +1609,13 @@ window.renderCompareView = function(planA, planB) {
         if (!_downPlan) return;
         _startX = e.touches[0].clientX;
         _startY = e.touches[0].clientY;
-        window.__compareLongPressJustFired = false;
         _timer = setTimeout(() => {
-            window.__compareLongPressJustFired = true;
-            window.startCompareMode(_downPlan);
+            const plan = _downPlan;
             _downPlan = null;
             if (navigator.vibrate) navigator.vibrate(40);
+            if (typeof window.openCompareModal === 'function') {
+                window.openCompareModal(plan || undefined);
+            }
         }, THRESHOLD);
     }, { passive: true });
 
