@@ -3115,13 +3115,6 @@ function generatePolicyTableData() {
     }
     document.getElementById('policyTableBody').innerHTML = html;
 
-    if (isBreakevenActive && foundBreakeven) {
-        requestAnimationFrame(() => {
-            const beRow = document.getElementById('breakevenRow');
-            if (beRow) beRow.scrollIntoView({ behavior: 'instant', block: 'center' });
-        });
-    }
-
     // --- 5. Summary Text ---
     if (foundBreakeven) {
         document.getElementById('breakevenSummary').innerHTML = `
