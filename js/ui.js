@@ -2680,7 +2680,7 @@ function generatePolicyTableData() {
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     
-    const hasSurrenderMenu = isLPB || isSLPA;
+    const hasSurrenderMenu = isLPB;
     
     // --- 1. UI Control Menu ---
     const surrenderContainer = document.getElementById('surrenderContainer');
@@ -2860,7 +2860,7 @@ function generatePolicyTableData() {
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
     const showSAColumn = hasSurrenderMenu || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
     const showAccidentColumn = isSLB;
-    const showCoverageColumn = isCX || isCL;
+    const showCoverageColumn = isCX || isCL || isSLPA;
     const showCVColumn = (isCX || isCL || isSLB) ? isShowCVActive : true;
 
     // --- 3. Header ---
@@ -2909,7 +2909,7 @@ function generatePolicyTableData() {
     const _lCF       = _isCompact ? 'CF'     : 'กระแสเงินสด';
     const _lTotal    = _isCompact ? 'รวมรับ' : 'รวมรับเงิน';
     const _lCV       = _isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้';
-    const _lCoverage = _isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง';
+    const _lCoverage = isSLPA ? (_isCompact ? 'ทุน' : 'ทุนประกัน') : (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
     const _lSA       = _isCompact ? 'ทุน'    : 'ทุนประกัน';
 
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
