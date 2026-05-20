@@ -2673,7 +2673,7 @@ function generatePolicyTableData() {
     
     const isSLB = planAbbr === "SLB" || planName.includes("SLB") || planName.includes("SUPREME LIFE BASE");
     const isSLPA = planAbbr === "SLPA" || planName.includes("SLPA") || planName.includes("SUPREME LIFE PROTECTOR");
-    const isLPB = planAbbr === "LPB" || planName.includes("LPB") || planName.includes("LIFE PROTECTOR");
+    const isLPB = !isSLPA && (planAbbr === "LPB" || planName.includes("LPB") || planName.includes("LIFE PROTECTOR"));
     const isWXN = planAbbr === "WXN" || planName.includes("WXN") || planName.includes("WHOLE LIFE EXTRA");
     const isElite = planName.includes('ELITE') || planName.includes('868') || planName.includes('818');
     const isTX = planName.includes('24 TX') || planAbbr === 'TX';
@@ -3101,10 +3101,6 @@ function generatePolicyTableData() {
         if (y >= cfLoopEnd) break;
     }
     document.getElementById('policyTableBody').innerHTML = html;
-    setTimeout(() => {
-        const firstHighlight = document.querySelector('.cf-highlight-row');
-        if (firstHighlight) firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
 
     // --- 5. Summary Text ---
     if (foundBreakeven) {
