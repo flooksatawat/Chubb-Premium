@@ -2820,6 +2820,8 @@ function generatePolicyTableData() {
             if (hasSurrenderMenu) {
                 document.getElementById('toggleSurrender').addEventListener('change', (e) => {
                     const cfI = document.getElementById('cfInlineControls');
+                    const tbl = document.getElementById('pdfTableTarget');
+                    const savedScroll = tbl ? tbl.scrollTop : 0;
                     if (e.target.checked) {
                         if (cfI) {
                             cfI.classList.remove('hidden');
@@ -2832,6 +2834,7 @@ function generatePolicyTableData() {
                             el.classList.remove('cf-highlight-row', 'bg-amber-50', 'border-y', 'border-amber-300'));
                     }
                     generatePolicyTableData();
+                    if (tbl) requestAnimationFrame(() => { tbl.scrollTop = savedScroll; });
                 });
             }
         }
