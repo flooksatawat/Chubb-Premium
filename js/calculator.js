@@ -381,11 +381,18 @@ window.adjustCashFlow = function(delta, type) {
     else calculate('cashflow', true);
 };
 
+function _getTPDMax() {
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    return mainSum * 2;
+}
+
 window.adjustTPD = function(delta) {
     const el = document.getElementById('tpdSAInput');
     if (!el) return;
     const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
-    const next = Math.max(0, cur + delta);
+    const max = _getTPDMax();
+    const next = Math.min(Math.max(0, cur + delta), max);
+    if (next === max && delta > 0) showCustomError(`ซื้อ TPD ได้สูงสุด ${max.toLocaleString()} บาท (2×ทุนหลัก)`);
     el.value = next.toLocaleString('en-US');
     window.currentTPDSA = String(next);
     window.refreshTPDPills && window.refreshTPDPills();
@@ -394,7 +401,7 @@ window.adjustTPD = function(delta) {
 
 window.setTPDMultiplier = function(mult) {
     const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
-    const v = Math.round(mainSum * mult);
+    const v = Math.min(Math.round(mainSum * mult), _getTPDMax());
     const el = document.getElementById('tpdSAInput');
     if (el) el.value = v.toLocaleString('en-US');
     window.currentTPDSA = String(v);
