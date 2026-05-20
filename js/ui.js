@@ -1973,66 +1973,90 @@ window.injectToWorkspace = function(html) {
 };
 window.renderToWorkspace = window.injectToWorkspace; // legacy alias
 
-window.openAIPanel = function() {
-    if (!window.isWideLayout()) { openPopup('aiMenuModal'); return; }
-    ['navMainBtn','navTableBtn','navCashBtn','navAiBtn'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.classList.remove('active');
-    });
-    const aiBtn = document.getElementById('navAiBtn');
-    if (aiBtn) aiBtn.classList.add('active');
-    const html = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2rem;gap:1.5rem;">
-        <div style="text-align:center;margin-bottom:0.5rem;">
-            <div style="width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,#2563eb,#1e3a8a);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 24px rgba(37,99,235,0.35);">
-                <i class="fas fa-robot" style="color:white;font-size:24px;"></i>
-            </div>
-            <div style="font-size:18px;font-weight:800;color:#1e293b;font-family:'Kanit',sans-serif;">เลือกผู้ช่วย AI</div>
-            <div style="font-size:12px;color:#94a3b8;margin-top:4px;">AI Tools สำหรับตัวแทน</div>
-        </div>
-        <div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;">
-            <button onclick="window.open('https://gemini.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
-                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
-                    <i class="fas fa-sparkles" style="color:#0284c7;font-size:18px;"></i>
-                </div>
-                <div style="text-align:left;flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:#1e40af;">Google Gemini</div>
-                    <div style="font-size:11px;color:#64748b;">AI สำหรับค้นหาและวิเคราะห์</div>
-                </div>
-                <i class="fas fa-external-link-alt" style="color:#93c5fd;font-size:12px;"></i>
-            </button>
-            <button onclick="window.open('https://notebooklm.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
-                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
-                    <i class="fas fa-book-open" style="color:#7c3aed;font-size:18px;"></i>
-                </div>
-                <div style="text-align:left;flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:#6d28d9;">Notebook LM</div>
-                    <div style="font-size:11px;color:#64748b;">AI สำหรับสรุปเอกสาร</div>
-                </div>
-                <i class="fas fa-external-link-alt" style="color:#c4b5fd;font-size:12px;"></i>
-            </button>
-            <button onclick="window.openCompareModal && window.openCompareModal()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
-                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
-                    <i class="fas fa-scale-balanced" style="color:#0d9488;font-size:18px;"></i>
-                </div>
-                <div style="text-align:left;flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:#0f766e;">เทียบแบบประกัน</div>
-                    <div style="font-size:11px;color:#64748b;">เปรียบเทียบหลายแผนพร้อมกัน</div>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#5eead4;font-size:12px;"></i>
-            </button>
-            <button onclick="window.openCompare3DModal && window.openCompare3DModal()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:16px;cursor:pointer;transition:all 0.2s;font-family:'Kanit',sans-serif;">
-                <div style="width:40px;height:40px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;">
-                    <i class="fas fa-hand-holding-medical" style="color:#e11d48;font-size:18px;"></i>
-                </div>
-                <div style="text-align:left;flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:#be123c;">เทียบแผน 3D Health</div>
-                    <div style="font-size:11px;color:#64748b;">เปรียบเทียบแพ็กเกจ HX</div>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#fda4af;font-size:12px;"></i>
-            </button>
-        </div>
+// ── AI Panel helpers ──────────────────────────────────────────────────────────
+function _aiMenuHTML() {
+    return `<div style="display:flex;flex-direction:column;gap:10px;font-family:'Kanit',sans-serif;">
+        <button onclick="window.open('https://gemini.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
+            <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-sparkles" style="color:#0284c7;font-size:17px;"></i></div>
+            <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#1e40af;">Google Gemini</div><div style="font-size:11px;color:#64748b;">AI สำหรับค้นหาและวิเคราะห์</div></div>
+            <i class="fas fa-external-link-alt" style="color:#93c5fd;font-size:11px;"></i>
+        </button>
+        <button onclick="window.open('https://notebooklm.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
+            <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-book-open" style="color:#7c3aed;font-size:17px;"></i></div>
+            <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#6d28d9;">Notebook LM</div><div style="font-size:11px;color:#64748b;">AI สำหรับสรุปเอกสาร</div></div>
+            <i class="fas fa-external-link-alt" style="color:#c4b5fd;font-size:11px;"></i>
+        </button>
+        <button onclick="window._aiShowCompare()" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
+            <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-scale-balanced" style="color:#0d9488;font-size:17px;"></i></div>
+            <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#0f766e;">เทียบแบบประกัน</div><div style="font-size:11px;color:#64748b;">เปรียบเทียบหลายแผนพร้อมกัน</div></div>
+            <i class="fas fa-chevron-right" style="color:#5eead4;font-size:11px;"></i>
+        </button>
+        <button onclick="window._aiShow3D()" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
+            <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-hand-holding-medical" style="color:#e11d48;font-size:17px;"></i></div>
+            <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#be123c;">เทียบแผน 3D Health</div><div style="font-size:11px;color:#64748b;">เปรียบเทียบแพ็กเกจ HX</div></div>
+            <i class="fas fa-chevron-right" style="color:#fda4af;font-size:11px;"></i>
+        </button>
     </div>`;
-    if (window.injectToWorkspace) window.injectToWorkspace(html);
+}
+
+window._aiShowCompare = function() {
+    // สลับ content ใน Swal เดิม (ถ้าเปิดอยู่) หรือสร้างใหม่
+    const swalHtml = Swal.getHtmlContainer();
+    if (swalHtml) {
+        if (window._buildCompareHTML) {
+            Swal.update({ title: '<span style="font-family:Kanit,sans-serif;font-size:17px;">🔍 เทียบแบบประกัน</span>' });
+            swalHtml.innerHTML = window._buildCompareHTML();
+        }
+    } else if (window.openCompareModal) {
+        window.openCompareModal();
+    }
+};
+
+window._aiShow3D = function() {
+    const swalHtml = Swal.getHtmlContainer();
+    if (swalHtml) {
+        if (window._build3DCompareHTML) {
+            Swal.update({ title: '<span style="font-family:Kanit,sans-serif;font-size:17px;">🏥 เทียบแผน 3D Health Excellence</span>' });
+            swalHtml.innerHTML = window._build3DCompareHTML();
+        }
+    } else if (window.openCompare3DModal) {
+        window.openCompare3DModal();
+    }
+};
+
+window.openAIPanel = function() {
+    // สำหรับ wide layout — inject ใน right pane, ไม่ใช้ Swal
+    if (window.isWideLayout()) {
+        ['navMainBtn','navTableBtn','navCashBtn','navAiBtn'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.classList.remove('active');
+        });
+        const aiBtn = document.getElementById('navAiBtn');
+        if (aiBtn) aiBtn.classList.add('active');
+        const html = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2rem;gap:1.5rem;">
+            <div style="text-align:center;margin-bottom:0.5rem;">
+                <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#1e3a8a);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;box-shadow:0 8px 24px rgba(37,99,235,0.35);">
+                    <i class="fas fa-robot" style="color:white;font-size:22px;"></i>
+                </div>
+                <div style="font-size:17px;font-weight:800;color:#1e293b;font-family:'Kanit',sans-serif;">เลือกผู้ช่วย AI</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:3px;">AI Tools สำหรับตัวแทน</div>
+            </div>
+            <div style="width:100%;max-width:340px;">${_aiMenuHTML()}</div>
+        </div>`;
+        if (window.injectToWorkspace) window.injectToWorkspace(html);
+        return;
+    }
+    // สำหรับ mobile — เปิด Swal เดียว ไม่เปิดซ้อน
+    Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:17px;"><i class="fas fa-robot" style="color:#2563eb;margin-right:6px;"></i>เลือกผู้ช่วย AI</span>',
+        html: _aiMenuHTML(),
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: Math.min(window.innerWidth - 20, 420),
+        didOpen: () => {
+            const popup = Swal.getPopup();
+            if (popup) popup.style.borderRadius = '20px';
+        }
+    });
 };
 
 window.resetRightPaneToPlaceholder = function() {
