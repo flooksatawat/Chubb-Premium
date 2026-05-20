@@ -1144,7 +1144,7 @@ window.open3DShareModal = function() {
             </div>
             <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์รายละเอียดความคุ้มครอง</h3>
             <div class="flex flex-col gap-3 w-full">
-                <button onclick="Swal.close(); setTimeout(() => exportTableToPDF('preview'), 200);"
+                <button onclick="Swal.close(); setTimeout(() => exportTableToPDF('save'), 200);"
                     class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl active:scale-[0.98] transition-all">
                     <i class="fas fa-file-pdf text-[22px] text-red-500 w-8 text-center"></i>
                     <div class="text-left"><div class="text-[14px] font-bold text-slate-800">แชร์ PDF</div><div class="text-[11px] text-slate-500">ส่งเป็นไฟล์ PDF</div></div>
@@ -4268,9 +4268,20 @@ async function _export3DPDF(actionType = 'preview') {
 
         const pdfBlob = doc.output('blob');
         const pdfFileName = `3D_Health_${hxVal}_19หมวด.pdf`;
+        const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
         if (toast.parentElement) toast.remove();
 
-        if (actionType === 'download' || typeof showPdfViewer !== 'function') {
+        if (actionType === 'save') {
+            const inLine = typeof isInLineApp === 'function' && isInLineApp();
+            if (inLine) {
+                await showPdfViewer(pdfBlob, pdfFileName);
+            } else {
+                const shared = typeof tryShareFile === 'function'
+                    ? await tryShareFile(pdfFile, pdfFileName, pdfFileName)
+                    : false;
+                if (!shared) doc.save(pdfFileName);
+            }
+        } else if (actionType === 'download') {
             const url = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a'); a.href = url; a.download = pdfFileName; a.click();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
