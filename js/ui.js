@@ -2683,7 +2683,7 @@ function generatePolicyTableData() {
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     
-    const hasSurrenderMenu = isLPB;
+    const hasSurrenderMenu = isLPB || isSLPA;
     
     // --- 1. UI Control Menu ---
     const surrenderContainer = document.getElementById('surrenderContainer');
@@ -2864,7 +2864,7 @@ function generatePolicyTableData() {
     const showCashFlowBase = isWXN || isElite || isTX;
     const forceShowCashFlow = showCashFlowBase;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = hasSurrenderMenu || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
+    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA;
     const showCVColumn = (isCX || isCL || isSLB) ? isShowCVActive : true;
@@ -3114,6 +3114,13 @@ function generatePolicyTableData() {
         if (y >= cfLoopEnd) break;
     }
     document.getElementById('policyTableBody').innerHTML = html;
+
+    if (isBreakevenActive && foundBreakeven) {
+        requestAnimationFrame(() => {
+            const beRow = document.getElementById('breakevenRow');
+            if (beRow) beRow.scrollIntoView({ behavior: 'instant', block: 'center' });
+        });
+    }
 
     // --- 5. Summary Text ---
     if (foundBreakeven) {
