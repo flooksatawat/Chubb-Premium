@@ -993,8 +993,8 @@ window.render3DOptionsUI = function() {
     let hbfVal = window.currentHBF || 0;
 
     const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
-    const hxoOpts = ['ไม่เลือก', 'HXO10', 'HXO20', 'HXO30', 'HXO50'];
-                const hxdOpts = ['ไม่เลือก', 'HXD100', 'HXD200', 'HXD500', 'HXD1000'];
+    const hxoOpts = ['HXO10', 'HXO20', 'HXO30', 'HXO50'];
+                const hxdOpts = ['HXD100', 'HXD200', 'HXD500', 'HXD1000'];
 
                 const displayLabels = {
                   'HXO10': '1,000', 'HXO20': '2,000', 'HXO30': '3,000', 'HXO50': '5,000',
@@ -1038,9 +1038,9 @@ window.render3DOptionsUI = function() {
 
         // ── HXO ──
         html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
-        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
+        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-4 gap-1 w-full">`;
         hxoOpts.forEach(opt => {
-            let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
+            let displayText = displayLabels[opt] || opt;
             let isSel = (opt === hxoVal);
             let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-blue-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-blue-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
             html += `<button onclick="window.handle3DClick('HXO', '${opt}')" class="${btnClass}">${displayText}</button>`;
@@ -1050,9 +1050,9 @@ window.render3DOptionsUI = function() {
         // ── HXD (เมื่อ HXO เลือกอยู่) ──
         if (hxoVal && hxoVal !== 'ไม่เลือก') {
             html += `<div id="rider-hxd" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-indigo-100"><button onclick="window.closeRiderSection('rider-hxd', 'currentHXD')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXD"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-star text-indigo-500"></i> ADVANCE (HXD)</p>`;
-            html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
+            html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-4 gap-1 w-full">`;
             hxdOpts.forEach(opt => {
-                let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
+                let displayText = displayLabels[opt] || opt;
                 let isSel = (opt === hxdVal);
                 let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-indigo-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-indigo-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
                 html += `<button onclick="window.handle3DClick('HXD', '${opt}')" class="${btnClass}">${displayText}</button>`;
@@ -5232,8 +5232,8 @@ window.render3DDetailsAccordion = function() {
     const hbfVal = window.currentHBF || 0;
 
     const hxOpts  = ['HX15','HX20','HX40','HX60','HX150','HX300'];
-    const hxoOpts = ['ไม่เลือก','HXO10','HXO20','HXO30','HXO50'];
-    const hxdOpts = ['ไม่เลือก','HXD100','HXD200','HXD500','HXD1000'];
+    const hxoOpts = ['HXO10','HXO20','HXO30','HXO50'];
+    const hxdOpts = ['HXD100','HXD200','HXD500','HXD1000'];
     const DL = {
         'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000',
         'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000',
@@ -5279,19 +5279,19 @@ window.render3DDetailsAccordion = function() {
 
         if (hxVal) {
             // HXO
-            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">OPD Extra (HXO) <span class="text-teal-500">${hxoVal==='ไม่เลือก'?'ไม่เลือก':DL[hxoVal]+' บ./ครั้ง'}</span></p>
-                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">OPD Extra (HXO) <span class="text-teal-500">${hxoVal==='ไม่เลือก'?'–':DL[hxoVal]+' บ./ครั้ง'}</span></p>
+                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-4 gap-1">`;
             hxoOpts.forEach(opt => {
-                const lbl = opt==='ไม่เลือก'?'ไม่':'HXO'+opt.replace('HXO','');
+                const lbl = 'HXO'+opt.replace('HXO','');
                 stickyHtml += `<button onclick="window.set3DHXO('${opt}')" class="${opt===hxoVal?pillSel:pillDef}">${lbl}</button>`;
             });
             stickyHtml += `</div></div>`;
 
             // HXD
-            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Advance (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'ไม่เลือก':DL[hxdVal]+' บ./รอบ'}</span></p>
-                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
+            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Advance (HXD) <span class="text-indigo-500">${hxdVal==='ไม่เลือก'?'–':DL[hxdVal]+' บ./รอบ'}</span></p>
+                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-4 gap-1">`;
             hxdOpts.forEach(opt => {
-                const lbl = opt==='ไม่เลือก'?'ไม่':'HXD'+opt.replace('HXD','');
+                const lbl = 'HXD'+opt.replace('HXD','');
                 stickyHtml += `<button onclick="window.set3DHXD('${opt}')" class="${opt===hxdVal?pillSel:pillDef}">${lbl}</button>`;
             });
             stickyHtml += `</div></div>`;
