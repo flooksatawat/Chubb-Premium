@@ -1504,24 +1504,17 @@ function _updatePlanPills(activePlan) {
 // ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
 function manualTriggerPopup() {
     try {
-        let ageInput = document.getElementById('ageInput');
-        let ageVal = parseInt(ageInput?.value);
-
         if (!currentGender) currentGender = 'male';
-        if (!ageVal || ageVal <= 0) {
-            ageVal = 30;
-            if (ageInput) ageInput.value = "30";
-        }
 
-        let sumVal = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, ''));
-        let premVal = parseInt((document.getElementById('premiumInput')?.value || '').replace(/,/g, ''));
-
-        if ((!sumVal || sumVal <= 0) && (!premVal || premVal <= 0)) {
-            let premInput = document.getElementById('premiumInput');
+        // ใช้ค่าจาก form ตรงๆ ไม่ override ด้วย default
+        const sumVal = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+        const premVal = parseInt((document.getElementById('premiumInput')?.value || '').replace(/,/g, '')) || 0;
+        if (!sumVal && !premVal) {
+            const premInput = document.getElementById('premiumInput');
             if (premInput) premInput.value = "120,000";
         }
 
-        let activeMode = typeof currentMode !== 'undefined' ? currentMode : 'sum';
+        const activeMode = typeof currentMode !== 'undefined' ? currentMode : 'sum';
         const freshData = (typeof calculate === 'function') ? calculate(activeMode, true) : null;
         const dataToShow = freshData || lastCalculationData;
 
