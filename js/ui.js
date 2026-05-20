@@ -4474,11 +4474,14 @@ async function exportTableToPDF(actionType = 'preview') {
             } 
         }
         
-        const d = lastCalculationData; 
-        const tableRows = []; 
-        const trs = document.querySelectorAll('#policyTableBody tr'); 
+        // Sync table DOM with current toggle state before reading
+        if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+
+        const d = lastCalculationData;
+        const tableRows = [];
+        const trs = document.querySelectorAll('#policyTableBody tr');
         const toggleBreakeven = document.getElementById('toggleBreakeven');
-        const showBreakeven = toggleBreakeven ? toggleBreakeven.checked : false; 
+        const showBreakeven = toggleBreakeven ? toggleBreakeven.checked : false;
         
         let beRowIndex = -1; 
         let beAgeStr = '', beYearStr = '', beCVStr = ''; 
@@ -4511,15 +4514,22 @@ async function exportTableToPDF(actionType = 'preview') {
             }
         });
         
-        doc.autoTable({ 
-            startY: (showBreakeven && beRowIndex !== -1) ? 40 : 34, 
-            head: [headRow], 
-            body: tableRows, 
-            theme: 'plain', 
-            margin: { top: 34, bottom: 15, left: 15, right: 15 }, 
-            styles: { font: fontName, fontSize: 12, halign: 'center', valign: 'middle', cellPadding: 1.5, minCellHeight: 4.8 }, 
+        doc.autoTable({
+            startY: (showBreakeven && beRowIndex !== -1) ? 40 : 34,
+            head: [headRow],
+            body: tableRows,
+            theme: 'plain',
+            margin: { top: 34, bottom: 15, left: 15, right: 15 },
+            styles: { font: fontName, fontSize: 12, halign: 'center', valign: 'middle', cellPadding: 1.5, minCellHeight: 4.8 },
             headStyles: { fillColor: [13, 148, 136], textColor: [255, 255, 255], fontStyle: 'bold', lineWidth: 0 },
-            bodyStyles: { textColor: [71, 85, 105], lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 }, lineColor: [241, 245, 249] }, 
+            bodyStyles: { textColor: [71, 85, 105], lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 }, lineColor: [241, 245, 249] },
+            didParseCell: function(data) {
+                if (showBreakeven && beRowIndex !== -1 && data.row.index === beRowIndex) {
+                    data.cell.styles.fillColor = [209, 250, 229];
+                    data.cell.styles.textColor = [6, 95, 70];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            },
             didDrawPage: function (data) { 
                 doc.setFillColor(36, 60, 148); 
                 doc.rect(0, 0, 210, 20, 'F'); 
