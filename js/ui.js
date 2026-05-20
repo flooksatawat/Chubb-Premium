@@ -1135,37 +1135,9 @@ window.renderD3QuickPills = function(ctx) {
     return `<div class="grid grid-cols-4 gap-1.5">${btns}</div>`;
 };
 
-// Share modal สำหรับ 3D: PDF + รูปภาพ
+// Share modal สำหรับ 3D: แสดง bottom sheet เดียวกับ nav bar share
 window.open3DShareModal = function() {
-    Swal.fire({
-        html: `<div class="flex flex-col items-center pt-1 pb-1">
-            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
-                <i class="fas fa-share-nodes text-lg text-slate-500"></i>
-            </div>
-            <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์รายละเอียดความคุ้มครอง</h3>
-            <div class="flex flex-col gap-3 w-full">
-                <button onclick="Swal.close(); setTimeout(() => exportTableToPDF('save'), 200);"
-                    class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl active:scale-[0.98] transition-all">
-                    <i class="fas fa-file-pdf text-[22px] text-red-500 w-8 text-center"></i>
-                    <div class="text-left"><div class="text-[14px] font-bold text-slate-800">แชร์ PDF</div><div class="text-[11px] text-slate-500">ส่งเป็นไฟล์ PDF</div></div>
-                </button>
-                <button onclick="Swal.close(); setTimeout(() => window.navShareAction(), 200);"
-                    class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl active:scale-[0.98] transition-all">
-                    <i class="fas fa-image text-[22px] text-blue-500 w-8 text-center"></i>
-                    <div class="text-left"><div class="text-[14px] font-bold text-slate-800">แชร์รูปภาพ</div><div class="text-[11px] text-slate-500">บันทึกหรือส่งเป็นรูป</div></div>
-                </button>
-            </div>
-        </div>`,
-        showConfirmButton: false,
-        showCloseButton: true,
-        width: 'min(90vw, 320px)',
-        padding: '1.25rem',
-        customClass: { popup: '!rounded-3xl !shadow-2xl', closeButton: '!text-slate-400 hover:!text-red-500' },
-        didOpen: () => {
-            const container = document.querySelector('.swal2-container');
-            if (container) container.style.zIndex = '99999';
-        },
-    });
+    exportTableToPDF('modal');
 };
 
 function _refresh3DRightView() {
@@ -4264,7 +4236,10 @@ async function _export3DPDF(actionType = 'preview') {
         const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
         if (toast.parentElement) toast.remove();
 
-        if (actionType === 'save') {
+        if (actionType === 'modal') {
+            const d = lastCalculationData || {};
+            await _showTableShareModal(pdfBlob, pdfFile, doc, d);
+        } else if (actionType === 'save') {
             const inLine = typeof isInLineApp === 'function' && isInLineApp();
             if (inLine) {
                 await showPdfViewer(pdfBlob, pdfFileName);
