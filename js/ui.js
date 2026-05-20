@@ -1400,9 +1400,9 @@ function selectAppPlan(planName) {
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
     }
 
-    // TPD rider: show for TL, 3D, and CL
+    // TPD rider: show for 3D and CL only (not TLA)
     const globalTPDContainer = document.getElementById('globalTPDContainer');
-    if (['Convertable Term', '3D Health Excellence', 'Century Life'].includes(planName)) {
+    if (['3D Health Excellence', 'Century Life'].includes(planName)) {
         if (globalTPDContainer) globalTPDContainer.classList.remove('hidden');
     } else {
         if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
