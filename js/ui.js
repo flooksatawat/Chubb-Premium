@@ -1608,6 +1608,7 @@ window.renderCompareView = function(planA, planB) {
     const THRESHOLD = 500;
     const MOVE_DEAD_ZONE = 8; // px — ขยับน้อยกว่านี้ไม่ cancel
     let _timer = null, _downPlan = null, _startX = 0, _startY = 0;
+    let _longPressFired = false; // กัน click หลัง long-press
 
     function getTargetPlan(e) {
         const btn = e.target.closest('[data-plan]');
@@ -1623,7 +1624,9 @@ window.renderCompareView = function(planA, planB) {
         if (!_downPlan) return;
         _startX = e.touches[0].clientX;
         _startY = e.touches[0].clientY;
+        _longPressFired = false;
         _timer = setTimeout(() => {
+            _longPressFired = true;
             window.startCompareMode(_downPlan);
             _downPlan = null;
             if (navigator.vibrate) navigator.vibrate(40);
@@ -1637,7 +1640,14 @@ window.renderCompareView = function(planA, planB) {
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     }, { passive: true });
 
-    document.addEventListener('touchend',    cancel, { passive: true });
+    // non-passive เพื่อ preventDefault ป้องกัน click หลัง long-press
+    document.addEventListener('touchend', e => {
+        if (_longPressFired) {
+            e.preventDefault();
+            _longPressFired = false;
+        }
+        cancel();
+    }, { passive: false });
     document.addEventListener('touchcancel', cancel, { passive: true });
 
     // mouse long-press for desktop/notebook
@@ -3134,7 +3144,6 @@ function generatePolicyTableData() {
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
             let breakevenValue = (isElitePlan || isTX || isWXN) ? surrenderTotal
-                               : isSLPA ? Math.round(d.sum * (1 + 0.05 * Math.floor(y / 5)))
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
