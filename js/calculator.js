@@ -55,7 +55,7 @@ async function loadAllRates() {
         'cx_rates.json', 'ci_rates.json', 'lp_rates.json', 'slb_rates.json', 'slpa_rates.json',
         'tx_rates.json', 'elite_rates.json', 'cl_rates.json', 'tla_rates.json',
         'hx_rates.json', 'hxd_rates.json', 'hxo_rates.json', '3d_health.json',
-        'hbf_rates.json', 'wxn_rates.json'
+        'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json'
     ];
     try {
         for (const file of rateFiles) {
@@ -65,6 +65,8 @@ async function loadAllRates() {
                     const d = await r.json(); 
                     if (file === 'ci_rates.json') {
                         CI_RATES = { ...CI_RATES, ...d };
+                    } else if (file === 'tpd_rates.json' || d.TPD_RATES) {
+                        window.TPD_RATES = d.TPD_RATES || d;
                     } else if (file === 'hbf_rates.json' || d.HBF_RATES) {
                         // โหลด HBF เข้าตัวแปร Global เพื่อให้เรียกใช้ได้ง่าย
                         window.HBF_RATES = d.HBF_RATES || d;
@@ -112,6 +114,20 @@ async function getCVData() {
 
 function getHealthRate(categoryKey, planName, age, gender) {
     if (!planName || planName === 'ไม่เลือก' || planName === '-') return 0;
+
+    // ส่วนของ TPD Super Care Rider
+    if (categoryKey === 'TPD') {
+        const tpdSource = window.TPD_RATES;
+        if (!tpdSource) return 0;
+        const sa = parseInt(planName) || 0;
+        if (sa <= 0) return 0;
+        const classKey = 'class_12'; // ชั้นอาชีพ 1&2 เป็นค่า default
+        const genderKey = (gender === 'male' || (gender || '').includes('ชาย')) ? 'male' : 'female';
+        const ageKey = String(Math.min(Math.max(age, 0), 99));
+        const rate = tpdSource[classKey]?.[genderKey]?.[ageKey];
+        if (rate === undefined) return 0;
+        return Math.round((sa / 1000) * rate);
+    }
 
     // ส่วนของ HBF ที่แบ่งตาม Occupational Class
     if (categoryKey === 'HBF') {
@@ -550,8 +566,10 @@ function calculate(source, enforceMin = false) {
             let hxdPrem = getHealthRate('HXD', hxdVal, age, currentGender);
             let hbfPrem = getHealthRate('HBF', hbfVal, age, currentGender);
             let mfPrem = getHealthRate('MF', mfVal, age, currentGender);
+            const _tpdSA3d = window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0';
+            let tpdPrem = getHealthRate('TPD', _tpdSA3d, age, currentGender);
 
-            let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem;
+            let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem + tpdPrem;
             let _3dClBasePrem = 0;
 
             if (source === 'sum') {
@@ -593,7 +611,7 @@ function calculate(source, enforceMin = false) {
                 _3dClBasePrem = basePrem;
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
             }
-            window._3dPremData = { clBasePrem: _3dClBasePrem, hxPrem, hxoPrem, hxdPrem, hbfPrem, hxVal, hxoVal, hxdVal, hbfVal, clPlan };
+            window._3dPremData = { clBasePrem: _3dClBasePrem, hxPrem, hxoPrem, hxdPrem, hbfPrem, tpdPrem, hxVal, hxoVal, hxdVal, hbfVal, clPlan, tpdSA: _tpdSA3d };
         }
         // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB, CL) ----------------
         else {
@@ -613,6 +631,8 @@ function calculate(source, enforceMin = false) {
             const totalRate = lifeRate + ciRate;
 
             let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
+            const _tpdSAStr = window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0';
+            let tpdPrem = getHealthRate('TPD', _tpdSAStr, age, currentGender);
 
             if (totalRate > 0) {
                 const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
@@ -623,12 +643,12 @@ function calculate(source, enforceMin = false) {
                     }
                     // คำนวณเบี้ยจากทุน: (ทุน/1000) * (เรทรวม - ส่วนลด)
                     let basePrem = (fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan));
-                    fPrem = Math.round(basePrem) + mfPrem;
+                    fPrem = Math.round(basePrem) + mfPrem + tpdPrem;
                     document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 } else {
                     // คำนวณทุนจากเบี้ย (ย้อนกลับ)
                     fPrem = getSafeValue('premiumInput') || 0;
-                    let basePrem = fPrem - mfPrem;
+                    let basePrem = fPrem - mfPrem - tpdPrem;
                     if(basePrem < 0) basePrem = 0;
 
                     let baseDiscountArray = [3, 2, 1.5, 1, 0.5, 0];
@@ -640,7 +660,7 @@ function calculate(source, enforceMin = false) {
 
                     if (enforceMin && fSum < _minS) {
                         fSum = _minS;
-                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem;
+                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem;
                         document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                     }
                     document.getElementById('sumInsuredInput').value = formatNum(fSum);
@@ -654,7 +674,8 @@ function calculate(source, enforceMin = false) {
         else cashFlowVal = getSafeValue('cashFlowInput');
         
         highlightActivePills(fSum, fPrem, cashFlowVal);
-        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}) };
+        const _tlaTpdPrem = (currentAppPlan === 'Convertable Term' && window.currentTPDEnabled) ? (typeof tpdPrem !== 'undefined' ? tpdPrem : 0) : 0;
+        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _tlaTpdPrem, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0') };
         
         if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
 

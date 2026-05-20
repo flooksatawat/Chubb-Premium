@@ -475,6 +475,25 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                      </div>                            
 
+                    <!-- TPD Rider container: visible for TL and 3D -->
+                    <div id="globalTPDContainer" class="hidden mx-1 mb-2 p-3 bg-orange-50 border border-orange-200 rounded-2xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-person-cane text-orange-500 text-[15px]"></i>
+                                <span class="text-[12px] font-bold text-orange-800">สัญญาเพิ่มเติม TPD</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="tpdToggle" class="sr-only peer" onchange="window.currentTPDEnabled=this.checked; if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
+                            </label>
+                        </div>
+                        <div id="tpdSAInputArea" class="hidden">
+                            <div class="text-[10px] font-bold text-orange-600 mb-1">ทุนประกัน TPD (บาท)</div>
+                            <input type="text" id="tpdSAInput" value="1,000,000" class="w-full bg-white border border-orange-200 rounded-xl px-3 py-2 text-[13px] font-bold text-orange-800 text-center focus:border-orange-400 focus:outline-none" oninput="this.value=this.value.replace(/[^0-9,]/g,''); window.currentTPDSA=this.value.replace(/,/g,''); if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
+                            <div id="tpdPremDisplay" class="mt-1.5 text-center text-[11px] font-bold text-orange-700"></div>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div id="mainActionsGroup" class="pb-2 shrink-0 flex flex-col gap-3 mt-1 transition-all duration-300">
                         <!-- Medical Fund shortcut: visible only for 24TX, Elite, WXN -->

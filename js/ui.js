@@ -1395,6 +1395,19 @@ function selectAppPlan(planName) {
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
     }
 
+    // TPD rider: show for TL and 3D only
+    const globalTPDContainer = document.getElementById('globalTPDContainer');
+    if (['Convertable Term', '3D Health Excellence'].includes(planName)) {
+        if (globalTPDContainer) globalTPDContainer.classList.remove('hidden');
+    } else {
+        if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
+        window.currentTPDEnabled = false;
+        const tpdToggle = document.getElementById('tpdToggle');
+        if (tpdToggle) tpdToggle.checked = false;
+        const tpdArea = document.getElementById('tpdSAInputArea');
+        if (tpdArea) tpdArea.classList.add('hidden');
+    }
+
     if (['Signature Legacy', 'Convertable Term'].includes(planName)) {
         if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; if(pPills) pPills.classList.add('hidden'); 
     } else if (planName !== '3D Health Excellence') {
@@ -2615,9 +2628,24 @@ window.toggleComTiers = function() {
     }
 };
 
-function refreshAllDisplays() { 
-    if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return; 
-    const p = lastCalculationData.premium || 0; 
+function _updateTPDUI() {
+    const toggle = document.getElementById('tpdToggle');
+    const area = document.getElementById('tpdSAInputArea');
+    const display = document.getElementById('tpdPremDisplay');
+    if (!toggle) return;
+    const enabled = toggle.checked;
+    if (area) area.classList.toggle('hidden', !enabled);
+    if (enabled && display && lastCalculationData && lastCalculationData.tpdPrem > 0) {
+        display.textContent = `เบี้ย TPD: ${lastCalculationData.tpdPrem.toLocaleString()} บาท/ปี`;
+    } else if (display) {
+        display.textContent = '';
+    }
+}
+
+function refreshAllDisplays() {
+    _updateTPDUI();
+    if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return;
+    const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     
@@ -2639,20 +2667,22 @@ function refreshAllDisplays() {
 
         const hxNum = parseInt((d3.hxVal || '').replace(/\D/g, ''), 10) || 0;
         const hxKey = hxNum >= 150 ? 'HX (150-300)' : 'HX (15-60)';
-        const hxRates  = d3.hxPrem  > 0 ? getComRateArray(hxKey)      : [];
-        const hxoRates = d3.hxoPrem > 0 ? getComRateArray('HXO')      : [];
-        const hxdRates = d3.hxdPrem > 0 ? getComRateArray('HXD')      : [];
-        const hbfRates = d3.hbfPrem > 0 ? getComRateArray('HBF')      : [];
+        const hxRates  = d3.hxPrem  > 0 ? getComRateArray(hxKey)  : [];
+        const hxoRates = d3.hxoPrem > 0 ? getComRateArray('HXO') : [];
+        const hxdRates = d3.hxdPrem > 0 ? getComRateArray('HXD') : [];
+        const hbfRates = d3.hbfPrem > 0 ? getComRateArray('HBF') : [];
+        const tpdRates3d = d3.tpdPrem > 0 ? getComRateArray('TPD') : [];
 
-        const maxYears = Math.max(clRates.length, hxRates.length, hxoRates.length, hxdRates.length, hbfRates.length, 1);
+        const maxYears = Math.max(clRates.length, hxRates.length, hxoRates.length, hxdRates.length, hbfRates.length, tpdRates3d.length, 1);
         window.lastTotalComYears = maxYears;
         for (let i = 0; i < maxYears; i++) {
-            const clAmt  = i < clRates.length  ? Math.round(d3.clBasePrem * clRates[i])  : 0;
-            const hxAmt  = i < hxRates.length  ? Math.round(d3.hxPrem     * hxRates[i])  : 0;
-            const hxoAmt = i < hxoRates.length ? Math.round(d3.hxoPrem    * hxoRates[i]) : 0;
-            const hxdAmt = i < hxdRates.length ? Math.round(d3.hxdPrem    * hxdRates[i]) : 0;
-            const hbfAmt = i < hbfRates.length ? Math.round(d3.hbfPrem    * hbfRates[i]) : 0;
-            const yearAmt = clAmt + hxAmt + hxoAmt + hxdAmt + hbfAmt;
+            const clAmt  = i < clRates.length    ? Math.round(d3.clBasePrem * clRates[i])    : 0;
+            const hxAmt  = i < hxRates.length    ? Math.round(d3.hxPrem     * hxRates[i])    : 0;
+            const hxoAmt = i < hxoRates.length   ? Math.round(d3.hxoPrem    * hxoRates[i])   : 0;
+            const hxdAmt = i < hxdRates.length   ? Math.round(d3.hxdPrem    * hxdRates[i])   : 0;
+            const hbfAmt = i < hbfRates.length   ? Math.round(d3.hbfPrem    * hbfRates[i])   : 0;
+            const tpdAmt = i < tpdRates3d.length ? Math.round(d3.tpdPrem    * tpdRates3d[i]) : 0;
+            const yearAmt = clAmt + hxAmt + hxoAmt + hxdAmt + hbfAmt + tpdAmt;
             totalComAmt += yearAmt;
             const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
             comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
@@ -2662,7 +2692,8 @@ function refreshAllDisplays() {
                     hxAmt  > 0 ? `HX ${hxAmt.toLocaleString()}`   : '',
                     hxoAmt > 0 ? `HXO ${hxoAmt.toLocaleString()}` : '',
                     hxdAmt > 0 ? `HXD ${hxdAmt.toLocaleString()}` : '',
-                    hbfAmt > 0 ? `HBF ${hbfAmt.toLocaleString()}` : ''
+                    hbfAmt > 0 ? `HBF ${hbfAmt.toLocaleString()}` : '',
+                    tpdAmt > 0 ? `TPD ${tpdAmt.toLocaleString()}` : ''
                 ].filter(Boolean).join(' + ')}</span>
                 <span class="text-[14px] font-black text-amber-600 text-right w-20">${yearAmt.toLocaleString()}</span>
             </div>`;
@@ -2677,17 +2708,26 @@ function refreshAllDisplays() {
             </div>
         </div>`;
     } else if (rateArr && rateArr.length > 0) {
-        window.lastTotalComYears = rateArr.length;
-        rateArr.forEach((r, i) => {
+        const _tpdPremForCom = (lastCalculationData.tpdPrem || 0);
+        const tpdRatesTLA = _tpdPremForCom > 0 ? getComRateArray('TPD') : [];
+        const maxYearsTLA = Math.max(rateArr.length, tpdRatesTLA.length);
+        window.lastTotalComYears = maxYearsTLA;
+        for (let i = 0; i < maxYearsTLA; i++) {
+            const r = i < rateArr.length ? rateArr[i] : 0;
             const annualAmt = Math.round(p * r) || 0;
-            totalComAmt += annualAmt; totalComPct += r;
+            const tpdAmt = i < tpdRatesTLA.length ? Math.round(_tpdPremForCom * tpdRatesTLA[i]) : 0;
+            const yearTotal = annualAmt + tpdAmt;
+            totalComAmt += yearTotal; totalComPct += r;
             const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
             comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
                 <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
-                <span class="text-[14px] font-black text-amber-600 text-center flex-1">${formatPct(r*100)}</span>
-                <span class="text-[14px] font-black text-slate-800 text-right w-20">${annualAmt.toLocaleString()}</span>
+                <span class="text-[13px] font-black text-slate-500 text-center flex-1 text-left pl-2 leading-tight">${[
+                    annualAmt > 0 ? `${formatPct(r*100)} = ${annualAmt.toLocaleString()}` : '',
+                    tpdAmt > 0    ? `TPD ${tpdAmt.toLocaleString()}` : ''
+                ].filter(Boolean).join(' + ')}</span>
+                <span class="text-[14px] font-black text-amber-600 text-right w-20">${yearTotal.toLocaleString()}</span>
             </div>`;
-        });
+        }
 
         if (rateArr.length > 5) {
             comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${rateArr.length} <i class="fas fa-chevron-down ml-1"></i></button>`;
@@ -4393,6 +4433,35 @@ async function _export3DPDF(actionType = 'preview') {
             y += 4;
         }
 
+        // ── สัญญาเพิ่มเติม TPD ──
+        const _tpdSA3dPDF = window.currentTPDEnabled ? (parseInt(window.currentTPDSA) || 0) : 0;
+        if (_tpdSA3dPDF > 0) {
+            const _tpdSADisp = _tpdSA3dPDF.toLocaleString();
+            checkPage(60);
+            doc.setFillColor(255, 247, 237);
+            doc.rect(15, y - 4, 180, 8, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(194, 100, 12);
+            doc.text(`สัญญาเพิ่มเติม TPD Super Care — ทุน ${_tpdSADisp} บาท`, 18, y + 1.5);
+            y += 10;
+            const tpdPDFItems = [
+                { t: `ข้อ 1 — ทุพพลภาพถาวรสิ้นเชิง (อายุก่อน 71 ปี)`, r: `100% = ${_tpdSADisp} บ.` },
+                { t: `ข้อ 2 — ทุพพลภาพจากอุบัติเหตุขนส่งสาธารณะ (อายุก่อน 71 ปี)`, r: `200% = ${(Math.round(_tpdSA3dPDF*2)).toLocaleString()} บ.` },
+                { t: `ข้อ 3 — ความบกพร่องต่อการดำรงชีวิตวัยสูงอายุ OAD (อายุ 71–100 ปี)`, r: `105% = ${Math.round(_tpdSA3dPDF*1.05).toLocaleString()} บ.` },
+            ];
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9.5);
+            tpdPDFItems.forEach(item => {
+                checkPage(9);
+                const lines = doc.splitTextToSize('• ' + item.t, 148);
+                doc.setTextColor(71, 85, 105); doc.text(lines, 20, y);
+                doc.setTextColor(194, 100, 12); doc.text(item.r, 192, y, { align: 'right' });
+                y += lines.length * 5 + 2;
+            });
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9); doc.setTextColor(148,163,184);
+            checkPage(7);
+            doc.text('* ระยะเวลาคุ้มครองต่อเนื่องไม่น้อยกว่า 180 วัน · อายุรับ 31 วัน – 70 ปี · ชั้นอาชีพ 1, 2, 3 เท่านั้น', 20, y);
+            y += 8;
+        }
+
         // Footer
         const pageCount = doc.internal.getNumberOfPages();
         doc.setFont(fontName, 'normal'); doc.setFontSize(9);
@@ -4421,6 +4490,7 @@ async function _export3DPDF(actionType = 'preview') {
                 hxo !== 'ไม่เลือก' ? `OPD ${_DL[hxo] || hxo}` : '',
                 hxd !== 'ไม่เลือก' ? `Advance ${_DL[hxd] || hxd}` : '',
                 hbf !== 'ไม่เลือก' ? `ชดเชย ${_DL[hbf] || hbf}` : '',
+                (window.currentTPDEnabled && parseInt(window.currentTPDSA) > 0) ? `TPD ${parseInt(window.currentTPDSA||0).toLocaleString()}` : '',
             ].filter(Boolean).join(' ');
             const cleanName = `3D Health ${_gTh3d} ${_age3d} ห้อง${_hxRoom}${riderParts ? ' ' + riderParts : ''}`;
             await _showTableShareModal(pdfBlob, pdfFile, doc, d, { cleanName });
@@ -5396,6 +5466,58 @@ window.render3DDetailsAccordion = function() {
                 </div>`;
             });
             contentHtml += `</div></div>`;
+        } else {
+            contentHtml += `<div class="mb-6"></div>`;
+        }
+
+        // HBF section
+        if (hbfVal !== 'ไม่เลือก') {
+            const hbfAmt = DL[hbfVal] || hbfVal.replace('HBF','');
+            contentHtml += `<div class="mx-3 mt-4 mb-1">
+                <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">สัญญาเพิ่มเติม HBF — ${hbfAmt} บ./วัน</p>
+                <div class="space-y-0">`;
+            [
+                { num:'1', title:'ชดเชยรายวัน กรณีผู้ป่วยใน', limit:`${hbfAmt} บาท/วัน` },
+                { num:'2', title:'ชดเชยรายวัน กรณีผู้ป่วย ICU', limit:`${hbfAmt} บาท/วัน` },
+            ].forEach(r => {
+                contentHtml += `<div class="border-b border-rose-50 py-2.5 flex items-center gap-2.5">
+                    <i class="fas fa-check-circle text-rose-400 shrink-0 text-sm"></i>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[9px] font-bold text-rose-300 block leading-none mb-0.5">ข้อ ${r.num}</span>
+                        <span class="text-[12px] font-medium text-slate-700">${r.title}</span>
+                    </div>
+                    <span class="text-[10px] text-rose-500 font-medium shrink-0">${r.limit}</span>
+                </div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // TPD section
+        const tpdSA3d = window.currentTPDEnabled ? (parseInt(window.currentTPDSA) || 0) : 0;
+        if (tpdSA3d > 0) {
+            const tpdSADisp = tpdSA3d.toLocaleString();
+            contentHtml += `<div class="mx-3 mt-4 mb-6">
+                <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-2">สัญญาเพิ่มเติม TPD — ทุน ${tpdSADisp} บาท</p>
+                <div class="space-y-0">`;
+            [
+                { num:'1', title:'ทุพพลภาพถาวรสิ้นเชิง (อายุ < 71 ปี)', limit:`100% = ${tpdSADisp} บ.` },
+                { num:'2', title:'ทุพพลภาพจากอุบัติเหตุขนส่งสาธารณะ (อายุ < 71 ปี)', limit:`200% = ${(tpdSA3d*2).toLocaleString()} บ.` },
+                { num:'3', title:'ความบกพร่องต่อการดำรงชีวิตวัยสูงอายุ OAD (อายุ 71–100 ปี)', limit:`105% = ${Math.round(tpdSA3d*1.05).toLocaleString()} บ.` },
+            ].forEach(r => {
+                contentHtml += `<div class="border-b border-orange-50 py-2.5 flex items-start gap-2.5">
+                    <i class="fas fa-person-cane text-orange-400 shrink-0 text-sm mt-0.5"></i>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[9px] font-bold text-orange-300 block leading-none mb-0.5">ข้อ ${r.num}</span>
+                        <span class="text-[12px] font-medium text-slate-700">${r.title}</span>
+                    </div>
+                    <span class="text-[10px] text-orange-600 font-medium shrink-0 text-right max-w-[90px] leading-tight">${r.limit}</span>
+                </div>`;
+            });
+            contentHtml += `</div>
+                <div class="mt-2 p-2 bg-orange-50 rounded-xl border border-orange-100">
+                    <p class="text-[10px] text-orange-700"><i class="fas fa-info-circle mr-1"></i>ระยะเวลาคุ้มครองต่อเนื่องไม่น้อยกว่า 180 วัน · อายุรับประกัน 31 วัน – 70 ปี · ชั้นอาชีพ 1, 2, 3</p>
+                </div>
+            </div>`;
         } else {
             contentHtml += `<div class="mb-6"></div>`;
         }
