@@ -89,7 +89,10 @@ function _initCompareState() {
 }
 
 window._buildCompareHTML = function() {
-    const { age, gender, premium, selected } = _initCompareState();
+    const { age, gender, premium } = _initCompareState();
+    // ใช้ preselect จาก long-press ถ้ามี แล้วล้างทิ้ง
+    const selected = window.__cmpPreselect || _initCompareState().selected;
+    window.__cmpPreselect = null;
     window.__cmpState = { age, gender, premium, selected };
 
     function build(sel) {
@@ -146,7 +149,7 @@ window._buildCompareHTML = function() {
     return build(selected);
 };
 
-window.openCompareModal = function() {
+window.openCompareModal = function(preselect) {
     const age = parseInt(document.getElementById('ageInput')?.value) || 35;
     const gender = window.currentGender || 'male';
     const premium = parseInt(((document.getElementById('premiumInput')?.value) || '').replace(/,/g, '')) || 0;
@@ -154,6 +157,14 @@ window.openCompareModal = function() {
     if (!premium || premium < 1000) {
         Swal.fire({ icon: 'warning', title: 'กรอกเบี้ยก่อน', text: 'กรุณากรอกเบี้ยประกันที่ต้องการเปรียบเทียบ', confirmButtonColor: '#0891b2' });
         return;
+    }
+
+    // ถ้ามี preselect (จาก long-press compare) ให้ override selected
+    if (Array.isArray(preselect) && preselect.length) {
+        const indices = preselect.map(name => _COMPARE_PLANS.findIndex(p => p.appPlan === name)).filter(i => i >= 0);
+        if (indices.length) {
+            window.__cmpPreselect = new Set(indices);
+        }
     }
 
     Swal.fire({

@@ -1224,7 +1224,14 @@ function selectAppPlan(planName) {
         const planA = window.__comparePlanA;
         if (planName !== planA) {
             closePopup('planSelectModal');
-            window.renderCompareView(planA, planName);
+            window.cancelCompareMode();
+            if (window.isWideLayout()) {
+                window.renderCompareView(planA, planName);
+            } else {
+                // mobile: เปิด Swal เปรียบเทียบ 2 แผน
+                window.__pendingComparePlans = [planA, planName];
+                if (window.openCompareModal) window.openCompareModal([planA, planName]);
+            }
             return;
         } else {
             window.cancelCompareMode();
@@ -1522,15 +1529,14 @@ window.__compareMode  = false;
 window.__comparePlanA = null;
 
 window.startCompareMode = function(planName) {
-    if (!window.isWideLayout()) return; // wide only
     window.__compareMode  = true;
     window.__comparePlanA = planName;
-    // show floating banner
+    // show floating banner — ทำงานทุก layout
     let banner = document.getElementById('_compareBanner');
     if (!banner) {
         banner = document.createElement('div');
         banner.id = '_compareBanner';
-        banner.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#1e3a8a,#0369a1);color:white;padding:10px 18px;border-radius:14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25);white-space:nowrap;';
+        banner.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#1e3a8a,#0369a1);color:white;padding:10px 18px;border-radius:14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25);white-space:nowrap;font-family:Kanit,sans-serif;';
         document.body.appendChild(banner);
     }
     banner.innerHTML = `<i class="fas fa-code-compare"></i> เปรียบเทียบ: <span style="color:#93c5fd">${planName}</span> &nbsp;→&nbsp; กดเลือกแบบที่ 2 &nbsp;<button onclick="window.cancelCompareMode()" style="background:rgba(255,255,255,0.15);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
@@ -1615,7 +1621,6 @@ window.renderCompareView = function(planA, planB) {
     function cancel() { clearTimeout(_timer); _timer = null; _downPlan = null; }
 
     document.addEventListener('touchstart', e => {
-        if (!window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
@@ -1642,7 +1647,7 @@ window.renderCompareView = function(planA, planB) {
     // mouse long-press for desktop/notebook
     let _mouseStartX = 0, _mouseStartY = 0;
     document.addEventListener('mousedown', e => {
-        if (e.button !== 0 || !window.isWideLayout()) return;
+        if (e.button !== 0) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
