@@ -514,11 +514,6 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
-    // 3D plan: ตาราง → แสดง 19 หมวด แทน tableView (ไม่ใช้ข้อมูลคำนวณ)
-    if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {
-        window.open3DDetailsView();
-        return;
-    }
     // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
@@ -540,6 +535,13 @@ function switchView(targetView) {
     // ── แสดงปุ่มแชร์เฉพาะหน้าตาราง ──
     const shareBtn = document.getElementById('navShareBtn');
     if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
+
+    // 3D plan: ตาราง → แสดง 19 หมวด (หลังจาก highlight nav แล้ว)
+    if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {
+        document.body.setAttribute('data-view', 'table');
+        window.open3DDetailsView();
+        return;
+    }
 
     document.body.setAttribute('data-view', targetView);
 
@@ -2807,6 +2809,7 @@ function generatePolicyTableData() {
     const isTX = planName.includes('24 TX') || planAbbr === 'TX';
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
+    const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
     
     const hasSurrenderMenu = isLPB || isSLPA;
     
@@ -2991,8 +2994,8 @@ function generatePolicyTableData() {
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
     const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
     const showAccidentColumn = isSLB;
-    const showCoverageColumn = isCX || isCL || isSLPA;
-    const showCVColumn = (isCX || isCL || isSLB) ? isShowCVActive : true;
+    const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
+    const showCVColumn = isTLA ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
 
     // --- 3. Header ---
     const initialSA = Math.round(d.sum); 
@@ -3058,7 +3061,7 @@ function generatePolicyTableData() {
     const _lCF       = _isCompact ? 'CF'     : 'กระแสเงินสด';
     const _lTotal    = _isSuperCompact ? 'รวม' : (_isCompact ? 'รวมรับ' : 'รวมรับเงิน');
     const _lCV       = _isSuperCompact ? 'สด'  : (_isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้');
-    const _lCoverage = isSLPA ? (_isCompact ? 'ทุน' : 'ทุนประกัน') : (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
+    const _lCoverage = isSLPA ? (_isCompact ? 'ทุน' : 'ทุนประกัน') : isTLA ? (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง') : (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
     const _lSA       = _isCompact ? 'ทุน'    : 'ทุนประกัน';
 
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
@@ -3095,6 +3098,8 @@ function generatePolicyTableData() {
         maxYear = 90 - d.age;
     } else if (isCL) {
         maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
+    } else if (isTLA) {
+        maxYear = payYears; // Term: คุ้มครองเฉพาะช่วงชำระเบี้ย
     }
 
     let html = ''; 

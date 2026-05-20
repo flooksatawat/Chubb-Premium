@@ -608,7 +608,7 @@ function calculate(source, enforceMin = false) {
         }
         // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB, CL) ----------------
         else {
-            let rateKey = currentPlan === 'TLA' ? 'TLA_RATES' : currentPlan;
+            let rateKey = currentPlan.includes('TLA') ? 'TLA_RATES' : currentPlan;
             // 100CL shares 90CL rates (no separate rate table exists)
             if (rateKey === '100CL') rateKey = '90CL';
 
