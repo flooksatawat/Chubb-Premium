@@ -3010,7 +3010,7 @@ function generatePolicyTableData() {
     const _vw = document.documentElement.clientWidth || window.innerWidth;
     const _isMobile = _vw < 700;
     const _isNarrow = _vw < 400;
-    const _badgeMobile = `flex-1 py-1 px-1 rounded-lg ${_isNarrow ? 'text-[10px]' : 'text-[13px]'} font-bold text-center ${_isNarrow ? '' : 'whitespace-nowrap'} leading-tight`;
+    const _badgeMobile = `flex-1 py-1 px-1 rounded-lg ${_isNarrow ? 'text-[10px]' : 'text-[13px]'} font-bold text-center whitespace-nowrap leading-tight`;
     const _badgeDesktop = 'flex-1 py-1.5 px-3 rounded-lg text-[14px] font-bold text-center whitespace-nowrap leading-tight';
     const _hasTableSACol = showCoverageColumn || showSAColumn;
     const _lastBadgeMobile = _hasTableSACol
@@ -3022,7 +3022,7 @@ function generatePolicyTableData() {
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-1 py-1 w-full">
             <div class="flex gap-1 w-full items-stretch">
-                <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
+                <span class="${_badgeMobile} bg-blue-600 text-white shadow-sm">${planAbbr}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
                 <span class="${_badgeMobile} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
             </div>
