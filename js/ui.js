@@ -1012,22 +1012,26 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
-        // ── HBF slider (continuous, step=100, 0=ไม่เลือก) ──
+        // ── HBF stepper (กด +/- ทีละ 100) ──
         const hbfNum = parseInt(hbfVal) || 0;
-        const hbfDisplay = hbfNum === 0 ? 'ไม่เลือก' : `${hbfNum.toLocaleString()} บาท/วัน`;
+        const hbfCenterTxt = hbfNum === 0 ? 'ปิด' : hbfNum.toLocaleString();
+        const hbfCenterCls = hbfNum === 0 ? 'text-slate-400' : 'text-rose-700';
         html += `<div id="rider-hbf" class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
-        html += `<div class="flex items-center justify-between mb-4">`;
+        html += `<div class="flex items-center justify-between mb-3">`;
         html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
-        html += `<span id="hbf-label" class="text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-400' : 'text-rose-600'}">${hbfDisplay}</span>`;
+        html += `<span class="text-[11px] text-slate-400">บาท/วัน (0–5,000)</span>`;
         html += `</div>`;
-        html += `<div class="px-1">`;
-        html += `<input type="range" id="hbf-slider" min="0" max="5000" step="100" value="${hbfNum}"`;
-        html += ` oninput="(function(v){var n=parseInt(v)||0;var l=document.getElementById('hbf-label');if(l){l.textContent=n===0?'ไม่เลือก':n.toLocaleString()+' บาท/วัน';l.className='text-[13px] font-bold '+(n===0?'text-slate-400':'text-rose-600');}window.handle3DClick('HBF',n);})(+this.value)"`;
-        html += ` class="w-full h-2 rounded-full appearance-none cursor-pointer" style="accent-color:#e11d48;">`;
+        html += `<div class="flex items-center gap-2">`;
+        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 text-rose-500 font-bold text-2xl flex items-center justify-center active:scale-90 active:bg-rose-100 transition-all select-none touch-manipulation">−</button>`;
+        html += `<div class="flex-1 flex flex-col items-center justify-center bg-rose-50 rounded-2xl h-12 border border-rose-100">`;
+        html += `<span class="text-[18px] font-bold leading-none ${hbfCenterCls}">${hbfCenterTxt}</span>`;
+        if (hbfNum > 0) html += `<span class="text-[9px] text-rose-400 leading-none mt-0.5">บาท/วัน</span>`;
+        html += `</div>`;
+        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 text-rose-500 font-bold text-2xl flex items-center justify-center active:scale-90 active:bg-rose-100 transition-all select-none touch-manipulation">+</button>`;
         html += `</div>`;
         html += `<div class="flex justify-between mt-2 px-1">`;
-        html += `<span class="text-[9px] text-slate-400">ไม่เลือก</span>`;
-        html += `<span class="text-[9px] text-slate-400">5,000 บ./วัน</span>`;
+        html += `<button onclick="window.handle3DClick('HBF',0)" class="text-[10px] px-2 py-0.5 rounded-full ${hbfNum===0?'bg-rose-100 text-rose-600 font-bold':'text-slate-400 hover:text-rose-400'} transition-all">ปิด</button>`;
+        html += `<div class="flex gap-1.5">${[500,1000,2000,3000,5000].map(v=>`<button onclick="window.handle3DClick('HBF',${v})" class="text-[10px] px-2 py-0.5 rounded-full ${hbfNum===v?'bg-rose-100 text-rose-600 font-bold':'text-slate-400 hover:text-rose-400'} transition-all">${v>=1000?(v/1000)+'K':v}</button>`).join('')}</div>`;
         html += `</div></div>`;
 
         // ── HXO ──
@@ -1150,6 +1154,11 @@ window.setHXD = function(val) {
     window.currentHXD = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView();
 };
 window.setHBF = function(val) { window.currentHBF = val; render3DOptionsUI(); if(typeof calculate === 'function') calculate('sum', true); _refresh3DRightView(); };
+window.adjustHBF = function(delta) {
+    const cur = parseInt(window.currentHBF) || 0;
+    const next = Math.max(0, Math.min(5000, Math.round((cur + delta) / 100) * 100));
+    window.handle3DClick('HBF', next);
+};
 window.setMFPlan = function(val) { window.currentMF = val; closePopup('mfPlanModal'); if(typeof calculate === 'function') calculate('sum', true); };
 
 // ==================== ระบบดึงเงื่อนไข (เพื่อแสดงใน Popup กดค้าง) ====================
@@ -5282,13 +5291,16 @@ window.render3DDetailsAccordion = function() {
             });
             stickyHtml += `</div></div>`;
 
-            // HBF slider
+            // HBF mini stepper
             stickyHtml += `<div>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfNum===0?'ไม่เลือก':hbfNum.toLocaleString()+' บ./วัน'}</span></p>
-                <div class="px-1">
-                    <input type="range" min="0" max="5000" step="100" value="${hbfNum}" oninput="(function(v){window.set3DHBF(parseInt(v)||0);})(+this.value)" class="w-full h-2 rounded-full appearance-none cursor-pointer" style="accent-color:#e11d48;">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfNum===0?'ปิด':hbfNum.toLocaleString()+' บ./วัน'}</span></p>
+                <div class="flex items-center gap-1.5">
+                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 font-bold text-lg flex items-center justify-center active:scale-90 transition-all select-none touch-manipulation">−</button>
+                    <div class="flex-1 text-center bg-rose-50 rounded-xl h-8 flex items-center justify-center">
+                        <span class="text-[13px] font-bold ${hbfNum===0?'text-slate-400':'text-rose-700'}">${hbfNum===0?'ปิด':hbfNum.toLocaleString()}</span>
+                    </div>
+                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 font-bold text-lg flex items-center justify-center active:scale-90 transition-all select-none touch-manipulation">+</button>
                 </div>
-                <div class="flex justify-between mt-1"><span class="text-[8px] text-slate-400">ไม่เลือก</span><span class="text-[8px] text-slate-400">5,000 บ./วัน</span></div>
             </div>`;
         }
         stickyHtml += `</div>`;
