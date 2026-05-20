@@ -4392,7 +4392,11 @@ async function _export3DPDF(actionType = 'preview') {
         }
 
         const pdfBlob = doc.output('blob');
-        const pdfFileName = `3D_Health_${hxVal}_19หมวด.pdf`;
+        const _d3d = lastCalculationData || {};
+        const _gTh3d = (_d3d.gender === 'male' || (_d3d.gender || '').includes('ชาย')) ? 'ชาย' : 'หญิง';
+        const _age3d = _d3d.age ? `${_d3d.age}ปี` : '';
+        const _hxRoom = (typeof HX_PLAN_INFO !== 'undefined' && HX_PLAN_INFO[hxVal]) ? HX_PLAN_INFO[hxVal].room : hxVal;
+        const pdfFileName = `3D Health ${_gTh3d} ${_age3d} ห้อง${_hxRoom}.pdf`;
         const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
         if (toast.parentElement) toast.remove();
 
@@ -4401,12 +4405,13 @@ async function _export3DPDF(actionType = 'preview') {
             const hxo = window.currentHXO || 'ไม่เลือก';
             const hxd = window.currentHXD || 'ไม่เลือก';
             const hbf = window.currentHBF || 'ไม่เลือก';
+            const _DL = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000','HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000','HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000' };
             const riderParts = [
-                hxo !== 'ไม่เลือก' ? `HXO:${hxo}` : '',
-                hxd !== 'ไม่เลือก' ? `HXD:${hxd}` : '',
-                hbf !== 'ไม่เลือก' ? `HBF:${hbf}` : '',
+                hxo !== 'ไม่เลือก' ? `OPD ${_DL[hxo] || hxo}` : '',
+                hxd !== 'ไม่เลือก' ? `Advance ${_DL[hxd] || hxd}` : '',
+                hbf !== 'ไม่เลือก' ? `ชดเชย ${_DL[hbf] || hbf}` : '',
             ].filter(Boolean).join(' ');
-            const cleanName = `3D ${hxVal}${riderParts ? ' ' + riderParts : ''}`;
+            const cleanName = `3D Health ${_gTh3d} ${_age3d} ห้อง${_hxRoom}${riderParts ? ' ' + riderParts : ''}`;
             await _showTableShareModal(pdfBlob, pdfFile, doc, d, { cleanName });
         } else if (actionType === 'save') {
             const inLine = typeof isInLineApp === 'function' && isInLineApp();
@@ -4563,8 +4568,8 @@ async function exportTableToPDF(actionType = 'preview') {
             doc.setTextColor(148, 163, 184); doc.text(`หน้า ${i} / ${pageCount}`, 195, 290, { align: 'right' }); 
         }
 
-        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentPlan) : currentPlan;
-        const pdfFileName = `${planAbbr}_ตารางมูลค่า_อายุ${d.age}.pdf`;
+        const _gTh = (d.gender === 'male' || (d.gender || '').includes('ชาย')) ? 'ชาย' : 'หญิง';
+        const pdfFileName = `ตารางมูลค่า ${currentAppPlan || currentPlan} ${_gTh} ${d.age}ปี.pdf`;
         
         // ===== ACTION HANDLING =====
         // LIFF/LINE in-app: ใช้ inline PDF viewer (PDF.js) — ไม่ต้องออก app เลย
@@ -5439,15 +5444,15 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     if (opts.cleanName) {
         cleanName = opts.cleanName;
     } else {
-        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || '');
-        const genderTh = (d.gender || '').includes('ชาย') ? 'ชาย' : 'หญิง';
+        const planFullName = currentAppPlan || '';
+        const genderTh = (d.gender === 'male' || (d.gender || '').includes('ชาย')) ? 'ชาย' : 'หญิง';
         const isSum = typeof currentMode !== 'undefined' && currentMode === 'sum';
         const rawAmt  = isSum ? (d.sum || 0) : (d.premium || 0);
         const amtFmt  = rawAmt >= 1000000
             ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
             : rawAmt.toLocaleString('th-TH');
         const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
-        cleanName = `${planAbbr} ${genderTh} ${d.age}ปี ${amtLabel}${amtFmt}`;
+        cleanName = `${planFullName} ${genderTh} ${d.age}ปี ${amtLabel} ${amtFmt}`;
     }
     const pdfName   = cleanName + '.pdf';
     const jpgName   = cleanName + '.jpg';
