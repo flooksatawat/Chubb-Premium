@@ -113,13 +113,12 @@ function generateSummaryText() {
 
 function _getShareText() {
     if (currentShareType === 'installment') return pendingInstallmentData.allText || '';
-    if (currentShareType === 'summary') return generateSummaryText();
     if (currentShareType === 'diseaseList') return 'https://short-url.org/1nMQi';
     if (['scb', 'bbl', 'bay', 'kbank'].includes(currentShareType)) {
         const bText = { scb: 'ธ.ไทยพาณิชย์ : 049-416-6866 สาขาถนนวิทยุ', bbl: 'ธ.กรุงเทพ : 147-312-5357 สาขาสุรวงศ์', bay: 'ธ.กรุงศรี : 001-016-4329 สาขาเพลินจิต', kbank: 'ธ.กสิกร : 099-132-6065 สาขาพหลโยธิน' };
         return bText[currentShareType] || '';
     }
-    return generateResultText(currentShareType);
+    return generateSummaryText();
 }
 
 function _closeResultModals() {

@@ -1778,7 +1778,7 @@ function _injectToPearLCanvas(d) {
                     <i class="fas fa-share-nodes"></i>แชร์
                 </button>
             </div>
-            <button onclick="openGenericShareModal('premium')" class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-600 font-bold text-sm transition-colors">
+            <button onclick="openGenericShareModal('summary')" class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-600 font-bold text-sm transition-colors">
                 <i class="fas fa-coins"></i>แชร์เฉพาะเบี้ยประกัน
             </button>
         </div>
@@ -1805,7 +1805,7 @@ function _injectToPearLCanvas(d) {
                 <i class="fas fa-laptop-medical text-lg text-teal-500"></i>
                 <span class="text-slate-700 font-medium">E-Submission</span>
             </button>
-            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('premium'), 200);" class="w-full flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-blue-100 active:scale-[0.98] transition-all">
+            <button onclick="Swal.close(); setTimeout(() => openGenericShareModal('summary'), 200);" class="w-full flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-blue-100 active:scale-[0.98] transition-all">
                 <i class="fas fa-coins text-lg text-blue-600"></i>
                 <span class="text-blue-700 font-bold">แชร์เฉพาะเบี้ยประกัน</span>
             </button>
@@ -3943,7 +3943,7 @@ function handlePdfShare() {
 async function _handleShareDesktopFallback() {
     if (typeof openGenericShareModal === 'function'
         && typeof lastCalculationData !== 'undefined' && lastCalculationData) {
-        openGenericShareModal('all');
+        openGenericShareModal('summary');
         return;
     }
     // สุดท้าย — lightbox + LIFF text share (ถ้า available)

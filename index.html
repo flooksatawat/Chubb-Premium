@@ -489,7 +489,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             <button id="mainActionBtn" onclick="manualTriggerPopup()" class="col-span-3 w-full btn-primary h-[54px] font-bold flex justify-center items-center gap-2 text-[16px]">
                                 <i class="fas fa-file-alt text-lg"></i> ดูรายละเอียด
                             </button>
-                            <button onclick="openGenericShareModal('all')" class="col-span-1 w-full h-[54px] bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-[16px] font-bold flex flex-col justify-center items-center gap-1 text-[12px] shadow-[0_8px_15px_rgba(16,185,129,0.3)] border border-emerald-300/50 active:scale-[0.95] transition-all relative overflow-hidden group">
+                            <button onclick="openGenericShareModal('summary')" class="col-span-1 w-full h-[54px] bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-[16px] font-bold flex flex-col justify-center items-center gap-1 text-[12px] shadow-[0_8px_15px_rgba(16,185,129,0.3)] border border-emerald-300/50 active:scale-[0.95] transition-all relative overflow-hidden group">
                                 <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/30 to-transparent pointer-events-none rounded-t-[16px]"></div>
                                 <i class="fas fa-share-nodes text-[20px] relative z-10 drop-shadow-sm group-hover:scale-110 transition-transform -mb-0.5"></i>
                                 <span class="relative z-10 drop-shadow-sm tracking-wide">แชร์</span>
@@ -1124,9 +1124,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         <button onclick="openTableFromModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(168,85,247,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-table-list text-[18px]"></i>ตารางมูลค่า</button>
                         <button onclick="openInstallmentModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(99,102,241,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-credit-card text-[18px]"></i>ตัวเลือกชำระ</button>
                         <button onclick="openBankModal()" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(251,146,60,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-building-columns text-[18px]"></i>บัญชีโอนเงิน</button>
-                        <button onclick="openGenericShareModal('premium')" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(37,99,235,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-coins text-[18px]"></i>แชร์เบี้ย</button>
+                        <button onclick="openGenericShareModal('summary')" class="flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white font-bold text-[12px] shadow-[0_4px_12px_rgba(37,99,235,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-coins text-[18px]"></i>แชร์เบี้ย</button>
                     </div>
-                    <button onclick="openGenericShareModal('all')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all mb-2.5"><i class="fas fa-share-nodes text-[18px]"></i>แชร์สรุปทั้งหมด</button>
+                    <button onclick="openGenericShareModal('summary')" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(16,185,129,0.4)] active:scale-[0.97] transition-all mb-2.5"><i class="fas fa-share-nodes text-[18px]"></i>แชร์สรุปทั้งหมด</button>
                     <button onclick="openEsubModal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white font-bold text-[14px] flex items-center justify-center gap-2.5 shadow-[0_6px_16px_rgba(244,63,94,0.35)] active:scale-[0.97] transition-all"><i class="fas fa-file-signature text-[18px]"></i>E-sub &amp; QNI</button>
                 </div>
             </div>
@@ -1206,7 +1206,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 </div>
                 
                 <div class="mt-4">
-                    <button onclick="openGenericShareModal('wxn')" class="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(124,58,237,0.3)] active:scale-95 transition-all">
+                    <button onclick="openGenericShareModal('summary')" class="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white py-3.5 rounded-[16px] font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_20px_rgba(124,58,237,0.3)] active:scale-95 transition-all">
                         <i class="fas fa-share-nodes text-xl"></i> แชร์ข้อมูลสรุป WXN
                     </button>
                 </div>
