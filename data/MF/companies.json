@@ -1,0 +1,68 @@
+{
+  "companies": [
+    {
+      "id": "AIA",
+      "name": "AIA",
+      "plans": [
+        { "id": "HS",           "name": "H&S",          "hasRoomRate": false },
+        { "id": "HS_EXTRA",     "name": "H&S Extra",    "hasRoomRate": false },
+        { "id": "HS_PLUS_GOLD", "name": "H&S Plus Gold","hasRoomRate": false },
+        { "id": "HEALTH_HAPPY", "name": "Health Happy", "hasRoomRate": false },
+        { "id": "INFINITE",     "name": "Infinite Care","hasRoomRate": false }
+      ]
+    },
+    {
+      "id": "AXA",
+      "name": "AXA",
+      "plans": [
+        {
+          "id": "IHEALTHY",
+          "name": "iHealthy",
+          "hasRoomRate": true,
+          "roomRates": ["SMART","SILVER","GOLD","DIAMOND","PLATINUM"]
+        },
+        { "id": "IHEALTHY_ULTRA", "name": "iHealthy Ultra", "hasRoomRate": false }
+      ]
+    },
+    {
+      "id": "GENERALI",
+      "name": "GENERALI",
+      "plans": []
+    },
+    {
+      "id": "TOKIO",
+      "name": "TOKIO",
+      "plans": []
+    },
+    {
+      "id": "CHUBB_HI",
+      "name": "CHUBB",
+      "plans": []
+    },
+    {
+      "id": "TIPAYA",
+      "name": "ทิพยประกันภัย",
+      "plans": []
+    },
+    {
+      "id": "MUANGTHAI",
+      "name": "เมืองไทย",
+      "plans": []
+    },
+    {
+      "id": "BANGKOK",
+      "name": "กรุงเทพ",
+      "plans": []
+    },
+    {
+      "id": "ACE",
+      "name": "อคิอันนี์ อยุธยา",
+      "plans": []
+    },
+    {
+      "id": "FWD",
+      "name": "FWD",
+      "plans": []
+    }
+  ]
+}

@@ -1226,7 +1226,7 @@ function replacePercentWithAmount(text, sum, premium) {
 }
 
 function selectAppPlan(planName) {
-    if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
+    if (planName === 'Medical Fund') { window.openMFCalculator(); return; }
 
     // ── Compare mode intercept ──
     if (window.__compareMode && window.__comparePlanA) {

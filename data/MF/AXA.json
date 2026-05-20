@@ -1,0 +1,18 @@
+{
+  "IHEALTHY": {
+    "name": "iHealthy",
+    "ageRange": [1, 70],
+    "roomRates": ["SMART","SILVER","GOLD","DIAMOND","PLATINUM"],
+    "SMART":    { "male": {}, "female": {} },
+    "SILVER":   { "male": {}, "female": {} },
+    "GOLD":     { "male": {}, "female": {} },
+    "DIAMOND":  { "male": {}, "female": {} },
+    "PLATINUM": { "male": {}, "female": {} }
+  },
+  "IHEALTHY_ULTRA": {
+    "name": "iHealthy Ultra",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  }
+}

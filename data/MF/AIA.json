@@ -1,0 +1,32 @@
+{
+  "HS": {
+    "name": "H&S",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  },
+  "HS_EXTRA": {
+    "name": "H&S Extra",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  },
+  "HS_PLUS_GOLD": {
+    "name": "H&S Plus Gold",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  },
+  "HEALTH_HAPPY": {
+    "name": "Health Happy",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  },
+  "INFINITE": {
+    "name": "Infinite Care",
+    "ageRange": [1, 70],
+    "male": {},
+    "female": {}
+  }
+}
