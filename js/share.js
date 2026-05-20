@@ -173,10 +173,10 @@ async function shareToMessenger() {
         }
     } catch {}
 
-    // เปิด Messenger app ตรงๆ
-    window.location.href = 'fb-messenger://';
+    // เปิด Messenger app โดยไม่ navigate ออกจากหน้า
+    window.open('fb-messenger://', '_blank');
 
-    // แจ้งให้วางข้อความ (แสดงสั้นๆ ก่อน Messenger เปิด)
+    // แจ้งให้วางข้อความ
     setTimeout(() => {
         Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความใน Messenger ได้เลย', timer: 2000, showConfirmButton: false });
     }, 300);

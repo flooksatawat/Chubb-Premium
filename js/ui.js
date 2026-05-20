@@ -4730,11 +4730,37 @@ function _showTableImageViewer(blob, imgName) {
         }
     }
 
+    async function _doMessenger() {
+        // บันทึกรูปก่อน แล้วเปิด Messenger พร้อมแจ้งให้แนบรูป
+        const imgFile = (typeof File !== 'undefined') ? new File([blob], imgName, { type: 'image/png' }) : null;
+        // ลอง Web Share ก่อน (iOS จะมี Messenger ใน share sheet ถ้าติดตั้งไว้)
+        if (imgFile && navigator.share && (!navigator.canShare || navigator.canShare({ files: [imgFile] }))) {
+            try {
+                await navigator.share({ files: [imgFile], title: imgName });
+                _showQuickToast('แชร์สำเร็จ');
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+            }
+        }
+        // Fallback: ดาวน์โหลดรูป แล้วเปิด Messenger ให้แนบเอง
+        try {
+            const u = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = u; a.download = imgName; a.click();
+            setTimeout(() => URL.revokeObjectURL(u), 5000);
+        } catch (_) {}
+        setTimeout(() => {
+            window.open('fb-messenger://', '_blank');
+        }, 600);
+        _showQuickToast('บันทึกรูปแล้ว → แนบรูปใน Messenger ได้เลย');
+    }
+
     document.getElementById('_tvShareBtn').addEventListener('click', _doShare);
     document.getElementById('_tvLine').addEventListener('click', async () => {
         if (inLine) { _doLineLiff(); } else { await _doShare(); }
     });
-    document.getElementById('_tvMsgr').addEventListener('click', _doShare);
+    document.getElementById('_tvMsgr').addEventListener('click', _doMessenger);
     document.getElementById('_tvSave').addEventListener('click', _doSave);
 }
 
