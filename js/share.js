@@ -108,6 +108,14 @@ function generateSummaryText() {
         `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
     ];
     if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
+    if (currentAppPlan === '3D Health Excellence') {
+        const hx  = window.currentHX  || '';
+        const hxo = window.currentHXO || 'ไม่เลือก';
+        const hxd = window.currentHXD || 'ไม่เลือก';
+        const hbf = window.currentHBF || 'ไม่เลือก';
+        if (hx) lines.push(`\n🏥 แผนสุขภาพ: ${hx}`);
+        lines.push(`HXO: ${hxo} | HXD: ${hxd} | HBF: ${hbf}`);
+    }
     return lines.join('\n');
 }
 
