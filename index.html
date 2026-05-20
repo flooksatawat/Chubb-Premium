@@ -618,8 +618,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <button id="navCashBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="switchView('cash')">
                     <i class="fas fa-money-bill-trend-up text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">CASH</span>
                 </button>
-                <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="openAIPanel()">
-                    <i class="fas fa-robot text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">AI</span>
+                <button id="navAiBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="openCompareModal()">
+                    <i class="fas fa-scale-balanced text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">เทียบ</span>
                 </button>
                 <button id="navShareBtn" class="nav-item flex flex-col items-center justify-center py-1 w-1/5 text-slate-400" onclick="exportTableToPDF('modal')" style="display:none;">
                     <i class="fas fa-share-nodes text-[20px] mb-0.5"></i><span class="text-[9px] font-bold tracking-wide">แชร์</span>
@@ -1561,6 +1561,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <script src="js/calculator.js?v=5"></script>
     <script src="js/parser.js?v=1"></script>
     <script src="js/ui.js?v=53"></script>
+    <script src="js/compare.js?v=1"></script>
     <script src="js/share.js?v=7"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
