@@ -29,7 +29,7 @@ function triggerInstallmentShare(type) {
             <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์ยอดชำระ${label}</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="hide-in-liff flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fas fa-share-nodes text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">แชร์</span></button>
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
@@ -81,7 +81,7 @@ function openGenericShareModal(type) {
             <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">เลือกช่องทางการแชร์</h3>
             <div class="grid grid-cols-3 gap-3 w-full">
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToLine === 'function') shareToLine(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-green-50 rounded-2xl border border-green-100 active:scale-95 transition-transform"><i class="fab fa-line text-[26px] text-[#00B900] mb-1.5"></i><span class="text-[10px] font-bold text-green-700">LINE</span></button>
-                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="hide-in-liff flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fab fa-facebook-messenger text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">Messenger</span></button>
+                <button onclick="Swal.close(); setTimeout(() => { if(typeof shareToMessenger === 'function') shareToMessenger(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-blue-50 rounded-2xl border border-blue-100 active:scale-95 transition-transform"><i class="fas fa-share-nodes text-[26px] text-[#0084FF] mb-1.5"></i><span class="text-[10px] font-bold text-blue-600">แชร์</span></button>
                 <button onclick="Swal.close(); setTimeout(() => { if(typeof copyShareData === 'function') copyShareData(); }, 200);" class="flex flex-col items-center justify-center py-3.5 bg-slate-50 rounded-2xl border border-slate-200 active:scale-95 transition-transform"><i class="fas fa-copy text-[26px] text-slate-500 mb-1.5"></i><span class="text-[10px] font-bold text-slate-500">คัดลอก</span></button>
             </div>
         </div>`,
@@ -161,7 +161,17 @@ async function shareToMessenger() {
     _closeResultModals();
     const text = _getShareText();
 
-    // คัดลอกข้อความก่อน แล้วเปิด Messenger ตรงๆ
+    // ใช้ native share sheet ถ้าอุปกรณ์รองรับ (iOS/Android จะมี Messenger ให้เลือก)
+    if (navigator.share) {
+        try {
+            await navigator.share({ text });
+            return;
+        } catch (err) {
+            if (err && err.name === 'AbortError') return; // user กดยกเลิก
+        }
+    }
+
+    // Fallback: คัดลอกข้อความ
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);
@@ -172,14 +182,7 @@ async function shareToMessenger() {
             document.execCommand('copy'); document.body.removeChild(ta);
         }
     } catch {}
-
-    // เปิด Messenger app โดยไม่ navigate ออกจากหน้า
-    window.open('fb-messenger://', '_blank');
-
-    // แจ้งให้วางข้อความ
-    setTimeout(() => {
-        Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความใน Messenger ได้เลย', timer: 2000, showConfirmButton: false });
-    }, 300);
+    Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว', text: 'วางข้อความในแอปที่ต้องการได้เลย', timer: 2000, showConfirmButton: false });
 }
 
 async function copyShareData() {
