@@ -309,7 +309,10 @@ window.mfInlineRender = function() {
     }
     const rateTable = p.roomRate ? planData[p.roomRate]?.[gender] : planData[gender];
     const ageRange = planData.ageRange || [1, 70];
-    const start = ageRange[0], end = ageRange[1];
+    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || ageRange[0];
+    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || ageRange[1];
+    const start = Math.max(ageStartInput, ageRange[0]);
+    const end = Math.min(ageEndInput, ageRange[1]);
 
     const curAge = parseInt(document.getElementById('ageInput')?.value) || start;
 
