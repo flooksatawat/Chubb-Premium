@@ -1700,13 +1700,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             document.body.appendChild(btn);
 
             function updateBtnPosition() {
-                const rp = document.getElementById('rightPane');
-                if (!rp || !window.isWideLayout || !window.isWideLayout()) {
+                if (!window.isWideLayout || !window.isWideLayout()) {
                     btn.style.display = 'none';
                     return;
                 }
-                const rect = rp.getBoundingClientRect();
-                btn.style.left = rect.left + 'px';
+                btn.style.left = '0px';
                 btn.style.display = 'flex';
             }
 
