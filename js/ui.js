@@ -1161,6 +1161,10 @@ window.open3DShareModal = function() {
         width: 'min(90vw, 320px)',
         padding: '1.25rem',
         customClass: { popup: '!rounded-3xl !shadow-2xl', closeButton: '!text-slate-400 hover:!text-red-500' },
+        didOpen: () => {
+            const container = document.querySelector('.swal2-container');
+            if (container) container.style.zIndex = '99999';
+        },
     });
 };
 
