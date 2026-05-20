@@ -559,7 +559,9 @@ function calculate(source, enforceMin = false) {
             let hxdPrem = getHealthRate('HXD', hxdVal, age, currentGender);
             let hbfPrem = getHealthRate('HBF', hbfVal, age, currentGender);
             let mfPrem = getHealthRate('MF', mfVal, age, currentGender);
-            const _tpdSA3d = window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0';
+            const _rawTPDSA3d = window.currentTPDEnabled ? (parseInt(window.currentTPDSA) || 0) : 0;
+            const _cappedTPDSA3d = Math.min(_rawTPDSA3d, fSum * 2);
+            const _tpdSA3d = String(_cappedTPDSA3d);
             let tpdPrem = getHealthRate('TPD', _tpdSA3d, age, currentGender);
 
             let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem + tpdPrem;
@@ -624,7 +626,13 @@ function calculate(source, enforceMin = false) {
             const totalRate = lifeRate + ciRate;
 
             let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
-            const _tpdSAStr = window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0';
+            const _rawTPDSA = window.currentTPDEnabled ? (parseInt(window.currentTPDSA) || 0) : 0;
+            const _cappedTPDSA = Math.min(_rawTPDSA, fSum * 2);
+            if (window.currentTPDEnabled && _rawTPDSA > fSum * 2) {
+                const capDisp = document.getElementById('tpdPremDisplay');
+                if (capDisp) capDisp.textContent = `ซื้อ TPD ได้สูงสุด ${(fSum*2).toLocaleString()} บาท (2×ทุนหลัก)`;
+            }
+            const _tpdSAStr = String(_cappedTPDSA);
             let tpdPrem = getHealthRate('TPD', _tpdSAStr, age, currentGender);
 
             if (totalRate > 0) {
