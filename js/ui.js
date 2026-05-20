@@ -3008,6 +3008,7 @@ function generatePolicyTableData() {
     // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
     const _vw = document.documentElement.clientWidth || window.innerWidth;
     const _isMobile = _vw < 700;
+    const _isNarrow = _vw < 400;
     const _badgeMobile = `flex-1 py-1 px-1 rounded-lg ${_isNarrow ? 'text-[10px]' : 'text-[13px]'} font-bold text-center ${_isNarrow ? '' : 'whitespace-nowrap'} leading-tight`;
     const _badgeDesktop = 'flex-1 py-1.5 px-3 rounded-lg text-[14px] font-bold text-center whitespace-nowrap leading-tight';
     const _hasTableSACol = showCoverageColumn || showSAColumn;
@@ -3038,7 +3039,6 @@ function generatePolicyTableData() {
         </div>`;
 
     // compact: WXN/Elite/TX บนจอแคบ (<400px) หรือเมื่อเปิด SA toggle
-    const _isNarrow   = _vw < 400;
     const _isCompact  = (isWXN || isElite || isTX) && (_isNarrow || (showSAColumn && isShowSAActive));
     // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
     const _isSuperCompact = _isCompact && _vw < 380;

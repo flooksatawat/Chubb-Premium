@@ -627,13 +627,16 @@ function calculate(source, enforceMin = false) {
 
             let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
             const _rawTPDSA = window.currentTPDEnabled ? (parseInt(window.currentTPDSA) || 0) : 0;
-            const _cappedTPDSA = Math.min(_rawTPDSA, fSum * 2);
-            if (window.currentTPDEnabled && _rawTPDSA > fSum * 2) {
+            // ใช้ค่าจาก input โดยตรง (ทำงานได้ทั้ง sum/prem mode)
+            const _fSumForCap = getSafeValue('sumInsuredInput') || fSum;
+            const _cappedTPDSA = _fSumForCap > 0 ? Math.min(_rawTPDSA, _fSumForCap * 2) : _rawTPDSA;
+            if (window.currentTPDEnabled && _rawTPDSA > _fSumForCap * 2 && _fSumForCap > 0) {
                 const capDisp = document.getElementById('tpdPremDisplay');
-                if (capDisp) capDisp.textContent = `ซื้อ TPD ได้สูงสุด ${(fSum*2).toLocaleString()} บาท (2×ทุนหลัก)`;
+                if (capDisp) capDisp.textContent = `ซื้อ TPD ได้สูงสุด ${(_fSumForCap*2).toLocaleString()} บาท (2×ทุนหลัก)`;
             }
             const _tpdSAStr = String(_cappedTPDSA);
             let tpdPrem = getHealthRate('TPD', _tpdSAStr, age, currentGender);
+            _generalTPDPrem = tpdPrem;
 
             if (totalRate > 0) {
                 const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
