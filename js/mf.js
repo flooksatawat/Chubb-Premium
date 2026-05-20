@@ -195,3 +195,126 @@ window.openMFCalculator = async function() {
     document.getElementById('mfCalculatorModal').classList.remove('hidden');
     await mfInit();
 };
+
+// ==================== MF Picker (rider for 24TX/Elite/WXN) ====================
+
+window._mfPicker = { company: null, plan: null, roomRate: null };
+
+async function mfPickerInit() {
+    if (!window._mfData.companies) {
+        try {
+            const res = await fetch('data/MF/companies.json');
+            window._mfData.companies = await res.json();
+        } catch(e) { window._mfData.companies = { companies: [] }; }
+    }
+    const companies = window._mfData.companies?.companies || [];
+    const sel = document.getElementById('mfPickerCompany');
+    if (!sel) return;
+    sel.innerHTML = `<option value="">— เลือกบริษัท —</option>` +
+        companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    // restore previous selection
+    const p = window._mfPicker;
+    sel.value = p.company || '';
+    document.getElementById('mfPickerPlanRow').classList.toggle('hidden', !p.company);
+    if (p.company) {
+        const co = companies.find(c => c.id === p.company);
+        const planSel = document.getElementById('mfPickerPlan');
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            (co?.plans || []).map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
+        planSel.value = p.plan || '';
+        const plan = co?.plans?.find(pl => pl.id === p.plan);
+        const rrRow = document.getElementById('mfPickerRoomRow');
+        if (plan?.hasRoomRate && plan.roomRates?.length) {
+            rrRow.classList.remove('hidden');
+            const rrSel = document.getElementById('mfPickerRoom');
+            rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+                plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+            rrSel.value = p.roomRate || '';
+        } else {
+            rrRow.classList.add('hidden');
+        }
+    }
+    mfPickerUpdateConfirm();
+}
+
+window.openMFPicker = async function() {
+    document.getElementById('mfPlanModal').classList.remove('hidden');
+    await mfPickerInit();
+};
+
+window.mfPickerSelectCompany = function(val) {
+    window._mfPicker = { company: val || null, plan: null, roomRate: null };
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === val);
+    const plans = co?.plans || [];
+    const planRow = document.getElementById('mfPickerPlanRow');
+    const planSel = document.getElementById('mfPickerPlan');
+    const rrRow = document.getElementById('mfPickerRoomRow');
+    if (plans.length) {
+        planRow.classList.remove('hidden');
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    } else {
+        planRow.classList.add('hidden');
+    }
+    rrRow.classList.add('hidden');
+    mfPickerUpdateConfirm();
+};
+
+window.mfPickerSelectPlan = function(val) {
+    window._mfPicker.plan = val || null;
+    window._mfPicker.roomRate = null;
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === window._mfPicker.company);
+    const plan = co?.plans?.find(p => p.id === val);
+    const rrRow = document.getElementById('mfPickerRoomRow');
+    const rrSel = document.getElementById('mfPickerRoom');
+    if (plan?.hasRoomRate && plan.roomRates?.length) {
+        rrRow.classList.remove('hidden');
+        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+    } else {
+        rrRow.classList.add('hidden');
+    }
+    mfPickerUpdateConfirm();
+};
+
+window.mfPickerSelectRoom = function(val) {
+    window._mfPicker.roomRate = val || null;
+    mfPickerUpdateConfirm();
+};
+
+function mfPickerUpdateConfirm() {
+    const p = window._mfPicker;
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const plan = co?.plans?.find(pl => pl.id === p.plan);
+    const needRoom = plan?.hasRoomRate;
+    const ready = p.company && p.plan && (!needRoom || p.roomRate);
+    const btn = document.getElementById('mfPickerConfirmBtn');
+    if (!btn) return;
+    btn.classList.toggle('opacity-50', !ready);
+    btn.classList.toggle('pointer-events-none', !ready);
+}
+
+window.mfPickerConfirm = function() {
+    const p = window._mfPicker;
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const plan = co?.plans?.find(pl => pl.id === p.plan);
+    // Build composite key: "COMPANY|PLAN_ID|ROOM" or "COMPANY|PLAN_ID"
+    const key = [p.company, p.plan, p.roomRate].filter(Boolean).join('|');
+    const label = [co?.name, plan?.name, p.roomRate].filter(Boolean).join(' · ');
+    window.currentMF = key;
+    window._mfCurrentLabel = label;
+    closePopup('mfPlanModal');
+    if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+window.mfPickerClear = function() {
+    window._mfPicker = { company: null, plan: null, roomRate: null };
+    window.currentMF = 'ไม่เลือก';
+    window._mfCurrentLabel = null;
+    closePopup('mfPlanModal');
+    if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};

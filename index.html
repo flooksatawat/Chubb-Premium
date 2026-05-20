@@ -516,7 +516,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <div id="mainActionsGroup" class="pb-2 shrink-0 flex flex-col gap-3 mt-1 transition-all duration-300">
                         <!-- Medical Fund shortcut: visible only for 24TX, Elite, WXN -->
                         <div id="medicalFundBtnContainer" class="hidden">
-                            <button onclick="selectAppPlan('Medical Fund')" class="w-full h-[48px] bg-gradient-to-br from-sky-400 to-cyan-600 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(14,165,233,0.3)] border border-sky-300/50 active:scale-[0.97] transition-all relative overflow-hidden">
+                            <button onclick="openMFPicker()" class="w-full h-[48px] bg-gradient-to-br from-sky-400 to-cyan-600 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(14,165,233,0.3)] border border-sky-300/50 active:scale-[0.97] transition-all relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none rounded-t-[16px]"></div>
                                 <i class="fas fa-hospital text-[18px] relative z-10"></i>
                                 <span class="relative z-10 tracking-wide">Medical Fund</span>
@@ -1257,8 +1257,58 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
     </div>  
 
-    <!-- Medical Fund Plan Modal (MF กองทุนสุขภาพ) - legacy, kept for compatibility -->
-    <div id="mfPlanModal" class="modal-overlay hidden"></div>
+    <!-- Medical Fund Picker Modal (rider selection for 24TX/Elite/WXN) -->
+    <div id="mfPlanModal" class="modal-overlay hidden">
+        <div class="modal-content-card !max-w-[22rem] !p-0 border-none overflow-hidden rounded-[24px]">
+            <div class="bg-gradient-to-br from-sky-500 to-cyan-600 px-5 py-4 text-white relative">
+                <button onclick="closePopup('mfPlanModal')" class="absolute top-3 right-4 text-sky-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10">&times;</button>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas fa-hospital text-white text-[17px]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-[16px] font-bold">Medical Fund</h3>
+                        <p class="text-[11px] text-sky-100">เลือกแผนประกันสุขภาพ</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 space-y-3 bg-white">
+                <!-- Company -->
+                <div>
+                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-building text-sky-500 mr-1"></i>บริษัท</p>
+                    <select id="mfPickerCompany" onchange="mfPickerSelectCompany(this.value)"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                        <option value="">— เลือกบริษัท —</option>
+                    </select>
+                </div>
+                <!-- Plan -->
+                <div id="mfPickerPlanRow" class="hidden">
+                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-file-medical text-sky-500 mr-1"></i>แผนประกัน</p>
+                    <select id="mfPickerPlan" onchange="mfPickerSelectPlan(this.value)"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                        <option value="">— เลือกแผน —</option>
+                    </select>
+                </div>
+                <!-- Room Rate -->
+                <div id="mfPickerRoomRow" class="hidden">
+                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-bed text-teal-500 mr-1"></i>ค่าห้อง / แผน</p>
+                    <select id="mfPickerRoom" onchange="mfPickerSelectRoom(this.value)"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                        <option value="">— เลือกแผน —</option>
+                    </select>
+                </div>
+                <!-- Buttons -->
+                <div class="flex gap-2 pt-1">
+                    <button onclick="mfPickerClear()" class="flex-1 py-2.5 rounded-[12px] bg-slate-100 text-slate-600 font-bold text-[13px] active:scale-95 transition-all">
+                        ไม่เลือก
+                    </button>
+                    <button id="mfPickerConfirmBtn" onclick="mfPickerConfirm()" class="flex-[2] py-2.5 rounded-[12px] bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-[13px] active:scale-95 transition-all opacity-50 pointer-events-none">
+                        <i class="fas fa-check mr-1"></i>ยืนยัน
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- MF Calculator Modal -->
     <div id="mfCalculatorModal" class="modal-overlay hidden">
