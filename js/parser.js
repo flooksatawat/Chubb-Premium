@@ -318,6 +318,15 @@ function extractAmount(t) {
 // 7. YEARS EXTRACTOR
 // ------------------------------------------------------------------
 function extractYears(t, age) {
+    // ตรวจจากชื่อแผนโดยตรงก่อน (10CX, 20CX, 10CL, 20CL, 60CL, 90CL, 5SLB, 10SLB, WXN10, WXN15 ฯลฯ)
+    const planYearMatch = t.match(/\b(10|20|60|90|100|5|15)\s*(?:cx|cl|slb|lpb|slpa|wxn|tx)\b/i)
+        || t.match(/\bwxn(10|15)\b/i)
+        || t.match(/\btla\b/i);
+    if (planYearMatch) {
+        const y = parseInt(planYearMatch[1]);
+        if (y && y >= 5 && y <= 100) return y;
+    }
+
     // ลองจับตัวเลขที่มีคำว่า "ปี" ก่อน
     const all = [...t.matchAll(/(\d{1,3})\s*ปี/g)];
     for (const m of all) {
