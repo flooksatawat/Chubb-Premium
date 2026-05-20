@@ -1406,8 +1406,11 @@ function selectAppPlan(planName) {
 
     if (mainActionBtn) {
         // ให้แผนพวกนี้แสดงปุ่มตารางมูลค่า (และดูรายละเอียดในตัว) นอกนั้นโชว์ดูรายละเอียด
-        if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra", "3D Health Excellence"].includes(planName)) {
+        if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ตาราง`;
+            mainActionBtn.onclick = function() { switchView('table'); };
+        } else if (planName === "3D Health Excellence") {
+            mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> รายละเอียด`;
             mainActionBtn.onclick = function() { switchView('table'); };
         } else {
             mainActionBtn.innerHTML = `<i class="fas fa-file-alt text-lg"></i> ดูรายละเอียด`;
