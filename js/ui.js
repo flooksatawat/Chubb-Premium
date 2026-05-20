@@ -1120,12 +1120,11 @@ window.d3RiderAction = function(rider, ctx) {
     }
 };
 
-// Renders a 5-pill quick-action bar (ตาราง / แชร์ / ชำระ / บัญชี / e-sub)
+// Renders a 4-pill quick-action bar (ตาราง / ชำระ / บัญชี / e-sub) — ตัด แชร์ ออก
 window.renderD3QuickPills = function(ctx) {
     const btnCls = 'bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-[11px] font-bold text-slate-700 flex flex-col items-center gap-1 hover:bg-white/30 transition-all active:scale-95';
     const pills = [
         { icon: 'fa-table',          label: 'ตาราง', action: 'window.openTableFromModal()' },
-        { icon: 'fa-share-nodes',    label: 'แชร์',  action: 'sharePlan()' },
         { icon: 'fa-credit-card',    label: 'ชำระ',  action: "openPopup('paymentModal')" },
         { icon: 'fa-university',     label: 'บัญชี', action: 'openBankModal()' },
         { icon: 'fa-file-signature', label: 'e-sub', action: 'openEsubModal()' },
@@ -1133,7 +1132,36 @@ window.renderD3QuickPills = function(ctx) {
     const btns = pills.map(p =>
         `<button onclick="${p.action}" class="${btnCls}"><i class="fas ${p.icon} text-[14px]"></i><span>${p.label}</span></button>`
     ).join('');
-    return `<div class="grid grid-cols-5 gap-1.5">${btns}</div>`;
+    return `<div class="grid grid-cols-4 gap-1.5">${btns}</div>`;
+};
+
+// Share modal สำหรับ 3D: PDF + รูปภาพ
+window.open3DShareModal = function() {
+    Swal.fire({
+        html: `<div class="flex flex-col items-center pt-1 pb-1">
+            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                <i class="fas fa-share-nodes text-lg text-slate-500"></i>
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 text-center mb-4 leading-snug px-2">แชร์รายละเอียดความคุ้มครอง</h3>
+            <div class="flex flex-col gap-3 w-full">
+                <button onclick="Swal.close(); setTimeout(() => exportTableToPDF('preview'), 200);"
+                    class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl active:scale-[0.98] transition-all">
+                    <i class="fas fa-file-pdf text-[22px] text-red-500 w-8 text-center"></i>
+                    <div class="text-left"><div class="text-[14px] font-bold text-slate-800">แชร์ PDF</div><div class="text-[11px] text-slate-500">ส่งเป็นไฟล์ PDF</div></div>
+                </button>
+                <button onclick="Swal.close(); setTimeout(() => window.navShareAction(), 200);"
+                    class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl active:scale-[0.98] transition-all">
+                    <i class="fas fa-image text-[22px] text-blue-500 w-8 text-center"></i>
+                    <div class="text-left"><div class="text-[14px] font-bold text-slate-800">แชร์รูปภาพ</div><div class="text-[11px] text-slate-500">บันทึกหรือส่งเป็นรูป</div></div>
+                </button>
+            </div>
+        </div>`,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: 'min(90vw, 320px)',
+        padding: '1.25rem',
+        customClass: { popup: '!rounded-3xl !shadow-2xl', closeButton: '!text-slate-400 hover:!text-red-500' },
+    });
 };
 
 function _refresh3DRightView() {
@@ -4836,7 +4864,7 @@ window.open3DDetailsView = function() {
             </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-            <button onclick="exportTableToPDF()" aria-label="แชร์" title="แชร์" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-share-alt"></i> แชร์</button>
+            <button onclick="window.open3DShareModal()" aria-label="แชร์" title="แชร์" style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.95);border:none;color:#0d9488;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;line-height:1;"><i class="fas fa-share-nodes"></i> แชร์</button>
             <button onclick="window.close3DDetailsRightView()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
         </div>
     </div>`;
