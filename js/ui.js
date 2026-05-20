@@ -1012,27 +1012,28 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
-        // ── HBF stepper (กด +/- ทีละ 100) ──
+        // ── HBF — pill grid + fine-tune stepper ──
         const hbfNum = parseInt(hbfVal) || 0;
-        const hbfCenterTxt = hbfNum === 0 ? 'ปิด' : hbfNum.toLocaleString();
-        const hbfCenterCls = hbfNum === 0 ? 'text-slate-400' : 'text-rose-700';
+        const hbfPresets = [0, 500, 1000, 2000, 3000, 5000];
+        const hbfPresetLbls = ['ปิด', '500', '1,000', '2,000', '3,000', '5,000'];
         html += `<div id="rider-hbf" class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
-        html += `<div class="flex items-center justify-between mb-3">`;
         html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
-        html += `<span class="text-[11px] text-slate-400">บาท/วัน (0–5,000)</span>`;
-        html += `</div>`;
-        html += `<div class="flex items-center gap-2">`;
-        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 text-rose-500 font-bold text-2xl flex items-center justify-center active:scale-90 active:bg-rose-100 transition-all select-none touch-manipulation">−</button>`;
-        html += `<div class="flex-1 flex flex-col items-center justify-center bg-rose-50 rounded-2xl h-12 border border-rose-100">`;
-        html += `<span class="text-[18px] font-bold leading-none ${hbfCenterCls}">${hbfCenterTxt}</span>`;
-        if (hbfNum > 0) html += `<span class="text-[9px] text-rose-400 leading-none mt-0.5">บาท/วัน</span>`;
-        html += `</div>`;
-        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 text-rose-500 font-bold text-2xl flex items-center justify-center active:scale-90 active:bg-rose-100 transition-all select-none touch-manipulation">+</button>`;
-        html += `</div>`;
-        html += `<div class="flex justify-between mt-2 px-1">`;
-        html += `<button onclick="window.handle3DClick('HBF',0)" class="text-[10px] px-2 py-0.5 rounded-full ${hbfNum===0?'bg-rose-100 text-rose-600 font-bold':'text-slate-400 hover:text-rose-400'} transition-all">ปิด</button>`;
-        html += `<div class="flex gap-1.5">${[500,1000,2000,3000,5000].map(v=>`<button onclick="window.handle3DClick('HBF',${v})" class="text-[10px] px-2 py-0.5 rounded-full ${hbfNum===v?'bg-rose-100 text-rose-600 font-bold':'text-slate-400 hover:text-rose-400'} transition-all">${v>=1000?(v/1000)+'K':v}</button>`).join('')}</div>`;
+        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-6 gap-1 w-full">`;
+        hbfPresets.forEach((v, i) => {
+            const isSel = hbfNum === v;
+            const cls = isSel
+                ? 'w-full text-center py-2 text-sm font-bold text-rose-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-rose-500/10'
+                : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
+            html += `<button onclick="window.handle3DClick('HBF',${v})" class="${cls}">${hbfPresetLbls[i]}</button>`;
+        });
         html += `</div></div>`;
+        html += `<div class="flex items-center gap-2 mt-3">`;
+        html += `<span class="text-[10px] text-slate-400 shrink-0 w-16">ปรับได้เอง</span>`;
+        html += `<div class="flex items-center gap-1.5 flex-1">`;
+        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">−</button>`;
+        html += `<div class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-9 flex items-center justify-center"><span class="text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-400' : 'text-rose-600'}">${hbfNum === 0 ? 'ปิด' : hbfNum.toLocaleString() + ' บ./วัน'}</span></div>`;
+        html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">+</button>`;
+        html += `</div></div></div>`;
 
         // ── HXO ──
         html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
@@ -5291,17 +5292,22 @@ window.render3DDetailsAccordion = function() {
             });
             stickyHtml += `</div></div>`;
 
-            // HBF mini stepper
-            stickyHtml += `<div>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfNum===0?'ปิด':hbfNum.toLocaleString()+' บ./วัน'}</span></p>
-                <div class="flex items-center gap-1.5">
-                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 font-bold text-lg flex items-center justify-center active:scale-90 transition-all select-none touch-manipulation">−</button>
-                    <div class="flex-1 text-center bg-rose-50 rounded-xl h-8 flex items-center justify-center">
-                        <span class="text-[13px] font-bold ${hbfNum===0?'text-slate-400':'text-rose-700'}">${hbfNum===0?'ปิด':hbfNum.toLocaleString()}</span>
-                    </div>
-                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 font-bold text-lg flex items-center justify-center active:scale-90 transition-all select-none touch-manipulation">+</button>
-                </div>
-            </div>`;
+            // HBF compact pill grid + stepper
+            {
+                const _hp = [0,500,1000,2000,3000,5000];
+                const _hl = ['ปิด','500','1K','2K','3K','5K'];
+                stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfNum===0?'ปิด':hbfNum.toLocaleString()+' บ./วัน'}</span></p>
+                    <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-6 gap-1 mb-1.5">`;
+                _hp.forEach((v,i) => {
+                    stickyHtml += `<button onclick="window.set3DHBF(${v})" class="${v===hbfNum?pillSel:pillDef}">${_hl[i]}</button>`;
+                });
+                stickyHtml += `</div>`;
+                stickyHtml += `<div class="flex items-center gap-1.5">
+                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 font-bold text-base flex items-center justify-center active:scale-90 select-none touch-manipulation">−</button>
+                    <div class="flex-1 text-center text-[11px] font-bold ${hbfNum===0?'text-slate-400':'text-rose-600'}">${hbfNum===0?'ปิด':hbfNum.toLocaleString()+' บ./วัน'}</div>
+                    <button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 font-bold text-base flex items-center justify-center active:scale-90 select-none touch-manipulation">+</button>
+                </div></div>`;
+            }
         }
         stickyHtml += `</div>`;
     }
