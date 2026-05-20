@@ -192,7 +192,9 @@ function mfShowError(msg) {
 }
 
 window.openMFCalculator = async function() {
-    document.getElementById('mfCalculatorModal').classList.remove('hidden');
+    const modal = document.getElementById('mfCalculatorModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
     await mfInit();
 };
 
@@ -238,7 +240,9 @@ async function mfPickerInit() {
 }
 
 window.openMFPicker = async function() {
-    document.getElementById('mfPlanModal').classList.remove('hidden');
+    const modal = document.getElementById('mfPlanModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
     await mfPickerInit();
 };
 

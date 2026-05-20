@@ -1315,7 +1315,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         <div class="modal-content-card !max-w-[22rem] !p-0 border-none overflow-hidden rounded-[24px]" style="max-height:92vh;display:flex;flex-direction:column;">
             <!-- Header -->
             <div class="bg-gradient-to-br from-sky-500 to-cyan-600 p-5 pt-6 text-center text-white flex-shrink-0 relative">
-                <button onclick="document.getElementById('mfCalculatorModal').classList.add('hidden')" class="absolute top-3 right-4 text-sky-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10 backdrop-blur-sm">&times;</button>
+                <button onclick="closePopup('mfCalculatorModal')" class="absolute top-3 right-4 text-sky-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10 backdrop-blur-sm">&times;</button>
                 <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
                     <i class="fas fa-hospital text-white text-[20px]"></i>
                 </div>
@@ -1741,7 +1741,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <script src="js/ui.js?v=68"></script>
     <script src="js/compare.js?v=5"></script>
     <script src="js/share.js?v=8"></script>
-    <script src="js/mf.js?v=3"></script>
+    <script src="js/mf.js?v=4"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
         if ('serviceWorker' in navigator) {
