@@ -805,16 +805,16 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <!-- ========================================== -->
     <!-- 1. หน้าสรุปผลหลัก (Result Modal) ดีไซน์ใหม่ -->
     <!-- ========================================== -->
-    <div id="resultModal" class="modal-overlay hidden" style="align-items:flex-start;padding-top:5vh;">
-        <div class="modal-content-card !max-w-[96vw] !w-[96vw] !p-0 !bg-slate-50 border-none overflow-hidden rounded-[24px]" style="max-height:90vh;display:flex;flex-direction:column;">
+    <div id="resultModal" class="modal-overlay hidden">
+        <div class="modal-content-card !max-w-[22rem] !p-0 !bg-white border-none overflow-hidden rounded-[24px]" style="max-height:90vh;display:flex;flex-direction:column;">
             <!-- Header -->
-            <div class="bg-[#1e3a8a] px-5 py-3 text-center text-white relative rounded-b-[20px] shadow-sm z-10 shrink-0">
-                <button onclick="closePopup('resultModal')" class="absolute top-3 right-4 text-blue-200 hover:text-white text-xl w-8 h-8 flex justify-center items-center transition-colors">&times;</button>
-                <h3 class="text-[15px] font-bold tracking-tight">สรุปผลการคำนวณ</h3>
+            <div class="bg-gradient-to-br from-[#1e3a8a] to-[#2563eb] p-5 pt-6 text-center text-white flex-shrink-0 relative">
+                <button onclick="closePopup('resultModal')" class="absolute top-3 right-4 text-blue-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10 backdrop-blur-sm">&times;</button>
+                <h3 id="resultModalTitle" class="text-[20px] font-bold tracking-tight drop-shadow-md">สรุปผลการคำนวณ</h3>
             </div>
 
             <!-- Content Area -->
-            <div class="overflow-y-auto custom-scrollbar p-4 pb-6 -mt-4 pt-8" style="flex:1;min-height:0;-webkit-overflow-scrolling:touch;">
+            <div class="overflow-y-auto flex-1 custom-scrollbar p-4 pb-5 bg-white" style="min-height:0;-webkit-overflow-scrolling:touch;">
                 
                 <!-- 3 กล่องบน (เพศ, อายุ, ระยะออม) -->
                 <div class="flex gap-2.5 mb-4">
