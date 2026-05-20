@@ -44,16 +44,43 @@ function triggerInstallmentShare(type) {
     });
 }
 
+const _3D_HX_INFO = {
+    'HX15':  { room: '1,500', limit: '1,000,000' },
+    'HX20':  { room: '2,000', limit: '3,000,000' },
+    'HX40':  { room: '4,000', limit: '5,000,000' },
+    'HX60':  { room: '6,000', limit: '10,000,000' },
+    'HX150': { room: '15,000', limit: '60,000,000' },
+    'HX300': { room: '30,000', limit: '120,000,000' },
+};
+const _3D_HXO_AMT = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000' };
+const _3D_HXD_AMT = { 'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000' };
+const _3D_HBF_AMT = { 'HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000' };
+
+function _get3DShareLines() {
+    const hx  = window.currentHX  || '';
+    const hxo = window.currentHXO || 'ไม่เลือก';
+    const hxd = window.currentHXD || 'ไม่เลือก';
+    const hbf = window.currentHBF || 'ไม่เลือก';
+    const lines = [];
+    if (hx && _3D_HX_INFO[hx]) {
+        const info = _3D_HX_INFO[hx];
+        lines.push(`🛏️ ค่าห้อง: ${info.room} บ./วัน | วงเงินเหมาจ่าย: ${info.limit} บ./ปี`);
+    }
+    if (hxo !== 'ไม่เลือก' && _3D_HXO_AMT[hxo]) lines.push(`💊 OPD (ผู้ป่วยนอก): ${_3D_HXO_AMT[hxo]} บ./ครั้ง`);
+    if (hxd !== 'ไม่เลือก' && _3D_HXD_AMT[hxd]) lines.push(`🔬 วงเงินตรวจ/วินิจฉัยเพิ่ม: ${_3D_HXD_AMT[hxd]} บ./ปี`);
+    if (hbf !== 'ไม่เลือก') {
+        const amt = hbf.startsWith('CUSTOM:') ? parseInt(hbf.split(':')[1]).toLocaleString() : _3D_HBF_AMT[hbf];
+        if (amt) lines.push(`🏨 ชดเชยรายวัน: ${amt} บ./วัน`);
+    }
+    return lines;
+}
+
 function generateShortShareText() {
     if (!lastCalculationData) return ''; const d = lastCalculationData;
     let text = `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 ออมเงิน: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
     if (currentAppPlan === '3D Health Excellence') {
-        const hx  = window.currentHX  || '';
-        const hxo = window.currentHXO || 'ไม่เลือก';
-        const hxd = window.currentHXD || 'ไม่เลือก';
-        const hbf = window.currentHBF || 'ไม่เลือก';
-        if (hx) text += `\n🏥 แผนสุขภาพ: ${hx}`;
-        text += `\nHXO: ${hxo} | HXD: ${hxd} | HBF: ${hbf}`;
+        const lines = _get3DShareLines();
+        if (lines.length) text += '\n' + lines.join('\n');
     }
     return text;
 }
@@ -118,12 +145,8 @@ function generateSummaryText() {
     ];
     if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
     if (currentAppPlan === '3D Health Excellence') {
-        const hx  = window.currentHX  || '';
-        const hxo = window.currentHXO || 'ไม่เลือก';
-        const hxd = window.currentHXD || 'ไม่เลือก';
-        const hbf = window.currentHBF || 'ไม่เลือก';
-        if (hx) lines.push(`\n🏥 แผนสุขภาพ: ${hx}`);
-        lines.push(`HXO: ${hxo} | HXD: ${hxd} | HBF: ${hbf}`);
+        const extraLines = _get3DShareLines();
+        if (extraLines.length) extraLines.forEach(l => lines.push(l));
     }
     return lines.join('\n');
 }
