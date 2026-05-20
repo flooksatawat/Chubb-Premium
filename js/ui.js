@@ -4216,6 +4216,81 @@ async function _export3DPDF(actionType = 'preview') {
             y += 3;
         });
 
+        // ── สัญญาเพิ่มเติม HXO ──
+        const _DL = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000',
+                      'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000',
+                      'HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000' };
+
+        if (hxoVal !== 'ไม่เลือก') {
+            checkPage(44);
+            doc.setFillColor(245, 243, 255);
+            doc.rect(15, y - 4, 180, 8, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(109, 40, 217);
+            doc.text(`สัญญาเพิ่มเติม HXO — ${_DL[hxoVal]||hxoVal} บ./ครั้ง`, 18, y + 1.5);
+            y += 10;
+            const hxoItems = [
+                { t: 'ข้อ 1 — ความคุ้มครองผู้ป่วยนอก (OPD)', r: 'สูงสุด 30 ครั้ง/รอบปี' },
+                { t: 'ข้อ 2 — ความคุ้มครองสุขภาพจิต (ค่าใช้จ่ายร่วม 20%)', r: 'สูงสุด 4 ครั้ง/รอบปี' },
+                { t: 'ข้อ 3 — ค่าตรวจรักษาทางทันตกรรม (ค่าใช้จ่ายร่วม 20%)', r: 'สูงสุด 2 ครั้ง/รอบปี' },
+            ];
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9.5);
+            hxoItems.forEach(item => {
+                checkPage(7);
+                const lines = doc.splitTextToSize('• ' + item.t, 150);
+                doc.setTextColor(71, 85, 105); doc.text(lines, 20, y);
+                doc.setTextColor(109, 40, 217); doc.text(item.r, 192, y, { align: 'right' });
+                y += lines.length * 5 + 1;
+            });
+            y += 4;
+        }
+
+        // ── สัญญาเพิ่มเติม HXD ──
+        if (hxdVal !== 'ไม่เลือก') {
+            checkPage(44);
+            doc.setFillColor(238, 242, 255);
+            doc.rect(15, y - 4, 180, 8, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(67, 56, 202);
+            doc.text(`สัญญาเพิ่มเติม HXD — ${_DL[hxdVal]||hxdVal} บ./รอบ`, 18, y + 1.5);
+            y += 10;
+            const hxdItems = [
+                { t: 'ข้อ 1 — ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', c: 'ระยะรอคอย 30 วัน' },
+                { t: 'ข้อ 2 — การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', c: 'ระยะรอคอย 365 วัน' },
+                { t: 'ข้อ 3 — ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง (ตลอดชีวิต/ราย)', c: 'ระยะรอคอย 120 วัน' },
+            ];
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9.5);
+            hxdItems.forEach(item => {
+                checkPage(9);
+                const lines = doc.splitTextToSize('• ' + item.t, 150);
+                doc.setTextColor(71, 85, 105); doc.text(lines, 20, y);
+                doc.setTextColor(245, 158, 11); doc.text(item.c, 192, y, { align: 'right' });
+                y += lines.length * 5 + 2;
+            });
+            y += 4;
+        }
+
+        // ── สัญญาเพิ่มเติม HBF ──
+        if (hbfVal !== 'ไม่เลือก') {
+            checkPage(36);
+            doc.setFillColor(255, 247, 237);
+            doc.rect(15, y - 4, 180, 8, 'F');
+            doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(194, 65, 12);
+            doc.text(`สัญญาเพิ่มเติม HBF — ${_DL[hbfVal]||hbfVal} บ./วัน (ชดเชยรายวัน)`, 18, y + 1.5);
+            y += 10;
+            const hbfItems = [
+                'รับผลประโยชน์ค่ารักษาพยาบาลรายวัน ตามจำนวนเงินเอาประกันภัยที่กำหนด',
+                'จ่ายชดเชยตามจำนวนวันที่เข้ารับการรักษาพยาบาลจริงในฐานะผู้ป่วยใน',
+                'รับเงินชดเชยสูงสุดไม่เกิน 365 วัน ต่อการเข้าพักรักษาตัวครั้งใดครั้งหนึ่ง',
+            ];
+            doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71, 85, 105);
+            hbfItems.forEach(item => {
+                checkPage(7);
+                const lines = doc.splitTextToSize('• ' + item, 175);
+                doc.text(lines, 20, y);
+                y += lines.length * 5 + 1;
+            });
+            y += 4;
+        }
+
         // Footer
         const pageCount = doc.internal.getNumberOfPages();
         doc.setFont(fontName, 'normal'); doc.setFontSize(9);
