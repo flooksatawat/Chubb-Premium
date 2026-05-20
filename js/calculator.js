@@ -14,7 +14,7 @@ let cvDataLookup = {};
 window.currentHX = 'ไม่เลือก';
 window.currentHXO = 'ไม่เลือก';
 window.currentHXD = 'ไม่เลือก';
-window.currentHBF = 'ไม่เลือก';
+window.currentHBF = 0;
 window.currentMF = 'ไม่เลือก';
 
 // ==================== DATA ARCHITECTURE & CONFIG ====================
@@ -129,18 +129,16 @@ function getHealthRate(categoryKey, planName, age, gender) {
         return Math.round((sa / 1000) * rate);
     }
 
-    // ส่วนของ HBF ที่แบ่งตาม Occupational Class
+    // ส่วนของ HBF — สูตร: (ค่าชดเชยรายวัน / 1000) * Rate_HBF
     if (categoryKey === 'HBF') {
+        const dailyAmt = parseInt(planName) || 0;
+        if (dailyAmt <= 0) return 0;
         let hbfSource = window.HBF_RATES || LIFE_RATES['HBF_RATES'];
         if (hbfSource && hbfSource['class_1']) {
-            // ใช้ string key เพื่อ match JSON เสมอ และ cap ที่ age 69
             const ageKey = String(Math.min(age, 69));
-            let rateFromClass = hbfSource['class_1'][ageKey];
+            const rateFromClass = hbfSource['class_1'][ageKey];
             if (rateFromClass !== undefined && rateFromClass > 0) {
-                const multiplierMap = { 'HBF500': 0.5, 'HBF1000': 1, 'HBF3000': 3, 'HBF5000': 5 };
-                const multiplier = multiplierMap[planName];
-                if (multiplier === undefined) return 0;
-                return Math.round(rateFromClass * multiplier);
+                return Math.round((dailyAmt / 1000) * rateFromClass);
             }
         }
         return 0;
@@ -157,17 +155,15 @@ function getHealthRate(categoryKey, planName, age, gender) {
 }
 
 function validateAndCapHBF(hbfVal, age, status, occupation, nationality, baseSumAssured, dailyIncome) {
-    if (!hbfVal || hbfVal === 'ไม่เลือก') return hbfVal;
-
-    const hbfNumMap = { 'HBF500': 500, 'HBF1000': 1000, 'HBF3000': 3000, 'HBF5000': 5000 };
-    let hbfAmount = hbfNumMap[hbfVal] || 0;
+    let hbfAmount = parseInt(hbfVal) || 0;
+    if (hbfAmount <= 0) return 0;
 
     const hardExclusions = {
         workAbroad: false, livingAbroad: false, studyingAbroad: false,
         isMonkNun: false, isPriest: false
     };
     for (const key in hardExclusions) {
-        if (hardExclusions[key]) return 'ไม่เลือก';
+        if (hardExclusions[key]) return 0;
     }
 
     let maxHBF = 5000;
@@ -189,12 +185,9 @@ function validateAndCapHBF(hbfVal, age, status, occupation, nationality, baseSum
 
     if (hbfAmount > maxHBF) hbfAmount = maxHBF;
 
-    if (hbfAmount >= 5000) return 'HBF5000';
-    if (hbfAmount >= 3000) return 'HBF3000';
-    if (hbfAmount >= 1000) return 'HBF1000';
-    if (hbfAmount >= 500) return 'HBF500';
-    
-    return 'ไม่เลือก';
+    // round down to nearest 100
+    hbfAmount = Math.floor(hbfAmount / 100) * 100;
+    return hbfAmount;
 }
 
 function getCLMinSum() {
@@ -548,7 +541,7 @@ function calculate(source, enforceMin = false) {
             let hxoVal = window.currentHXO || 'ไม่เลือก';
             let hxdVal = window.currentHXD || 'ไม่เลือก';
             if (hxoVal === 'ไม่เลือก') hxdVal = 'ไม่เลือก';
-            let hbfVal = window.currentHBF || 'ไม่เลือก';
+            let hbfVal = window.currentHBF || 0;
             let mfVal = window.currentMF && window.currentMF !== '' ? window.currentMF : 'ไม่เลือก';
 
             let cappedHbfVal = validateAndCapHBF(hbfVal, age, 'adult', '', '', fSum, 0);
@@ -556,9 +549,9 @@ function calculate(source, enforceMin = false) {
                 hbfVal = cappedHbfVal;
                 window.currentHBF = cappedHbfVal;
                 if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
-                
-                if (age <= 15) showCustomError(`อายุ ${age} ปี ซื้อชดเชยสูงสุดได้ ${cappedHbfVal.replace('HBF', '')} บาท`);
-                else showCustomError(`ทุนประกัน ${formatNum(fSum)} ซื้อชดเชยสูงสุดได้ ${cappedHbfVal.replace('HBF', '')} บาท`);
+
+                if (age <= 15) showCustomError(`อายุ ${age} ปี ซื้อชดเชยสูงสุดได้ ${cappedHbfVal.toLocaleString()} บาท/วัน`);
+                else showCustomError(`ทุนประกัน ${formatNum(fSum)} ซื้อชดเชยสูงสุดได้ ${cappedHbfVal.toLocaleString()} บาท/วัน`);
             }
 
             let hxPrem = getHealthRate('HX', hxVal, age, currentGender);

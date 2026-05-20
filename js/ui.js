@@ -965,7 +965,7 @@ window.handle3DClick = function(type, val) {
     if (type === 'HX') {
         window.currentHX = val;
         if (!window.currentHXO) window.currentHXO = 'ไม่เลือก';
-        if (!window.currentHBF) window.currentHBF = 'ไม่เลือก';
+        if (!window.currentHBF) window.currentHBF = 0;
     } else if (type === 'HXO') {
         window.currentHXO = val;
         if (val === 'ไม่เลือก') window.currentHXD = 'ไม่เลือก';
@@ -988,17 +988,15 @@ window.render3DOptionsUI = function() {
     let hxVal = window.currentHX || '';
     let hxoVal = window.currentHXO || '';
     let hxdVal = window.currentHXD || '';
-    let hbfVal = window.currentHBF || '';
+    let hbfVal = window.currentHBF || 0;
 
     const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
     const hxoOpts = ['ไม่เลือก', 'HXO10', 'HXO20', 'HXO30', 'HXO50'];
                 const hxdOpts = ['ไม่เลือก', 'HXD100', 'HXD200', 'HXD500', 'HXD1000'];
-                const hbfOpts = ['ไม่เลือก', 'HBF500', 'HBF1000', 'HBF3000', 'HBF5000'];
 
                 const displayLabels = {
                   'HXO10': '1,000', 'HXO20': '2,000', 'HXO30': '3,000', 'HXO50': '5,000',
-                  'HXD100': '10,000', 'HXD200': '20,000', 'HXD500': '50,000', 'HXD1000': '100,000',
-                  'HBF500': '500', 'HBF1000': '1,000', 'HBF3000': '3,000', 'HBF5000': '5,000'
+                  'HXD100': '10,000', 'HXD200': '20,000', 'HXD500': '50,000', 'HXD1000': '100,000'
                 };
 
     let html = '';
@@ -1014,26 +1012,22 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
-        // ── HBF slider (always paired with HX, no close button) ──
-        const hbfStepMap = { 'ไม่เลือก': 0, 'HBF500': 1, 'HBF1000': 2, 'HBF3000': 3, 'HBF5000': 4 };
-        const hbfSliderVals = ['ไม่เลือก', 'HBF500', 'HBF1000', 'HBF3000', 'HBF5000'];
-        const hbfTickLabels = ['ไม่เลือก', '500', '1,000', '3,000', '5,000'];
-        const hbfStepValue = hbfStepMap[hbfVal] ?? 0;
-        const hbfDisplay = hbfVal === 'ไม่เลือก' ? 'ไม่เลือก' : `${displayLabels[hbfVal] || hbfVal} บาท/วัน`;
+        // ── HBF slider (continuous, step=100, 0=ไม่เลือก) ──
+        const hbfNum = parseInt(hbfVal) || 0;
+        const hbfDisplay = hbfNum === 0 ? 'ไม่เลือก' : `${hbfNum.toLocaleString()} บาท/วัน`;
         html += `<div id="rider-hbf" class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
         html += `<div class="flex items-center justify-between mb-4">`;
         html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
-        html += `<span id="hbf-label" class="text-[13px] font-bold ${hbfVal === 'ไม่เลือก' ? 'text-slate-400' : 'text-rose-600'}">${hbfDisplay}</span>`;
+        html += `<span id="hbf-label" class="text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-400' : 'text-rose-600'}">${hbfDisplay}</span>`;
         html += `</div>`;
         html += `<div class="px-1">`;
-        html += `<input type="range" id="hbf-slider" min="0" max="4" step="1" value="${hbfStepValue}"`;
-        html += ` oninput="(function(v){var vals=['ไม่เลือก','HBF500','HBF1000','HBF3000','HBF5000'];var lbls=['ไม่เลือก','500 บาท/วัน','1,000 บาท/วัน','3,000 บาท/วัน','5,000 บาท/วัน'];var l=document.getElementById('hbf-label');if(l){l.textContent=lbls[v];l.className='text-[13px] font-bold '+(v==0?'text-slate-400':'text-rose-600');}var ticks=document.querySelectorAll('.hbf-tick');ticks.forEach(function(t,i){t.className='hbf-tick text-[9px] '+(i==v?'text-rose-600 font-bold':'text-slate-400');});window.handle3DClick('HBF',vals[v]);})(+this.value)"`;
+        html += `<input type="range" id="hbf-slider" min="0" max="5000" step="100" value="${hbfNum}"`;
+        html += ` oninput="(function(v){var n=parseInt(v)||0;var l=document.getElementById('hbf-label');if(l){l.textContent=n===0?'ไม่เลือก':n.toLocaleString()+' บาท/วัน';l.className='text-[13px] font-bold '+(n===0?'text-slate-400':'text-rose-600');}window.handle3DClick('HBF',n);})(+this.value)"`;
         html += ` class="w-full h-2 rounded-full appearance-none cursor-pointer" style="accent-color:#e11d48;">`;
         html += `</div>`;
         html += `<div class="flex justify-between mt-2 px-1">`;
-        hbfTickLabels.forEach((lbl, i) => {
-            html += `<span class="hbf-tick text-[9px] ${i === hbfStepValue ? 'text-rose-600 font-bold' : 'text-slate-400'}">${lbl}</span>`;
-        });
+        html += `<span class="text-[9px] text-slate-400">ไม่เลือก</span>`;
+        html += `<span class="text-[9px] text-slate-400">5,000 บ./วัน</span>`;
         html += `</div></div>`;
 
         // ── HXO ──
@@ -1111,7 +1105,7 @@ window.d3RiderAction = function(rider, ctx) {
         if ((window.currentHXO || 'ไม่เลือก') === 'ไม่เลือก') window.currentHXO = 'HXO10';
         window.currentHXD = (window.currentHXD || 'ไม่เลือก') === 'ไม่เลือก' ? 'HXD100' : 'ไม่เลือก';
     } else if (rider === 'HBF') {
-        window.currentHBF = (window.currentHBF || 'ไม่เลือก') === 'ไม่เลือก' ? 'HBF1000' : 'ไม่เลือก';
+        window.currentHBF = (!window.currentHBF || window.currentHBF === 0) ? 1000 : 0;
     }
     if (ctx === 'accordion') {
         if (typeof window.render3DOptionsUI === 'function') window.render3DOptionsUI();
@@ -1376,7 +1370,7 @@ function selectAppPlan(planName) {
     }
     
     if (planName === '3D Health Excellence') {
-        window.currentHX = 'ไม่เลือก'; window.currentHXO = 'ไม่เลือก'; window.currentHXD = 'ไม่เลือก'; window.currentHBF = 'ไม่เลือก';
+        window.currentHX = 'ไม่เลือก'; window.currentHXO = 'ไม่เลือก'; window.currentHXD = 'ไม่เลือก'; window.currentHBF = 0;
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
         if(extraOptions) { extraOptions.classList.remove('hidden'); render3DOptionsUI(); }
         const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.remove('hidden');
@@ -4290,7 +4284,7 @@ async function _export3DPDF(actionType = 'preview') {
         const tier = planInfo.tier;
         const hxoVal = window.currentHXO || 'ไม่เลือก';
         const hxdVal = window.currentHXD || 'ไม่เลือก';
-        const hbfVal = window.currentHBF || 'ไม่เลือก';
+        const hbfVal = window.currentHBF || 0;
 
         // Header
         doc.setFillColor(13, 148, 136);
@@ -4305,7 +4299,7 @@ async function _export3DPDF(actionType = 'preview') {
         doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(30,41,59);
         doc.text('สัญญาเพิ่มเติม:', 15, y);
         doc.setFont(fontName, 'normal'); doc.setTextColor(71,85,105);
-        doc.text(`HXO: ${hxoVal} | HXD: ${hxdVal} | HBF: ${hbfVal}`, 55, y);
+        doc.text(`HXO: ${hxoVal} | HXD: ${hxdVal} | HBF: ${hbfVal > 0 ? hbfVal.toLocaleString()+' บ./วัน' : 'ไม่เลือก'}`, 55, y);
         y += 8;
 
         const checkPage = (h) => { if (y + h > 285) { doc.addPage(); y = 20; } };
@@ -4360,8 +4354,7 @@ async function _export3DPDF(actionType = 'preview') {
 
         // ── สัญญาเพิ่มเติม HXO ──
         const _DL = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000',
-                      'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000',
-                      'HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000' };
+                      'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000' };
 
         if (hxoVal !== 'ไม่เลือก') {
             checkPage(44);
@@ -4411,12 +4404,12 @@ async function _export3DPDF(actionType = 'preview') {
         }
 
         // ── สัญญาเพิ่มเติม HBF ──
-        if (hbfVal !== 'ไม่เลือก') {
+        if (hbfVal > 0) {
             checkPage(36);
             doc.setFillColor(255, 247, 237);
             doc.rect(15, y - 4, 180, 8, 'F');
             doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(194, 65, 12);
-            doc.text(`สัญญาเพิ่มเติม HBF — ${_DL[hbfVal]||hbfVal} บ./วัน (ชดเชยรายวัน)`, 18, y + 1.5);
+            doc.text(`สัญญาเพิ่มเติม HBF — ${hbfVal.toLocaleString()} บ./วัน (ชดเชยรายวัน)`, 18, y + 1.5);
             y += 10;
             const hbfItems = [
                 'รับผลประโยชน์ค่ารักษาพยาบาลรายวัน ตามจำนวนเงินเอาประกันภัยที่กำหนด',
@@ -4484,12 +4477,12 @@ async function _export3DPDF(actionType = 'preview') {
             const d = lastCalculationData || {};
             const hxo = window.currentHXO || 'ไม่เลือก';
             const hxd = window.currentHXD || 'ไม่เลือก';
-            const hbf = window.currentHBF || 'ไม่เลือก';
-            const _DL = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000','HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000','HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000' };
+            const hbf = window.currentHBF || 0;
+            const _DL = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000','HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000' };
             const riderParts = [
                 hxo !== 'ไม่เลือก' ? `OPD ${_DL[hxo] || hxo}` : '',
                 hxd !== 'ไม่เลือก' ? `Advance ${_DL[hxd] || hxd}` : '',
-                hbf !== 'ไม่เลือก' ? `ชดเชย ${_DL[hbf] || hbf}` : '',
+                hbf > 0 ? `ชดเชย ${hbf.toLocaleString()}` : '',
                 (window.currentTPDEnabled && parseInt(window.currentTPDSA) > 0) ? `TPD ${parseInt(window.currentTPDSA||0).toLocaleString()}` : '',
             ].filter(Boolean).join(' ');
             const cleanName = `3D Health ${_gTh3d} ${_age3d} ห้อง${_hxRoom}${riderParts ? ' ' + riderParts : ''}`;
@@ -5222,16 +5215,14 @@ window.render3DDetailsAccordion = function() {
     const hxVal  = window.currentHX  || '';
     const hxoVal = window.currentHXO || 'ไม่เลือก';
     const hxdVal = window.currentHXD || 'ไม่เลือก';
-    const hbfVal = window.currentHBF || 'ไม่เลือก';
+    const hbfVal = window.currentHBF || 0;
 
     const hxOpts  = ['HX15','HX20','HX40','HX60','HX150','HX300'];
     const hxoOpts = ['ไม่เลือก','HXO10','HXO20','HXO30','HXO50'];
     const hxdOpts = ['ไม่เลือก','HXD100','HXD200','HXD500','HXD1000'];
-    const hbfOpts = ['ไม่เลือก','HBF500','HBF1000','HBF3000','HBF5000'];
     const DL = {
         'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000',
         'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000',
-        'HBF500':'500','HBF1000':'1,000','HBF3000':'3,000','HBF5000':'5,000',
     };
 
     const pillSel = 'py-1.5 text-[11px] font-bold text-teal-700 bg-white shadow rounded-xl border border-teal-200/60';
@@ -5242,7 +5233,8 @@ window.render3DDetailsAccordion = function() {
     const hxLabel = hxVal ? ((HX_PLAN_INFO[hxVal] && HX_PLAN_INFO[hxVal].room) || hxVal) : 'ยังไม่เลือก';
     const hxoLabel = hxoVal === 'ไม่เลือก' ? '–' : (DL[hxoVal]||hxoVal)+' บ./ครั้ง';
     const hxdLabel = hxdVal === 'ไม่เลือก' ? '–' : (DL[hxdVal]||hxdVal)+' บ./รอบ';
-    const hbfLabel = hbfVal === 'ไม่เลือก' ? '–' : ((hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])||hbfVal)+' บ./วัน';
+    const hbfNum = parseInt(hbfVal) || 0;
+    const hbfLabel = hbfNum === 0 ? '–' : hbfNum.toLocaleString()+' บ./วัน';
 
     let stickyHtml = `<div class="sticky top-0 z-10 bg-white/97 backdrop-blur-sm border-b border-slate-100">`;
 
@@ -5252,7 +5244,7 @@ window.render3DDetailsAccordion = function() {
             <span class="text-[11px] font-bold text-teal-600">${hxLabel}</span>
             ${hxoVal!=='ไม่เลือก'?`<span class="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded-full font-medium">HXO ${hxoLabel}</span>`:''}
             ${hxdVal!=='ไม่เลือก'?`<span class="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium">HXD ${hxdLabel}</span>`:''}
-            ${hbfVal!=='ไม่เลือก'?`<span class="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-full font-medium">HBF ${hbfLabel}</span>`:''}
+            ${hbfNum>0?`<span class="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-full font-medium">HBF ${hbfLabel}</span>`:''}
         </div>
         <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1 shrink-0">
             ${selOpen ? 'ซ่อน' : 'ตัวเลือก'}<i class="fas fa-chevron-${selOpen?'up':'down'} text-[9px]"></i>
@@ -5290,14 +5282,14 @@ window.render3DDetailsAccordion = function() {
             });
             stickyHtml += `</div></div>`;
 
-            // HBF
-            stickyHtml += `<div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfVal==='ไม่เลือก'?'ไม่เลือก':(hbfVal.startsWith('CUSTOM:')?parseInt(hbfVal.split(':')[1]).toLocaleString():DL[hbfVal])+' บ./วัน'}</span></p>
-                <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-5 gap-1">`;
-            hbfOpts.forEach(opt => {
-                const lbl = opt==='ไม่เลือก'?'ไม่':opt.replace('HBF','');
-                stickyHtml += `<button onclick="window.set3DHBF('${opt}')" class="${opt===hbfVal?pillSel:pillDef}">${lbl}</button>`;
-            });
-            stickyHtml += `</div></div>`;
+            // HBF slider
+            stickyHtml += `<div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">ชดเชยรายวัน (HBF) <span class="text-rose-500">${hbfNum===0?'ไม่เลือก':hbfNum.toLocaleString()+' บ./วัน'}</span></p>
+                <div class="px-1">
+                    <input type="range" min="0" max="5000" step="100" value="${hbfNum}" oninput="(function(v){window.set3DHBF(parseInt(v)||0);})(+this.value)" class="w-full h-2 rounded-full appearance-none cursor-pointer" style="accent-color:#e11d48;">
+                </div>
+                <div class="flex justify-between mt-1"><span class="text-[8px] text-slate-400">ไม่เลือก</span><span class="text-[8px] text-slate-400">5,000 บ./วัน</span></div>
+            </div>`;
         }
         stickyHtml += `</div>`;
     }
@@ -5471,8 +5463,8 @@ window.render3DDetailsAccordion = function() {
         }
 
         // HBF section
-        if (hbfVal !== 'ไม่เลือก') {
-            const hbfAmt = DL[hbfVal] || hbfVal.replace('HBF','');
+        if (hbfNum > 0) {
+            const hbfAmt = hbfNum.toLocaleString();
             contentHtml += `<div class="mx-3 mt-4 mb-1">
                 <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">สัญญาเพิ่มเติม HBF — ${hbfAmt} บ./วัน</p>
                 <div class="space-y-0">`;

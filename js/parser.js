@@ -388,10 +388,9 @@ function parseCommand(rawText) {
         const hbfM = t.match(/(?:ชดเชย|ชดเชยรายวัน|รายวัน|ค่าชดเชย)\s*([\d,]+)?/);
         if (hbfM) {
             const v = hbfM[1] ? parseInt(hbfM[1].replace(/,/g,'')) : NaN;
-            const hbfMap = [[500,'HBF500'],[1000,'HBF1000'],[3000,'HBF3000'],[5000,'HBF5000']];
             result.hbf = !isNaN(v) && v > 0
-                ? hbfMap.reduce((p,c) => Math.abs(c[0]-v) < Math.abs(p[0]-v) ? c : p)[1]
-                : 'HBF1000';
+                ? Math.floor(Math.min(v, 5000) / 100) * 100
+                : 1000;
         }
     }
 
