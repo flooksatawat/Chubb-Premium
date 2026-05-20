@@ -1606,9 +1606,9 @@ window.renderCompareView = function(planA, planB) {
 // Long-press delegation — เริ่ม compare mode บน wide layout เท่านั้น
 (function initCompareLongPress() {
     const THRESHOLD = 500;
-    const MOVE_DEAD_ZONE = 8; // px — ขยับน้อยกว่านี้ไม่ cancel
+    const MOVE_DEAD_ZONE = 8;
     let _timer = null, _downPlan = null, _startX = 0, _startY = 0;
-    let _longPressFired = false; // กัน click หลัง long-press
+    let _longPressFired = false;
 
     function getTargetPlan(e) {
         const btn = e.target.closest('[data-plan]');
@@ -1640,7 +1640,6 @@ window.renderCompareView = function(planA, planB) {
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     }, { passive: true });
 
-    // non-passive เพื่อ preventDefault ป้องกัน click หลัง long-press
     document.addEventListener('touchend', e => {
         if (_longPressFired) {
             e.preventDefault();
@@ -1652,6 +1651,7 @@ window.renderCompareView = function(planA, planB) {
 
     // mouse long-press for desktop/notebook
     let _mouseStartX = 0, _mouseStartY = 0;
+    let _mouseLongPressFired = false;
     document.addEventListener('mousedown', e => {
         if (e.button !== 0 || !window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
@@ -1659,15 +1659,23 @@ window.renderCompareView = function(planA, planB) {
         _downPlan = getTargetPlan(e);
         if (!_downPlan) return;
         _mouseStartX = e.clientX; _mouseStartY = e.clientY;
-        _timer = setTimeout(() => { window.startCompareMode(_downPlan); _downPlan = null; }, THRESHOLD);
+        _mouseLongPressFired = false;
+        _timer = setTimeout(() => {
+            _mouseLongPressFired = true;
+            window.startCompareMode(_downPlan);
+            _downPlan = null;
+        }, THRESHOLD);
     });
     document.addEventListener('mousemove', e => {
         if (!_timer) return;
         const dx = e.clientX - _mouseStartX, dy = e.clientY - _mouseStartY;
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     });
-    document.addEventListener('mouseup',   cancel);
-    document.addEventListener('mouseleave',cancel);
+    document.addEventListener('click', e => {
+        if (_mouseLongPressFired) { e.stopPropagation(); e.preventDefault(); _mouseLongPressFired = false; }
+    }, true);
+    document.addEventListener('mouseup',    cancel);
+    document.addEventListener('mouseleave', cancel);
 })();
 
 window.computeForPlan = function (planName) {
