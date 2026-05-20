@@ -514,6 +514,10 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
+    // Medical Fund shows its table inline in the main view — no separate table/cash view
+    if (currentAppPlan === 'Medical Fund' && (targetView === 'table' || targetView === 'cash')) {
+        targetView = 'main';
+    }
     // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
         if (typeof calculate === 'function') calculate(currentMode, true);
@@ -615,7 +619,7 @@ const modernPlansData = [
     { name: 'Whole Life Extra', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-trend-up', isHighlight: false, bg: 'bg-gradient-to-br from-blue-100 to-blue-200', text: 'text-blue-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-blue-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: '24 TX', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-transfer', isHighlight: false, bg: 'bg-gradient-to-br from-violet-100 to-violet-200', text: 'text-violet-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-violet-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-violet-100 group-hover:text-violet-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: '868 / 818 Elite Saving', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-sack-dollar', isHighlight: false, bg: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200', text: 'text-fuchsia-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-fuchsia-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
-    { name: 'Medical Fund', desc: 'อยู่ระหว่างการพัฒนา', icon: 'fas fa-hospital', isHighlight: false, bg: 'bg-gradient-to-br from-sky-100 to-sky-200', text: 'text-sky-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-sky-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' }
+    { name: 'Medical Fund', desc: 'ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง', icon: 'fas fa-hospital', isHighlight: false, bg: 'bg-gradient-to-br from-sky-100 to-sky-200', text: 'text-sky-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-sky-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' }
 ];
 
 let isModernSearchActive = false;
@@ -1226,8 +1230,6 @@ function replacePercentWithAmount(text, sum, premium) {
 }
 
 function selectAppPlan(planName) {
-    if (planName === 'Medical Fund') { window.openMFCalculator(); return; }
-
     // ── Compare mode intercept ──
     if (window.__compareMode && window.__comparePlanA) {
         const planA = window.__comparePlanA;
@@ -1428,9 +1430,29 @@ function selectAppPlan(planName) {
         }
     }
 
+    // ── Medical Fund: inline plan view (no popup) ──
+    const mfInlineContainer = document.getElementById('mfInlineContainer');
+    if (planName === 'Medical Fund') {
+        if (sumInsuredContainer) sumInsuredContainer.classList.add('hidden');
+        if (premiumContainer) premiumContainer.classList.add('hidden');
+        if (cashFlowContainer) cashFlowContainer.classList.add('hidden');
+        if (planSelectionWrapper) planSelectionWrapper.classList.add('hidden');
+        if (extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
+        if (hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
+        if (globalMFContainer) globalMFContainer.classList.add('hidden');
+        if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
+        if (medFundBtnContainer) medFundBtnContainer.classList.add('hidden');
+        if (mfInlineContainer) { mfInlineContainer.classList.remove('hidden'); if (window.mfInlineInit) window.mfInlineInit(); }
+    } else {
+        if (mfInlineContainer) mfInlineContainer.classList.add('hidden');
+    }
+
     if (mainActionBtn) {
         // ให้แผนพวกนี้แสดงปุ่มตารางมูลค่า (และดูรายละเอียดในตัว) นอกนั้นโชว์ดูรายละเอียด
-        if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
+        if (planName === 'Medical Fund') {
+            mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ดูตารางเบี้ย`;
+            mainActionBtn.onclick = function() { const r = document.getElementById('mfInlineResult'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+        } else if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ตาราง`;
             mainActionBtn.onclick = function() { switchView('table'); };
         } else if (planName === "3D Health Excellence") {
@@ -1446,17 +1468,17 @@ function selectAppPlan(planName) {
     setPlan(currentPlan);
     updateQuickPills(planName);
 
-    // TLA ไม่มีตาราง — ปิดปุ่ม ตาราง ให้เป็นสีเทา
+    // TLA และ MF ไม่มีหน้าตารางแยก — ปิดปุ่ม ตาราง ให้เป็นสีเทา
     const _navTbl = document.getElementById('navTableBtn');
+    const _noTablePlan = planName === 'Convertable Term' || planName === 'Medical Fund';
     if (_navTbl) {
-        const isTLAPlan = planName === 'Convertable Term';
-        _navTbl.disabled = isTLAPlan;
-        _navTbl.style.opacity = isTLAPlan ? '0.3' : '';
-        _navTbl.style.cursor  = isTLAPlan ? 'not-allowed' : '';
-        if (isTLAPlan && _tableWasActive) switchView('main');
+        _navTbl.disabled = _noTablePlan;
+        _navTbl.style.opacity = _noTablePlan ? '0.3' : '';
+        _navTbl.style.cursor  = _noTablePlan ? 'not-allowed' : '';
+        if (_noTablePlan && _tableWasActive) switchView('main');
     }
 
-    if (_tableWasActive && planName !== 'Convertable Term') setTimeout(() => { if (typeof switchView === 'function') switchView('table'); }, 80);
+    if (_tableWasActive && !_noTablePlan) setTimeout(() => { if (typeof switchView === 'function') switchView('table'); }, 80);
 }
 
 function setPlan(plan) {
@@ -1502,6 +1524,7 @@ function _updatePlanPills(activePlan) {
 
 // ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
 function manualTriggerPopup() {
+    if (currentAppPlan === 'Medical Fund') return;
     try {
         if (!currentGender) currentGender = 'male';
 

@@ -347,6 +347,37 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                     </div>
 
+                    <!-- Medical Fund: inline selectors (shown when MF plan is active) -->
+                    <div class="premium-card shrink-0 hidden" id="mfInlineContainer">
+                        <div class="flex justify-between items-center mb-3">
+                            <p class="text-sky-700 text-[13px] font-bold flex items-center gap-1.5"><i class="fas fa-hospital text-sky-500"></i> ประกันสุขภาพ Medical Fund</p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-building text-sky-500 mr-1"></i>บริษัท</p>
+                                <select id="mfInlineCompany" onchange="mfInlineSelectCompany(this.value)"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                                    <option value="">— เลือกบริษัท —</option>
+                                </select>
+                            </div>
+                            <div id="mfInlinePlanRow" class="hidden">
+                                <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-file-medical text-sky-500 mr-1"></i>แผนประกัน</p>
+                                <select id="mfInlinePlan" onchange="mfInlineSelectPlan(this.value)"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                                    <option value="">— เลือกแผน —</option>
+                                </select>
+                            </div>
+                            <div id="mfInlineRoomRow" class="hidden">
+                                <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-bed text-teal-500 mr-1"></i>ค่าห้อง / แผน</p>
+                                <select id="mfInlineRoom" onchange="mfInlineSelectRoom(this.value)"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                                    <option value="">— เลือกแผน —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="mfInlineResult"></div>
+                    </div>
+
                     <!-- 3D Health Excellence: Room Rate Container -->
                     <div class="premium-card shrink-0 hidden" id="hxRoomRateContainer">
                         <div class="flex justify-between items-center mb-2.5">
@@ -1736,12 +1767,12 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <span style="color:#475569;font-size:11px;font-weight:600;">ถ่ายหน้าจอแล้วส่งใน LINE — Power + Volume Up (iPhone)</span>
         </div>
     </div>
-    <script src="js/calculator.js?v=6"></script>
+    <script src="js/calculator.js?v=7"></script>
     <script src="js/parser.js?v=2"></script>
-    <script src="js/ui.js?v=68"></script>
+    <script src="js/ui.js?v=69"></script>
     <script src="js/compare.js?v=5"></script>
     <script src="js/share.js?v=8"></script>
-    <script src="js/mf.js?v=4"></script>
+    <script src="js/mf.js?v=5"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
         if ('serviceWorker' in navigator) {

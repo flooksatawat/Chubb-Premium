@@ -33,7 +33,8 @@ const PLAN_CONFIG = {
     "868 / 818 Elite Saving": { abbr: "Elite", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['S868', 'S818'], hasCashFlow: true },
     "Century Life": { abbr: "CL", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 150000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
-    "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false }
+    "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
+    "Medical Fund": { abbr: "MF", minAge: 0, maxAge: 99, minSum: 0, minPrem: 0, getMaxSum: (age) => Infinity, options: [], hasCashFlow: false }
 };
 
 const allInsurancePlans = [
@@ -47,7 +48,7 @@ const allInsurancePlans = [
     { name: "Whole Life Extra", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "24 TX", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "868 / 818 Elite Saving", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
-    { name: "Medical Fund", desc: "อยู่ระหว่างการพัฒนา", icon: "fas fa-hospital", color: "text-sky-500", bg: "bg-sky-100" }
+    { name: "Medical Fund", desc: "ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง", icon: "fas fa-hospital", color: "text-sky-500", bg: "bg-sky-100" }
 ];
 
 async function loadAllRates() {
@@ -431,7 +432,10 @@ function calculate(source, enforceMin = false) {
     try {
         currentMode = source;
         let ageInput = document.getElementById('ageInput');
-        let age = parseInt(ageInput.value) || 0; 
+        let age = parseInt(ageInput.value) || 0;
+
+        if (currentAppPlan === 'Medical Fund') { if (window.mfInlineRender) window.mfInlineRender(); return; }
+
         let fSum = 0, fPrem = 0; 
         const config = PLAN_CONFIG[currentAppPlan] || { minSum: 100000, minPrem: 4000 };
         

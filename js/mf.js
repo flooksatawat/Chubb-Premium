@@ -198,6 +198,162 @@ window.openMFCalculator = async function() {
     await mfInit();
 };
 
+// ==================== MF Inline (plan view from main selector) ====================
+
+window._mfInline = { company: null, plan: null, roomRate: null };
+
+window.mfInlineInit = async function() {
+    if (!window._mfData.companies) {
+        try {
+            const res = await fetch('data/MF/companies.json');
+            window._mfData.companies = await res.json();
+        } catch (e) { window._mfData.companies = { companies: [] }; }
+    }
+    const companies = window._mfData.companies?.companies || [];
+    const sel = document.getElementById('mfInlineCompany');
+    if (!sel) return;
+    const p = window._mfInline;
+    sel.innerHTML = `<option value="">— เลือกบริษัท —</option>` +
+        companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    sel.value = p.company || '';
+
+    const planRow = document.getElementById('mfInlinePlanRow');
+    const planSel = document.getElementById('mfInlinePlan');
+    const co = companies.find(c => c.id === p.company);
+    if (p.company && co?.plans?.length) {
+        planRow.classList.remove('hidden');
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            co.plans.map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
+        planSel.value = p.plan || '';
+    } else {
+        planRow.classList.add('hidden');
+    }
+
+    const plan = co?.plans?.find(pl => pl.id === p.plan);
+    const rrRow = document.getElementById('mfInlineRoomRow');
+    const rrSel = document.getElementById('mfInlineRoom');
+    if (plan?.hasRoomRate && plan.roomRates?.length) {
+        rrRow.classList.remove('hidden');
+        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+        rrSel.value = p.roomRate || '';
+    } else {
+        rrRow.classList.add('hidden');
+    }
+
+    if (p.company) await mfLoadRates(p.company);
+    window.mfInlineRender();
+};
+
+window.mfInlineSelectCompany = async function(val) {
+    window._mfInline = { company: val || null, plan: null, roomRate: null };
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === val);
+    const plans = co?.plans || [];
+    const planRow = document.getElementById('mfInlinePlanRow');
+    const planSel = document.getElementById('mfInlinePlan');
+    const rrRow = document.getElementById('mfInlineRoomRow');
+    if (plans.length) {
+        planRow.classList.remove('hidden');
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    } else {
+        planRow.classList.add('hidden');
+    }
+    rrRow.classList.add('hidden');
+    if (val) await mfLoadRates(val);
+    window.mfInlineRender();
+};
+
+window.mfInlineSelectPlan = function(val) {
+    window._mfInline.plan = val || null;
+    window._mfInline.roomRate = null;
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === window._mfInline.company);
+    const plan = co?.plans?.find(p => p.id === val);
+    const rrRow = document.getElementById('mfInlineRoomRow');
+    const rrSel = document.getElementById('mfInlineRoom');
+    if (plan?.hasRoomRate && plan.roomRates?.length) {
+        rrRow.classList.remove('hidden');
+        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+    } else {
+        rrRow.classList.add('hidden');
+    }
+    window.mfInlineRender();
+};
+
+window.mfInlineSelectRoom = function(val) {
+    window._mfInline.roomRate = val || null;
+    window.mfInlineRender();
+};
+
+window.mfInlineRender = function() {
+    const area = document.getElementById('mfInlineResult');
+    if (!area) return;
+    const p = window._mfInline;
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+
+    const companies = window._mfData.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+    const needRoom = planMeta?.hasRoomRate;
+
+    if (!p.company || !p.plan || (needRoom && !p.roomRate)) { area.innerHTML = ''; return; }
+
+    const rates = window._mfData.rates[p.company] || {};
+    const planData = rates[p.plan];
+    if (!planData) {
+        area.innerHTML = `<p class="text-center text-[11px] text-slate-400 mt-3"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</p>`;
+        return;
+    }
+    const rateTable = p.roomRate ? planData[p.roomRate]?.[gender] : planData[gender];
+    const ageRange = planData.ageRange || [1, 70];
+    const start = ageRange[0], end = ageRange[1];
+
+    const curAge = parseInt(document.getElementById('ageInput')?.value) || start;
+
+    let rows = '';
+    let total = 0, hasData = false;
+    for (let age = start; age <= end; age++) {
+        const prem = rateTable ? (rateTable[String(age)] ?? rateTable[age] ?? null) : null;
+        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
+        if (prem != null) { total += prem; hasData = true; }
+        const isCur = age === curAge;
+        rows += `<tr class="${isCur ? 'bg-sky-100' : (age % 2 === 0 ? 'bg-white' : 'bg-sky-50/40')}">
+            <td class="py-2 px-3 text-center text-[12px] font-bold ${isCur ? 'text-sky-800' : 'text-slate-700'}">${age}${isCur ? ' ◀' : ''}</td>
+            <td class="py-2 px-3 text-right text-[12px] font-bold ${prem != null ? (isCur ? 'text-sky-800' : 'text-slate-800') : 'text-slate-400'}">${premStr}</td>
+        </tr>`;
+    }
+    const totalStr = hasData ? total.toLocaleString('en-US') : '—';
+
+    area.innerHTML = `
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <span class="text-[12px] font-bold text-sky-700">${co?.name || ''} · ${planData.name || p.plan}${p.roomRate ? ' · ' + p.roomRate : ''}</span>
+                <span class="text-[11px] text-slate-500">${gender === 'male' ? 'ชาย' : 'หญิง'}</span>
+            </div>
+            <div class="rounded-[14px] overflow-hidden border border-sky-200 shadow-sm">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-sky-500 to-cyan-600 text-white">
+                            <th class="py-2.5 px-3 text-center text-[11px] font-bold">อายุ (ปี)</th>
+                            <th class="py-2.5 px-3 text-right text-[11px] font-bold">เบี้ย (บาท/ปี)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot>
+                        <tr class="bg-sky-600 text-white">
+                            <td class="py-2.5 px-3 text-[12px] font-bold">รวมทั้งหมด</td>
+                            <td class="py-2.5 px-3 text-right text-[13px] font-black">${totalStr}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            ${!hasData ? `<p class="text-center text-[11px] text-slate-400 mt-3"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</p>` : ''}
+        </div>`;
+};
+
 // ==================== MF Picker (rider for 24TX/Elite/WXN) ====================
 
 window._mfPicker = { company: null, plan: null, roomRate: null };
