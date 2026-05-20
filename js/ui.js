@@ -2994,7 +2994,12 @@ function generatePolicyTableData() {
 
     for (let y = 1; y <= cfLoopEnd; y++) {
         let currentAge = d.age + y;
-        
+
+        // SLPA: ทุนประกันเพิ่มขึ้น 5% ของทุนเริ่มต้น ทุกวันครบรอบ 5 ปีกรมธรรม์ (ไม่เกินอายุ 90 ปี)
+        const slpaEffectiveSA = (isSLPA && !isSurrenderActive)
+            ? Math.round(d.sum * (1 + 0.05 * Math.floor(y / 5)))
+            : currentSA;
+
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
         let annualSaving = 0; 
         if (isElitePlan) {
@@ -3048,8 +3053,8 @@ function generatePolicyTableData() {
             }
         }
         
-        let cvTotal = Math.round((currentSA * cvRate) / 1000);
-        if (currentSA <= 0) cvTotal = 0; 
+        let cvTotal = Math.round((slpaEffectiveSA * cvRate) / 1000);
+        if (slpaEffectiveSA <= 0) cvTotal = 0;
 
         let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt;
         
@@ -3062,7 +3067,7 @@ function generatePolicyTableData() {
         }
 
         // 5. ความคุ้มครองชีวิต
-        let deathBenefit = currentSA;
+        let deathBenefit = slpaEffectiveSA;
         if (isElitePlan && currentSA > 0) {
             let eliteMultiplier = Math.min(y, 8) * 1.0; 
             deathBenefit = Math.max(Math.round(currentSA * eliteMultiplier), cvTotal, totalSaving);
@@ -3088,7 +3093,7 @@ function generatePolicyTableData() {
             ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
             ${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
 
-        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${currentSA > 0 ? currentSA.toLocaleString() : '—'}</td>`;
+        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
         if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
         if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
         html += `</tr>`;
