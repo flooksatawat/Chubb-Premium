@@ -1225,13 +1225,7 @@ function selectAppPlan(planName) {
         if (planName !== planA) {
             closePopup('planSelectModal');
             window.cancelCompareMode();
-            if (window.isWideLayout()) {
-                window.renderCompareView(planA, planName);
-            } else {
-                // mobile: เปิด Swal เปรียบเทียบ 2 แผน
-                window.__pendingComparePlans = [planA, planName];
-                if (window.openCompareModal) window.openCompareModal([planA, planName]);
-            }
+            window.renderCompareView(planA, planName);
             return;
         } else {
             window.cancelCompareMode();
@@ -1529,6 +1523,7 @@ window.__compareMode  = false;
 window.__comparePlanA = null;
 
 window.startCompareMode = function(planName) {
+    if (!window.isWideLayout()) return;
     window.__compareMode  = true;
     window.__comparePlanA = planName;
     // show floating banner — ทำงานทุก layout
@@ -1621,6 +1616,7 @@ window.renderCompareView = function(planA, planB) {
     function cancel() { clearTimeout(_timer); _timer = null; _downPlan = null; }
 
     document.addEventListener('touchstart', e => {
+        if (!window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
@@ -1647,7 +1643,7 @@ window.renderCompareView = function(planA, planB) {
     // mouse long-press for desktop/notebook
     let _mouseStartX = 0, _mouseStartY = 0;
     document.addEventListener('mousedown', e => {
-        if (e.button !== 0) return;
+        if (e.button !== 0 || !window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
