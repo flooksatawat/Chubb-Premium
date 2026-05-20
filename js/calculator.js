@@ -460,20 +460,6 @@ function calculate(source, enforceMin = false) {
                     fSum = config.minSum;
                     fPrem = Math.round((fSum / 1000) * (clRate - getDiscount(fSum, '24TX'))) + mfPrem;
                 }
-                if (enforceMin && fPrem < config.minPrem) {
-                    showCustomError(`เบี้ยประกันขั้นต่ำ ต้องไม่น้อยกว่า ${config.minPrem.toLocaleString()} บาท/ปี`);
-                    fPrem = config.minPrem;
-                    let basePrem = fPrem - mfPrem;
-                    
-                    let baseDiscountArray = [5, 4, 2, 0];
-                    fSum = 0;
-                    for (let d_val of baseDiscountArray) { 
-                        let s = Math.round((basePrem * 1000) / (clRate - d_val)); 
-                        if (getDiscount(s, '24TX') === d_val) { fSum = s; break; } 
-                    } 
-                    if (fSum === 0) fSum = clRate > 0 ? Math.round((basePrem * 1000) / clRate) : 0;
-                }
-
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
                 document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 // แสดงยอดเงินคืนงวดแรก (5%) ในกล่องกระแสเงินสด

@@ -46,7 +46,16 @@ function triggerInstallmentShare(type) {
 
 function generateShortShareText() {
     if (!lastCalculationData) return ''; const d = lastCalculationData;
-    return `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 ออมเงิน: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
+    let text = `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 ออมเงิน: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
+    if (currentAppPlan === '3D Health Excellence') {
+        const hx  = window.currentHX  || '';
+        const hxo = window.currentHXO || 'ไม่เลือก';
+        const hxd = window.currentHXD || 'ไม่เลือก';
+        const hbf = window.currentHBF || 'ไม่เลือก';
+        if (hx) text += `\n🏥 แผนสุขภาพ: ${hx}`;
+        text += `\nHXO: ${hxo} | HXD: ${hxd} | HBF: ${hbf}`;
+    }
+    return text;
 }
 
 function generateResultText(type) {
