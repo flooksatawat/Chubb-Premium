@@ -675,16 +675,16 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
         <!-- RIGHT PANE — Result Canvas (visible ≥ 768px, รองรับ iPad / Tablet / จอในของมือถือพับ) -->
         <div class="right-pane hidden min-[700px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane" style="flex-direction:column;">
-            <!-- ปุ่ม toggle ซ่อน/แสดง left pane — แท็บขอบซ้าย ไม่ทับเนื้อหา -->
+            <!-- ปุ่ม toggle ซ่อน/แสดง left pane — touch target กว้าง 32px กดง่ายขึ้น -->
             <button id="toggleLeftPaneBtn" onclick="window.toggleLeftPane && window.toggleLeftPane()"
                 title="ซ่อน/แสดงเมนูซ้าย"
-                style="position:absolute;top:50%;left:0;transform:translateY(-50%);z-index:100;
-                       width:16px;height:48px;
-                       background:rgba(255,255,255,0.92);
-                       border-radius:0 8px 8px 0;border:1px solid rgba(36,60,148,0.15);border-left:none;cursor:pointer;
+                style="position:absolute;top:50%;left:0;transform:translateY(-50%);z-index:200;
+                       width:32px;height:64px;padding:0;
+                       background:rgba(255,255,255,0.95);
+                       border-radius:0 12px 12px 0;border:1.5px solid rgba(36,60,148,0.18);border-left:none;cursor:pointer;
                        display:flex;align-items:center;justify-content:center;
-                       box-shadow:2px 0 6px rgba(0,0,0,0.08);">
-                <i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:8px;"></i>
+                       box-shadow:3px 0 10px rgba(0,0,0,0.12);-webkit-tap-highlight-color:transparent;touch-action:manipulation;">
+                <i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:11px;pointer-events:none;"></i>
             </button>
             <div id="rightPaneMain" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
             <div id="resultCanvas" class="no-scrollbar w-full h-full p-6 overflow-y-auto" style="flex:1;">
