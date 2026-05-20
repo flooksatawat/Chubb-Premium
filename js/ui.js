@@ -1014,13 +1014,14 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
-        // ── HBF — pill grid + fine-tune stepper ──
+        // ── HBF — pill grid (ไม่มีปิด) + X ปิดมุมขวาบน + fine-tune stepper ──
         const hbfNum = parseInt(hbfVal) || 0;
-        const hbfPresets = [0, 500, 1000, 2000, 3000, 5000];
-        const hbfPresetLbls = ['ปิด', '500', '1,000', '2,000', '3,000', '5,000'];
-        html += `<div id="rider-hbf" class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
-        html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
-        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-6 gap-1 w-full">`;
+        const hbfPresets = [500, 1000, 2000, 3000, 5000];
+        const hbfPresetLbls = ['500', '1,000', '2,000', '3,000', '5,000'];
+        html += `<div id="rider-hbf" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
+        html += `<button onclick="window.handle3DClick('HBF',0);document.getElementById('rider-hbf').style.display='none';" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ปิด HBF"><i class="fas fa-times text-[12px]"></i></button>`;
+        html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
+        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
         hbfPresets.forEach((v, i) => {
             const isSel = hbfNum === v;
             const cls = isSel
@@ -1029,13 +1030,11 @@ window.render3DOptionsUI = function() {
             html += `<button onclick="window.handle3DClick('HBF',${v})" class="${cls}">${hbfPresetLbls[i]}</button>`;
         });
         html += `</div></div>`;
-        html += `<div class="flex items-center gap-2 mt-3">`;
-        html += `<span class="text-[10px] text-slate-400 shrink-0 w-16">ปรับได้เอง</span>`;
-        html += `<div class="flex items-center gap-1.5 flex-1">`;
+        html += `<div class="flex items-center gap-1.5 mt-3">`;
         html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">−</button>`;
-        html += `<div class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-9 flex items-center justify-center"><span class="text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-400' : 'text-rose-600'}">${hbfNum === 0 ? 'ปิด' : hbfNum.toLocaleString() + ' บ./วัน'}</span></div>`;
+        html += `<div class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-9 flex items-center justify-center"><span class="text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-300' : 'text-rose-600'}">${hbfNum === 0 ? '—' : hbfNum.toLocaleString()}</span></div>`;
         html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">+</button>`;
-        html += `</div></div></div>`;
+        html += `</div></div>`;
 
         // ── HXO ──
         html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
