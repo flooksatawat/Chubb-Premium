@@ -675,17 +675,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
         <!-- RIGHT PANE — Result Canvas (visible ≥ 768px, รองรับ iPad / Tablet / จอในของมือถือพับ) -->
         <div class="right-pane hidden min-[700px]:flex flex-1 h-screen bg-slate-50 overflow-hidden relative" id="rightPane" style="flex-direction:column;">
-            <!-- ปุ่ม toggle ซ่อน/แสดง left pane — touch target กว้าง 32px กดง่ายขึ้น -->
-            <button id="toggleLeftPaneBtn" onclick="window.toggleLeftPane && window.toggleLeftPane()"
-                title="ซ่อน/แสดงเมนูซ้าย"
-                style="position:absolute;top:50%;left:0;transform:translateY(-50%);z-index:200;
-                       width:32px;height:64px;padding:0;
-                       background:rgba(255,255,255,0.95);
-                       border-radius:0 12px 12px 0;border:1.5px solid rgba(36,60,148,0.18);border-left:none;cursor:pointer;
-                       display:flex;align-items:center;justify-content:center;
-                       box-shadow:3px 0 10px rgba(0,0,0,0.12);-webkit-tap-highlight-color:transparent;touch-action:manipulation;">
-                <i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:11px;pointer-events:none;"></i>
-            </button>
             <div id="rightPaneMain" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
             <div id="resultCanvas" class="no-scrollbar w-full h-full p-6 overflow-y-auto" style="flex:1;">
                 <div class="result-canvas-placeholder" id="canvasPlaceholder">
@@ -1679,15 +1668,64 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         // ==================== TOGGLE LEFT PANE BUTTON ====================
         (function initTogglePane() {
             const layout = document.querySelector('.command-center-layout');
-            if (!layout) return;
+            const rightPane = document.getElementById('rightPane');
+            if (!layout || !rightPane) return;
+
+            // สร้างปุ่มบน layout โดยตรง (ไม่อยู่ใน overflow:hidden)
+            const btn = document.createElement('button');
+            btn.id = 'toggleLeftPaneBtn';
+            btn.title = 'ซ่อน/แสดงเมนูซ้าย';
+            btn.style.cssText = [
+                'position:fixed',
+                'top:50%',
+                'transform:translateY(-50%)',
+                'z-index:500',
+                'width:36px',
+                'height:72px',
+                'padding:0',
+                'background:rgba(255,255,255,0.97)',
+                'border-radius:0 14px 14px 0',
+                'border:1.5px solid rgba(36,60,148,0.2)',
+                'border-left:none',
+                'cursor:pointer',
+                'display:none',
+                'align-items:center',
+                'justify-content:center',
+                'box-shadow:3px 0 12px rgba(0,0,0,0.15)',
+                '-webkit-tap-highlight-color:transparent',
+                'touch-action:manipulation',
+                'user-select:none',
+            ].join(';');
+            btn.innerHTML = '<i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:12px;pointer-events:none;"></i>';
+            document.body.appendChild(btn);
+
+            function updateBtnPosition() {
+                const rp = document.getElementById('rightPane');
+                if (!rp || !window.isWideLayout || !window.isWideLayout()) {
+                    btn.style.display = 'none';
+                    return;
+                }
+                const rect = rp.getBoundingClientRect();
+                btn.style.left = rect.left + 'px';
+                btn.style.display = 'flex';
+            }
 
             window.toggleLeftPane = function() {
                 const hidden = layout.classList.toggle('left-pane-hidden');
                 const icon = document.getElementById('toggleLeftPaneIcon');
                 if (icon) icon.className = hidden ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                requestAnimationFrame(updateBtnPosition);
             };
 
-            // Reset เมื่อหมุนจอหรือ resize ออกจาก wide mode
+            // touch + click ทั้งคู่เพื่อรองรับทุก browser
+            btn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                window.toggleLeftPane();
+            }, { passive: false });
+            btn.addEventListener('click', function() {
+                window.toggleLeftPane();
+            });
+
             window.addEventListener('resize', () => {
                 setTimeout(() => {
                     if (!window.isWideLayout || !window.isWideLayout()) {
@@ -1695,8 +1733,12 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         const icon = document.getElementById('toggleLeftPaneIcon');
                         if (icon) icon.className = 'fas fa-chevron-left';
                     }
+                    updateBtnPosition();
                 }, 200);
             });
+
+            // วางปุ่มหลัง layout render
+            setTimeout(updateBtnPosition, 300);
         })();
     </script>
 
