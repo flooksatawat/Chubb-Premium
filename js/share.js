@@ -423,6 +423,11 @@ function setupScrollHideNav() {
         attached.add(el);
         let lastScrollTop = 0;
         el.addEventListener('scroll', function() {
+            if (typeof window.isWideLayout === 'function' && window.isWideLayout()) {
+                bottomNav.style.transform = 'translateY(0)';
+                bottomNav.style.opacity = '1';
+                return;
+            }
             let st = this.scrollTop;
             if (st <= 10) { bottomNav.style.transform = 'translateY(0)'; bottomNav.style.opacity = '1'; lastScrollTop = st; return; }
             if (st < 0) return; if (Math.abs(lastScrollTop - st) <= 5) return;
