@@ -117,12 +117,17 @@ function getHealthRate(categoryKey, planName, age, gender) {
     if (categoryKey === 'HBF') {
         let hbfSource = window.HBF_RATES || LIFE_RATES['HBF_RATES'];
         if (hbfSource && hbfSource['class_1']) {
-            let rateFromClass = hbfSource['class_1'][age];
-            if (rateFromClass !== undefined) {
+            // ใช้ string key เพื่อ match JSON เสมอ และ cap ที่ age 69
+            const ageKey = String(Math.min(age, 69));
+            let rateFromClass = hbfSource['class_1'][ageKey];
+            if (rateFromClass !== undefined && rateFromClass > 0) {
                 const multiplierMap = { 'HBF500': 0.5, 'HBF1000': 1, 'HBF3000': 3, 'HBF5000': 5 };
-                return Math.round(rateFromClass * (multiplierMap[planName] || 0));
+                const multiplier = multiplierMap[planName];
+                if (multiplier === undefined) return 0;
+                return Math.round(rateFromClass * multiplier);
             }
         }
+        return 0;
     }
 
     let cleanName = planName.trim();

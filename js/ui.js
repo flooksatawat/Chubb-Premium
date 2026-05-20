@@ -1014,6 +1014,29 @@ window.render3DOptionsUI = function() {
     html += `</div></div></div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
+        // ── HBF slider (always paired with HX, no close button) ──
+        const hbfStepMap = { 'ไม่เลือก': 0, 'HBF500': 1, 'HBF1000': 2, 'HBF3000': 3, 'HBF5000': 4 };
+        const hbfSliderVals = ['ไม่เลือก', 'HBF500', 'HBF1000', 'HBF3000', 'HBF5000'];
+        const hbfTickLabels = ['ไม่เลือก', '500', '1,000', '3,000', '5,000'];
+        const hbfStepValue = hbfStepMap[hbfVal] ?? 0;
+        const hbfDisplay = hbfVal === 'ไม่เลือก' ? 'ไม่เลือก' : `${displayLabels[hbfVal] || hbfVal} บาท/วัน`;
+        html += `<div id="rider-hbf" class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100">`;
+        html += `<div class="flex items-center justify-between mb-4">`;
+        html += `<p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
+        html += `<span id="hbf-label" class="text-[13px] font-bold ${hbfVal === 'ไม่เลือก' ? 'text-slate-400' : 'text-rose-600'}">${hbfDisplay}</span>`;
+        html += `</div>`;
+        html += `<div class="px-1">`;
+        html += `<input type="range" id="hbf-slider" min="0" max="4" step="1" value="${hbfStepValue}"`;
+        html += ` oninput="(function(v){var vals=['ไม่เลือก','HBF500','HBF1000','HBF3000','HBF5000'];var lbls=['ไม่เลือก','500 บาท/วัน','1,000 บาท/วัน','3,000 บาท/วัน','5,000 บาท/วัน'];var l=document.getElementById('hbf-label');if(l){l.textContent=lbls[v];l.className='text-[13px] font-bold '+(v==0?'text-slate-400':'text-rose-600');}var ticks=document.querySelectorAll('.hbf-tick');ticks.forEach(function(t,i){t.className='hbf-tick text-[9px] '+(i==v?'text-rose-600 font-bold':'text-slate-400');});window.handle3DClick('HBF',vals[v]);})(+this.value)"`;
+        html += ` class="w-full h-2 rounded-full appearance-none cursor-pointer" style="accent-color:#e11d48;">`;
+        html += `</div>`;
+        html += `<div class="flex justify-between mt-2 px-1">`;
+        hbfTickLabels.forEach((lbl, i) => {
+            html += `<span class="hbf-tick text-[9px] ${i === hbfStepValue ? 'text-rose-600 font-bold' : 'text-slate-400'}">${lbl}</span>`;
+        });
+        html += `</div></div>`;
+
+        // ── HXO ──
         html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
         html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
         hxoOpts.forEach(opt => {
@@ -1024,6 +1047,7 @@ window.render3DOptionsUI = function() {
         });
         html += `</div></div></div>`;
 
+        // ── HXD (เมื่อ HXO เลือกอยู่) ──
         if (hxoVal && hxoVal !== 'ไม่เลือก') {
             html += `<div id="rider-hxd" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-indigo-100"><button onclick="window.closeRiderSection('rider-hxd', 'currentHXD')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXD"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-star text-indigo-500"></i> ADVANCE (HXD)</p>`;
             html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
@@ -1035,30 +1059,10 @@ window.render3DOptionsUI = function() {
             });
             html += `</div></div></div>`;
         }
-
-        html += `<div id="rider-hbf" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-rose-100"><button onclick="window.closeRiderSection('rider-hbf', 'currentHBF')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HBF"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-heartbeat text-rose-500"></i> ชดเชยรายวัน (HBF)</p>`;
-        html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-5 gap-1 w-full">`;
-        hbfOpts.forEach(opt => {
-            let displayText = opt === 'ไม่เลือก' ? opt : (displayLabels[opt] || opt);
-            let isSel = (opt === hbfVal);
-            let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-rose-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-rose-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
-            html += `<button onclick="window.handle3DClick('HBF', '${opt}')" class="${btnClass}">${displayText}</button>`;
-        });
-        html += `</div></div></div>`;
     }
 
     container.insertAdjacentHTML('beforeend', html);
 
-    setTimeout(() => {
-        const customInput = document.getElementById('hbf-custom-amount');
-        if (customInput) {
-            if(hbfVal && hbfVal.startsWith('CUSTOM:')) customInput.value = hbfVal.split(':')[1];
-            customInput.addEventListener('change', function() {
-                const val = parseInt(this.value);
-                if (!isNaN(val) && val >= 100 && val <= 5000) window.handle3DClick('HBF', 'CUSTOM:' + val);
-            });
-        }
-    }, 10);
 };
 
 // Close a rider section, reset its state, and recalculate
