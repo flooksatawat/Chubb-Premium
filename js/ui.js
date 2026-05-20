@@ -4503,7 +4503,7 @@ async function exportTableToPDF(actionType = 'preview') {
             tds.forEach(td => rowData.push(td.innerText.trim()));
             tableRows.push(rowData);
 
-            if (tr.classList.contains('breakeven-target')) {
+            if (tr.id === 'breakevenRow') {
                 beRowIndex = index;
                 beAgeStr = rowData[0];
                 beYearStr = parseInt(beAgeStr) - parseInt(d.age || 0);
