@@ -1219,6 +1219,20 @@ function replacePercentWithAmount(text, sum, premium) {
 function selectAppPlan(planName) {
     if (planName === 'Medical Fund') { showCustomError("ระบบ Medical Fund อยู่ระหว่างการพัฒนา"); return; }
 
+    // ── Compare mode intercept ──
+    if (window.__compareMode && window.__comparePlanA) {
+        const planA = window.__comparePlanA;
+        if (planName !== planA) {
+            window.cancelCompareMode();
+            window.renderCompareView(planA, planName);
+            return;
+        } else {
+            // แตะแบบเดิมหลัง long-press — ยกเลิก compare แต่ไม่ select
+            window.cancelCompareMode();
+            return;
+        }
+    }
+
     _cachedForPlan = null; // invalidate card cache so active highlight updates
 
     const _rp = document.getElementById('rightPane');
@@ -1613,9 +1627,7 @@ window.renderCompareView = function(planA, planB) {
             const plan = _downPlan;
             _downPlan = null;
             if (navigator.vibrate) navigator.vibrate(40);
-            if (typeof window.openCompareModal === 'function') {
-                window.openCompareModal(plan || undefined);
-            }
+            window.startCompareMode(plan);
         }, THRESHOLD);
     }, { passive: true });
 
@@ -1626,7 +1638,14 @@ window.renderCompareView = function(planA, planB) {
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     }, { passive: true });
 
-    document.addEventListener('touchend',    cancel, { passive: true });
+    // non-passive — preventDefault ป้องกัน click หลัง long-press บน planA เดิม
+    document.addEventListener('touchend', e => {
+        if (window.__compareMode && window.__comparePlanA) {
+            // long-press เพิ่งยิง กัน click ที่ตามมา
+            if (getTargetPlan(e) === window.__comparePlanA) e.preventDefault();
+        }
+        cancel();
+    }, { passive: false });
     document.addEventListener('touchcancel', cancel, { passive: true });
 
     // mouse long-press for desktop/notebook
