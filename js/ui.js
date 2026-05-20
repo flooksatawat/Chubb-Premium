@@ -3058,9 +3058,9 @@ function generatePolicyTableData() {
     // ชื่อหัวตาราง: compact/super-compact ใช้ label สั้น
     const _lSaving   = _isCompact ? 'ออม'    : 'ออมเงิน';
     const _lAccum    = _isCompact ? 'สะสม'   : 'ออมสะสม';
-    const _lCF       = _isCompact ? 'CF'     : 'กระแสเงินสด';
+    const _lCF       = 'CF';
     const _lTotal    = _isSuperCompact ? 'รวม' : (_isCompact ? 'รวมรับ' : 'รวมรับเงิน');
-    const _lCV       = _isSuperCompact ? 'สด'  : (_isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้');
+    const _lCV       = 'สด';
     const _lCoverage = isSLPA ? (_isCompact ? 'ทุน' : 'ทุนประกัน') : isTLA ? (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง') : (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
     const _lSA       = _isCompact ? 'ทุน'    : 'ทุนประกัน';
 
