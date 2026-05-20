@@ -4243,7 +4243,16 @@ async function _export3DPDF(actionType = 'preview') {
 
         if (actionType === 'modal') {
             const d = lastCalculationData || {};
-            await _showTableShareModal(pdfBlob, pdfFile, doc, d);
+            const hxo = window.currentHXO || 'ไม่เลือก';
+            const hxd = window.currentHXD || 'ไม่เลือก';
+            const hbf = window.currentHBF || 'ไม่เลือก';
+            const riderParts = [
+                hxo !== 'ไม่เลือก' ? `HXO:${hxo}` : '',
+                hxd !== 'ไม่เลือก' ? `HXD:${hxd}` : '',
+                hbf !== 'ไม่เลือก' ? `HBF:${hbf}` : '',
+            ].filter(Boolean).join(' ');
+            const cleanName = `3D ${hxVal}${riderParts ? ' ' + riderParts : ''}`;
+            await _showTableShareModal(pdfBlob, pdfFile, doc, d, { cleanName });
         } else if (actionType === 'save') {
             const inLine = typeof isInLineApp === 'function' && isInLineApp();
             if (inLine) {
@@ -5256,20 +5265,25 @@ window.printTable = function() {
 // ════════════════════════════════════════════════
 //  Share Modal — ส่งภาพ / PDF / พิมพ์ / ดาวน์โหลด
 // ════════════════════════════════════════════════
-async function _showTableShareModal(pdfBlob, pdfFile, doc, d) {
+async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     const existing = document.getElementById('_tblShareModal');
     if (existing) existing.remove();
 
-    // ── ชื่อไฟล์ตามรูปแบบ: แบบ_เพศ_อายุ_เบี้ย/ทุน ──
-    const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || '');
-    const genderTh = (d.gender || '').includes('ชาย') ? 'ชาย' : 'หญิง';
-    const isSum = typeof currentMode !== 'undefined' && currentMode === 'sum';
-    const rawAmt  = isSum ? (d.sum || 0) : (d.premium || 0);
-    const amtFmt  = rawAmt >= 1000000
-        ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
-        : rawAmt.toLocaleString('th-TH');
-    const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
-    const cleanName = `${planAbbr} ${genderTh} ${d.age}ปี ${amtLabel}${amtFmt}`;
+    // ── ชื่อไฟล์ตามรูปแบบ: แบบ_เพศ_อายุ_เบี้ย/ทุน (override ได้ผ่าน opts.cleanName) ──
+    let cleanName;
+    if (opts.cleanName) {
+        cleanName = opts.cleanName;
+    } else {
+        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || '');
+        const genderTh = (d.gender || '').includes('ชาย') ? 'ชาย' : 'หญิง';
+        const isSum = typeof currentMode !== 'undefined' && currentMode === 'sum';
+        const rawAmt  = isSum ? (d.sum || 0) : (d.premium || 0);
+        const amtFmt  = rawAmt >= 1000000
+            ? (rawAmt / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'ล้าน'
+            : rawAmt.toLocaleString('th-TH');
+        const amtLabel = isSum ? 'ทุน' : 'เบี้ย';
+        cleanName = `${planAbbr} ${genderTh} ${d.age}ปี ${amtLabel}${amtFmt}`;
+    }
     const pdfName   = cleanName + '.pdf';
     const jpgName   = cleanName + '.jpg';
 
