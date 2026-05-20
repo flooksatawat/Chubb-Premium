@@ -1605,7 +1605,8 @@ window.renderCompareView = function(planA, planB) {
 // Long-press delegation — เริ่ม compare mode บน wide layout เท่านั้น
 (function initCompareLongPress() {
     const THRESHOLD = 500;
-    let _timer = null, _downPlan = null;
+    const MOVE_DEAD_ZONE = 8; // px — ขยับน้อยกว่านี้ไม่ cancel
+    let _timer = null, _downPlan = null, _startX = 0, _startY = 0;
 
     function getTargetPlan(e) {
         const btn = e.target.closest('[data-plan]');
@@ -1619,28 +1620,40 @@ window.renderCompareView = function(planA, planB) {
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
         if (!_downPlan) return;
+        _startX = e.touches[0].clientX;
+        _startY = e.touches[0].clientY;
         _timer = setTimeout(() => {
             window.startCompareMode(_downPlan);
             _downPlan = null;
-            // haptic
             if (navigator.vibrate) navigator.vibrate(40);
         }, THRESHOLD);
     }, { passive: true });
-    document.addEventListener('touchend',   cancel, { passive: true });
-    document.addEventListener('touchmove',  cancel, { passive: true });
-    document.addEventListener('touchcancel',cancel, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+        if (!_timer) return;
+        const dx = e.touches[0].clientX - _startX;
+        const dy = e.touches[0].clientY - _startY;
+        if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
+    }, { passive: true });
+
+    document.addEventListener('touchend',    cancel, { passive: true });
+    document.addEventListener('touchcancel', cancel, { passive: true });
 
     // mouse long-press for desktop/notebook
+    let _mouseStartX = 0, _mouseStartY = 0;
     document.addEventListener('mousedown', e => {
         if (e.button !== 0 || !window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
         if (!_downPlan) return;
-        _timer = setTimeout(() => {
-            window.startCompareMode(_downPlan);
-            _downPlan = null;
-        }, THRESHOLD);
+        _mouseStartX = e.clientX; _mouseStartY = e.clientY;
+        _timer = setTimeout(() => { window.startCompareMode(_downPlan); _downPlan = null; }, THRESHOLD);
+    });
+    document.addEventListener('mousemove', e => {
+        if (!_timer) return;
+        const dx = e.clientX - _mouseStartX, dy = e.clientY - _mouseStartY;
+        if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
     });
     document.addEventListener('mouseup',   cancel);
     document.addEventListener('mouseleave',cancel);
