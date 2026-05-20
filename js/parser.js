@@ -251,7 +251,7 @@ function detectPlan(text) {
 function extractAge(t) {
     // "อายุ 35" / "อายุสามสิบห้า"
     let m = t.match(/(?:อายุ|age)\s*(\d{1,2})/i);
-    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 85) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 0 && v <= 85) return v; }
 
     // อายุ + คำไทย
     m = t.match(/อายุ\s*((?:ยี่สิบ|สามสิบ|สี่สิบ|ห้าสิบ|หกสิบ|เจ็ดสิบ|แปดสิบ)[ก-๙]*)/);
