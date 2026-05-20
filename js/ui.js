@@ -3133,7 +3133,7 @@ function generatePolicyTableData() {
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
             let breakevenValue = (isElitePlan || isTX || isWXN) ? surrenderTotal
-                               : isSLPA ? slpaEffectiveSA
+                               : isSLPA ? Math.round(d.sum * (1 + 0.05 * Math.floor(y / 5)))
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
