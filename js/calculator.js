@@ -351,9 +351,35 @@ function setQuickSum(val) { document.getElementById('sumInsuredInput').value = v
 function setQuickPremium(val) { document.getElementById('premiumInput').value = val.toLocaleString('en-US'); calculate('premium', true); }
 function setQuickCashFlow(val) { const el = document.getElementById('cashFlowInput'); if(el) { el.value = val.toLocaleString(); calculate('cashflow', true); } }
 function setWXNQuickCashFlow(val, type) {
-    if (type === 1) { document.getElementById('cashFlowInput1').value = val.toLocaleString(); calculate('cashflow1', true); } 
+    if (type === 1) { document.getElementById('cashFlowInput1').value = val.toLocaleString(); calculate('cashflow1', true); }
     else if (type === 2) { document.getElementById('cashFlowInput2').value = val.toLocaleString(); calculate('cashflow2', true); }
 }
+
+window.adjustSum = function(delta) {
+    const el = document.getElementById('sumInsuredInput');
+    const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
+    const next = Math.max(0, cur + delta);
+    el.value = next.toLocaleString('en-US');
+    calculate('sum', true);
+};
+window.adjustPremium = function(delta) {
+    const el = document.getElementById('premiumInput');
+    const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
+    const next = Math.max(0, cur + delta);
+    el.value = next.toLocaleString('en-US');
+    calculate('premium', true);
+};
+window.adjustCashFlow = function(delta, type) {
+    const idMap = { 0: 'cashFlowInput', 1: 'cashFlowInput1', 2: 'cashFlowInput2' };
+    const el = document.getElementById(idMap[type || 0]);
+    if (!el) return;
+    const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
+    const next = Math.max(0, cur + delta);
+    el.value = next.toLocaleString('en-US');
+    if (type === 1) calculate('cashflow1', true);
+    else if (type === 2) calculate('cashflow2', true);
+    else calculate('cashflow', true);
+};
 
 // ==================== LOGIC: คำนวณหลัก (MASTER CALCULATION) ====================
 function calculate(source, enforceMin = false) { 

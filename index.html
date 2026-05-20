@@ -340,9 +340,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             <button id="sumPill4" onclick="setQuickSum(5000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">5 ล้าน</button>
                             <button id="sumPill5" onclick="setQuickSum(10000000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">10 ล้าน</button>
                         </div>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
-                            <input type="text" id="sumInsuredInput" value="200,000" class="input-box-rounded pl-8" oninput="handleSumInput(this)">
+                        <div class="flex items-center gap-2 mt-1">
+                            <button onmousedown="window._sI=setInterval(()=>window.adjustSum(-100000),150)" onmouseup="clearInterval(window._sI)" ontouchstart="window._sI=setInterval(()=>window.adjustSum(-100000),150)" ontouchend="clearInterval(window._sI)" onclick="window.adjustSum(-100000)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">−</button>
+                            <input type="text" id="sumInsuredInput" value="200,000" class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-10 text-[15px] font-bold text-slate-800 outline-none focus:border-emerald-400 focus:bg-white transition-colors" oninput="handleSumInput(this)">
+                            <button onmousedown="window._sI=setInterval(()=>window.adjustSum(100000),150)" onmouseup="clearInterval(window._sI)" ontouchstart="window._sI=setInterval(()=>window.adjustSum(100000),150)" ontouchend="clearInterval(window._sI)" onclick="window.adjustSum(100000)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">+</button>
                         </div>
                     </div>
 
@@ -421,9 +422,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             <button id="premPill4" onclick="setQuickPremium(48000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">48,000</button>
                             <button id="premPill5" onclick="setQuickPremium(60000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300">60,000</button>
                         </div>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">฿</span>
-                            <input type="text" id="premiumInput" class="input-box-rounded pl-8 text-blue-700" value="0" oninput="handlePremiumInput(this)">
+                        <div class="flex items-center gap-2 mt-1">
+                            <button onmousedown="window._pI=setInterval(()=>window.adjustPremium(-1000),150)" onmouseup="clearInterval(window._pI)" ontouchstart="window._pI=setInterval(()=>window.adjustPremium(-1000),150)" ontouchend="clearInterval(window._pI)" onclick="window.adjustPremium(-1000)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-blue-100 active:text-blue-600 transition-all select-none touch-manipulation">−</button>
+                            <input type="text" id="premiumInput" class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-10 text-[15px] font-bold text-blue-700 outline-none focus:border-blue-400 focus:bg-white transition-colors" value="0" oninput="handlePremiumInput(this)">
+                            <button onmousedown="window._pI=setInterval(()=>window.adjustPremium(1000),150)" onmouseup="clearInterval(window._pI)" ontouchstart="window._pI=setInterval(()=>window.adjustPremium(1000),150)" ontouchend="clearInterval(window._pI)" onclick="window.adjustPremium(1000)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-blue-100 active:text-blue-600 transition-all select-none touch-manipulation">+</button>
                         </div>
                     </div>
 
@@ -443,7 +445,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                 <button id="cashPill4" onclick="setQuickCashFlow(300000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">3 แสน</button>
                                 <button id="cashPill5" onclick="setQuickCashFlow(500000)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all duration-300">5 แสน</button>
                             </div>
-                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-white focus:ring-emerald-500" oninput="handleCashFlowInput(this, 0)"></div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <button onmousedown="window._cI=setInterval(()=>window.adjustCashFlow(-10000,0),150)" onmouseup="clearInterval(window._cI)" ontouchstart="window._cI=setInterval(()=>window.adjustCashFlow(-10000,0),150)" ontouchend="clearInterval(window._cI)" onclick="window.adjustCashFlow(-10000,0)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">−</button>
+                                <input type="text" id="cashFlowInput" value="0" class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-10 text-[15px] font-bold text-emerald-700 outline-none focus:border-emerald-400 focus:bg-white transition-colors" oninput="handleCashFlowInput(this, 0)">
+                                <button onmousedown="window._cI=setInterval(()=>window.adjustCashFlow(10000,0),150)" onmouseup="clearInterval(window._cI)" ontouchstart="window._cI=setInterval(()=>window.adjustCashFlow(10000,0),150)" ontouchend="clearInterval(window._cI)" onclick="window.adjustCashFlow(10000,0)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">+</button>
+                            </div>
                         </div>
             
                         <!-- Dual Box (WXN) -->
@@ -458,7 +464,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                     <button id="wxnC1Pill4" onclick="setWXNQuickCashFlow(100000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">1 แสน</button>
                                     <button id="wxnC1Pill5" onclick="setWXNQuickCashFlow(200000, 1)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">2 แสน</button>
                                 </div>
-                                <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput1" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-emerald-50/30 focus:ring-emerald-500 focus:bg-white border-emerald-100" oninput="handleCashFlowInput(this, 1)"></div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <button onmousedown="window._c1I=setInterval(()=>window.adjustCashFlow(-10000,1),150)" onmouseup="clearInterval(window._c1I)" ontouchstart="window._c1I=setInterval(()=>window.adjustCashFlow(-10000,1),150)" ontouchend="clearInterval(window._c1I)" onclick="window.adjustCashFlow(-10000,1)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">−</button>
+                                    <input type="text" id="cashFlowInput1" value="0" class="flex-1 text-center bg-slate-50 border border-emerald-100 rounded-xl h-10 text-[15px] font-bold text-emerald-700 outline-none focus:border-emerald-400 focus:bg-white transition-colors" oninput="handleCashFlowInput(this, 1)">
+                                    <button onmousedown="window._c1I=setInterval(()=>window.adjustCashFlow(10000,1),150)" onmouseup="clearInterval(window._c1I)" ontouchstart="window._c1I=setInterval(()=>window.adjustCashFlow(10000,1),150)" ontouchend="clearInterval(window._c1I)" onclick="window.adjustCashFlow(10000,1)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">+</button>
+                                </div>
                             </div>
                             <div class="bg-white p-3 rounded-[20px] border border-emerald-100 shadow-sm relative">
                                 <p class="text-[12px] font-bold text-emerald-600 mb-2 flex justify-between items-center"><span><i class="fas fa-coins mr-1"></i> อายุ 61 ปีขึ้นไป</span><span class="bg-emerald-100 px-2 py-0.5 rounded-lg text-emerald-700">รับ 10%+</span></p>
@@ -470,7 +480,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                     <button id="wxnC2Pill4" onclick="setWXNQuickCashFlow(300000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">3 แสน</button>
                                     <button id="wxnC2Pill5" onclick="setWXNQuickCashFlow(500000, 2)" class="flex-1 relative z-10 rounded-[10px] text-[11px] font-medium text-emerald-600/80 hover:text-emerald-700 transition-all">5 แสน</button>
                                 </div>
-                                <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-lg">฿</span><input type="text" id="cashFlowInput2" value="0" class="input-box-rounded pl-8 text-emerald-700 bg-emerald-50/30 focus:ring-emerald-500 focus:bg-white border-emerald-100" oninput="handleCashFlowInput(this, 2)"></div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <button onmousedown="window._c2I=setInterval(()=>window.adjustCashFlow(-10000,2),150)" onmouseup="clearInterval(window._c2I)" ontouchstart="window._c2I=setInterval(()=>window.adjustCashFlow(-10000,2),150)" ontouchend="clearInterval(window._c2I)" onclick="window.adjustCashFlow(-10000,2)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">−</button>
+                                    <input type="text" id="cashFlowInput2" value="0" class="flex-1 text-center bg-slate-50 border border-emerald-100 rounded-xl h-10 text-[15px] font-bold text-emerald-700 outline-none focus:border-emerald-400 focus:bg-white transition-colors" oninput="handleCashFlowInput(this, 2)">
+                                    <button onmousedown="window._c2I=setInterval(()=>window.adjustCashFlow(10000,2),150)" onmouseup="clearInterval(window._c2I)" ontouchstart="window._c2I=setInterval(()=>window.adjustCashFlow(10000,2),150)" ontouchend="clearInterval(window._c2I)" onclick="window.adjustCashFlow(10000,2)" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 active:bg-emerald-100 active:text-emerald-700 transition-all select-none touch-manipulation">+</button>
+                                </div>
                             </div>
                         </div>
                      </div>                            
