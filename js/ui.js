@@ -3116,9 +3116,7 @@ function generatePolicyTableData() {
     } else {
         document.getElementById('breakevenSummary').innerHTML = `<div class="bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 m-3 text-[11px] text-slate-500 font-bold flex items-center justify-center gap-2"><i class="fas fa-info-circle text-slate-400 text-lg"></i> ไม่พบจุดคุ้มทุนก่อนครบกำหนดสัญญา</div>`;
     }
-    if (isBreakevenActive && foundBreakeven) {
-        setTimeout(() => document.getElementById('breakevenRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
-    }
+    // ไม่ auto-scroll เพื่อไม่ให้ตารางค้างบน mobile
 
     // แสดง/ซ่อน breakevenSummary ตาม toggle สำหรับทุกแผน
     const summary = document.getElementById('breakevenSummary');
@@ -3142,16 +3140,7 @@ function toggleBreakevenDisplay(smoothScroll = true) {
     if (isChecked) {
         tableBody.classList.add('show-breakeven');
         if (summary) summary.classList.remove('hidden');
-        if (smoothScroll) {
-            setTimeout(() => {
-                const beRow = tableBody.querySelector('.breakeven-target');
-                const pdfTableTarget = document.getElementById('pdfTableTarget');
-                if (beRow && pdfTableTarget) {
-                    const targetPos = beRow.offsetTop - (pdfTableTarget.clientHeight / 2) + 30;
-                    pdfTableTarget.scrollTo({ top: targetPos, behavior: 'smooth' });
-                }
-            }, 100);
-        }
+        // ไม่ auto-scroll เพื่อไม่ให้ตารางค้างบน mobile
     } else {
         tableBody.classList.remove('show-breakeven');
         if (summary) summary.classList.add('hidden');
