@@ -2962,7 +2962,7 @@ function generatePolicyTableData() {
     // มือถือ = 2 บรรทัด ตรวจ width จริง (ไม่เอา height — กัน landscape phone misclassify)
     const _vw = document.documentElement.clientWidth || window.innerWidth;
     const _isMobile = _vw < 700;
-    const _badgeMobile = 'flex-1 py-1 px-2 rounded-lg text-[13px] font-bold text-center whitespace-nowrap leading-tight';
+    const _badgeMobile = `flex-1 py-1 px-1 rounded-lg ${_isNarrow ? 'text-[10px]' : 'text-[13px]'} font-bold text-center ${_isNarrow ? '' : 'whitespace-nowrap'} leading-tight`;
     const _badgeDesktop = 'flex-1 py-1.5 px-3 rounded-lg text-[14px] font-bold text-center whitespace-nowrap leading-tight';
     const _hasTableSACol = showCoverageColumn || showSAColumn;
     const _lastBadgeMobile = _hasTableSACol
@@ -2991,18 +2991,29 @@ function generatePolicyTableData() {
             ${_lastBadgeDesktop}
         </div>`;
 
-    // compact mode เมื่อ WXN/Elite/TX เปิด SA → 7 columns ต้องย่อให้พอดีจอ
-    const _isCompact = showSAColumn && isShowSAActive && (isWXN || isElite || isTX);
-    const _thCls = _isCompact ? 'py-1.5 px-1 font-bold' : (_isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold');
-    const _thSz  = _isCompact ? 'font-size:9px;white-space:nowrap;' : (_isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;');
-    const _tdBase = _isCompact ? 'py-2 px-1' : 'py-4 px-3';
+    // compact: WXN/Elite/TX บนจอแคบ (<400px) หรือเมื่อเปิด SA toggle
+    const _isNarrow   = _vw < 400;
+    const _isCompact  = (isWXN || isElite || isTX) && (_isNarrow || (showSAColumn && isShowSAActive));
+    // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
+    const _isSuperCompact = _isCompact && _vw < 380;
+    const _thCls = _isSuperCompact ? 'py-1 px-0.5 font-bold'
+                 : _isCompact      ? 'py-1.5 px-1 font-bold'
+                 : _isMobile       ? 'py-2 px-1.5 font-bold'
+                 :                   'py-3 px-3 font-bold';
+    const _thSz  = _isSuperCompact ? 'font-size:8px;white-space:nowrap;'
+                 : _isCompact      ? 'font-size:9px;white-space:nowrap;'
+                 : _isMobile       ? 'font-size:10px;white-space:nowrap;'
+                 :                   'font-size:13px;white-space:nowrap;';
+    const _tdBase = _isSuperCompact ? 'py-1 px-0.5'
+                  : _isCompact      ? 'py-2 px-1'
+                  :                   'py-4 px-3';
 
-    // ชื่อหัวตาราง: compact ใช้ label สั้น
+    // ชื่อหัวตาราง: compact/super-compact ใช้ label สั้น
     const _lSaving   = _isCompact ? 'ออม'    : 'ออมเงิน';
     const _lAccum    = _isCompact ? 'สะสม'   : 'ออมสะสม';
     const _lCF       = _isCompact ? 'CF'     : 'กระแสเงินสด';
-    const _lTotal    = _isCompact ? 'รวมรับ' : 'รวมรับเงิน';
-    const _lCV       = _isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้';
+    const _lTotal    = _isSuperCompact ? 'รวม' : (_isCompact ? 'รวมรับ' : 'รวมรับเงิน');
+    const _lCV       = _isSuperCompact ? 'สด'  : (_isCompact ? 'เงินสด' : 'เงินสดพร้อมใช้');
     const _lCoverage = isSLPA ? (_isCompact ? 'ทุน' : 'ทุนประกัน') : (_isCompact ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
     const _lSA       = _isCompact ? 'ทุน'    : 'ทุนประกัน';
 

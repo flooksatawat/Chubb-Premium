@@ -512,6 +512,16 @@
         #planListContainer .text-\[32px\] { font-size: 26px !important; }
         #planListContainer .text-\[30px\] { font-size: 24px !important; }
 
+        /* ── Outer foldable screen (≤379px) เช่น Honor Magic V3 outer screen ── */
+        @media (max-width: 379px) {
+            .app-container { max-width: 100vw !important; width: 100vw !important; }
+            #pdfTableTarget { overflow-x: auto !important; display: block !important; }
+            #pdfTableTarget table { font-size: 8px !important; }
+            #pdfTableTarget th, #pdfTableTarget td { padding: 4px 2px !important; white-space: nowrap !important; }
+            .policy-table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+            #tableHeaderTitle span { font-size: 10px !important; padding-left: 4px !important; padding-right: 4px !important; white-space: normal !important; }
+        }
+
         /* Keyboard overflow fix — mobile */
         @media (max-width: 699px) {
             .scrollable-view { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
