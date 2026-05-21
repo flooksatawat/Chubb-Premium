@@ -506,9 +506,20 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
-    // Always anchor start on customer age from top of page; end at data max
-    const start = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
-    const end = dataMax;
+    const startEl = document.getElementById('mfInlineAgeStart');
+    const endEl = document.getElementById('mfInlineAgeEnd');
+    const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
+    // Re-sync inputs to defaults when customer age changes (user can still override after)
+    if (window._mfLastCurAge !== curAge) {
+        if (startEl) startEl.value = defaultStart;
+        if (endEl) endEl.value = dataMax;
+        window._mfLastCurAge = curAge;
+    } else {
+        if (startEl && !startEl.value) startEl.value = defaultStart;
+        if (endEl && !endEl.value) endEl.value = dataMax;
+    }
+    const start = parseInt(startEl?.value) || defaultStart;
+    const end = parseInt(endEl?.value) || dataMax;
     const stepRateFor = (age) => {
         let band = null;
         for (const b of dataAges) { if (b <= age) band = b; else break; }
