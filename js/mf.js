@@ -529,7 +529,11 @@ window.mfBuildPremiumMap = function(gender) {
 window.mfPremForAge = function(map, age) {
     if (!map) return null;
     const ages = Object.keys(map).map(Number).sort((a, b) => a - b);
-    let prem = null;
+    if (ages.length === 0) return null;
+    // ถ้าอายุต่ำกว่า band แรก ใช้ band แรก
+    if (age < ages[0]) return map[ages[0]];
+    // หา band สูงสุดที่ <= อายุ
+    let prem = map[ages[0]];
     for (const a of ages) { if (a <= age) prem = map[a]; else break; }
     return prem;
 };

@@ -3297,12 +3297,12 @@ function generatePolicyTableData() {
         if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
         if (_mfLabel && _mfMap) {
             const _mfP = window.mfPremForAge(_mfMap, currentAge);
-            const _mfChg = _mfP !== null && _mfP !== _mfPrevPrem;
-            if (_mfP !== null) _mfPrevPrem = _mfP;
+            const _mfChg = _mfP !== _mfPrevPrem;
+            _mfPrevPrem = _mfP;
             const _mfStyle = _mfChg
                 ? `${_fSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
                 : `${_fSz}color:#94a3b8;`;
-            html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP !== null ? _mfP.toLocaleString('en-US') : '—'}</td>`;
+            html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
         }
         html += `</tr>`;
 
