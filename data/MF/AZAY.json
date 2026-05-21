@@ -2143,6 +2143,1486 @@
           "แผน 4 (15M)": 728238
         }
       }
+    },
+    {
+      "age_band": 11,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 81469,
+          "แพลทินัม (80M)": 35122
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79100,
+          "แพลทินัม (80M)": 32350
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 81469,
+          "แพลทินัม (80M)": 35122
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79100,
+          "แพลทินัม (80M)": 32350
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 81469,
+          "แพลทินัม (80M)": 35122
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79100,
+          "แพลทินัม (80M)": 32350
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 81469,
+          "แพลทินัม (80M)": 35122
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79100,
+          "แพลทินัม (80M)": 32350
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 81469,
+          "แพลทินัม (80M)": 35122
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79100,
+          "แพลทินัม (80M)": 32350
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 69247,
+          "แพลทินัม (80M)": 34221
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79546,
+          "แพลทินัม (80M)": 33480
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 69247,
+          "แพลทินัม (80M)": 34221
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79546,
+          "แพลทินัม (80M)": 33480
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 69247,
+          "แพลทินัม (80M)": 34221
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79546,
+          "แพลทินัม (80M)": 33480
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 69247,
+          "แพลทินัม (80M)": 34221
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79546,
+          "แพลทินัม (80M)": 33480
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 69247,
+          "แพลทินัม (80M)": 34221
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79546,
+          "แพลทินัม (80M)": 33480
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 68582,
+          "แพลทินัม (80M)": 34358
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85434,
+          "แพลทินัม (80M)": 39637
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 68582,
+          "แพลทินัม (80M)": 34358
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85434,
+          "แพลทินัม (80M)": 39637
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 68582,
+          "แพลทินัม (80M)": 34358
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85434,
+          "แพลทินัม (80M)": 39637
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 68582,
+          "แพลทินัม (80M)": 34358
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85434,
+          "แพลทินัม (80M)": 39637
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 68582,
+          "แพลทินัม (80M)": 34358
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85434,
+          "แพลทินัม (80M)": 39637
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79601,
+          "แพลทินัม (80M)": 40249
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 101119,
+          "แพลทินัม (80M)": 49180
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79601,
+          "แพลทินัม (80M)": 40249
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 101119,
+          "แพลทินัม (80M)": 49180
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79601,
+          "แพลทินัม (80M)": 40249
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 101119,
+          "แพลทินัม (80M)": 49180
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79601,
+          "แพลทินัม (80M)": 40249
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 101119,
+          "แพลทินัม (80M)": 49180
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 79601,
+          "แพลทินัม (80M)": 40249
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 101119,
+          "แพลทินัม (80M)": 49180
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85956,
+          "แพลทินัม (80M)": 42852
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 109786,
+          "แพลทินัม (80M)": 52897
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85956,
+          "แพลทินัม (80M)": 42852
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 109786,
+          "แพลทินัม (80M)": 52897
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85956,
+          "แพลทินัม (80M)": 42852
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 109786,
+          "แพลทินัม (80M)": 52897
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85956,
+          "แพลทินัม (80M)": 42852
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 109786,
+          "แพลทินัม (80M)": 52897
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 85956,
+          "แพลทินัม (80M)": 42852
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 109786,
+          "แพลทินัม (80M)": 52897
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 98429,
+          "แพลทินัม (80M)": 46231
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 118062,
+          "แพลทินัม (80M)": 55771
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 98429,
+          "แพลทินัม (80M)": 46231
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 118062,
+          "แพลทินัม (80M)": 55771
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 98429,
+          "แพลทินัม (80M)": 46231
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 118062,
+          "แพลทินัม (80M)": 55771
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 98429,
+          "แพลทินัม (80M)": 46231
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 118062,
+          "แพลทินัม (80M)": 55771
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 98429,
+          "แพลทินัม (80M)": 46231
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 118062,
+          "แพลทินัม (80M)": 55771
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 108708,
+          "แพลทินัม (80M)": 47672
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 130394,
+          "แพลทินัม (80M)": 59521
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 108708,
+          "แพลทินัม (80M)": 47672
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 130394,
+          "แพลทินัม (80M)": 59521
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 108708,
+          "แพลทินัม (80M)": 47672
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 130394,
+          "แพลทินัม (80M)": 59521
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 108708,
+          "แพลทินัม (80M)": 47672
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 130394,
+          "แพลทินัม (80M)": 59521
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 108708,
+          "แพลทินัม (80M)": 47672
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 130394,
+          "แพลทินัม (80M)": 59521
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 125106,
+          "แพลทินัม (80M)": 52707
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 145924,
+          "แพลทินัม (80M)": 65672
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 125106,
+          "แพลทินัม (80M)": 52707
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 145924,
+          "แพลทินัม (80M)": 65672
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 125106,
+          "แพลทินัม (80M)": 52707
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 145924,
+          "แพลทินัม (80M)": 65672
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 125106,
+          "แพลทินัม (80M)": 52707
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 145924,
+          "แพลทินัม (80M)": 65672
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 125106,
+          "แพลทินัม (80M)": 52707
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 145924,
+          "แพลทินัม (80M)": 65672
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 149934,
+          "แพลทินัม (80M)": 66552
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 160170,
+          "แพลทินัม (80M)": 67481
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 149934,
+          "แพลทินัม (80M)": 66552
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 160170,
+          "แพลทินัม (80M)": 67481
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 149934,
+          "แพลทินัม (80M)": 66552
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 160170,
+          "แพลทินัม (80M)": 67481
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 149934,
+          "แพลทินัม (80M)": 66552
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 160170,
+          "แพลทินัม (80M)": 67481
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 149934,
+          "แพลทินัม (80M)": 66552
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 160170,
+          "แพลทินัม (80M)": 67481
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 182516,
+          "แพลทินัม (80M)": 81351
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 191269,
+          "แพลทินัม (80M)": 79738
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 182516,
+          "แพลทินัม (80M)": 81351
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 191269,
+          "แพลทินัม (80M)": 79738
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 182516,
+          "แพลทินัม (80M)": 81351
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 191269,
+          "แพลทินัม (80M)": 79738
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 182516,
+          "แพลทินัม (80M)": 81351
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 191269,
+          "แพลทินัม (80M)": 79738
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 182516,
+          "แพลทินัม (80M)": 81351
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 191269,
+          "แพลทินัม (80M)": 79738
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 234402,
+          "แพลทินัม (80M)": 116692
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 230796,
+          "แพลทินัม (80M)": 105203
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 234402,
+          "แพลทินัม (80M)": 116692
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 230796,
+          "แพลทินัม (80M)": 105203
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 234402,
+          "แพลทินัม (80M)": 116692
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 230796,
+          "แพลทินัม (80M)": 105203
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 234402,
+          "แพลทินัม (80M)": 116692
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 230796,
+          "แพลทินัม (80M)": 105203
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 234402,
+          "แพลทินัม (80M)": 116692
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 230796,
+          "แพลทินัม (80M)": 105203
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 304938,
+          "แพลทินัม (80M)": 169676
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 282706,
+          "แพลทินัม (80M)": 147664
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 304938,
+          "แพลทินัม (80M)": 169676
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 282706,
+          "แพลทินัม (80M)": 147664
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 304938,
+          "แพลทินัม (80M)": 169676
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 282706,
+          "แพลทินัม (80M)": 147664
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 304938,
+          "แพลทินัม (80M)": 169676
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 282706,
+          "แพลทินัม (80M)": 147664
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 304938,
+          "แพลทินัม (80M)": 169676
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 282706,
+          "แพลทินัม (80M)": 147664
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 394223,
+          "แพลทินัม (80M)": 239772
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 367086,
+          "แพลทินัม (80M)": 201092
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 394223,
+          "แพลทินัม (80M)": 239772
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 367086,
+          "แพลทินัม (80M)": 201092
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 394223,
+          "แพลทินัม (80M)": 239772
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 367086,
+          "แพลทินัม (80M)": 201092
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 394223,
+          "แพลทินัม (80M)": 239772
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 367086,
+          "แพลทินัม (80M)": 201092
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 394223,
+          "แพลทินัม (80M)": 239772
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 367086,
+          "แพลทินัม (80M)": 201092
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 571099,
+          "แพลทินัม (80M)": 369688
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 480805,
+          "แพลทินัม (80M)": 290267
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 571099,
+          "แพลทินัม (80M)": 369688
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 480805,
+          "แพลทินัม (80M)": 290267
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 571099,
+          "แพลทินัม (80M)": 369688
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 480805,
+          "แพลทินัม (80M)": 290267
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 571099,
+          "แพลทินัม (80M)": 369688
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 480805,
+          "แพลทินัม (80M)": 290267
+        }
+      }
+    },
+    {
+      "age_band": 80,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 571099,
+          "แพลทินัม (80M)": 369688
+        }
+      }
+    },
+    {
+      "age_band": 80,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 480805,
+          "แพลทินัม (80M)": 290267
+        }
+      }
+    },
+    {
+      "age_band": 81,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 845676,
+          "แพลทินัม (80M)": 568942
+        }
+      }
+    },
+    {
+      "age_band": 81,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 651918,
+          "แพลทินัม (80M)": 412492
+        }
+      }
+    },
+    {
+      "age_band": 82,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 845676,
+          "แพลทินัม (80M)": 568942
+        }
+      }
+    },
+    {
+      "age_band": 82,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 651918,
+          "แพลทินัม (80M)": 412492
+        }
+      }
+    },
+    {
+      "age_band": 83,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 845676,
+          "แพลทินัม (80M)": 568942
+        }
+      }
+    },
+    {
+      "age_band": 83,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 651918,
+          "แพลทินัม (80M)": 412492
+        }
+      }
+    },
+    {
+      "age_band": 84,
+      "gender": "Male",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 845676,
+          "แพลทินัม (80M)": 568942
+        }
+      }
+    },
+    {
+      "age_band": 84,
+      "gender": "Female",
+      "premiums": {
+        "AZAY FIRST CLASS": {
+          "บียอนด์ แพลทินัม (100M)": 651918,
+          "แพลทินัม (80M)": 412492
+        }
+      }
     }
   ]
 }

@@ -90,6 +90,7 @@
       "id": "AZAY",
       "name": "AZAY",
       "plans": [
+        { "id": "FIRST_CLASS", "name": "FIRST CLASS", "hasRoomRate": true, "roomRates": ["บียอนด์ แพลทินัม (100M)","แพลทินัม (80M)"] },
         { "id": "UNLOCK_ULTRA", "name": "ปลดล็อค อัลตร้า", "hasRoomRate": true, "roomRates": ["แผน 1 (3M)","แผน 2 (6M)","แผน 3 (10M)","แผน 4 (15M)"] }
       ]
     },
