@@ -569,8 +569,18 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
+    // Alert if customer age is missing
+    if (!curAge || curAge <= 0) {
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <i class="fas fa-exclamation-triangle text-amber-500"></i>
+                <span class="text-[12px] font-bold text-amber-700">กรุณากรอกอายุลูกค้าด้านบน</span>
+            </div>
+        </td></tr>`;
+        return;
+    }
     // Alert if customer age is outside the data range
-    if (curAge > 0 && (curAge < dataMin || curAge > dataMax)) {
+    if (curAge < dataMin || curAge > dataMax) {
         if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
                 <i class="fas fa-exclamation-triangle text-amber-500"></i>
