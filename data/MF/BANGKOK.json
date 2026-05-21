@@ -1,0 +1,3182 @@
+{
+  "company_id": "BANGKOK",
+  "company_name": "กรุงเทพประกันภัย",
+  "premium_structure": "Per-Age Rate",
+  "note": "Extracted from Chubb_SolutionDesign.xlsx Premium_Rider",
+  "rates": [
+    {
+      "age_band": 0,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 1,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 35581,
+          "แผน 2 (2M)": 56059,
+          "แผน 3 (3M)": 72573,
+          "แผน 4 (4M)": 87136,
+          "แผน 5 (5M)": 98867
+        }
+      }
+    },
+    {
+      "age_band": 1,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 30148,
+          "แผน 2 (2M)": 45866,
+          "แผน 3 (3M)": 59378,
+          "แผน 4 (4M)": 72889,
+          "แผน 5 (5M)": 86400
+        }
+      }
+    },
+    {
+      "age_band": 1,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 35581,
+          "แผน 2 (2M)": 56059,
+          "แผน 3 (3M)": 72573,
+          "แผน 4 (4M)": 87136,
+          "แผน 5 (5M)": 98867
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 30148,
+          "แผน 2 (2M)": 45866,
+          "แผน 3 (3M)": 59378,
+          "แผน 4 (4M)": 72889,
+          "แผน 5 (5M)": 86400
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 3,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 35581,
+          "แผน 2 (2M)": 56059,
+          "แผน 3 (3M)": 72573,
+          "แผน 4 (4M)": 87136,
+          "แผน 5 (5M)": 98867
+        }
+      }
+    },
+    {
+      "age_band": 3,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 30148,
+          "แผน 2 (2M)": 45866,
+          "แผน 3 (3M)": 59378,
+          "แผน 4 (4M)": 72889,
+          "แผน 5 (5M)": 86400
+        }
+      }
+    },
+    {
+      "age_band": 3,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 4,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 35581,
+          "แผน 2 (2M)": 56059,
+          "แผน 3 (3M)": 72573,
+          "แผน 4 (4M)": 87136,
+          "แผน 5 (5M)": 98867
+        }
+      }
+    },
+    {
+      "age_band": 4,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 30148,
+          "แผน 2 (2M)": 45866,
+          "แผน 3 (3M)": 59378,
+          "แผน 4 (4M)": 72889,
+          "แผน 5 (5M)": 86400
+        }
+      }
+    },
+    {
+      "age_band": 4,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 5,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 35581,
+          "แผน 2 (2M)": 56059,
+          "แผน 3 (3M)": 72573,
+          "แผน 4 (4M)": 87136,
+          "แผน 5 (5M)": 98867
+        }
+      }
+    },
+    {
+      "age_band": 5,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 30148,
+          "แผน 2 (2M)": 45866,
+          "แผน 3 (3M)": 59378,
+          "แผน 4 (4M)": 72889,
+          "แผน 5 (5M)": 86400
+        }
+      }
+    },
+    {
+      "age_band": 5,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 10176,
+          "IPD 2": 17180,
+          "IPD 3": 24185,
+          "IPD 4": 31189,
+          "IPD 5": 38194
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 8219,
+          "OPD 2": 16437,
+          "OPD 3": 24655,
+          "OPD 4": 32874,
+          "OPD 5": 41091
+        }
+      }
+    },
+    {
+      "age_band": 6,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21333,
+          "แผน 2 (2M)": 33175,
+          "แผน 3 (3M)": 43564,
+          "แผน 4 (4M)": 53041,
+          "แผน 5 (5M)": 61548
+        }
+      }
+    },
+    {
+      "age_band": 6,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 19633,
+          "แผน 2 (2M)": 33620,
+          "แผน 3 (3M)": 44727,
+          "แผน 4 (4M)": 54786,
+          "แผน 5 (5M)": 64263
+        }
+      }
+    },
+    {
+      "age_band": 6,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4816,
+          "IPD 2": 8074,
+          "IPD 3": 11332,
+          "IPD 4": 14589,
+          "IPD 5": 17847
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4459,
+          "OPD 2": 8917,
+          "OPD 3": 13375,
+          "OPD 4": 17834,
+          "OPD 5": 22291
+        }
+      }
+    },
+    {
+      "age_band": 7,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21333,
+          "แผน 2 (2M)": 33175,
+          "แผน 3 (3M)": 43564,
+          "แผน 4 (4M)": 53041,
+          "แผน 5 (5M)": 61548
+        }
+      }
+    },
+    {
+      "age_band": 7,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 19633,
+          "แผน 2 (2M)": 33620,
+          "แผน 3 (3M)": 44727,
+          "แผน 4 (4M)": 54786,
+          "แผน 5 (5M)": 64263
+        }
+      }
+    },
+    {
+      "age_band": 7,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4816,
+          "IPD 2": 8074,
+          "IPD 3": 11332,
+          "IPD 4": 14589,
+          "IPD 5": 17847
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4459,
+          "OPD 2": 8917,
+          "OPD 3": 13375,
+          "OPD 4": 17834,
+          "OPD 5": 22291
+        }
+      }
+    },
+    {
+      "age_band": 8,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21333,
+          "แผน 2 (2M)": 33175,
+          "แผน 3 (3M)": 43564,
+          "แผน 4 (4M)": 53041,
+          "แผน 5 (5M)": 61548
+        }
+      }
+    },
+    {
+      "age_band": 8,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 19633,
+          "แผน 2 (2M)": 33620,
+          "แผน 3 (3M)": 44727,
+          "แผน 4 (4M)": 54786,
+          "แผน 5 (5M)": 64263
+        }
+      }
+    },
+    {
+      "age_band": 8,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4816,
+          "IPD 2": 8074,
+          "IPD 3": 11332,
+          "IPD 4": 14589,
+          "IPD 5": 17847
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4459,
+          "OPD 2": 8917,
+          "OPD 3": 13375,
+          "OPD 4": 17834,
+          "OPD 5": 22291
+        }
+      }
+    },
+    {
+      "age_band": 9,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21333,
+          "แผน 2 (2M)": 33175,
+          "แผน 3 (3M)": 43564,
+          "แผน 4 (4M)": 53041,
+          "แผน 5 (5M)": 61548
+        }
+      }
+    },
+    {
+      "age_band": 9,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 19633,
+          "แผน 2 (2M)": 33620,
+          "แผน 3 (3M)": 44727,
+          "แผน 4 (4M)": 54786,
+          "แผน 5 (5M)": 64263
+        }
+      }
+    },
+    {
+      "age_band": 9,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4816,
+          "IPD 2": 8074,
+          "IPD 3": 11332,
+          "IPD 4": 14589,
+          "IPD 5": 17847
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4459,
+          "OPD 2": 8917,
+          "OPD 3": 13375,
+          "OPD 4": 17834,
+          "OPD 5": 22291
+        }
+      }
+    },
+    {
+      "age_band": 10,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21333,
+          "แผน 2 (2M)": 33175,
+          "แผน 3 (3M)": 43564,
+          "แผน 4 (4M)": 53041,
+          "แผน 5 (5M)": 61548
+        }
+      }
+    },
+    {
+      "age_band": 10,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 19633,
+          "แผน 2 (2M)": 33620,
+          "แผน 3 (3M)": 44727,
+          "แผน 4 (4M)": 54786,
+          "แผน 5 (5M)": 64263
+        }
+      }
+    },
+    {
+      "age_band": 10,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4816,
+          "IPD 2": 8074,
+          "IPD 3": 11332,
+          "IPD 4": 14589,
+          "IPD 5": 17847
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4459,
+          "OPD 2": 8917,
+          "OPD 3": 13375,
+          "OPD 4": 17834,
+          "OPD 5": 22291
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16872,
+          "แผน 2 (2M)": 24857,
+          "แผน 3 (3M)": 31249,
+          "แผน 4 (4M)": 38009,
+          "แผน 5 (5M)": 45055
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13804,
+          "แผน 2 (2M)": 21307,
+          "แผน 3 (3M)": 26850,
+          "แผน 4 (4M)": 32560,
+          "แผน 5 (5M)": 37950
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3736,
+          "IPD 2": 6360,
+          "IPD 3": 8984,
+          "IPD 4": 1608,
+          "IPD 5": 14232
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3277,
+          "OPD 2": 6554,
+          "OPD 3": 9830,
+          "OPD 4": 13106,
+          "OPD 5": 16383
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16872,
+          "แผน 2 (2M)": 24857,
+          "แผน 3 (3M)": 31249,
+          "แผน 4 (4M)": 38009,
+          "แผน 5 (5M)": 45055
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13804,
+          "แผน 2 (2M)": 21307,
+          "แผน 3 (3M)": 26850,
+          "แผน 4 (4M)": 32560,
+          "แผน 5 (5M)": 37950
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3736,
+          "IPD 2": 6360,
+          "IPD 3": 8984,
+          "IPD 4": 1608,
+          "IPD 5": 14232
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3277,
+          "OPD 2": 6554,
+          "OPD 3": 9830,
+          "OPD 4": 13106,
+          "OPD 5": 16383
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16872,
+          "แผน 2 (2M)": 24857,
+          "แผน 3 (3M)": 31249,
+          "แผน 4 (4M)": 38009,
+          "แผน 5 (5M)": 45055
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13804,
+          "แผน 2 (2M)": 21307,
+          "แผน 3 (3M)": 26850,
+          "แผน 4 (4M)": 32560,
+          "แผน 5 (5M)": 37950
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3736,
+          "IPD 2": 6360,
+          "IPD 3": 8984,
+          "IPD 4": 1608,
+          "IPD 5": 14232
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3277,
+          "OPD 2": 6554,
+          "OPD 3": 9830,
+          "OPD 4": 13106,
+          "OPD 5": 16383
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16872,
+          "แผน 2 (2M)": 24857,
+          "แผน 3 (3M)": 31249,
+          "แผน 4 (4M)": 38009,
+          "แผน 5 (5M)": 45055
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13804,
+          "แผน 2 (2M)": 21307,
+          "แผน 3 (3M)": 26850,
+          "แผน 4 (4M)": 32560,
+          "แผน 5 (5M)": 37950
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3736,
+          "IPD 2": 6360,
+          "IPD 3": 8984,
+          "IPD 4": 1608,
+          "IPD 5": 14232
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3277,
+          "OPD 2": 6554,
+          "OPD 3": 9830,
+          "OPD 4": 13106,
+          "OPD 5": 16383
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16872,
+          "แผน 2 (2M)": 24857,
+          "แผน 3 (3M)": 31249,
+          "แผน 4 (4M)": 38009,
+          "แผน 5 (5M)": 45055
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13804,
+          "แผน 2 (2M)": 21307,
+          "แผน 3 (3M)": 26850,
+          "แผน 4 (4M)": 32560,
+          "แผน 5 (5M)": 37950
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3736,
+          "IPD 2": 6360,
+          "IPD 3": 8984,
+          "IPD 4": 1608,
+          "IPD 5": 14232
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3277,
+          "OPD 2": 6554,
+          "OPD 3": 9830,
+          "OPD 4": 13106,
+          "OPD 5": 16383
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13638,
+          "แผน 2 (2M)": 23115,
+          "แผน 3 (3M)": 29656,
+          "แผน 4 (4M)": 35224,
+          "แผน 5 (5M)": 41639
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11159,
+          "แผน 2 (2M)": 19314,
+          "แผน 3 (3M)": 25004,
+          "แผน 4 (4M)": 29706,
+          "แผน 5 (5M)": 34071
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3694,
+          "IPD 2": 6361,
+          "IPD 3": 9029,
+          "IPD 4": 11696,
+          "IPD 5": 14364
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2595,
+          "OPD 2": 5190,
+          "OPD 3": 7783,
+          "OPD 4": 10378,
+          "OPD 5": 12973
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13638,
+          "แผน 2 (2M)": 23115,
+          "แผน 3 (3M)": 29656,
+          "แผน 4 (4M)": 35224,
+          "แผน 5 (5M)": 41639
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11159,
+          "แผน 2 (2M)": 19314,
+          "แผน 3 (3M)": 25004,
+          "แผน 4 (4M)": 29706,
+          "แผน 5 (5M)": 34071
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3694,
+          "IPD 2": 6361,
+          "IPD 3": 9029,
+          "IPD 4": 11696,
+          "IPD 5": 14364
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2595,
+          "OPD 2": 5190,
+          "OPD 3": 7783,
+          "OPD 4": 10378,
+          "OPD 5": 12973
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13638,
+          "แผน 2 (2M)": 23115,
+          "แผน 3 (3M)": 29656,
+          "แผน 4 (4M)": 35224,
+          "แผน 5 (5M)": 41639
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11159,
+          "แผน 2 (2M)": 19314,
+          "แผน 3 (3M)": 25004,
+          "แผน 4 (4M)": 29706,
+          "แผน 5 (5M)": 34071
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3694,
+          "IPD 2": 6361,
+          "IPD 3": 9029,
+          "IPD 4": 11696,
+          "IPD 5": 14364
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2595,
+          "OPD 2": 5190,
+          "OPD 3": 7783,
+          "OPD 4": 10378,
+          "OPD 5": 12973
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13638,
+          "แผน 2 (2M)": 23115,
+          "แผน 3 (3M)": 29656,
+          "แผน 4 (4M)": 35224,
+          "แผน 5 (5M)": 41639
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11159,
+          "แผน 2 (2M)": 19314,
+          "แผน 3 (3M)": 25004,
+          "แผน 4 (4M)": 29706,
+          "แผน 5 (5M)": 34071
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3694,
+          "IPD 2": 6361,
+          "IPD 3": 9029,
+          "IPD 4": 11696,
+          "IPD 5": 14364
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2595,
+          "OPD 2": 5190,
+          "OPD 3": 7783,
+          "OPD 4": 10378,
+          "OPD 5": 12973
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13638,
+          "แผน 2 (2M)": 23115,
+          "แผน 3 (3M)": 29656,
+          "แผน 4 (4M)": 35224,
+          "แผน 5 (5M)": 41639
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11159,
+          "แผน 2 (2M)": 19314,
+          "แผน 3 (3M)": 25004,
+          "แผน 4 (4M)": 29706,
+          "แผน 5 (5M)": 34071
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3694,
+          "IPD 2": 6361,
+          "IPD 3": 9029,
+          "IPD 4": 11696,
+          "IPD 5": 14364
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2595,
+          "OPD 2": 5190,
+          "OPD 3": 7783,
+          "OPD 4": 10378,
+          "OPD 5": 12973
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13610,
+          "แผน 2 (2M)": 23068,
+          "แผน 3 (3M)": 29596,
+          "แผน 4 (4M)": 35153,
+          "แผน 5 (5M)": 41555
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11136,
+          "แผน 2 (2M)": 19274,
+          "แผน 3 (3M)": 24952,
+          "แผน 4 (4M)": 29644,
+          "แผน 5 (5M)": 34000
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3958,
+          "IPD 2": 6722,
+          "IPD 3": 9484,
+          "IPD 4": 12247,
+          "IPD 5": 15010
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2552,
+          "OPD 2": 5103,
+          "OPD 3": 7655,
+          "OPD 4": 10206,
+          "OPD 5": 12758
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13610,
+          "แผน 2 (2M)": 23068,
+          "แผน 3 (3M)": 29596,
+          "แผน 4 (4M)": 35153,
+          "แผน 5 (5M)": 41555
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11136,
+          "แผน 2 (2M)": 19274,
+          "แผน 3 (3M)": 24952,
+          "แผน 4 (4M)": 29644,
+          "แผน 5 (5M)": 34000
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3958,
+          "IPD 2": 6722,
+          "IPD 3": 9484,
+          "IPD 4": 12247,
+          "IPD 5": 15010
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2552,
+          "OPD 2": 5103,
+          "OPD 3": 7655,
+          "OPD 4": 10206,
+          "OPD 5": 12758
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13610,
+          "แผน 2 (2M)": 23068,
+          "แผน 3 (3M)": 29596,
+          "แผน 4 (4M)": 35153,
+          "แผน 5 (5M)": 41555
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11136,
+          "แผน 2 (2M)": 19274,
+          "แผน 3 (3M)": 24952,
+          "แผน 4 (4M)": 29644,
+          "แผน 5 (5M)": 34000
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3958,
+          "IPD 2": 6722,
+          "IPD 3": 9484,
+          "IPD 4": 12247,
+          "IPD 5": 15010
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2552,
+          "OPD 2": 5103,
+          "OPD 3": 7655,
+          "OPD 4": 10206,
+          "OPD 5": 12758
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13610,
+          "แผน 2 (2M)": 23068,
+          "แผน 3 (3M)": 29596,
+          "แผน 4 (4M)": 35153,
+          "แผน 5 (5M)": 41555
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11136,
+          "แผน 2 (2M)": 19274,
+          "แผน 3 (3M)": 24952,
+          "แผน 4 (4M)": 29644,
+          "แผน 5 (5M)": 34000
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3958,
+          "IPD 2": 6722,
+          "IPD 3": 9484,
+          "IPD 4": 12247,
+          "IPD 5": 15010
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2552,
+          "OPD 2": 5103,
+          "OPD 3": 7655,
+          "OPD 4": 10206,
+          "OPD 5": 12758
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13610,
+          "แผน 2 (2M)": 23068,
+          "แผน 3 (3M)": 29596,
+          "แผน 4 (4M)": 35153,
+          "แผน 5 (5M)": 41555
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11136,
+          "แผน 2 (2M)": 19274,
+          "แผน 3 (3M)": 24952,
+          "แผน 4 (4M)": 29644,
+          "แผน 5 (5M)": 34000
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 3958,
+          "IPD 2": 6722,
+          "IPD 3": 9484,
+          "IPD 4": 12247,
+          "IPD 5": 15010
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2552,
+          "OPD 2": 5103,
+          "OPD 3": 7655,
+          "OPD 4": 10206,
+          "OPD 5": 12758
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13542,
+          "แผน 2 (2M)": 21983,
+          "แผน 3 (3M)": 28458,
+          "แผน 4 (4M)": 34934,
+          "แผน 5 (5M)": 41410
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11080,
+          "แผน 2 (2M)": 17986,
+          "แผน 3 (3M)": 23284,
+          "แผน 4 (4M)": 28582,
+          "แผน 5 (5M)": 33881
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4261,
+          "IPD 2": 7144,
+          "IPD 3": 10028,
+          "IPD 4": 12911,
+          "IPD 5": 15793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2966,
+          "OPD 2": 5931,
+          "OPD 3": 8896,
+          "OPD 4": 11861,
+          "OPD 5": 14826
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13542,
+          "แผน 2 (2M)": 21983,
+          "แผน 3 (3M)": 28458,
+          "แผน 4 (4M)": 34934,
+          "แผน 5 (5M)": 41410
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11080,
+          "แผน 2 (2M)": 17986,
+          "แผน 3 (3M)": 23284,
+          "แผน 4 (4M)": 28582,
+          "แผน 5 (5M)": 33881
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4261,
+          "IPD 2": 7144,
+          "IPD 3": 10028,
+          "IPD 4": 12911,
+          "IPD 5": 15793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2966,
+          "OPD 2": 5931,
+          "OPD 3": 8896,
+          "OPD 4": 11861,
+          "OPD 5": 14826
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13542,
+          "แผน 2 (2M)": 21983,
+          "แผน 3 (3M)": 28458,
+          "แผน 4 (4M)": 34934,
+          "แผน 5 (5M)": 41410
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11080,
+          "แผน 2 (2M)": 17986,
+          "แผน 3 (3M)": 23284,
+          "แผน 4 (4M)": 28582,
+          "แผน 5 (5M)": 33881
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4261,
+          "IPD 2": 7144,
+          "IPD 3": 10028,
+          "IPD 4": 12911,
+          "IPD 5": 15793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2966,
+          "OPD 2": 5931,
+          "OPD 3": 8896,
+          "OPD 4": 11861,
+          "OPD 5": 14826
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13542,
+          "แผน 2 (2M)": 21983,
+          "แผน 3 (3M)": 28458,
+          "แผน 4 (4M)": 34934,
+          "แผน 5 (5M)": 41410
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11080,
+          "แผน 2 (2M)": 17986,
+          "แผน 3 (3M)": 23284,
+          "แผน 4 (4M)": 28582,
+          "แผน 5 (5M)": 33881
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4261,
+          "IPD 2": 7144,
+          "IPD 3": 10028,
+          "IPD 4": 12911,
+          "IPD 5": 15793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2966,
+          "OPD 2": 5931,
+          "OPD 3": 8896,
+          "OPD 4": 11861,
+          "OPD 5": 14826
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13542,
+          "แผน 2 (2M)": 21983,
+          "แผน 3 (3M)": 28458,
+          "แผน 4 (4M)": 34934,
+          "แผน 5 (5M)": 41410
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 11080,
+          "แผน 2 (2M)": 17986,
+          "แผน 3 (3M)": 23284,
+          "แผน 4 (4M)": 28582,
+          "แผน 5 (5M)": 33881
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4261,
+          "IPD 2": 7144,
+          "IPD 3": 10028,
+          "IPD 4": 12911,
+          "IPD 5": 15793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 2966,
+          "OPD 2": 5931,
+          "OPD 3": 8896,
+          "OPD 4": 11861,
+          "OPD 5": 14826
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 15666,
+          "แผน 2 (2M)": 22894,
+          "แผน 3 (3M)": 29639,
+          "แผน 4 (4M)": 36383,
+          "แผน 5 (5M)": 43127
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 12127,
+          "แผน 2 (2M)": 18732,
+          "แผน 3 (3M)": 24250,
+          "แผน 4 (4M)": 29768,
+          "แผน 5 (5M)": 35286
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4292,
+          "IPD 2": 7175,
+          "IPD 3": 10058,
+          "IPD 4": 12942,
+          "IPD 5": 15824
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3438,
+          "OPD 2": 6876,
+          "OPD 3": 10314,
+          "OPD 4": 13752,
+          "OPD 5": 17188
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 15666,
+          "แผน 2 (2M)": 22894,
+          "แผน 3 (3M)": 29639,
+          "แผน 4 (4M)": 36383,
+          "แผน 5 (5M)": 43127
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 12127,
+          "แผน 2 (2M)": 18732,
+          "แผน 3 (3M)": 24250,
+          "แผน 4 (4M)": 29768,
+          "แผน 5 (5M)": 35286
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4292,
+          "IPD 2": 7175,
+          "IPD 3": 10058,
+          "IPD 4": 12942,
+          "IPD 5": 15824
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3438,
+          "OPD 2": 6876,
+          "OPD 3": 10314,
+          "OPD 4": 13752,
+          "OPD 5": 17188
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 15666,
+          "แผน 2 (2M)": 22894,
+          "แผน 3 (3M)": 29639,
+          "แผน 4 (4M)": 36383,
+          "แผน 5 (5M)": 43127
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 12127,
+          "แผน 2 (2M)": 18732,
+          "แผน 3 (3M)": 24250,
+          "แผน 4 (4M)": 29768,
+          "แผน 5 (5M)": 35286
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4292,
+          "IPD 2": 7175,
+          "IPD 3": 10058,
+          "IPD 4": 12942,
+          "IPD 5": 15824
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3438,
+          "OPD 2": 6876,
+          "OPD 3": 10314,
+          "OPD 4": 13752,
+          "OPD 5": 17188
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 15666,
+          "แผน 2 (2M)": 22894,
+          "แผน 3 (3M)": 29639,
+          "แผน 4 (4M)": 36383,
+          "แผน 5 (5M)": 43127
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 12127,
+          "แผน 2 (2M)": 18732,
+          "แผน 3 (3M)": 24250,
+          "แผน 4 (4M)": 29768,
+          "แผน 5 (5M)": 35286
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4292,
+          "IPD 2": 7175,
+          "IPD 3": 10058,
+          "IPD 4": 12942,
+          "IPD 5": 15824
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3438,
+          "OPD 2": 6876,
+          "OPD 3": 10314,
+          "OPD 4": 13752,
+          "OPD 5": 17188
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 15666,
+          "แผน 2 (2M)": 22894,
+          "แผน 3 (3M)": 29639,
+          "แผน 4 (4M)": 36383,
+          "แผน 5 (5M)": 43127
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 12127,
+          "แผน 2 (2M)": 18732,
+          "แผน 3 (3M)": 24250,
+          "แผน 4 (4M)": 29768,
+          "แผน 5 (5M)": 35286
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4292,
+          "IPD 2": 7175,
+          "IPD 3": 10058,
+          "IPD 4": 12942,
+          "IPD 5": 15824
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3438,
+          "OPD 2": 6876,
+          "OPD 3": 10314,
+          "OPD 4": 13752,
+          "OPD 5": 17188
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16831,
+          "แผน 2 (2M)": 26293,
+          "แผน 3 (3M)": 34038,
+          "แผน 4 (4M)": 41784,
+          "แผน 5 (5M)": 48016
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13267,
+          "แผน 2 (2M)": 21512,
+          "แผน 3 (3M)": 27849,
+          "แผน 4 (4M)": 34187,
+          "แผน 5 (5M)": 39139
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4751,
+          "IPD 2": 8032,
+          "IPD 3": 11314,
+          "IPD 4": 14595,
+          "IPD 5": 17876
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3815,
+          "OPD 2": 7628,
+          "OPD 3": 11442,
+          "OPD 4": 15255,
+          "OPD 5": 19068
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16831,
+          "แผน 2 (2M)": 26293,
+          "แผน 3 (3M)": 34038,
+          "แผน 4 (4M)": 41784,
+          "แผน 5 (5M)": 48016
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13267,
+          "แผน 2 (2M)": 21512,
+          "แผน 3 (3M)": 27849,
+          "แผน 4 (4M)": 34187,
+          "แผน 5 (5M)": 39139
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4751,
+          "IPD 2": 8032,
+          "IPD 3": 11314,
+          "IPD 4": 14595,
+          "IPD 5": 17876
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3815,
+          "OPD 2": 7628,
+          "OPD 3": 11442,
+          "OPD 4": 15255,
+          "OPD 5": 19068
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16831,
+          "แผน 2 (2M)": 26293,
+          "แผน 3 (3M)": 34038,
+          "แผน 4 (4M)": 41784,
+          "แผน 5 (5M)": 48016
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13267,
+          "แผน 2 (2M)": 21512,
+          "แผน 3 (3M)": 27849,
+          "แผน 4 (4M)": 34187,
+          "แผน 5 (5M)": 39139
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4751,
+          "IPD 2": 8032,
+          "IPD 3": 11314,
+          "IPD 4": 14595,
+          "IPD 5": 17876
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3815,
+          "OPD 2": 7628,
+          "OPD 3": 11442,
+          "OPD 4": 15255,
+          "OPD 5": 19068
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16831,
+          "แผน 2 (2M)": 26293,
+          "แผน 3 (3M)": 34038,
+          "แผน 4 (4M)": 41784,
+          "แผน 5 (5M)": 48016
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13267,
+          "แผน 2 (2M)": 21512,
+          "แผน 3 (3M)": 27849,
+          "แผน 4 (4M)": 34187,
+          "แผน 5 (5M)": 39139
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4751,
+          "IPD 2": 8032,
+          "IPD 3": 11314,
+          "IPD 4": 14595,
+          "IPD 5": 17876
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3815,
+          "OPD 2": 7628,
+          "OPD 3": 11442,
+          "OPD 4": 15255,
+          "OPD 5": 19068
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 16831,
+          "แผน 2 (2M)": 26293,
+          "แผน 3 (3M)": 34038,
+          "แผน 4 (4M)": 41784,
+          "แผน 5 (5M)": 48016
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 13267,
+          "แผน 2 (2M)": 21512,
+          "แผน 3 (3M)": 27849,
+          "แผน 4 (4M)": 34187,
+          "แผน 5 (5M)": 39139
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 4751,
+          "IPD 2": 8032,
+          "IPD 3": 11314,
+          "IPD 4": 14595,
+          "IPD 5": 17876
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 3815,
+          "OPD 2": 7628,
+          "OPD 3": 11442,
+          "OPD 4": 15255,
+          "OPD 5": 19068
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 18197,
+          "แผน 2 (2M)": 31895,
+          "แผน 3 (3M)": 39752,
+          "แผน 4 (4M)": 46134,
+          "แผน 5 (5M)": 51557
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 14929,
+          "แผน 2 (2M)": 26127,
+          "แผน 3 (3M)": 32846,
+          "แผน 4 (4M)": 38818,
+          "แผน 5 (5M)": 44043
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 5303,
+          "IPD 2": 9176,
+          "IPD 3": 13048,
+          "IPD 4": 16920,
+          "IPD 5": 20793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4405,
+          "OPD 2": 8809,
+          "OPD 3": 13215,
+          "OPD 4": 17619,
+          "OPD 5": 22023
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 18197,
+          "แผน 2 (2M)": 31895,
+          "แผน 3 (3M)": 39752,
+          "แผน 4 (4M)": 46134,
+          "แผน 5 (5M)": 51557
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 14929,
+          "แผน 2 (2M)": 26127,
+          "แผน 3 (3M)": 32846,
+          "แผน 4 (4M)": 38818,
+          "แผน 5 (5M)": 44043
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 5303,
+          "IPD 2": 9176,
+          "IPD 3": 13048,
+          "IPD 4": 16920,
+          "IPD 5": 20793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4405,
+          "OPD 2": 8809,
+          "OPD 3": 13215,
+          "OPD 4": 17619,
+          "OPD 5": 22023
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 18197,
+          "แผน 2 (2M)": 31895,
+          "แผน 3 (3M)": 39752,
+          "แผน 4 (4M)": 46134,
+          "แผน 5 (5M)": 51557
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 14929,
+          "แผน 2 (2M)": 26127,
+          "แผน 3 (3M)": 32846,
+          "แผน 4 (4M)": 38818,
+          "แผน 5 (5M)": 44043
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 5303,
+          "IPD 2": 9176,
+          "IPD 3": 13048,
+          "IPD 4": 16920,
+          "IPD 5": 20793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4405,
+          "OPD 2": 8809,
+          "OPD 3": 13215,
+          "OPD 4": 17619,
+          "OPD 5": 22023
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 18197,
+          "แผน 2 (2M)": 31895,
+          "แผน 3 (3M)": 39752,
+          "แผน 4 (4M)": 46134,
+          "แผน 5 (5M)": 51557
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 14929,
+          "แผน 2 (2M)": 26127,
+          "แผน 3 (3M)": 32846,
+          "แผน 4 (4M)": 38818,
+          "แผน 5 (5M)": 44043
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 5303,
+          "IPD 2": 9176,
+          "IPD 3": 13048,
+          "IPD 4": 16920,
+          "IPD 5": 20793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4405,
+          "OPD 2": 8809,
+          "OPD 3": 13215,
+          "OPD 4": 17619,
+          "OPD 5": 22023
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 18197,
+          "แผน 2 (2M)": 31895,
+          "แผน 3 (3M)": 39752,
+          "แผน 4 (4M)": 46134,
+          "แผน 5 (5M)": 51557
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 14929,
+          "แผน 2 (2M)": 26127,
+          "แผน 3 (3M)": 32846,
+          "แผน 4 (4M)": 38818,
+          "แผน 5 (5M)": 44043
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 5303,
+          "IPD 2": 9176,
+          "IPD 3": 13048,
+          "IPD 4": 16920,
+          "IPD 5": 20793
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 4405,
+          "OPD 2": 8809,
+          "OPD 3": 13215,
+          "OPD 4": 17619,
+          "OPD 5": 22023
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21418,
+          "แผน 2 (2M)": 37831,
+          "แผน 3 (3M)": 46881,
+          "แผน 4 (4M)": 54166,
+          "แผน 5 (5M)": 60335
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 17348,
+          "แผน 2 (2M)": 30360,
+          "แผน 3 (3M)": 38166,
+          "แผน 4 (4M)": 45106,
+          "แผน 5 (5M)": 51178
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 6780,
+          "IPD 2": 11582,
+          "IPD 3": 16383,
+          "IPD 4": 21185,
+          "IPD 5": 25987
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5049,
+          "OPD 2": 10099,
+          "OPD 3": 15147,
+          "OPD 4": 20197,
+          "OPD 5": 25246
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21418,
+          "แผน 2 (2M)": 37831,
+          "แผน 3 (3M)": 46881,
+          "แผน 4 (4M)": 54166,
+          "แผน 5 (5M)": 60335
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 17348,
+          "แผน 2 (2M)": 30360,
+          "แผน 3 (3M)": 38166,
+          "แผน 4 (4M)": 45106,
+          "แผน 5 (5M)": 51178
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 6780,
+          "IPD 2": 11582,
+          "IPD 3": 16383,
+          "IPD 4": 21185,
+          "IPD 5": 25987
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5049,
+          "OPD 2": 10099,
+          "OPD 3": 15147,
+          "OPD 4": 20197,
+          "OPD 5": 25246
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21418,
+          "แผน 2 (2M)": 37831,
+          "แผน 3 (3M)": 46881,
+          "แผน 4 (4M)": 54166,
+          "แผน 5 (5M)": 60335
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 17348,
+          "แผน 2 (2M)": 30360,
+          "แผน 3 (3M)": 38166,
+          "แผน 4 (4M)": 45106,
+          "แผน 5 (5M)": 51178
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 6780,
+          "IPD 2": 11582,
+          "IPD 3": 16383,
+          "IPD 4": 21185,
+          "IPD 5": 25987
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5049,
+          "OPD 2": 10099,
+          "OPD 3": 15147,
+          "OPD 4": 20197,
+          "OPD 5": 25246
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21418,
+          "แผน 2 (2M)": 37831,
+          "แผน 3 (3M)": 46881,
+          "แผน 4 (4M)": 54166,
+          "แผน 5 (5M)": 60335
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 17348,
+          "แผน 2 (2M)": 30360,
+          "แผน 3 (3M)": 38166,
+          "แผน 4 (4M)": 45106,
+          "แผน 5 (5M)": 51178
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 6780,
+          "IPD 2": 11582,
+          "IPD 3": 16383,
+          "IPD 4": 21185,
+          "IPD 5": 25987
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5049,
+          "OPD 2": 10099,
+          "OPD 3": 15147,
+          "OPD 4": 20197,
+          "OPD 5": 25246
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21418,
+          "แผน 2 (2M)": 37831,
+          "แผน 3 (3M)": 46881,
+          "แผน 4 (4M)": 54166,
+          "แผน 5 (5M)": 60335
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 17348,
+          "แผน 2 (2M)": 30360,
+          "แผน 3 (3M)": 38166,
+          "แผน 4 (4M)": 45106,
+          "แผน 5 (5M)": 51178
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 6780,
+          "IPD 2": 11582,
+          "IPD 3": 16383,
+          "IPD 4": 21185,
+          "IPD 5": 25987
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5049,
+          "OPD 2": 10099,
+          "OPD 3": 15147,
+          "OPD 4": 20197,
+          "OPD 5": 25246
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 25386,
+          "แผน 2 (2M)": 42378,
+          "แผน 3 (3M)": 53276,
+          "แผน 4 (4M)": 62962,
+          "แผน 5 (5M)": 71439
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21398,
+          "แผน 2 (2M)": 36472,
+          "แผน 3 (3M)": 45665,
+          "แผน 4 (4M)": 53968,
+          "แผน 5 (5M)": 61232
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 7762,
+          "IPD 2": 13064,
+          "IPD 3": 18365,
+          "IPD 4": 23667,
+          "IPD 5": 28968
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5640,
+          "OPD 2": 11280,
+          "OPD 3": 16920,
+          "OPD 4": 22560,
+          "OPD 5": 28200
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 25386,
+          "แผน 2 (2M)": 42378,
+          "แผน 3 (3M)": 53276,
+          "แผน 4 (4M)": 62962,
+          "แผน 5 (5M)": 71439
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21398,
+          "แผน 2 (2M)": 36472,
+          "แผน 3 (3M)": 45665,
+          "แผน 4 (4M)": 53968,
+          "แผน 5 (5M)": 61232
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 7762,
+          "IPD 2": 13064,
+          "IPD 3": 18365,
+          "IPD 4": 23667,
+          "IPD 5": 28968
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5640,
+          "OPD 2": 11280,
+          "OPD 3": 16920,
+          "OPD 4": 22560,
+          "OPD 5": 28200
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 25386,
+          "แผน 2 (2M)": 42378,
+          "แผน 3 (3M)": 53276,
+          "แผน 4 (4M)": 62962,
+          "แผน 5 (5M)": 71439
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21398,
+          "แผน 2 (2M)": 36472,
+          "แผน 3 (3M)": 45665,
+          "แผน 4 (4M)": 53968,
+          "แผน 5 (5M)": 61232
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 7762,
+          "IPD 2": 13064,
+          "IPD 3": 18365,
+          "IPD 4": 23667,
+          "IPD 5": 28968
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5640,
+          "OPD 2": 11280,
+          "OPD 3": 16920,
+          "OPD 4": 22560,
+          "OPD 5": 28200
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 25386,
+          "แผน 2 (2M)": 42378,
+          "แผน 3 (3M)": 53276,
+          "แผน 4 (4M)": 62962,
+          "แผน 5 (5M)": 71439
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21398,
+          "แผน 2 (2M)": 36472,
+          "แผน 3 (3M)": 45665,
+          "แผน 4 (4M)": 53968,
+          "แผน 5 (5M)": 61232
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 7762,
+          "IPD 2": 13064,
+          "IPD 3": 18365,
+          "IPD 4": 23667,
+          "IPD 5": 28968
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5640,
+          "OPD 2": 11280,
+          "OPD 3": 16920,
+          "OPD 4": 22560,
+          "OPD 5": 28200
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 25386,
+          "แผน 2 (2M)": 42378,
+          "แผน 3 (3M)": 53276,
+          "แผน 4 (4M)": 62962,
+          "แผน 5 (5M)": 71439
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 21398,
+          "แผน 2 (2M)": 36472,
+          "แผน 3 (3M)": 45665,
+          "แผน 4 (4M)": 53968,
+          "แผน 5 (5M)": 61232
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Unisex",
+      "premiums": {
+        "กรุงเทพ Happy Healthy IPD": {
+          "IPD 1": 7762,
+          "IPD 2": 13064,
+          "IPD 3": 18365,
+          "IPD 4": 23667,
+          "IPD 5": 28968
+        },
+        "กรุงเทพ Happy Healthy OPD": {
+          "OPD 1": 5640,
+          "OPD 2": 11280,
+          "OPD 3": 16920,
+          "OPD 4": 22560,
+          "OPD 5": 28200
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 31975,
+          "แผน 2 (2M)": 52924,
+          "แผน 3 (3M)": 65164,
+          "แผน 4 (4M)": 77012,
+          "แผน 5 (5M)": 87378
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 28683,
+          "แผน 2 (2M)": 49819,
+          "แผน 3 (3M)": 61024,
+          "แผน 4 (4M)": 69841,
+          "แผน 5 (5M)": 77457
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 31975,
+          "แผน 2 (2M)": 52924,
+          "แผน 3 (3M)": 65164,
+          "แผน 4 (4M)": 77012,
+          "แผน 5 (5M)": 87378
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 28683,
+          "แผน 2 (2M)": 49819,
+          "แผน 3 (3M)": 61024,
+          "แผน 4 (4M)": 69841,
+          "แผน 5 (5M)": 77457
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 31975,
+          "แผน 2 (2M)": 52924,
+          "แผน 3 (3M)": 65164,
+          "แผน 4 (4M)": 77012,
+          "แผน 5 (5M)": 87378
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 28683,
+          "แผน 2 (2M)": 49819,
+          "แผน 3 (3M)": 61024,
+          "แผน 4 (4M)": 69841,
+          "แผน 5 (5M)": 77457
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 31975,
+          "แผน 2 (2M)": 52924,
+          "แผน 3 (3M)": 65164,
+          "แผน 4 (4M)": 77012,
+          "แผน 5 (5M)": 87378
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 28683,
+          "แผน 2 (2M)": 49819,
+          "แผน 3 (3M)": 61024,
+          "แผน 4 (4M)": 69841,
+          "แผน 5 (5M)": 77457
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 31975,
+          "แผน 2 (2M)": 52924,
+          "แผน 3 (3M)": 65164,
+          "แผน 4 (4M)": 77012,
+          "แผน 5 (5M)": 87378
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 28683,
+          "แผน 2 (2M)": 49819,
+          "แผน 3 (3M)": 61024,
+          "แผน 4 (4M)": 69841,
+          "แผน 5 (5M)": 77457
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 39793,
+          "แผน 2 (2M)": 65786,
+          "แผน 3 (3M)": 80791,
+          "แผน 4 (4M)": 95481,
+          "แผน 5 (5M)": 108334
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 38801,
+          "แผน 2 (2M)": 65934,
+          "แผน 3 (3M)": 82993,
+          "แผน 4 (4M)": 95372,
+          "แผน 5 (5M)": 106169
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 39793,
+          "แผน 2 (2M)": 65786,
+          "แผน 3 (3M)": 80791,
+          "แผน 4 (4M)": 95481,
+          "แผน 5 (5M)": 108334
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 38801,
+          "แผน 2 (2M)": 65934,
+          "แผน 3 (3M)": 82993,
+          "แผน 4 (4M)": 95372,
+          "แผน 5 (5M)": 106169
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 39793,
+          "แผน 2 (2M)": 65786,
+          "แผน 3 (3M)": 80791,
+          "แผน 4 (4M)": 95481,
+          "แผน 5 (5M)": 108334
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 38801,
+          "แผน 2 (2M)": 65934,
+          "แผน 3 (3M)": 82993,
+          "แผน 4 (4M)": 95372,
+          "แผน 5 (5M)": 106169
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 39793,
+          "แผน 2 (2M)": 65786,
+          "แผน 3 (3M)": 80791,
+          "แผน 4 (4M)": 95481,
+          "แผน 5 (5M)": 108334
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 38801,
+          "แผน 2 (2M)": 65934,
+          "แผน 3 (3M)": 82993,
+          "แผน 4 (4M)": 95372,
+          "แผน 5 (5M)": 106169
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 39793,
+          "แผน 2 (2M)": 65786,
+          "แผน 3 (3M)": 80791,
+          "แผน 4 (4M)": 95481,
+          "แผน 5 (5M)": 108334
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 38801,
+          "แผน 2 (2M)": 65934,
+          "แผน 3 (3M)": 82993,
+          "แผน 4 (4M)": 95372,
+          "แผน 5 (5M)": 106169
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50169,
+          "แผน 2 (2M)": 85768,
+          "แผน 3 (3M)": 105810,
+          "แผน 4 (4M)": 125031,
+          "แผน 5 (5M)": 141861
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50005,
+          "แผน 2 (2M)": 80922,
+          "แผน 3 (3M)": 104760,
+          "แผน 4 (4M)": 122183,
+          "แผน 5 (5M)": 137210
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50169,
+          "แผน 2 (2M)": 85768,
+          "แผน 3 (3M)": 105810,
+          "แผน 4 (4M)": 125031,
+          "แผน 5 (5M)": 141861
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50005,
+          "แผน 2 (2M)": 80922,
+          "แผน 3 (3M)": 104760,
+          "แผน 4 (4M)": 122183,
+          "แผน 5 (5M)": 137210
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50169,
+          "แผน 2 (2M)": 85768,
+          "แผน 3 (3M)": 105810,
+          "แผน 4 (4M)": 125031,
+          "แผน 5 (5M)": 141861
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50005,
+          "แผน 2 (2M)": 80922,
+          "แผน 3 (3M)": 104760,
+          "แผน 4 (4M)": 122183,
+          "แผน 5 (5M)": 137210
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50169,
+          "แผน 2 (2M)": 85768,
+          "แผน 3 (3M)": 105810,
+          "แผน 4 (4M)": 125031,
+          "แผน 5 (5M)": 141861
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50005,
+          "แผน 2 (2M)": 80922,
+          "แผน 3 (3M)": 104760,
+          "แผน 4 (4M)": 122183,
+          "แผน 5 (5M)": 137210
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50169,
+          "แผน 2 (2M)": 85768,
+          "แผน 3 (3M)": 105810,
+          "แผน 4 (4M)": 125031,
+          "แผน 5 (5M)": 141861
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 50005,
+          "แผน 2 (2M)": 80922,
+          "แผน 3 (3M)": 104760,
+          "แผน 4 (4M)": 122183,
+          "แผน 5 (5M)": 137210
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 75254,
+          "แผน 2 (2M)": 119710,
+          "แผน 3 (3M)": 154975,
+          "แผน 4 (4M)": 189099,
+          "แผน 5 (5M)": 214556
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 69092,
+          "แผน 2 (2M)": 98945,
+          "แผน 3 (3M)": 126798,
+          "แผน 4 (4M)": 155651,
+          "แผน 5 (5M)": 184503
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 75254,
+          "แผน 2 (2M)": 119710,
+          "แผน 3 (3M)": 154975,
+          "แผน 4 (4M)": 189099,
+          "แผน 5 (5M)": 214556
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 69092,
+          "แผน 2 (2M)": 98945,
+          "แผน 3 (3M)": 126798,
+          "แผน 4 (4M)": 155651,
+          "แผน 5 (5M)": 184503
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 75254,
+          "แผน 2 (2M)": 119710,
+          "แผน 3 (3M)": 154975,
+          "แผน 4 (4M)": 189099,
+          "แผน 5 (5M)": 214556
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 69092,
+          "แผน 2 (2M)": 98945,
+          "แผน 3 (3M)": 126798,
+          "แผน 4 (4M)": 155651,
+          "แผน 5 (5M)": 184503
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 75254,
+          "แผน 2 (2M)": 119710,
+          "แผน 3 (3M)": 154975,
+          "แผน 4 (4M)": 189099,
+          "แผน 5 (5M)": 214556
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 69092,
+          "แผน 2 (2M)": 98945,
+          "แผน 3 (3M)": 126798,
+          "แผน 4 (4M)": 155651,
+          "แผน 5 (5M)": 184503
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 75254,
+          "แผน 2 (2M)": 119710,
+          "แผน 3 (3M)": 154975,
+          "แผน 4 (4M)": 189099,
+          "แผน 5 (5M)": 214556
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 69092,
+          "แผน 2 (2M)": 98945,
+          "แผน 3 (3M)": 126798,
+          "แผน 4 (4M)": 155651,
+          "แผน 5 (5M)": 184503
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 100877,
+          "แผน 2 (2M)": 143003,
+          "แผน 3 (3M)": 185129,
+          "แผน 4 (4M)": 227255,
+          "แผน 5 (5M)": 269381
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 82535,
+          "แผน 2 (2M)": 117002,
+          "แผน 3 (3M)": 151469,
+          "แผน 4 (4M)": 185936,
+          "แผน 5 (5M)": 220402
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 100877,
+          "แผน 2 (2M)": 143003,
+          "แผน 3 (3M)": 185129,
+          "แผน 4 (4M)": 227255,
+          "แผน 5 (5M)": 269381
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 82535,
+          "แผน 2 (2M)": 117002,
+          "แผน 3 (3M)": 151469,
+          "แผน 4 (4M)": 185936,
+          "แผน 5 (5M)": 220402
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 100877,
+          "แผน 2 (2M)": 143003,
+          "แผน 3 (3M)": 185129,
+          "แผน 4 (4M)": 227255,
+          "แผน 5 (5M)": 269381
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 82535,
+          "แผน 2 (2M)": 117002,
+          "แผน 3 (3M)": 151469,
+          "แผน 4 (4M)": 185936,
+          "แผน 5 (5M)": 220402
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Female",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 100877,
+          "แผน 2 (2M)": 143003,
+          "แผน 3 (3M)": 185129,
+          "แผน 4 (4M)": 227255,
+          "แผน 5 (5M)": 269381
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Male",
+      "premiums": {
+        "กรุงเทพ BBL Health Plus": {
+          "แผน 1 (1M)": 82535,
+          "แผน 2 (2M)": 117002,
+          "แผน 3 (3M)": 151469,
+          "แผน 4 (4M)": 185936,
+          "แผน 5 (5M)": 220402
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,808 @@
+{
+  "company_id": "TPB",
+  "company_name": "TPB",
+  "premium_structure": "Per-Age Rate",
+  "note": "Extracted from Chubb_SolutionDesign.xlsx Premium_Rider",
+  "rates": [
+    {
+      "age_band": 21,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 19339.18,
+          "แผน 2": 14014.86
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 14876.21,
+          "แผน 2": 10780.25
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 19339.18,
+          "แผน 2": 14014.86
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 14876.21,
+          "แผน 2": 10780.25
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 19339.18,
+          "แผน 2": 14014.86
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 14876.21,
+          "แผน 2": 10780.25
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 19339.18,
+          "แผน 2": 14014.86
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 14876.21,
+          "แผน 2": 10780.25
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 19339.18,
+          "แผน 2": 14014.86
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 14876.21,
+          "แผน 2": 10780.25
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20420.95,
+          "แผน 2": 14783.12
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 16409.52,
+          "แผน 2": 11943.34
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20420.95,
+          "แผน 2": 14783.12
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 16409.52,
+          "แผน 2": 11943.34
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20420.95,
+          "แผน 2": 14783.12
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 16409.52,
+          "แผน 2": 11943.34
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20420.95,
+          "แผน 2": 14783.12
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 16409.52,
+          "แผน 2": 11943.34
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20420.95,
+          "แผน 2": 14783.12
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 16409.52,
+          "แผน 2": 11943.34
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 23207.23,
+          "แผน 2": 16817.19
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 17851.88,
+          "แผน 2": 12936.3
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 23207.23,
+          "แผน 2": 16817.19
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 17851.88,
+          "แผน 2": 12936.3
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 23207.23,
+          "แผน 2": 16817.19
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 17851.88,
+          "แผน 2": 12936.3
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 23207.23,
+          "แผน 2": 16817.19
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 17851.88,
+          "แผน 2": 12936.3
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 23207.23,
+          "แผน 2": 16817.19
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 17851.88,
+          "แผน 2": 12936.3
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 25767.74,
+          "แผน 2": 18546.31
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20017.56,
+          "แผน 2": 14453.56
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 25767.74,
+          "แผน 2": 18546.31
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20017.56,
+          "แผน 2": 14453.56
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 25767.74,
+          "แผน 2": 18546.31
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20017.56,
+          "แผน 2": 14453.56
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 25767.74,
+          "แผน 2": 18546.31
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20017.56,
+          "แผน 2": 14453.56
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 25767.74,
+          "แผน 2": 18546.31
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 20017.56,
+          "แผน 2": 14453.56
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 29836.95,
+          "แผน 2": 21621.49
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 22951.5,
+          "แผน 2": 16632.08
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 29836.95,
+          "แผน 2": 21621.49
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 22951.5,
+          "แผน 2": 16632.08
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 29836.95,
+          "แผน 2": 21621.49
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 22951.5,
+          "แผน 2": 16632.08
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 29836.95,
+          "แผน 2": 21621.49
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 22951.5,
+          "แผน 2": 16632.08
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 29836.95,
+          "แผน 2": 21621.49
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 22951.5,
+          "แผน 2": 16632.08
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 36077.19,
+          "แผน 2": 26049.15
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 28585.05,
+          "แผน 2": 20737.67
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 36077.19,
+          "แผน 2": 26049.15
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 28585.05,
+          "แผน 2": 20737.67
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 36077.19,
+          "แผน 2": 26049.15
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 28585.05,
+          "แผน 2": 20737.67
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 36077.19,
+          "แผน 2": 26049.15
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 28585.05,
+          "แผน 2": 20737.67
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 36077.19,
+          "แผน 2": 26049.15
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 28585.05,
+          "แผน 2": 20737.67
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 44202.77,
+          "แผน 2": 32032.59
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 34002.46,
+          "แผน 2": 24639.96
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 44202.77,
+          "แผน 2": 32032.59
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 34002.46,
+          "แผน 2": 24639.96
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 44202.77,
+          "แผน 2": 32032.59
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 34002.46,
+          "แผน 2": 24639.96
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 44202.77,
+          "แผน 2": 32032.59
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 34002.46,
+          "แผน 2": 24639.96
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 44202.77,
+          "แผน 2": 32032.59
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 34002.46,
+          "แผน 2": 24639.96
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 49969,
+          "แผน 2": 36209.87
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 42502.54,
+          "แผน 2": 30799.95
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 49969,
+          "แผน 2": 36209.87
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 42502.54,
+          "แผน 2": 30799.95
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 49969,
+          "แผน 2": 36209.87
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 42502.54,
+          "แผน 2": 30799.95
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 49969,
+          "แผน 2": 36209.87
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 42502.54,
+          "แผน 2": 30799.95
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Female",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 49969,
+          "แผน 2": 36209.87
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Male",
+      "premiums": {
+        "TPB Health": {
+          "แผน 1": 42502.54,
+          "แผน 2": 30799.95
+        }
+      }
+    }
+  ]
+}

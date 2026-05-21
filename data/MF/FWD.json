@@ -1,0 +1,1846 @@
+{
+  "company_id": "FWD",
+  "company_name": "FWD",
+  "premium_structure": "Per-Age Rate",
+  "note": "Extracted from Chubb_SolutionDesign.xlsx Premium_Rider",
+  "rates": [
+    {
+      "age_band": 0,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 0,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 1,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 1,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 3,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 3,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 4,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 4,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 5,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 5,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 58840,
+          "แผน Ultra (3.3M)": 95690
+        }
+      }
+    },
+    {
+      "age_band": 6,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 6,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 7,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 7,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 8,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 8,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 9,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 9,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 10,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 10,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 11,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 12,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 13,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 14,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 15,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Grand (1.1M)": 35300,
+          "แผน Ultra (3.3M)": 57410
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 16,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 17,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 18,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 19,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 20,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 22,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 23,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 24,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 25,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 26,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 27,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 28,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 29,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 30,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 31,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 32,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 33,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 34,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 35,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 19800,
+          "แผน Grand (1.1M)": 23500,
+          "แผน Ultra (3.3M)": 38200
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 28310,
+          "แผน Grand (1.1M)": 33610,
+          "แผน Ultra (3.3M)": 54630
+        }
+      }
+    },
+    {
+      "age_band": 36,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 21780,
+          "แผน Grand (1.1M)": 25850,
+          "แผน Ultra (3.3M)": 42020
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 28310,
+          "แผน Grand (1.1M)": 33610,
+          "แผน Ultra (3.3M)": 54630
+        }
+      }
+    },
+    {
+      "age_band": 37,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 21780,
+          "แผน Grand (1.1M)": 25850,
+          "แผน Ultra (3.3M)": 42020
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 28310,
+          "แผน Grand (1.1M)": 33610,
+          "แผน Ultra (3.3M)": 54630
+        }
+      }
+    },
+    {
+      "age_band": 38,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 21780,
+          "แผน Grand (1.1M)": 25850,
+          "แผน Ultra (3.3M)": 42020
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 28310,
+          "แผน Grand (1.1M)": 33610,
+          "แผน Ultra (3.3M)": 54630
+        }
+      }
+    },
+    {
+      "age_band": 39,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 21780,
+          "แผน Grand (1.1M)": 25850,
+          "แผน Ultra (3.3M)": 42020
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 28310,
+          "แผน Grand (1.1M)": 33610,
+          "แผน Ultra (3.3M)": 54630
+        }
+      }
+    },
+    {
+      "age_band": 40,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 21780,
+          "แผน Grand (1.1M)": 25850,
+          "แผน Ultra (3.3M)": 42020
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 30890,
+          "แผน Grand (1.1M)": 36660,
+          "แผน Ultra (3.3M)": 59560
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 23760,
+          "แผน Grand (1.1M)": 28200,
+          "แผน Ultra (3.3M)": 45840
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 30890,
+          "แผน Grand (1.1M)": 36660,
+          "แผน Ultra (3.3M)": 59560
+        }
+      }
+    },
+    {
+      "age_band": 42,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 23760,
+          "แผน Grand (1.1M)": 28200,
+          "แผน Ultra (3.3M)": 45840
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 30890,
+          "แผน Grand (1.1M)": 36660,
+          "แผน Ultra (3.3M)": 59560
+        }
+      }
+    },
+    {
+      "age_band": 43,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 23760,
+          "แผน Grand (1.1M)": 28200,
+          "แผน Ultra (3.3M)": 45840
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 30890,
+          "แผน Grand (1.1M)": 36660,
+          "แผน Ultra (3.3M)": 59560
+        }
+      }
+    },
+    {
+      "age_band": 44,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 23760,
+          "แผน Grand (1.1M)": 28200,
+          "แผน Ultra (3.3M)": 45840
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 30890,
+          "แผน Grand (1.1M)": 36660,
+          "แผน Ultra (3.3M)": 59560
+        }
+      }
+    },
+    {
+      "age_band": 45,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 23760,
+          "แผน Grand (1.1M)": 28200,
+          "แผน Ultra (3.3M)": 45840
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 33460,
+          "แผน Grand (1.1M)": 39720,
+          "แผน Ultra (3.3M)": 64560
+        }
+      }
+    },
+    {
+      "age_band": 46,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 33460,
+          "แผน Grand (1.1M)": 39720,
+          "แผน Ultra (3.3M)": 64560
+        }
+      }
+    },
+    {
+      "age_band": 47,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 33460,
+          "แผน Grand (1.1M)": 39720,
+          "แผน Ultra (3.3M)": 64560
+        }
+      }
+    },
+    {
+      "age_band": 48,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 33460,
+          "แผน Grand (1.1M)": 39720,
+          "แผน Ultra (3.3M)": 64560
+        }
+      }
+    },
+    {
+      "age_band": 49,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 33460,
+          "แผน Grand (1.1M)": 39720,
+          "แผน Ultra (3.3M)": 64560
+        }
+      }
+    },
+    {
+      "age_band": 50,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 25740,
+          "แผน Grand (1.1M)": 30550,
+          "แผน Ultra (3.3M)": 49660
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 38610,
+          "แผน Grand (1.1M)": 45830,
+          "แผน Ultra (3.3M)": 74490
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 29700,
+          "แผน Grand (1.1M)": 35250,
+          "แผน Ultra (3.3M)": 57300
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 38610,
+          "แผน Grand (1.1M)": 45830,
+          "แผน Ultra (3.3M)": 74490
+        }
+      }
+    },
+    {
+      "age_band": 52,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 29700,
+          "แผน Grand (1.1M)": 35250,
+          "แผน Ultra (3.3M)": 57300
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 38610,
+          "แผน Grand (1.1M)": 45830,
+          "แผน Ultra (3.3M)": 74490
+        }
+      }
+    },
+    {
+      "age_band": 53,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 29700,
+          "แผน Grand (1.1M)": 35250,
+          "แผน Ultra (3.3M)": 57300
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 38610,
+          "แผน Grand (1.1M)": 45830,
+          "แผน Ultra (3.3M)": 74490
+        }
+      }
+    },
+    {
+      "age_band": 54,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 29700,
+          "แผน Grand (1.1M)": 35250,
+          "แผน Ultra (3.3M)": 57300
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 38610,
+          "แผน Grand (1.1M)": 45830,
+          "แผน Ultra (3.3M)": 74490
+        }
+      }
+    },
+    {
+      "age_band": 55,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 29700,
+          "แผน Grand (1.1M)": 35250,
+          "แผน Ultra (3.3M)": 57300
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 51480,
+          "แผน Grand (1.1M)": 61100,
+          "แผน Ultra (3.3M)": 99320
+        }
+      }
+    },
+    {
+      "age_band": 56,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 39600,
+          "แผน Grand (1.1M)": 47000,
+          "แผน Ultra (3.3M)": 76400
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 51480,
+          "แผน Grand (1.1M)": 61100,
+          "แผน Ultra (3.3M)": 99320
+        }
+      }
+    },
+    {
+      "age_band": 57,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 39600,
+          "แผน Grand (1.1M)": 47000,
+          "แผน Ultra (3.3M)": 76400
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 51480,
+          "แผน Grand (1.1M)": 61100,
+          "แผน Ultra (3.3M)": 99320
+        }
+      }
+    },
+    {
+      "age_band": 58,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 39600,
+          "แผน Grand (1.1M)": 47000,
+          "แผน Ultra (3.3M)": 76400
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 51480,
+          "แผน Grand (1.1M)": 61100,
+          "แผน Ultra (3.3M)": 99320
+        }
+      }
+    },
+    {
+      "age_band": 59,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 39600,
+          "แผน Grand (1.1M)": 47000,
+          "แผน Ultra (3.3M)": 76400
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 51480,
+          "แผน Grand (1.1M)": 61100,
+          "แผน Ultra (3.3M)": 99320
+        }
+      }
+    },
+    {
+      "age_band": 60,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 39600,
+          "แผน Grand (1.1M)": 47000,
+          "แผน Ultra (3.3M)": 76400
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 77220,
+          "แผน Grand (1.1M)": 91650,
+          "แผน Ultra (3.3M)": 148980
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 59400,
+          "แผน Grand (1.1M)": 70500,
+          "แผน Ultra (3.3M)": 114600
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 77220,
+          "แผน Grand (1.1M)": 91650,
+          "แผน Ultra (3.3M)": 148980
+        }
+      }
+    },
+    {
+      "age_band": 62,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 59400,
+          "แผน Grand (1.1M)": 70500,
+          "แผน Ultra (3.3M)": 114600
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 77220,
+          "แผน Grand (1.1M)": 91650,
+          "แผน Ultra (3.3M)": 148980
+        }
+      }
+    },
+    {
+      "age_band": 63,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 59400,
+          "แผน Grand (1.1M)": 70500,
+          "แผน Ultra (3.3M)": 114600
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 77220,
+          "แผน Grand (1.1M)": 91650,
+          "แผน Ultra (3.3M)": 148980
+        }
+      }
+    },
+    {
+      "age_band": 64,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 59400,
+          "แผน Grand (1.1M)": 70500,
+          "แผน Ultra (3.3M)": 114600
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 77220,
+          "แผน Grand (1.1M)": 91650,
+          "แผน Ultra (3.3M)": 148980
+        }
+      }
+    },
+    {
+      "age_band": 65,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 59400,
+          "แผน Grand (1.1M)": 70500,
+          "แผน Ultra (3.3M)": 114600
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 102960,
+          "แผน Grand (1.1M)": 122200,
+          "แผน Ultra (3.3M)": 196640
+        }
+      }
+    },
+    {
+      "age_band": 66,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 79200,
+          "แผน Grand (1.1M)": 94000,
+          "แผน Ultra (3.3M)": 152800
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 102960,
+          "แผน Grand (1.1M)": 122200,
+          "แผน Ultra (3.3M)": 196640
+        }
+      }
+    },
+    {
+      "age_band": 67,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 79200,
+          "แผน Grand (1.1M)": 94000,
+          "แผน Ultra (3.3M)": 152800
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 102960,
+          "แผน Grand (1.1M)": 122200,
+          "แผน Ultra (3.3M)": 196640
+        }
+      }
+    },
+    {
+      "age_band": 68,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 79200,
+          "แผน Grand (1.1M)": 94000,
+          "แผน Ultra (3.3M)": 152800
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 102960,
+          "แผน Grand (1.1M)": 122200,
+          "แผน Ultra (3.3M)": 196640
+        }
+      }
+    },
+    {
+      "age_band": 69,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 79200,
+          "แผน Grand (1.1M)": 94000,
+          "แผน Ultra (3.3M)": 152800
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 102960,
+          "แผน Grand (1.1M)": 122200,
+          "แผน Ultra (3.3M)": 196640
+        }
+      }
+    },
+    {
+      "age_band": 70,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 79200,
+          "แผน Grand (1.1M)": 94000,
+          "แผน Ultra (3.3M)": 152800
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 128700,
+          "แผน Grand (1.1M)": 152750,
+          "แผน Ultra (3.3M)": 248300
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 99000,
+          "แผน Grand (1.1M)": 117500,
+          "แผน Ultra (3.3M)": 191000
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 128700,
+          "แผน Grand (1.1M)": 152750,
+          "แผน Ultra (3.3M)": 248300
+        }
+      }
+    },
+    {
+      "age_band": 72,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 99000,
+          "แผน Grand (1.1M)": 117500,
+          "แผน Ultra (3.3M)": 191000
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 128700,
+          "แผน Grand (1.1M)": 152750,
+          "แผน Ultra (3.3M)": 248300
+        }
+      }
+    },
+    {
+      "age_band": 73,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 99000,
+          "แผน Grand (1.1M)": 117500,
+          "แผน Ultra (3.3M)": 191000
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 128700,
+          "แผน Grand (1.1M)": 152750,
+          "แผน Ultra (3.3M)": 248300
+        }
+      }
+    },
+    {
+      "age_band": 74,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 99000,
+          "แผน Grand (1.1M)": 117500,
+          "แผน Ultra (3.3M)": 191000
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 128700,
+          "แผน Grand (1.1M)": 152750,
+          "แผน Ultra (3.3M)": 248300
+        }
+      }
+    },
+    {
+      "age_band": 75,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 99000,
+          "แผน Grand (1.1M)": 117500,
+          "แผน Ultra (3.3M)": 191000
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 154440,
+          "แผน Grand (1.1M)": 183300,
+          "แผน Ultra (3.3M)": 297960
+        }
+      }
+    },
+    {
+      "age_band": 76,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 118800,
+          "แผน Grand (1.1M)": 141000,
+          "แผน Ultra (3.3M)": 229200
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 154440,
+          "แผน Grand (1.1M)": 183300,
+          "แผน Ultra (3.3M)": 297960
+        }
+      }
+    },
+    {
+      "age_band": 77,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 118800,
+          "แผน Grand (1.1M)": 141000,
+          "แผน Ultra (3.3M)": 229200
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 154440,
+          "แผน Grand (1.1M)": 183300,
+          "แผน Ultra (3.3M)": 297960
+        }
+      }
+    },
+    {
+      "age_band": 78,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 118800,
+          "แผน Grand (1.1M)": 141000,
+          "แผน Ultra (3.3M)": 229200
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 154440,
+          "แผน Grand (1.1M)": 183300,
+          "แผน Ultra (3.3M)": 297960
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 118800,
+          "แผน Grand (1.1M)": 141000,
+          "แผน Ultra (3.3M)": 229200
+        }
+      }
+    },
+    {
+      "age_band": 80,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 154440,
+          "แผน Grand (1.1M)": 183300,
+          "แผน Ultra (3.3M)": 297960
+        }
+      }
+    },
+    {
+      "age_band": 80,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 118800,
+          "แผน Grand (1.1M)": 141000,
+          "แผน Ultra (3.3M)": 229200
+        }
+      }
+    },
+    {
+      "age_band": 81,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 180180,
+          "แผน Grand (1.1M)": 213850,
+          "แผน Ultra (3.3M)": 347620
+        }
+      }
+    },
+    {
+      "age_band": 81,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 138600,
+          "แผน Grand (1.1M)": 164500,
+          "แผน Ultra (3.3M)": 267400
+        }
+      }
+    },
+    {
+      "age_band": 82,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 180180,
+          "แผน Grand (1.1M)": 213850,
+          "แผน Ultra (3.3M)": 347620
+        }
+      }
+    },
+    {
+      "age_band": 82,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 138600,
+          "แผน Grand (1.1M)": 164500,
+          "แผน Ultra (3.3M)": 267400
+        }
+      }
+    },
+    {
+      "age_band": 83,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 180180,
+          "แผน Grand (1.1M)": 213850,
+          "แผน Ultra (3.3M)": 347620
+        }
+      }
+    },
+    {
+      "age_band": 83,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 138600,
+          "แผน Grand (1.1M)": 164500,
+          "แผน Ultra (3.3M)": 267400
+        }
+      }
+    },
+    {
+      "age_band": 84,
+      "gender": "Female",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 180180,
+          "แผน Grand (1.1M)": 213850,
+          "แผน Ultra (3.3M)": 347620
+        }
+      }
+    },
+    {
+      "age_band": 84,
+      "gender": "Male",
+      "premiums": {
+        "FWD Health": {
+          "แผน Super": 138600,
+          "แผน Grand (1.1M)": 164500,
+          "แผน Ultra (3.3M)": 267400
+        }
+      }
+    }
+  ]
+}
