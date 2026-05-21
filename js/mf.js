@@ -364,6 +364,16 @@ window.mfInlineRender = function() {
     const rp = document.getElementById('rightPane');
     const tableActive = !!(tv && (tv.style.display !== 'none' || (rp && tv.parentElement === rp)));
 
+    // Sync to currentMF so main table column stays in step
+    if (complete) {
+        const coName = co?.name || p.company;
+        const planName = planMeta?.name || p.plan;
+        const key = [p.company, p.plan, p.roomRate].filter(Boolean).join('|');
+        const label = [coName, planName, p.roomRate].filter(Boolean).join(' · ');
+        window.currentMF = key;
+        window._mfCurrentLabel = label;
+    }
+
     // Wide screen: auto-show table in right pane when selection complete
     if (complete && isWide && !tableActive) {
         if (typeof switchView === 'function') switchView('table');
@@ -488,6 +498,15 @@ window.mfPickerConfirm = async function() {
     const label = [co?.name, plan?.name, p.roomRate].filter(Boolean).join(' · ');
     window.currentMF = key;
     window._mfCurrentLabel = label;
+    // Sync to inline selector state (data + UI dropdowns)
+    window._mfInline = { company: p.company, plan: p.plan, roomRate: p.roomRate || null };
+    // Update inline dropdown DOM if visible
+    const _inlineCo = document.getElementById('mfInlineCompany');
+    const _inlinePlan = document.getElementById('mfInlinePlan');
+    const _inlineRoom = document.getElementById('mfInlineRoom');
+    if (_inlineCo) _inlineCo.value = p.company || '';
+    if (_inlinePlan) _inlinePlan.value = p.plan || '';
+    if (_inlineRoom) _inlineRoom.value = p.roomRate || '';
     // Ensure rate data is loaded before recalculating
     if (p.company) await mfLoadRates(p.company);
     closePopup('mfPlanModal');

@@ -3037,7 +3037,13 @@ function generatePolicyTableData() {
     const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
     const _mfGender = (typeof currentGender !== 'undefined' && currentGender) || (d.gender || 'male');
     const _mfMap = hasMFCol ? window.mfBuildPremiumMap(_mfGender) : null;
-    const _mfLabel = (hasMFCol && _mfMap) ? (window._mfCurrentLabel || window.currentMF.split('|').join(' ')) : null;
+    const _mfLabelFull = (hasMFCol && _mfMap) ? (window._mfCurrentLabel || window.currentMF.split('|').join(' ')) : null;
+    const _mfLabel = _mfLabelFull ? (() => {
+        const pts = _mfLabelFull.split(' · ');
+        if (pts.length >= 3) return pts[0] + ' ' + pts[2]; // company + room rate
+        if (pts.length === 2) return pts[0] + ' ' + pts[1];
+        return _mfLabelFull;
+    })() : null;
 
     // --- 3. Header ---
     const initialSA = Math.round(d.sum);
