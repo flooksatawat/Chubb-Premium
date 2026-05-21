@@ -547,7 +547,21 @@ window.mfGenerateTable = function() {
     </tr>`;
 
     if (dataAges.length === 0) {
-        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</td></tr>`;
+        const genderKey = gender === 'male' ? 'Male' : 'Female';
+        const planFullName = `${coName} ${planName}`.trim();
+        const hasRaw = Object.keys(rawData).length > 0;
+        const isArr = Array.isArray(rawData.rates);
+        const sampleKeys = isArr && rawData.rates.length
+            ? Object.keys(rawData.rates[0]?.premiums || {}).slice(0, 3).join(', ')
+            : '—';
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-8 text-center">
+            <div class="text-[12px] text-slate-400 mb-2"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ยสำหรับชุดนี้</div>
+            <div class="text-[10px] text-slate-400 leading-relaxed">
+                หา: <b>${planFullName}</b> / ${genderKey} / ${p.roomRate || '—'}<br>
+                ข้อมูล: ${hasRaw ? 'โหลดแล้ว' : 'ยังไม่โหลด'} | format: ${isArr ? 'Step Rate' : 'Legacy'}<br>
+                ${isArr ? `แผนที่มี: ${sampleKeys}` : ''}
+            </div>
+        </td></tr>`;
         return;
     }
 
