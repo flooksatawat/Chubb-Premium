@@ -619,8 +619,8 @@ window.mfGenerateTable = function() {
         if (body) body.innerHTML = '';
         if (window._mfLastAlertKey === alertKey) return;
         window._mfLastAlertKey = alertKey;
-        // Remove any existing MF alert popup before showing new one
-        document.querySelectorAll('.mf-alert-popup').forEach(el => el.remove());
+        // Remove any existing MF popups before showing new one
+        document.querySelectorAll('.mf-alert-popup, .mf-total-popup').forEach(el => el.remove());
         const overlay = document.createElement('div');
         overlay.className = 'mf-alert-popup';
         overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);';
@@ -968,7 +968,12 @@ window.mfShowTotalPopup = async function() {
 
     const dataMin = dataAges[0];
     const dataMax = dataAges[dataAges.length - 1];
-    const startAge = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
+
+    // Guard: age must be filled and within range
+    if (!curAge || curAge <= 0) return;
+    if (curAge < dataMin || curAge > dataMax) return;
+
+    const startAge = Math.max(curAge, dataMin);
     const stepRateFor = (age) => {
         let band = null;
         for (const b of dataAges) { if (b <= age) band = b; else break; }
@@ -981,7 +986,8 @@ window.mfShowTotalPopup = async function() {
     }
     if (total === 0) return;
 
-    document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
+    // Remove both popup types to prevent overlap
+    document.querySelectorAll('.mf-total-popup, .mf-alert-popup').forEach(el => el.remove());
     const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
     const overlay = document.createElement('div');
     overlay.className = 'mf-total-popup';
