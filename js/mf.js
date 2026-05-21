@@ -447,20 +447,56 @@ window.mfGenerateTable = function() {
         return;
     }
 
-    const rates = window._mfData?.rates?.[p.company] || {};
-    const planData = rates[p.plan];
-    const rateTable = p.roomRate ? planData?.[p.roomRate]?.[gender] : planData?.[gender];
+    const rawData = window._mfData?.rates?.[p.company] || {};
 
-    const ageRange = planData?.ageRange || [1, 70];
-    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || ageRange[0];
-    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || ageRange[1];
-    const start = Math.max(ageStartInput, ageRange[0]);
-    const end = Math.min(ageEndInput, ageRange[1]);
+    // Detect new Step Rate format (has `rates` array) vs old format (keyed by plan id)
+    const isStepRateFormat = Array.isArray(rawData.rates);
 
     const coName = co?.name || p.company;
-    const planName = planData?.name || p.plan;
+    const planName = planMeta?.name || p.plan;
     const roomLabel = p.roomRate ? ` · ${p.roomRate}` : '';
     const curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+
+    // Build {age: premium} map from selected format
+    let premiumByAge = {};
+    let dataAges = [];
+
+    if (isStepRateFormat) {
+        const genderKey = gender === 'male' ? 'Male' : 'Female';
+        const planFullName = `${coName} ${planName}`.trim();
+        rawData.rates.forEach(r => {
+            if (r.gender !== genderKey) return;
+            const planPrem = r.premiums?.[planFullName];
+            if (!planPrem) return;
+            const prem = planMeta?.hasRoomRate ? planPrem[p.roomRate] : (typeof planPrem === 'number' ? planPrem : null);
+            if (typeof prem === 'number') {
+                premiumByAge[r.age_band] = prem;
+                dataAges.push(r.age_band);
+            }
+        });
+        dataAges = [...new Set(dataAges)].sort((a, b) => a - b);
+    } else {
+        const planData = rawData[p.plan];
+        const rateTable = p.roomRate ? planData?.[p.roomRate]?.[gender] : planData?.[gender];
+        if (rateTable) {
+            Object.keys(rateTable).forEach(k => {
+                const age = parseInt(k);
+                if (!isNaN(age)) {
+                    premiumByAge[age] = rateTable[k];
+                    dataAges.push(age);
+                }
+            });
+            dataAges.sort((a, b) => a - b);
+        }
+    }
+
+    const dataMin = dataAges[0] || 1;
+    const dataMax = dataAges[dataAges.length - 1] || 70;
+    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || dataMin;
+    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || dataMax;
+    const ageRowsToShow = dataAges.filter(a => a >= ageStartInput && a <= ageEndInput);
+    const start = ageRowsToShow[0] ?? ageStartInput;
+    const end = ageRowsToShow[ageRowsToShow.length - 1] ?? ageEndInput;
 
     // Header title
     const _vw = window.innerWidth;
@@ -496,30 +532,30 @@ window.mfGenerateTable = function() {
         <th class="${_thCls} text-right" style="${_thSz}">เบี้ย (บาท/ปี)</th>
     </tr>`;
 
-    if (!planData || !rateTable) {
+    if (dataAges.length === 0) {
         if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</td></tr>`;
         return;
     }
 
     let html = '';
     let total = 0, hasData = false;
-    for (let age = start; age <= end; age++) {
-        const prem = rateTable[String(age)] ?? rateTable[age] ?? null;
+    ageRowsToShow.forEach((age, idx) => {
+        const prem = premiumByAge[age];
         const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
         if (prem != null) { total += prem; hasData = true; }
         const isCur = age === curAge;
-        const rowBg = isCur ? 'background:#e0f2fe;' : (age % 2 === 0 ? 'background:#ffffff;' : 'background:#f0f9ff;');
-        const ageCls = `${_tdBase} text-center font-bold text-[${_isMobile ? '12' : '14'}px] ${isCur ? 'color:#0369a1;' : 'color:#334155;'}`;
-        const premCls = `${_tdBase} text-right font-bold text-[${_isMobile ? '12' : '14'}px] ${prem != null ? (isCur ? 'color:#0369a1;' : 'color:#1e293b;') : 'color:#94a3b8;'}`;
+        const rowBg = isCur ? 'background:#e0f2fe;' : (idx % 2 === 0 ? 'background:#ffffff;' : 'background:#f0f9ff;');
+        const ageColor = isCur ? '#0369a1' : '#334155';
+        const premColor = prem != null ? (isCur ? '#0369a1' : '#1e293b') : '#94a3b8';
         html += `<tr style="${rowBg}">
-            <td class="${ageCls}" style="${isCur ? 'color:#0369a1;' : 'color:#334155;'}">${age}${isCur ? ' ◀' : ''}</td>
-            <td class="${_tdBase} text-right font-bold" style="${prem != null ? (isCur ? 'color:#0369a1;' : 'color:#1e293b;') : 'color:#94a3b8;'}font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
+            <td class="${_tdBase} text-center font-bold" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}${isCur ? ' ◀' : ''}</td>
+            <td class="${_tdBase} text-right font-bold" style="color:${premColor};font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
         </tr>`;
-    }
+    });
 
     if (hasData) {
         html += `<tr style="background:#0369a1;">
-            <td class="${_tdBase} text-center font-bold text-white" style="font-size:${_isMobile ? '12' : '13'}px;">รวมทั้งหมด</td>
+            <td class="${_tdBase} text-center font-bold text-white" style="font-size:${_isMobile ? '12' : '13'}px;">รวมเบี้ยประกัน</td>
             <td class="${_tdBase} text-right font-black text-white" style="font-size:${_isMobile ? '13' : '15'}px;">${total.toLocaleString('en-US')}</td>
         </tr>`;
     }
