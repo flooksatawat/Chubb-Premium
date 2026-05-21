@@ -1893,21 +1893,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             btn.title = 'ซ่อน/แสดงเมนูซ้าย';
             btn.style.cssText = [
                 'position:fixed',
-                'top:50%',
-                'transform:translateY(-50%)',
-                'z-index:500',
-                'width:36px',
-                'height:72px',
+                'bottom:88px',
+                'left:50%',
+                'transform:translateX(-50%)',
+                'z-index:60',
+                'width:64px',
+                'height:26px',
                 'padding:0',
                 'background:rgba(255,255,255,0.97)',
-                'border-radius:0 14px 14px 0',
+                'border-radius:999px',
                 'border:1.5px solid rgba(36,60,148,0.2)',
-                'border-left:none',
                 'cursor:pointer',
                 'display:none',
                 'align-items:center',
                 'justify-content:center',
-                'box-shadow:3px 0 12px rgba(0,0,0,0.15)',
+                'box-shadow:0 4px 14px rgba(0,0,0,0.12)',
                 '-webkit-tap-highlight-color:transparent',
                 'touch-action:manipulation',
                 'user-select:none',
@@ -1920,7 +1920,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     btn.style.display = 'none';
                     return;
                 }
-                btn.style.left = '0px';
                 btn.style.display = 'flex';
             }
 
