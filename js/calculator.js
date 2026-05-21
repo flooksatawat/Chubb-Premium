@@ -203,24 +203,45 @@ function getPlanAgeLimit(planName, appPlanName) {
     return { min: config.minAge !== undefined ? config.minAge : 11, max };
 }
 
+function _clampAgeWithWarn(val, limits, planLabel) {
+    if (val < limits.min) {
+        showCustomError(`${planLabel} รับประกันตั้งแต่อายุ ${limits.min} ปี`);
+        val = limits.min;
+    } else if (val > limits.max) {
+        showCustomError(`${planLabel} รับประกันสูงสุดถึงอายุ ${limits.max} ปี`);
+        val = limits.max;
+    }
+    return val;
+}
+
+function _getPlanLabel() {
+    if (currentAppPlan === 'Whole Life Extra') return `แผน ${currentPlan}`;
+    if (currentAppPlan === 'Century Life') return `แผน ${currentPlan}`;
+    if (currentAppPlan === '3D Health Excellence') return `แผน ${currentPlan}`;
+    if (currentAppPlan === '24 TX') return 'แผน 24TX';
+    if (currentAppPlan === '868 / 818 Elite Saving') return `แผน ${currentPlan}`;
+    return `แผน ${currentPlan || currentAppPlan}`;
+}
+
 function forceAgeValidation() {
     const input = document.getElementById('ageInput');
     let val = parseInt(input.value) || 0;
     const limits = getPlanAgeLimit(currentPlan, currentAppPlan);
 
+    // Plan-specific overrides (tighter than PLAN_CONFIG)
     if (currentAppPlan === 'Whole Life Extra') {
-        if (currentPlan === 'WXN10' && val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
-        else if (currentPlan === 'WXN15') {
+        if (currentPlan === 'WXN10') {
+            if (val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
+        } else if (currentPlan === 'WXN15') {
             if (val < 11) { val = 11; showCustomError("แผน WXN15 รับประกันตั้งแต่อายุ 11 ปี"); }
-            if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
+            else if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
         }
-    }
-    if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
+    } else if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
         val = 55;
         showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    } else {
+        val = _clampAgeWithWarn(val, limits, _getPlanLabel());
     }
-    if (val < limits.min) val = limits.min;
-    if (val > limits.max) val = limits.max;
     input.value = val;
     calculate(currentMode, true);
 }
@@ -231,18 +252,18 @@ function adjustAge(delta) {
     const limits = getPlanAgeLimit(currentPlan, currentAppPlan);
 
     if (currentAppPlan === 'Whole Life Extra') {
-        if (currentPlan === 'WXN10' && val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
-        else if (currentPlan === 'WXN15') {
+        if (currentPlan === 'WXN10') {
+            if (val > 50) { val = 50; showCustomError("แผน WXN10 รับประกันสูงสุดถึงอายุ 50 ปี"); }
+        } else if (currentPlan === 'WXN15') {
             if (val < 11) { val = 11; showCustomError("แผน WXN15 รับประกันตั้งแต่อายุ 11 ปี"); }
-            if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
+            else if (val > 45) { val = 45; showCustomError("แผน WXN15 รับประกันสูงสุดถึงอายุ 45 ปี"); }
         }
-    }
-    if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
+    } else if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
         val = 55;
         showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    } else {
+        val = _clampAgeWithWarn(val, limits, _getPlanLabel());
     }
-    if (val < limits.min) val = limits.min;
-    if (val > limits.max) val = limits.max;
     input.value = val;
     calculate(currentMode, true);
 }
