@@ -727,32 +727,47 @@ window.mfGenerateTable = function() {
         return;
     }
 
+    // Detect per-age format: if avg gap between band entries ≤ 1.1 → every year has its own rate
+    const avgBandGap = dataAges.length > 1
+        ? (dataAges[dataAges.length - 1] - dataAges[0]) / (dataAges.length - 1)
+        : 1;
+    const isPerAge = avgBandGap <= 1.1;
+
     let html = '';
     let total = 0, hasData = false;
     let prevPrem = null;
+    let rowIdx = 0;
 
     ageRowsToShow.forEach((age) => {
         const prem = isStepRateFormat ? stepRateFor(age) : premiumByAge[age];
         if (prem != null) { total += prem; hasData = true; }
 
-        // Highlight only when premium VALUE changes from previous row
-        const isPremChange = prem != null && prem !== prevPrem;
-        if (prem != null) prevPrem = prem;
-
         const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
 
-        if (isPremChange) {
-            // ── Band-start row: teal highlight ──────────────────────────
-            html += `<tr style="background:#f0fdfa;border-top:2px solid #5eead4;">
-                <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:center;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${age}</td>
-                <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:right;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${premStr}</td>
+        if (isPerAge) {
+            // ── Per-age plan: flat alternating rows, no band-highlight ──
+            const bg = rowIdx % 2 === 0 ? '#fff' : '#f8fafc';
+            html += `<tr style="background:${bg};border-bottom:1px solid #f1f5f9;">
+                <td style="padding:${_isMobile?'5px 8px':'6px 12px'};text-align:center;color:#334155;font-size:${_isMobile?'12':'13'}px;">${age}</td>
+                <td style="padding:${_isMobile?'5px 8px':'6px 12px'};text-align:right;color:#0f766e;font-size:${_isMobile?'12':'13'}px;font-weight:600;">${premStr}</td>
             </tr>`;
+            rowIdx++;
         } else {
-            // ── Same-band row: compact, muted ────────────────────────────
-            html += `<tr style="background:#fff;">
-                <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:center;color:#94a3b8;font-size:${_isMobile?'11':'12'}px;">${age}</td>
-                <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:right;color:#cbd5e1;font-size:${_isMobile?'11':'12'}px;">—</td>
-            </tr>`;
+            // ── Band-based plan: highlight only band-start rows ──
+            const isPremChange = prem != null && prem !== prevPrem;
+            if (prem != null) prevPrem = prem;
+
+            if (isPremChange) {
+                html += `<tr style="background:#f0fdfa;border-top:2px solid #5eead4;">
+                    <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:center;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${age}</td>
+                    <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:right;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${premStr}</td>
+                </tr>`;
+            } else {
+                html += `<tr style="background:#fff;">
+                    <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:center;color:#94a3b8;font-size:${_isMobile?'11':'12'}px;">${age}</td>
+                    <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:right;color:#cbd5e1;font-size:${_isMobile?'11':'12'}px;">—</td>
+                </tr>`;
+            }
         }
     });
 

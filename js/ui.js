@@ -4316,6 +4316,92 @@ async function loadThaiFontBold() {
     }
 }
 
+async function _exportMFTablePDF(actionType = 'preview') {
+    const toast = document.createElement('div');
+    toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-900 text-white px-8 py-5 rounded-2xl text-sm font-bold z-[1000] shadow-2xl text-center backdrop-blur-sm transition-all";
+    toast.innerHTML = `<i class='fas fa-spinner fa-spin mb-3 block text-3xl'></i><span>กำลังสร้างภาพความละเอียดสูง...</span>`;
+    document.body.appendChild(toast);
+    try {
+        const [fontBase64, fontBoldBase64] = await Promise.all([
+            typeof loadThaiFont === 'function' ? loadThaiFont() : Promise.resolve(null),
+            typeof loadThaiFontBold === 'function' ? loadThaiFontBold() : Promise.resolve(null)
+        ]);
+        if (!window.jspdf && !window.jsPDF) throw new Error("ไม่พบไลบรารี jsPDF");
+        const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        if (typeof doc.autoTable !== 'function') throw new Error("ไม่พบไลบรารี jspdf-autotable");
+        let fontName = 'helvetica';
+        if (fontBase64) {
+            try {
+                doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
+                doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+                if (fontBoldBase64) { doc.addFileToVFS('Sarabun-Bold.ttf', fontBoldBase64); doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold'); }
+                else doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'bold');
+                fontName = 'Sarabun';
+            } catch(e) {}
+        }
+        // Read header and body from DOM
+        const headRow = [];
+        document.querySelectorAll('#policyTableHead th').forEach(th => headRow.push(th.innerText.trim()));
+        const tableRows = [];
+        document.querySelectorAll('#policyTableBody tr').forEach(tr => {
+            const row = [];
+            tr.querySelectorAll('td').forEach(td => row.push(td.innerText.trim()));
+            if (row.some(c => c && c !== '—')) tableRows.push(row);
+        });
+        // Title from header
+        const titleEl = document.getElementById('tableHeaderTitle');
+        const titleText = titleEl ? titleEl.innerText.trim() : 'Medical Fund';
+        const gender = (typeof currentGender !== 'undefined' && currentGender === 'female') ? 'หญิง' : 'ชาย';
+        doc.setFont(fontName, 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(13, 148, 136);
+        doc.text('Medical Fund — ตารางเบี้ยประกันสุขภาพ', 14, 18);
+        doc.setFontSize(10);
+        doc.setFont(fontName, 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(titleText.replace(/\s+/g, ' '), 14, 25);
+        doc.autoTable({
+            head: [headRow.length ? headRow : ['อายุ (ปี)', 'เบี้ย (บาท/ปี)']],
+            body: tableRows,
+            startY: 30,
+            styles: { font: fontName, fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240, 253, 250] },
+            columnStyles: { 0: { halign: 'center' }, 1: { halign: 'right' } },
+        });
+        const pdfBlob = doc.output('blob');
+        const p = window._mfInline || {};
+        const companies = window._mfData?.companies?.companies || [];
+        const co = companies.find(c => c.id === p.company);
+        const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+        const coName = co?.name || p.company || 'MF';
+        const planName = planMeta?.name || p.plan || '';
+        const roomLabel = p.roomRate ? ` ${p.roomRate}` : '';
+        const gender = (typeof currentGender !== 'undefined' && currentGender === 'female') ? 'หญิง' : 'ชาย';
+        const cleanName = `Medical Fund ${coName} ${planName}${roomLabel} ${gender}`.trim();
+        const pdfFileName = `${cleanName}.pdf`;
+        const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
+        if (toast.parentNode) toast.remove();
+        if (actionType === 'modal') {
+            await _showTableShareModal(pdfBlob, pdfFile, doc, {}, { cleanName });
+        } else if (actionType === 'save') {
+            const inLine = typeof isInLineApp === 'function' && isInLineApp();
+            if (inLine) {
+                await showPdfViewer(pdfBlob, pdfFileName);
+            } else {
+                const shared = typeof tryShareFile === 'function' ? await tryShareFile(pdfFile, pdfFileName, pdfFileName) : false;
+                if (!shared) doc.save(pdfFileName);
+            }
+        } else {
+            window.open(doc.output('bloburl'), '_blank');
+        }
+    } catch(e) {
+        if (toast.parentNode) toast.remove();
+        showCustomError('เกิดข้อผิดพลาด: ' + e.message);
+    }
+}
+
 async function _export3DPDF(actionType = 'preview') {
     const hxVal = window.currentHX || '';
     if (!hxVal || hxVal === 'ไม่เลือก') return showCustomError("กรุณาเลือกแผน HX ก่อน");
@@ -4582,6 +4668,12 @@ async function exportTableToPDF(actionType = 'preview') {
     // 3D plan: PDF 19 หมวด แทนตารางมูลค่า
     if (currentAppPlan === '3D Health Excellence') {
         return _export3DPDF(actionType);
+    }
+    // Medical Fund: ใช้ DOM table โดยตรง (ไม่มี lastCalculationData)
+    if (currentAppPlan === 'Medical Fund') {
+        const mfRows = document.querySelectorAll('#policyTableBody tr');
+        if (!mfRows.length) return showCustomError("กรุณาเลือกแผนประกันสุขภาพก่อน");
+        return _exportMFTablePDF(actionType);
     }
     if (!lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");
     
