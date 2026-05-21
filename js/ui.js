@@ -4696,11 +4696,12 @@ async function exportTableToPDF(actionType = 'preview') {
         // ตรวจสอบว่าโหลดปลั๊กอิน autoTable มาแล้วหรือไม่
         if (typeof doc.autoTable !== 'function') throw new Error("ไม่พบไลบรารี jspdf-autotable");
 
-        let fontName = 'helvetica'; 
-        
-        if (fontBase64) { 
-            try { 
-                doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64); 
+        let fontName = 'helvetica';
+        const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan || currentPlan) : (currentAppPlan || currentPlan || 'insurance');
+
+        if (fontBase64) {
+            try {
+                doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
                 doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
                 // แก้: ใช้ไฟล์ Bold แยก ไม่ใช่ Regular ซ้ำ
                 if (fontBoldBase64) {
@@ -4780,7 +4781,6 @@ async function exportTableToPDF(actionType = 'preview') {
                 const formatN = typeof formatNum === 'function' ? formatNum : (n) => n;
                 let sumDisplay = (d.sum % 1000000 === 0 && d.sum >= 1000000) ? (d.sum/1000000)+' ล้านบาท' : formatN(d.sum)+' บาท';
                 
-                const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentPlan) : currentPlan;
                 const surrenderNote = isSurrenderActive ? ' | ทยอยเวนคืน' : '';
                 doc.setFontSize(14); doc.setTextColor(30, 58, 138);
                 doc.text(`${planAbbr} ${d.gender || ''} ${d.age || ''} ทุน ${sumDisplay}${surrenderNote}`, 105, 28, { align: 'center' });
