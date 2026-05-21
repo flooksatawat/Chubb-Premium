@@ -36,6 +36,44 @@ async function mfLoadRates(companyId) {
     return window._mfData.rates[companyId];
 }
 
+async function mfPreloadAll() {
+    const companies = window._mfData.companies?.companies || [];
+    await Promise.all(companies.map(c => mfLoadRates(c.id).catch(() => {})));
+}
+
+// Check if a specific (company, plan, room?, gender?) combo has premium data
+function mfHasData(companyId, planId, roomRate, gender) {
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === companyId);
+    if (!co) return false;
+    const planMeta = co.plans?.find(p => p.id === planId);
+    if (!planMeta) return false;
+    const data = window._mfData?.rates?.[companyId];
+    if (!data) return false;
+    const planFullName = `${co.name} ${planMeta.name}`.trim();
+    if (Array.isArray(data.rates)) {
+        const genderKey = gender ? (gender === 'male' ? 'Male' : 'Female') : null;
+        return data.rates.some(r => {
+            if (genderKey && r.gender !== genderKey) return false;
+            const planPrem = r.premiums?.[planFullName];
+            if (!planPrem) return false;
+            if (planMeta.hasRoomRate) {
+                if (roomRate) return typeof planPrem[roomRate] === 'number';
+                return Object.values(planPrem).some(v => typeof v === 'number');
+            }
+            return typeof planPrem === 'number';
+        });
+    }
+    // Legacy format
+    const planData = data[planId];
+    if (!planData) return false;
+    if (planMeta.hasRoomRate) {
+        if (roomRate) return !!(planData[roomRate]?.[gender || 'male']);
+        return planMeta.roomRates?.some(r => planData[r]?.[gender || 'male']);
+    }
+    return !!(planData[gender || 'male']);
+}
+
 function mfRenderCompanies() {
     const companies = window._mfData.companies?.companies || [];
     const sel = document.getElementById('mfCompanySelect');
@@ -209,22 +247,34 @@ window.mfInlineInit = async function() {
             window._mfData.companies = await res.json();
         } catch (e) { window._mfData.companies = { companies: [] }; }
     }
+    // Pre-load all company data so we can filter by availability
+    await mfPreloadAll();
+
     const companies = window._mfData.companies?.companies || [];
     const sel = document.getElementById('mfInlineCompany');
     if (!sel) return;
     const p = window._mfInline;
+    // Only show companies that have at least one plan with data
+    const availCompanies = companies.filter(c =>
+        c.plans?.some(pl => mfHasData(c.id, pl.id, null, null))
+    );
     sel.innerHTML = `<option value="">— เลือกบริษัท —</option>` +
-        companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        availCompanies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     sel.value = p.company || '';
 
     const planRow = document.getElementById('mfInlinePlanRow');
     const planSel = document.getElementById('mfInlinePlan');
     const co = companies.find(c => c.id === p.company);
     if (p.company && co?.plans?.length) {
-        planRow.classList.remove('hidden');
-        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
-            co.plans.map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
-        planSel.value = p.plan || '';
+        const availPlans = co.plans.filter(pl => mfHasData(co.id, pl.id, null, null));
+        if (availPlans.length) {
+            planRow.classList.remove('hidden');
+            planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+                availPlans.map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
+            planSel.value = p.plan || '';
+        } else {
+            planRow.classList.add('hidden');
+        }
     } else {
         planRow.classList.add('hidden');
     }
@@ -232,11 +282,17 @@ window.mfInlineInit = async function() {
     const plan = co?.plans?.find(pl => pl.id === p.plan);
     const rrRow = document.getElementById('mfInlineRoomRow');
     const rrSel = document.getElementById('mfInlineRoom');
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
     if (plan?.hasRoomRate && plan.roomRates?.length) {
-        rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
-            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
-        rrSel.value = p.roomRate || '';
+        const availRooms = plan.roomRates.filter(r => mfHasData(co.id, plan.id, r, gender));
+        if (availRooms.length) {
+            rrRow.classList.remove('hidden');
+            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
+                availRooms.map(r => `<option value="${r}">${r}</option>`).join('');
+            rrSel.value = p.roomRate || '';
+        } else {
+            rrRow.classList.add('hidden');
+        }
     } else {
         rrRow.classList.add('hidden');
     }
@@ -247,21 +303,22 @@ window.mfInlineInit = async function() {
 
 window.mfInlineSelectCompany = async function(val) {
     window._mfInline = { company: val || null, plan: null, roomRate: null };
+    if (val) await mfLoadRates(val);
     const companies = window._mfData.companies?.companies || [];
     const co = companies.find(c => c.id === val);
     const plans = co?.plans || [];
+    const availPlans = plans.filter(pl => mfHasData(co.id, pl.id, null, null));
     const planRow = document.getElementById('mfInlinePlanRow');
     const planSel = document.getElementById('mfInlinePlan');
     const rrRow = document.getElementById('mfInlineRoomRow');
-    if (plans.length) {
+    if (availPlans.length) {
         planRow.classList.remove('hidden');
         planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
-            plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            availPlans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     } else {
         planRow.classList.add('hidden');
     }
     rrRow.classList.add('hidden');
-    if (val) await mfLoadRates(val);
     window.mfInlineRender();
 };
 
@@ -273,10 +330,16 @@ window.mfInlineSelectPlan = function(val) {
     const plan = co?.plans?.find(p => p.id === val);
     const rrRow = document.getElementById('mfInlineRoomRow');
     const rrSel = document.getElementById('mfInlineRoom');
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
     if (plan?.hasRoomRate && plan.roomRates?.length) {
-        rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
-            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+        const availRooms = plan.roomRates.filter(r => mfHasData(co.id, plan.id, r, gender));
+        if (availRooms.length) {
+            rrRow.classList.remove('hidden');
+            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
+                availRooms.map(r => `<option value="${r}">${r}</option>`).join('');
+        } else {
+            rrRow.classList.add('hidden');
+        }
     } else {
         rrRow.classList.add('hidden');
     }
@@ -506,6 +569,16 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
+    // Alert if customer age is outside the data range
+    if (curAge > 0 && (curAge < dataMin || curAge > dataMax)) {
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <i class="fas fa-exclamation-triangle text-amber-500"></i>
+                <span class="text-[12px] font-bold text-amber-700">อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ (${dataMin}–${dataMax} ปี)</span>
+            </div>
+        </td></tr>`;
+        return;
+    }
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
     const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
@@ -567,19 +640,10 @@ window.mfGenerateTable = function() {
     </tr>`;
 
     if (dataAges.length === 0) {
-        const genderKey = gender === 'male' ? 'Male' : 'Female';
-        const planFullName = `${coName} ${planName}`.trim();
-        const hasRaw = Object.keys(rawData).length > 0;
-        const isArr = Array.isArray(rawData.rates);
-        const sampleKeys = isArr && rawData.rates.length
-            ? Object.keys(rawData.rates[0]?.premiums || {}).slice(0, 3).join(', ')
-            : '—';
-        if (body) body.innerHTML = `<tr><td colspan="2" class="py-8 text-center">
-            <div class="text-[12px] text-slate-400 mb-2"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ยสำหรับชุดนี้</div>
-            <div class="text-[10px] text-slate-400 leading-relaxed">
-                หา: <b>${planFullName}</b> / ${genderKey} / ${p.roomRate || '—'}<br>
-                ข้อมูล: ${hasRaw ? 'โหลดแล้ว' : 'ยังไม่โหลด'} | format: ${isArr ? 'Step Rate' : 'Legacy'}<br>
-                ${isArr ? `แผนที่มี: ${sampleKeys}` : ''}
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl">
+                <i class="fas fa-exclamation-triangle text-rose-500"></i>
+                <span class="text-[12px] font-bold text-rose-700">ไม่มีข้อมูลเบี้ยสำหรับชุดนี้</span>
             </div>
         </td></tr>`;
         return;
