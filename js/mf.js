@@ -587,7 +587,7 @@ window.mfGenerateTable = function() {
         const genderKey = gender === 'male' ? 'Male' : 'Female';
         const planFullName = `${coName} ${planName}`.trim();
         rawData.rates.forEach(r => {
-            if (r.gender !== genderKey) return;
+            if (r.gender !== genderKey && r.gender !== 'Unisex') return;
             const planPrem = r.premiums?.[planFullName];
             if (!planPrem) return;
             const prem = planMeta?.hasRoomRate ? planPrem[p.roomRate] : (typeof planPrem === 'number' ? planPrem : null);
