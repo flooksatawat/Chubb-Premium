@@ -5,16 +5,18 @@
   "note": "Extracted from Chubb_SolutionDesign.xlsx Premium_Rider",
   "rates": [
     {
-      "age_band": 1,
+      "age_band": 0,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 51810
+        }
+      }
+    },
+    {
+      "age_band": 0,
       "gender": "Male",
       "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 45985,
-          "HSP6": 73576,
-          "HSP9": 99787,
-          "HSP12": 123698,
-          "HSP15": 143012
-        },
         "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
           "HSPP1": 59781
         }
@@ -37,6 +39,38 @@
       }
     },
     {
+      "age_band": 1,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 45985,
+          "HSP6": 73576,
+          "HSP9": 99787,
+          "HSP12": 123698,
+          "HSP15": 143012
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 59781
+        }
+      }
+    },
+    {
+      "age_band": 2,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 37810,
+          "HSP6": 60495,
+          "HSP9": 82047,
+          "HSP12": 101708,
+          "HSP15": 117588
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 41591
+        }
+      }
+    },
+    {
       "age_band": 2,
       "gender": "Male",
       "premiums": {
@@ -53,7 +87,7 @@
       }
     },
     {
-      "age_band": 2,
+      "age_band": 3,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -85,7 +119,7 @@
       }
     },
     {
-      "age_band": 3,
+      "age_band": 4,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -117,7 +151,7 @@
       }
     },
     {
-      "age_band": 4,
+      "age_band": 5,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -149,18 +183,19 @@
       }
     },
     {
-      "age_band": 5,
+      "age_band": 6,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 37810,
-          "HSP6": 60495,
-          "HSP9": 82047,
-          "HSP12": 101708,
-          "HSP15": 117588
+          "HSP3": 25668,
+          "HSP6": 41069,
+          "HSP9": 55700,
+          "HSP12": 69048,
+          "HSP15": 79828
         },
         "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 41591
+          "HSPP1": 28235,
+          "HSPP2": 45176
         }
       }
     },
@@ -182,7 +217,7 @@
       }
     },
     {
-      "age_band": 6,
+      "age_band": 7,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -216,7 +251,7 @@
       }
     },
     {
-      "age_band": 7,
+      "age_band": 8,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -250,7 +285,7 @@
       }
     },
     {
-      "age_band": 8,
+      "age_band": 9,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -284,7 +319,7 @@
       }
     },
     {
-      "age_band": 9,
+      "age_band": 10,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -318,40 +353,6 @@
       }
     },
     {
-      "age_band": 10,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 25668,
-          "HSP6": 41069,
-          "HSP9": 55700,
-          "HSP12": 69048,
-          "HSP15": 79828
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 28235,
-          "HSPP2": 45176
-        }
-      }
-    },
-    {
-      "age_band": 11,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 16194,
-          "HSP6": 25911,
-          "HSP9": 35141,
-          "HSP12": 43562,
-          "HSP15": 50364
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 17813,
-          "HSPP2": 28502
-        }
-      }
-    },
-    {
       "age_band": 11,
       "gender": "Female",
       "premiums": {
@@ -369,7 +370,7 @@
       }
     },
     {
-      "age_band": 12,
+      "age_band": 11,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -403,7 +404,7 @@
       }
     },
     {
-      "age_band": 13,
+      "age_band": 12,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -437,7 +438,7 @@
       }
     },
     {
-      "age_band": 14,
+      "age_band": 13,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -471,7 +472,7 @@
       }
     },
     {
-      "age_band": 15,
+      "age_band": 14,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -505,22 +506,19 @@
       }
     },
     {
-      "age_band": 16,
+      "age_band": 15,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 15242,
-          "HSP6": 24387,
-          "HSP9": 33074,
-          "HSP12": 41000,
-          "HSP15": 47401
+          "HSP3": 16194,
+          "HSP6": 25911,
+          "HSP9": 35141,
+          "HSP12": 43562,
+          "HSP15": 50364
         },
         "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 16766,
-          "HSPP2": 26826,
-          "HSPP3": 36381,
-          "HSPP4": 45100,
-          "HSPP5": 52141
+          "HSPP1": 17813,
+          "HSPP2": 28502
         }
       }
     },
@@ -545,7 +543,7 @@
       }
     },
     {
-      "age_band": 17,
+      "age_band": 16,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -585,7 +583,7 @@
       }
     },
     {
-      "age_band": 18,
+      "age_band": 17,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -625,7 +623,7 @@
       }
     },
     {
-      "age_band": 19,
+      "age_band": 18,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -665,7 +663,7 @@
       }
     },
     {
-      "age_band": 20,
+      "age_band": 19,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -705,6 +703,46 @@
       }
     },
     {
+      "age_band": 20,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 15242,
+          "HSP6": 24387,
+          "HSP9": 33074,
+          "HSP12": 41000,
+          "HSP15": 47401
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 16766,
+          "HSPP2": 26826,
+          "HSPP3": 36381,
+          "HSPP4": 45100,
+          "HSPP5": 52141
+        }
+      }
+    },
+    {
+      "age_band": 21,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 17562,
+          "HSP6": 28100,
+          "HSP9": 38111,
+          "HSP12": 47243,
+          "HSP15": 54619
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 19318,
+          "HSPP2": 30910,
+          "HSPP3": 41922,
+          "HSPP4": 51967,
+          "HSPP5": 60081
+        }
+      }
+    },
+    {
       "age_band": 21,
       "gender": "Male",
       "premiums": {
@@ -725,7 +763,7 @@
       }
     },
     {
-      "age_band": 21,
+      "age_band": 22,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -765,7 +803,7 @@
       }
     },
     {
-      "age_band": 22,
+      "age_band": 23,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -805,7 +843,7 @@
       }
     },
     {
-      "age_band": 23,
+      "age_band": 24,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -845,7 +883,7 @@
       }
     },
     {
-      "age_band": 24,
+      "age_band": 25,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -885,7 +923,7 @@
       }
     },
     {
-      "age_band": 25,
+      "age_band": 26,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -925,7 +963,7 @@
       }
     },
     {
-      "age_band": 26,
+      "age_band": 27,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -965,7 +1003,7 @@
       }
     },
     {
-      "age_band": 27,
+      "age_band": 28,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1005,7 +1043,7 @@
       }
     },
     {
-      "age_band": 28,
+      "age_band": 29,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1045,7 +1083,7 @@
       }
     },
     {
-      "age_band": 29,
+      "age_band": 30,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1085,7 +1123,7 @@
       }
     },
     {
-      "age_band": 30,
+      "age_band": 31,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1125,7 +1163,7 @@
       }
     },
     {
-      "age_band": 31,
+      "age_band": 32,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1165,7 +1203,7 @@
       }
     },
     {
-      "age_band": 32,
+      "age_band": 33,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1205,7 +1243,7 @@
       }
     },
     {
-      "age_band": 33,
+      "age_band": 34,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1245,7 +1283,7 @@
       }
     },
     {
-      "age_band": 34,
+      "age_band": 35,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1285,46 +1323,6 @@
       }
     },
     {
-      "age_band": 35,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 17562,
-          "HSP6": 28100,
-          "HSP9": 38111,
-          "HSP12": 47243,
-          "HSP15": 54619
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 19318,
-          "HSPP2": 30910,
-          "HSPP3": 41922,
-          "HSPP4": 51967,
-          "HSPP5": 60081
-        }
-      }
-    },
-    {
-      "age_band": 36,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 17666,
-          "HSP6": 28266,
-          "HSP9": 38336,
-          "HSP12": 47523,
-          "HSP15": 54943
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 19433,
-          "HSPP2": 31093,
-          "HSPP3": 42170,
-          "HSPP4": 52275,
-          "HSPP5": 60437
-        }
-      }
-    },
-    {
       "age_band": 36,
       "gender": "Female",
       "premiums": {
@@ -1345,7 +1343,7 @@
       }
     },
     {
-      "age_band": 37,
+      "age_band": 36,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1385,7 +1383,7 @@
       }
     },
     {
-      "age_band": 38,
+      "age_band": 37,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1425,7 +1423,7 @@
       }
     },
     {
-      "age_band": 39,
+      "age_band": 38,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1465,7 +1463,7 @@
       }
     },
     {
-      "age_band": 40,
+      "age_band": 39,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1505,6 +1503,46 @@
       }
     },
     {
+      "age_band": 40,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 17666,
+          "HSP6": 28266,
+          "HSP9": 38336,
+          "HSP12": 47523,
+          "HSP15": 54943
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 19433,
+          "HSPP2": 31093,
+          "HSPP3": 42170,
+          "HSPP4": 52275,
+          "HSPP5": 60437
+        }
+      }
+    },
+    {
+      "age_band": 41,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 23417,
+          "HSP6": 37467,
+          "HSP9": 50814,
+          "HSP12": 62991,
+          "HSP15": 72826
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 25759,
+          "HSPP2": 41214,
+          "HSPP3": 55895,
+          "HSPP4": 69290,
+          "HSPP5": 80109
+        }
+      }
+    },
+    {
       "age_band": 41,
       "gender": "Male",
       "premiums": {
@@ -1525,7 +1563,7 @@
       }
     },
     {
-      "age_band": 41,
+      "age_band": 42,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1565,7 +1603,7 @@
       }
     },
     {
-      "age_band": 42,
+      "age_band": 43,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1605,7 +1643,7 @@
       }
     },
     {
-      "age_band": 43,
+      "age_band": 44,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1645,7 +1683,7 @@
       }
     },
     {
-      "age_band": 44,
+      "age_band": 45,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1685,46 +1723,6 @@
       }
     },
     {
-      "age_band": 45,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 23417,
-          "HSP6": 37467,
-          "HSP9": 50814,
-          "HSP12": 62991,
-          "HSP15": 72826
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 25759,
-          "HSPP2": 41214,
-          "HSPP3": 55895,
-          "HSPP4": 69290,
-          "HSPP5": 80109
-        }
-      }
-    },
-    {
-      "age_band": 46,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 23555,
-          "HSP6": 37688,
-          "HSP9": 51115,
-          "HSP12": 63363,
-          "HSP15": 73257
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 25911,
-          "HSPP2": 41457,
-          "HSPP3": 56227,
-          "HSPP4": 69699,
-          "HSPP5": 80583
-        }
-      }
-    },
-    {
       "age_band": 46,
       "gender": "Female",
       "premiums": {
@@ -1745,7 +1743,7 @@
       }
     },
     {
-      "age_band": 47,
+      "age_band": 46,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1785,7 +1783,7 @@
       }
     },
     {
-      "age_band": 48,
+      "age_band": 47,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1825,7 +1823,7 @@
       }
     },
     {
-      "age_band": 49,
+      "age_band": 48,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1865,7 +1863,7 @@
       }
     },
     {
-      "age_band": 50,
+      "age_band": 49,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1905,6 +1903,46 @@
       }
     },
     {
+      "age_band": 50,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 23555,
+          "HSP6": 37688,
+          "HSP9": 51115,
+          "HSP12": 63363,
+          "HSP15": 73257
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 25911,
+          "HSPP2": 41457,
+          "HSPP3": 56227,
+          "HSPP4": 69699,
+          "HSPP5": 80583
+        }
+      }
+    },
+    {
+      "age_band": 51,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 36026,
+          "HSP6": 57641,
+          "HSP9": 78176,
+          "HSP12": 96909,
+          "HSP15": 112040
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 39629,
+          "HSPP2": 63405,
+          "HSPP3": 85994,
+          "HSPP4": 106600,
+          "HSPP5": 123244
+        }
+      }
+    },
+    {
       "age_band": 51,
       "gender": "Male",
       "premiums": {
@@ -1925,7 +1963,7 @@
       }
     },
     {
-      "age_band": 51,
+      "age_band": 52,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -1965,7 +2003,7 @@
       }
     },
     {
-      "age_band": 52,
+      "age_band": 53,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2005,7 +2043,7 @@
       }
     },
     {
-      "age_band": 53,
+      "age_band": 54,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2045,7 +2083,7 @@
       }
     },
     {
-      "age_band": 54,
+      "age_band": 55,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2085,46 +2123,6 @@
       }
     },
     {
-      "age_band": 55,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 36026,
-          "HSP6": 57641,
-          "HSP9": 78176,
-          "HSP12": 96909,
-          "HSP15": 112040
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 39629,
-          "HSPP2": 63405,
-          "HSPP3": 85994,
-          "HSPP4": 106600,
-          "HSPP5": 123244
-        }
-      }
-    },
-    {
-      "age_band": 56,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 37541,
-          "HSP6": 60066,
-          "HSP9": 81464,
-          "HSP12": 100986,
-          "HSP15": 116753
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 41295,
-          "HSPP2": 66073,
-          "HSPP3": 89610,
-          "HSPP4": 111085,
-          "HSPP5": 128428
-        }
-      }
-    },
-    {
       "age_band": 56,
       "gender": "Female",
       "premiums": {
@@ -2145,7 +2143,7 @@
       }
     },
     {
-      "age_band": 57,
+      "age_band": 56,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2185,7 +2183,7 @@
       }
     },
     {
-      "age_band": 58,
+      "age_band": 57,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2225,7 +2223,7 @@
       }
     },
     {
-      "age_band": 59,
+      "age_band": 58,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2265,7 +2263,7 @@
       }
     },
     {
-      "age_band": 60,
+      "age_band": 59,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2305,6 +2303,46 @@
       }
     },
     {
+      "age_band": 60,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 37541,
+          "HSP6": 60066,
+          "HSP9": 81464,
+          "HSP12": 100986,
+          "HSP15": 116753
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 41295,
+          "HSPP2": 66073,
+          "HSPP3": 89610,
+          "HSPP4": 111085,
+          "HSPP5": 128428
+        }
+      }
+    },
+    {
+      "age_band": 61,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 48496,
+          "HSP6": 77594,
+          "HSP9": 105236,
+          "HSP12": 130454,
+          "HSP15": 150823
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 53346,
+          "HSPP2": 85353,
+          "HSPP3": 115760,
+          "HSPP4": 143499,
+          "HSPP5": 165905
+        }
+      }
+    },
+    {
       "age_band": 61,
       "gender": "Male",
       "premiums": {
@@ -2325,7 +2363,7 @@
       }
     },
     {
-      "age_band": 61,
+      "age_band": 62,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2365,7 +2403,7 @@
       }
     },
     {
-      "age_band": 62,
+      "age_band": 63,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2405,7 +2443,7 @@
       }
     },
     {
-      "age_band": 63,
+      "age_band": 64,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2445,7 +2483,7 @@
       }
     },
     {
-      "age_band": 64,
+      "age_band": 65,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2485,46 +2523,6 @@
       }
     },
     {
-      "age_band": 65,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 48496,
-          "HSP6": 77594,
-          "HSP9": 105236,
-          "HSP12": 130454,
-          "HSP15": 150823
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 53346,
-          "HSPP2": 85353,
-          "HSPP3": 115760,
-          "HSPP4": 143499,
-          "HSPP5": 165905
-        }
-      }
-    },
-    {
-      "age_band": 66,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 73610,
-          "HSP6": 117776,
-          "HSP9": 159734,
-          "HSP12": 198011,
-          "HSP15": 228927
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 80971,
-          "HSPP2": 129554,
-          "HSPP3": 175707,
-          "HSPP4": 217812,
-          "HSPP5": 251820
-        }
-      }
-    },
-    {
       "age_band": 66,
       "gender": "Female",
       "premiums": {
@@ -2545,7 +2543,7 @@
       }
     },
     {
-      "age_band": 67,
+      "age_band": 66,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2585,7 +2583,7 @@
       }
     },
     {
-      "age_band": 68,
+      "age_band": 67,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2625,7 +2623,7 @@
       }
     },
     {
-      "age_band": 69,
+      "age_band": 68,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2665,7 +2663,7 @@
       }
     },
     {
-      "age_band": 70,
+      "age_band": 69,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2705,6 +2703,44 @@
       }
     },
     {
+      "age_band": 70,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 73610,
+          "HSP6": 117776,
+          "HSP9": 159734,
+          "HSP12": 198011,
+          "HSP15": 228927
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 80971,
+          "HSPP2": 129554,
+          "HSPP3": 175707,
+          "HSPP4": 217812,
+          "HSPP5": 251820
+        }
+      }
+    },
+    {
+      "age_band": 71,
+      "gender": "Female",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 105306,
+          "HSP6": 168489,
+          "HSP9": 228513,
+          "HSP12": 283272,
+          "HSP15": 327500
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 115837,
+          "HSPP2": 185338,
+          "HSPP3": 251364
+        }
+      }
+    },
+    {
       "age_band": 71,
       "gender": "Male",
       "premiums": {
@@ -2723,7 +2759,7 @@
       }
     },
     {
-      "age_band": 71,
+      "age_band": 72,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2759,7 +2795,7 @@
       }
     },
     {
-      "age_band": 72,
+      "age_band": 73,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2795,7 +2831,7 @@
       }
     },
     {
-      "age_band": 73,
+      "age_band": 74,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2831,7 +2867,7 @@
       }
     },
     {
-      "age_band": 74,
+      "age_band": 75,
       "gender": "Female",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2867,42 +2903,6 @@
       }
     },
     {
-      "age_band": 75,
-      "gender": "Female",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 105306,
-          "HSP6": 168489,
-          "HSP9": 228513,
-          "HSP12": 283272,
-          "HSP15": 327500
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 115837,
-          "HSPP2": 185338,
-          "HSPP3": 251364
-        }
-      }
-    },
-    {
-      "age_band": 76,
-      "gender": "Male",
-      "premiums": {
-        "CHUBB เฮลท์ โพรเทคเตอร์": {
-          "HSP3": 191386,
-          "HSP6": 306218,
-          "HSP9": 415308,
-          "HSP12": 514828,
-          "HSP15": 597374
-        },
-        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
-          "HSPP1": 193300,
-          "HSPP2": 309280,
-          "HSPP3": 419461
-        }
-      }
-    },
-    {
       "age_band": 76,
       "gender": "Female",
       "premiums": {
@@ -2921,7 +2921,7 @@
       }
     },
     {
-      "age_band": 77,
+      "age_band": 76,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2957,7 +2957,7 @@
       }
     },
     {
-      "age_band": 78,
+      "age_band": 77,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -2993,7 +2993,7 @@
       }
     },
     {
-      "age_band": 79,
+      "age_band": 78,
       "gender": "Male",
       "premiums": {
         "CHUBB เฮลท์ โพรเทคเตอร์": {
@@ -3025,6 +3025,24 @@
           "HSPP1": 181929,
           "HSPP2": 291087,
           "HSPP3": 394787
+        }
+      }
+    },
+    {
+      "age_band": 79,
+      "gender": "Male",
+      "premiums": {
+        "CHUBB เฮลท์ โพรเทคเตอร์": {
+          "HSP3": 191386,
+          "HSP6": 306218,
+          "HSP9": 415308,
+          "HSP12": 514828,
+          "HSP15": 597374
+        },
+        "CHUBB เฮลท์ โพรเทคเตอร์ พลัส": {
+          "HSPP1": 193300,
+          "HSPP2": 309280,
+          "HSPP3": 419461
         }
       }
     }
