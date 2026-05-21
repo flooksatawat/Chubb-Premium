@@ -506,18 +506,29 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
-    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || dataMin;
-    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || dataMax;
+    // Anchor start on customer age; respect explicit user inputs if different
+    const startEl = document.getElementById('mfInlineAgeStart');
+    const endEl = document.getElementById('mfInlineAgeEnd');
+    const startVal = parseInt(startEl?.value);
+    const endVal = parseInt(endEl?.value);
+    const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
+    const ageStartInput = (!startVal || startVal === 1) ? defaultStart : startVal;
+    const ageEndInput = (!endVal || endVal === 70) ? dataMax : endVal;
+    if (startEl && +startEl.value !== ageStartInput) startEl.value = ageStartInput;
+    if (endEl && +endEl.value !== ageEndInput) endEl.value = ageEndInput;
     const start = Math.max(ageStartInput, dataMin);
     const end = Math.min(ageEndInput, dataMax);
-    // Expand to every age: for Step Rate, use largest age_band <= age
-    const ageRowsToShow = [];
-    for (let age = start; age <= end; age++) ageRowsToShow.push(age);
     const stepRateFor = (age) => {
         let band = null;
         for (const b of dataAges) { if (b <= age) band = b; else break; }
         return band != null ? premiumByAge[band] : null;
     };
+    // Build rows: every age in range, skip if no premium
+    const ageRowsToShow = [];
+    for (let age = start; age <= end; age++) {
+        const prem = isStepRateFormat ? stepRateFor(age) : premiumByAge[age];
+        if (prem != null) ageRowsToShow.push(age);
+    }
 
     // Header title
     const _vw = window.innerWidth;
