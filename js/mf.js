@@ -319,11 +319,14 @@ window.mfInlineSelectPlan = function(val) {
         rrRow.classList.add('hidden');
     }
     window.mfInlineRender();
+    // Show total popup when plan is selected and no room rate needed
+    if (val && !plan?.hasRoomRate) window.mfShowTotalPopup();
 };
 
 window.mfInlineSelectRoom = function(val) {
     window._mfInline.roomRate = val || null;
     window.mfInlineRender();
+    if (val) window.mfShowTotalPopup();
 };
 
 window.mfInlineRender = function() {
@@ -486,6 +489,7 @@ window.mfPickerConfirm = async function() {
     if (p.company) await mfLoadRates(p.company);
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+    window.mfShowTotalPopup();
 };
 
 // ── Build {age: premium} map for the selected MF plan (for inline column in main table) ──
@@ -773,4 +777,84 @@ window.mfGenerateTable = function() {
     }
 
     if (body) body.innerHTML = html || `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400">ไม่มีข้อมูลในช่วงอายุนี้</td></tr>`;
+};
+
+// ==================== MF Total Premium Popup ====================
+
+window.mfShowTotalPopup = async function() {
+    const p = window._mfInline || {};
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+    if (!p.company || !p.plan) return;
+    if (planMeta?.hasRoomRate && !p.roomRate) return;
+
+    if (p.company) await mfLoadRates(p.company);
+    const rawData = window._mfData?.rates?.[p.company] || {};
+    const isStepRate = Array.isArray(rawData.rates);
+    const coName = co?.name || p.company;
+    const planName = planMeta?.name || p.plan;
+    const roomLabel = p.roomRate ? ` · ${p.roomRate}` : '';
+    const curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+
+    let premiumByAge = {};
+    let dataAges = [];
+    if (isStepRate) {
+        const gKey = gender === 'male' ? 'Male' : 'Female';
+        const pfName = `${coName} ${planName}`.trim();
+        rawData.rates.forEach(r => {
+            if (r.gender !== gKey && r.gender !== 'Unisex') return;
+            const pp = r.premiums?.[pfName];
+            if (!pp) return;
+            const prem = planMeta?.hasRoomRate ? pp[p.roomRate] : (typeof pp === 'number' ? pp : null);
+            if (typeof prem === 'number') { premiumByAge[r.age_band] = prem; dataAges.push(r.age_band); }
+        });
+        dataAges = [...new Set(dataAges)].sort((a, b) => a - b);
+    } else {
+        const planData = rawData[p.plan];
+        const rateTable = p.roomRate ? planData?.[p.roomRate]?.[gender] : planData?.[gender];
+        if (rateTable) {
+            Object.keys(rateTable).forEach(k => {
+                const age = parseInt(k);
+                if (!isNaN(age)) { premiumByAge[age] = rateTable[k]; dataAges.push(age); }
+            });
+            dataAges.sort((a, b) => a - b);
+        }
+    }
+    if (dataAges.length === 0) return;
+
+    const dataMin = dataAges[0];
+    const dataMax = dataAges[dataAges.length - 1];
+    const startAge = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
+    const stepRateFor = (age) => {
+        let band = null;
+        for (const b of dataAges) { if (b <= age) band = b; else break; }
+        return band != null ? premiumByAge[band] : null;
+    };
+    let total = 0;
+    for (let age = startAge; age <= dataMax; age++) {
+        const prem = isStepRate ? stepRateFor(age) : premiumByAge[age];
+        if (prem != null) total += prem;
+    }
+    if (total === 0) return;
+
+    document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
+    const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
+    const overlay = document.createElement('div');
+    overlay.className = 'mf-total-popup';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+        <div style="max-width:360px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:30px 24px 24px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;">
+            <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                <i class="fas fa-shield-alt" style="font-size:28px;color:#fff;"></i>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:2px;">เบี้ยประกันสุขภาพ ตลอดชีวิต</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:18px;">${coName} · ${planName}${roomLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${startAge}–${dataMax} ปี</div>
+            <div style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">${total.toLocaleString('en-US')}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;margin-bottom:22px;">บาท (รวมทุกปีตลอดชีวิต)</div>
+            <button onclick="this.closest('.mf-total-popup').remove()" style="background:rgba(255,255,255,0.22);color:#fff;border:2px solid rgba(255,255,255,0.45);padding:10px 36px;border-radius:9999px;font-weight:700;font-size:14px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.22)'">ตกลง</button>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
 };
