@@ -506,16 +506,21 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
-    // Anchor start on customer age; respect explicit user inputs if different
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
-    const startVal = parseInt(startEl?.value);
-    const endVal = parseInt(endEl?.value);
+    // Always anchor start on customer age when it changes
     const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
-    const ageStartInput = (!startVal || startVal === 1) ? defaultStart : startVal;
-    const ageEndInput = (!endVal || endVal === 70) ? dataMax : endVal;
-    if (startEl && +startEl.value !== ageStartInput) startEl.value = ageStartInput;
-    if (endEl && +endEl.value !== ageEndInput) endEl.value = ageEndInput;
+    if (window._mfLastCurAge !== curAge) {
+        if (startEl) startEl.value = defaultStart;
+        window._mfLastCurAge = curAge;
+    }
+    const endVal = parseInt(endEl?.value);
+    if (!endVal || endVal === 70 || endVal > dataMax) {
+        if (endEl) endEl.value = dataMax;
+    }
+    const startVal = parseInt(startEl?.value) || defaultStart;
+    const ageStartInput = startVal;
+    const ageEndInput = parseInt(endEl?.value) || dataMax;
     const start = Math.max(ageStartInput, dataMin);
     const end = Math.min(ageEndInput, dataMax);
     const stepRateFor = (age) => {
