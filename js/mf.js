@@ -687,24 +687,18 @@ window.mfGenerateTable = function() {
         const prem = isStepRateFormat ? stepRateFor(age) : premiumByAge[age];
         const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
         if (prem != null) { total += prem; hasData = true; }
-        const isCur = age === curAge;
         const isBandStart = isStepRateFormat && dataAges.includes(age);
         let rowStyle = 'background:#ffffff;';
         let ageColor = '#475569';
         let premColor = prem != null ? '#1e293b' : '#94a3b8';
         let fontWeight = 'font-bold';
         if (isBandStart) {
-            rowStyle = 'background:#f0fdfa;border-top:1px solid #5eead4;';
+            rowStyle = 'background:#f0fdfa;border-top:2px solid #5eead4;';
             ageColor = '#0f766e';
             if (prem != null) premColor = '#0f766e';
         }
-        if (isCur) {
-            rowStyle = 'background:#dbeafe;';
-            ageColor = '#1d4ed8';
-            if (prem != null) premColor = '#1d4ed8';
-        }
         html += `<tr style="${rowStyle}">
-            <td class="${_tdBase} text-center ${fontWeight}" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}${isCur ? ' ◀' : ''}</td>
+            <td class="${_tdBase} text-center ${fontWeight}" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}</td>
             <td class="${_tdBase} text-right ${fontWeight}" style="color:${premColor};font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
         </tr>`;
     });
