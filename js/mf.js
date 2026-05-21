@@ -570,7 +570,7 @@ window.mfGenerateTable = function() {
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
 
-    const renderAlert = (title, msg, alertKey) => {
+    const renderAlert = (title, msg) => {
         if (body) body.innerHTML = `<tr><td colspan="2" style="padding:0;">
             <div style="display:flex;align-items:center;justify-content:center;min-height:340px;padding:24px;">
                 <div style="max-width:420px;width:100%;background:#fef3c7;border:2px solid #fbbf24;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 10px 30px rgba(251,191,36,0.25);">
@@ -580,18 +580,13 @@ window.mfGenerateTable = function() {
                 </div>
             </div>
         </td></tr>`;
-        if (typeof showCustomError === 'function' && window._mfLastAlertKey !== alertKey) {
-            window._mfLastAlertKey = alertKey;
-            showCustomError(`${title}\n${msg}`);
-        }
     };
 
     // Alert if customer age is missing
     if (!curAge || curAge <= 0) {
         renderAlert(
             'กรุณากรอกอายุลูกค้า',
-            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`,
-            `noage:${coName}:${planName}:${p.roomRate}`
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`
         );
         return;
     }
@@ -599,12 +594,10 @@ window.mfGenerateTable = function() {
     if (curAge < dataMin || curAge > dataMax) {
         renderAlert(
             `อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ`,
-            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`,
-            `outrange:${curAge}:${coName}:${planName}:${p.roomRate}`
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`
         );
         return;
     }
-    window._mfLastAlertKey = null;
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
     const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
