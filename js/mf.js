@@ -574,18 +574,29 @@ window.mfGenerateTable = function() {
 
     let html = '';
     let total = 0, hasData = false;
-    ageRowsToShow.forEach((age, idx) => {
+    ageRowsToShow.forEach((age) => {
         const prem = isStepRateFormat ? stepRateFor(age) : premiumByAge[age];
         const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
         if (prem != null) { total += prem; hasData = true; }
         const isCur = age === curAge;
         const isBandStart = isStepRateFormat && dataAges.includes(age);
-        const rowBg = isCur ? 'background:#e0f2fe;' : (isBandStart ? 'background:#ecfeff;' : (idx % 2 === 0 ? 'background:#ffffff;' : 'background:#f0f9ff;'));
-        const ageColor = isCur ? '#0369a1' : '#334155';
-        const premColor = prem != null ? (isCur ? '#0369a1' : '#1e293b') : '#94a3b8';
-        html += `<tr style="${rowBg}">
-            <td class="${_tdBase} text-center font-bold" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}${isCur ? ' ◀' : ''}${isBandStart ? ' •' : ''}</td>
-            <td class="${_tdBase} text-right font-bold" style="color:${premColor};font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
+        let rowStyle = 'background:#ffffff;';
+        let ageColor = '#475569';
+        let premColor = prem != null ? '#1e293b' : '#94a3b8';
+        let fontWeight = 'font-bold';
+        if (isBandStart) {
+            rowStyle = 'background:#f0fdfa;border-top:1px solid #5eead4;';
+            ageColor = '#0f766e';
+            if (prem != null) premColor = '#0f766e';
+        }
+        if (isCur) {
+            rowStyle = 'background:#dbeafe;';
+            ageColor = '#1d4ed8';
+            if (prem != null) premColor = '#1d4ed8';
+        }
+        html += `<tr style="${rowStyle}">
+            <td class="${_tdBase} text-center ${fontWeight}" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}${isCur ? ' ◀' : ''}</td>
+            <td class="${_tdBase} text-right ${fontWeight}" style="color:${premColor};font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
         </tr>`;
     });
 
