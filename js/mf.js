@@ -569,26 +569,42 @@ window.mfGenerateTable = function() {
 
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
-    // Alert if customer age is missing
-    if (!curAge || curAge <= 0) {
-        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
-                <i class="fas fa-exclamation-triangle text-amber-500"></i>
-                <span class="text-[12px] font-bold text-amber-700">กรุณากรอกอายุลูกค้าด้านบน</span>
+
+    const renderAlert = (title, msg, alertKey) => {
+        if (body) body.innerHTML = `<tr><td colspan="2" style="padding:0;">
+            <div style="display:flex;align-items:center;justify-content:center;min-height:340px;padding:24px;">
+                <div style="max-width:420px;width:100%;background:#fef3c7;border:2px solid #fbbf24;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 10px 30px rgba(251,191,36,0.25);">
+                    <div style="font-size:48px;color:#d97706;margin-bottom:12px;"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div style="font-size:18px;font-weight:800;color:#92400e;margin-bottom:8px;">${title}</div>
+                    <div style="font-size:14px;font-weight:600;color:#78350f;line-height:1.5;">${msg}</div>
+                </div>
             </div>
         </td></tr>`;
+        if (typeof showCustomError === 'function' && window._mfLastAlertKey !== alertKey) {
+            window._mfLastAlertKey = alertKey;
+            showCustomError(`${title}\n${msg}`);
+        }
+    };
+
+    // Alert if customer age is missing
+    if (!curAge || curAge <= 0) {
+        renderAlert(
+            'กรุณากรอกอายุลูกค้า',
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`,
+            `noage:${coName}:${planName}:${p.roomRate}`
+        );
         return;
     }
     // Alert if customer age is outside the data range
     if (curAge < dataMin || curAge > dataMax) {
-        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
-                <i class="fas fa-exclamation-triangle text-amber-500"></i>
-                <span class="text-[12px] font-bold text-amber-700">อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ (${dataMin}–${dataMax} ปี)</span>
-            </div>
-        </td></tr>`;
+        renderAlert(
+            `อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ`,
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`,
+            `outrange:${curAge}:${coName}:${planName}:${p.roomRate}`
+        );
         return;
     }
+    window._mfLastAlertKey = null;
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
     const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
