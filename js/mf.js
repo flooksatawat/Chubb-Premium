@@ -570,23 +570,34 @@ window.mfGenerateTable = function() {
     const dataMin = dataAges[0] || 1;
     const dataMax = dataAges[dataAges.length - 1] || 70;
 
-    const renderAlert = (title, msg) => {
-        if (body) body.innerHTML = `<tr><td colspan="2" style="padding:0;">
-            <div style="display:flex;align-items:center;justify-content:center;min-height:340px;padding:24px;">
-                <div style="max-width:420px;width:100%;background:#fef3c7;border:2px solid #fbbf24;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 10px 30px rgba(251,191,36,0.25);">
-                    <div style="font-size:48px;color:#d97706;margin-bottom:12px;"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div style="font-size:18px;font-weight:800;color:#92400e;margin-bottom:8px;">${title}</div>
-                    <div style="font-size:14px;font-weight:600;color:#78350f;line-height:1.5;">${msg}</div>
+    const renderAlert = (title, msg, alertKey) => {
+        if (body) body.innerHTML = '';
+        if (window._mfLastAlertKey === alertKey) return;
+        window._mfLastAlertKey = alertKey;
+        // Remove any existing MF alert popup before showing new one
+        document.querySelectorAll('.mf-alert-popup').forEach(el => el.remove());
+        const overlay = document.createElement('div');
+        overlay.className = 'mf-alert-popup';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);';
+        overlay.innerHTML = `
+            <div style="max-width:420px;width:100%;background:#fff;border-radius:24px;padding:28px 24px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.35);border:2px solid #fbbf24;">
+                <div style="width:72px;height:72px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:34px;color:#d97706;"></i>
                 </div>
-            </div>
-        </td></tr>`;
+                <div style="font-size:18px;font-weight:800;color:#92400e;margin-bottom:8px;">${title}</div>
+                <div style="font-size:14px;font-weight:600;color:#78350f;line-height:1.55;margin-bottom:20px;">${msg}</div>
+                <button onclick="this.closest('.mf-alert-popup').remove()" style="background:#f59e0b;color:#fff;border:none;padding:10px 32px;border-radius:9999px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,0.35);">ตกลง</button>
+            </div>`;
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
     };
 
     // Alert if customer age is missing
     if (!curAge || curAge <= 0) {
         renderAlert(
             'กรุณากรอกอายุลูกค้า',
-            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`,
+            `noage:${coName}:${planName}:${p.roomRate}`
         );
         return;
     }
@@ -594,10 +605,12 @@ window.mfGenerateTable = function() {
     if (curAge < dataMin || curAge > dataMax) {
         renderAlert(
             `อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ`,
-            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`
+            `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`,
+            `outrange:${curAge}:${coName}:${planName}:${p.roomRate}`
         );
         return;
     }
+    window._mfLastAlertKey = null;
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
     const defaultStart = curAge > 0 ? Math.max(curAge, dataMin) : dataMin;
