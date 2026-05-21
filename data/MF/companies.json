@@ -7,7 +7,7 @@
         { "id": "HS",           "name": "H&S",          "hasRoomRate": false },
         { "id": "HS_EXTRA",     "name": "H&S Extra",    "hasRoomRate": false },
         { "id": "HS_PLUS_GOLD", "name": "H&S Plus Gold","hasRoomRate": false },
-        { "id": "HEALTH_HAPPY", "name": "Health Happy", "hasRoomRate": false },
+        { "id": "HEALTH_HAPPY", "name": "Health Happy", "hasRoomRate": true, "roomRates": ["1 ล้าน", "5 ล้าน", "15 ล้าน", "25 ล้าน", "เลือกลง"] },
         { "id": "INFINITE",     "name": "Infinite Care","hasRoomRate": false }
       ]
     },

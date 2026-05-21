@@ -79,7 +79,7 @@ function mfRenderRoomRateSelector() {
 
     if (plan?.hasRoomRate && plan.roomRates?.length) {
         rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
             plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
         rrSel.value = window._mfState.roomRate || '';
     } else {
@@ -234,7 +234,7 @@ window.mfInlineInit = async function() {
     const rrSel = document.getElementById('mfInlineRoom');
     if (plan?.hasRoomRate && plan.roomRates?.length) {
         rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
             plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
         rrSel.value = p.roomRate || '';
     } else {
@@ -275,7 +275,7 @@ window.mfInlineSelectPlan = function(val) {
     const rrSel = document.getElementById('mfInlineRoom');
     if (plan?.hasRoomRate && plan.roomRates?.length) {
         rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
             plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
     } else {
         rrRow.classList.add('hidden');
@@ -328,7 +328,7 @@ async function mfPickerInit() {
         if (plan?.hasRoomRate && plan.roomRates?.length) {
             rrRow.classList.remove('hidden');
             const rrSel = document.getElementById('mfPickerRoom');
-            rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
                 plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
             rrSel.value = p.roomRate || '';
         } else {
@@ -374,7 +374,7 @@ window.mfPickerSelectPlan = function(val) {
     const rrSel = document.getElementById('mfPickerRoom');
     if (plan?.hasRoomRate && plan.roomRates?.length) {
         rrRow.classList.remove('hidden');
-        rrSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
             plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
     } else {
         rrRow.classList.add('hidden');
