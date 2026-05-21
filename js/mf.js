@@ -319,14 +319,13 @@ window.mfInlineSelectPlan = function(val) {
         rrRow.classList.add('hidden');
     }
     window.mfInlineRender();
-    // Show total popup when plan is selected and no room rate needed
-    if (val && !plan?.hasRoomRate) window.mfShowTotalPopup();
+    if (val && !plan?.hasRoomRate) mfScheduleTotalPopup();
 };
 
 window.mfInlineSelectRoom = function(val) {
     window._mfInline.roomRate = val || null;
     window.mfInlineRender();
-    if (val) window.mfShowTotalPopup();
+    if (val) mfScheduleTotalPopup();
 };
 
 window.mfInlineRender = function() {
@@ -489,7 +488,7 @@ window.mfPickerConfirm = async function() {
     if (p.company) await mfLoadRates(p.company);
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
-    window.mfShowTotalPopup();
+    mfScheduleTotalPopup();
 };
 
 // ── Build {age: premium} map for the selected MF plan (for inline column in main table) ──
@@ -918,8 +917,14 @@ window.mfInlineSearchSelect = async function(item) {
 
     // Trigger render + popup
     window.mfInlineRender();
-    window.mfShowTotalPopup();
+    mfScheduleTotalPopup();
 };
+
+let _mfTotalPopupTimer = null;
+function mfScheduleTotalPopup(delay = 1500) {
+    clearTimeout(_mfTotalPopupTimer);
+    _mfTotalPopupTimer = setTimeout(() => window.mfShowTotalPopup(), delay);
+}
 
 window.mfSelectMainPlan = function(planName, btn) {
     document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
