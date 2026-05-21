@@ -3112,11 +3112,11 @@ function generatePolicyTableData() {
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
+        ${_mfLabel ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
         ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
-        ${_mfLabel ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">${_mfLabel}</th>` : ''}
     </tr>`;
     
     // --- 4. Main Loop ---
@@ -3289,12 +3289,7 @@ function generatePolicyTableData() {
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             <td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
-            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
-            ${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
-
-        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
-        if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
-        if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
+            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}`;
         if (_mfLabel && _mfMap) {
             const _mfP = window.mfPremForAge(_mfMap, currentAge);
             const _mfChg = _mfP !== _mfPrevPrem;
@@ -3304,6 +3299,10 @@ function generatePolicyTableData() {
                 : `${_fSz}color:#94a3b8;`;
             html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
         }
+        html += `${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
+        if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
+        if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
         html += `</tr>`;
 
         if (y >= cfLoopEnd) break;
