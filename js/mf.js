@@ -662,9 +662,8 @@ window.mfGenerateTable = function() {
         </div>`;
 
     // Table style sizes
-    const _thCls = _isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold';
-    const _thSz  = _isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;';
-    const _tdBase = _isMobile ? 'py-4 px-1.5' : 'py-4 px-3';
+    const _thCls = _isMobile ? 'py-2 px-2 font-bold' : 'py-2.5 px-3 font-bold';
+    const _thSz  = _isMobile ? 'font-size:11px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;';
 
     if (head) head.innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isMobile ? 'font-size:10px;' : 'font-size:13px;'}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ (ปี)</th>
@@ -683,30 +682,37 @@ window.mfGenerateTable = function() {
 
     let html = '';
     let total = 0, hasData = false;
+    let prevPrem = null;
+
     ageRowsToShow.forEach((age) => {
         const prem = isStepRateFormat ? stepRateFor(age) : premiumByAge[age];
-        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
         if (prem != null) { total += prem; hasData = true; }
-        const isBandStart = isStepRateFormat && dataAges.includes(age);
-        let rowStyle = 'background:#ffffff;';
-        let ageColor = '#475569';
-        let premColor = prem != null ? '#1e293b' : '#94a3b8';
-        let fontWeight = 'font-bold';
-        if (isBandStart) {
-            rowStyle = 'background:#f0fdfa;border-top:2px solid #5eead4;';
-            ageColor = '#0f766e';
-            if (prem != null) premColor = '#0f766e';
+
+        // Highlight only when premium VALUE changes from previous row
+        const isPremChange = prem != null && prem !== prevPrem;
+        if (prem != null) prevPrem = prem;
+
+        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
+
+        if (isPremChange) {
+            // ── Band-start row: teal highlight ──────────────────────────
+            html += `<tr style="background:#f0fdfa;border-top:2px solid #5eead4;">
+                <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:center;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${age}</td>
+                <td style="padding:${_isMobile?'6px 8px':'7px 12px'};text-align:right;font-weight:700;color:#0f766e;font-size:${_isMobile?'12':'14'}px;">${premStr}</td>
+            </tr>`;
+        } else {
+            // ── Same-band row: compact, muted ────────────────────────────
+            html += `<tr style="background:#fff;">
+                <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:center;color:#94a3b8;font-size:${_isMobile?'11':'12'}px;">${age}</td>
+                <td style="padding:${_isMobile?'3px 8px':'4px 12px'};text-align:right;color:#cbd5e1;font-size:${_isMobile?'11':'12'}px;">—</td>
+            </tr>`;
         }
-        html += `<tr style="${rowStyle}">
-            <td class="${_tdBase} text-center ${fontWeight}" style="color:${ageColor};font-size:${_isMobile ? '12' : '14'}px;">${age}</td>
-            <td class="${_tdBase} text-right ${fontWeight}" style="color:${premColor};font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
-        </tr>`;
     });
 
     if (hasData) {
         html += `<tr style="background:#0369a1;">
-            <td class="${_tdBase} text-center font-bold text-white" style="font-size:${_isMobile ? '12' : '13'}px;">รวมเบี้ยประกัน</td>
-            <td class="${_tdBase} text-right font-black text-white" style="font-size:${_isMobile ? '13' : '15'}px;">${total.toLocaleString('en-US')}</td>
+            <td style="padding:${_isMobile?'8px 8px':'10px 12px'};text-align:center;font-weight:700;color:#fff;font-size:${_isMobile?'12':'13'}px;">รวมเบี้ยประกัน</td>
+            <td style="padding:${_isMobile?'8px 8px':'10px 12px'};text-align:right;font-weight:900;color:#fff;font-size:${_isMobile?'13':'15'}px;">${total.toLocaleString('en-US')}</td>
         </tr>`;
     }
 
