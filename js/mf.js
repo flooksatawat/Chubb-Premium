@@ -289,72 +289,12 @@ window.mfInlineSelectRoom = function(val) {
 };
 
 window.mfInlineRender = function() {
-    const area = document.getElementById('mfInlineResult');
-    if (!area) return;
-    const p = window._mfInline;
-    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
-
-    const companies = window._mfData.companies?.companies || [];
-    const co = companies.find(c => c.id === p.company);
-    const planMeta = co?.plans?.find(pl => pl.id === p.plan);
-    const needRoom = planMeta?.hasRoomRate;
-
-    if (!p.company || !p.plan || (needRoom && !p.roomRate)) { area.innerHTML = ''; return; }
-
-    const rates = window._mfData.rates[p.company] || {};
-    const planData = rates[p.plan];
-    if (!planData) {
-        area.innerHTML = `<p class="text-center text-[11px] text-slate-400 mt-3"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</p>`;
-        return;
-    }
-    const rateTable = p.roomRate ? planData[p.roomRate]?.[gender] : planData[gender];
-    const ageRange = planData.ageRange || [1, 70];
-    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || ageRange[0];
-    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || ageRange[1];
-    const start = Math.max(ageStartInput, ageRange[0]);
-    const end = Math.min(ageEndInput, ageRange[1]);
-
-    const curAge = parseInt(document.getElementById('ageInput')?.value) || start;
-
-    let rows = '';
-    let total = 0, hasData = false;
-    for (let age = start; age <= end; age++) {
-        const prem = rateTable ? (rateTable[String(age)] ?? rateTable[age] ?? null) : null;
-        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
-        if (prem != null) { total += prem; hasData = true; }
-        const isCur = age === curAge;
-        rows += `<tr class="${isCur ? 'bg-sky-100' : (age % 2 === 0 ? 'bg-white' : 'bg-sky-50/40')}">
-            <td class="py-2 px-3 text-center text-[12px] font-bold ${isCur ? 'text-sky-800' : 'text-slate-700'}">${age}${isCur ? ' ◀' : ''}</td>
-            <td class="py-2 px-3 text-right text-[12px] font-bold ${prem != null ? (isCur ? 'text-sky-800' : 'text-slate-800') : 'text-slate-400'}">${premStr}</td>
-        </tr>`;
-    }
-    const totalStr = hasData ? total.toLocaleString('en-US') : '—';
-
-    area.innerHTML = `
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[12px] font-bold text-sky-700">${co?.name || ''} · ${planData.name || p.plan}${p.roomRate ? ' · ' + p.roomRate : ''}</span>
-                <span class="text-[11px] text-slate-500">${gender === 'male' ? 'ชาย' : 'หญิง'}</span>
-            </div>
-            <div class="rounded-[14px] overflow-hidden border border-sky-200 shadow-sm">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-gradient-to-r from-sky-500 to-cyan-600 text-white">
-                            <th class="py-2.5 px-3 text-center text-[11px] font-bold">อายุ (ปี)</th>
-                            <th class="py-2.5 px-3 text-right text-[11px] font-bold">เบี้ย (บาท/ปี)</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                    <tfoot>
-                        <tr class="bg-sky-600 text-white">
-                            <td class="py-2.5 px-3 text-[12px] font-bold">รวมทั้งหมด</td>
-                            <td class="py-2.5 px-3 text-right text-[13px] font-black">${totalStr}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            ${!hasData ? `<p class="text-center text-[11px] text-slate-400 mt-3"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</p>` : ''}
-        </div>`;
+    // No inline result — table shows in tableView via NAV ตาราง
+    // If tableView is currently active, refresh it
+    const tv = document.getElementById('tableView');
+    const rp = document.getElementById('rightPane');
+    const tableActive = tv && (tv.style.display !== 'none' || (rp && tv.parentElement === rp));
+    if (tableActive && typeof generatePolicyTableData === 'function') generatePolicyTableData();
 };
 
 // ==================== MF Picker (rider for 24TX/Elite/WXN) ====================
@@ -480,4 +420,109 @@ window.mfPickerClear = function() {
     window._mfCurrentLabel = null;
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+// ==================== MF Table (renders into shared tableView) ====================
+
+window.mfGenerateTable = function() {
+    const p = window._mfInline || {};
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
+
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+
+    const head = document.getElementById('policyTableHead');
+    const body = document.getElementById('policyTableBody');
+    const titleEl = document.getElementById('tableHeaderTitle');
+    const surrenderContainer = document.getElementById('surrenderContainer');
+    if (surrenderContainer) surrenderContainer.innerHTML = '';
+
+    // No selection yet
+    if (!p.company || !p.plan || (planMeta?.hasRoomRate && !p.roomRate)) {
+        if (head) head.innerHTML = '';
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400"><i class="fas fa-info-circle mr-1"></i>กรุณาเลือกบริษัท แผนประกัน และค่าห้องในหน้าหลัก</td></tr>`;
+        if (titleEl) titleEl.innerHTML = `<span class="text-[13px] font-bold text-sky-700">Medical Fund</span>`;
+        return;
+    }
+
+    const rates = window._mfData?.rates?.[p.company] || {};
+    const planData = rates[p.plan];
+    const rateTable = p.roomRate ? planData?.[p.roomRate]?.[gender] : planData?.[gender];
+
+    const ageRange = planData?.ageRange || [1, 70];
+    const ageStartInput = parseInt(document.getElementById('mfInlineAgeStart')?.value) || ageRange[0];
+    const ageEndInput = parseInt(document.getElementById('mfInlineAgeEnd')?.value) || ageRange[1];
+    const start = Math.max(ageStartInput, ageRange[0]);
+    const end = Math.min(ageEndInput, ageRange[1]);
+
+    const coName = co?.name || p.company;
+    const planName = planData?.name || p.plan;
+    const roomLabel = p.roomRate ? ` · ${p.roomRate}` : '';
+    const curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+
+    // Header title
+    const _vw = window.innerWidth;
+    const _isMobile = _vw < 700;
+    const _badge = _isMobile
+        ? 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border'
+        : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border';
+    if (titleEl) titleEl.innerHTML = _isMobile ? `
+        <div class="flex flex-col gap-0.5 w-full">
+            <div class="flex flex-wrap gap-1">
+                <span class="${_badge} bg-sky-600 text-white border-sky-700">MF</span>
+                <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">${gThai}</span>
+                <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">อายุ ${start}–${end}</span>
+            </div>
+            <div class="flex flex-wrap gap-1">
+                <span class="${_badge} bg-white text-slate-800 border-slate-200 shadow-sm">${coName} · ${planName}${roomLabel}</span>
+            </div>
+        </div>` : `
+        <div class="flex gap-1.5 items-center py-0.5 w-full">
+            <span class="${_badge} bg-sky-600 text-white border-sky-700">Medical Fund</span>
+            <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">เพศ: ${gThai}</span>
+            <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">อายุ: ${start}–${end} ปี</span>
+            <span class="${_badge} bg-white text-slate-800 border-slate-200 shadow-sm">${coName} · ${planName}${roomLabel}</span>
+        </div>`;
+
+    // Table style sizes
+    const _thCls = _isMobile ? 'py-2 px-1.5 font-bold' : 'py-3 px-3 font-bold';
+    const _thSz  = _isMobile ? 'font-size:10px;white-space:nowrap;' : 'font-size:13px;white-space:nowrap;';
+    const _tdBase = _isMobile ? 'py-4 px-1.5' : 'py-4 px-3';
+
+    if (head) head.innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isMobile ? 'font-size:10px;' : 'font-size:13px;'}">
+        <th class="${_thCls} text-center" style="${_thSz}">อายุ (ปี)</th>
+        <th class="${_thCls} text-right" style="${_thSz}">เบี้ย (บาท/ปี)</th>
+    </tr>`;
+
+    if (!planData || !rateTable) {
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    let total = 0, hasData = false;
+    for (let age = start; age <= end; age++) {
+        const prem = rateTable[String(age)] ?? rateTable[age] ?? null;
+        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
+        if (prem != null) { total += prem; hasData = true; }
+        const isCur = age === curAge;
+        const rowBg = isCur ? 'background:#e0f2fe;' : (age % 2 === 0 ? 'background:#ffffff;' : 'background:#f0f9ff;');
+        const ageCls = `${_tdBase} text-center font-bold text-[${_isMobile ? '12' : '14'}px] ${isCur ? 'color:#0369a1;' : 'color:#334155;'}`;
+        const premCls = `${_tdBase} text-right font-bold text-[${_isMobile ? '12' : '14'}px] ${prem != null ? (isCur ? 'color:#0369a1;' : 'color:#1e293b;') : 'color:#94a3b8;'}`;
+        html += `<tr style="${rowBg}">
+            <td class="${ageCls}" style="${isCur ? 'color:#0369a1;' : 'color:#334155;'}">${age}${isCur ? ' ◀' : ''}</td>
+            <td class="${_tdBase} text-right font-bold" style="${prem != null ? (isCur ? 'color:#0369a1;' : 'color:#1e293b;') : 'color:#94a3b8;'}font-size:${_isMobile ? '12' : '14'}px;">${premStr}</td>
+        </tr>`;
+    }
+
+    if (hasData) {
+        html += `<tr style="background:#0369a1;">
+            <td class="${_tdBase} text-center font-bold text-white" style="font-size:${_isMobile ? '12' : '13'}px;">รวมทั้งหมด</td>
+            <td class="${_tdBase} text-right font-black text-white" style="font-size:${_isMobile ? '13' : '15'}px;">${total.toLocaleString('en-US')}</td>
+        </tr>`;
+    }
+
+    if (body) body.innerHTML = html || `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400">ไม่มีข้อมูลในช่วงอายุนี้</td></tr>`;
 };

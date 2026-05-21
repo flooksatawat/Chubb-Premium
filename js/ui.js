@@ -514,16 +514,25 @@ function getPlanAbbr(planName) {
 }
 
 function switchView(targetView) {
-    // Medical Fund shows its table inline in the main view — no separate table/cash view
-    if (currentAppPlan === 'Medical Fund' && (targetView === 'table' || targetView === 'cash')) {
-        targetView = 'main';
-    }
     // ── Data guard (table / cash need calculation first) ──
     if (targetView === 'table' || targetView === 'cash') {
-        if (typeof calculate === 'function') calculate(currentMode, true);
-        if (!lastCalculationData || lastCalculationData.premium === 0) {
-            showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน");
-            return;
+        if (currentAppPlan === 'Medical Fund') {
+            // MF: check that company + plan (+ roomRate if needed) are selected
+            const p = window._mfInline || {};
+            const companies = window._mfData?.companies?.companies || [];
+            const co = companies.find(c => c.id === p.company);
+            const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+            const needRoom = planMeta?.hasRoomRate;
+            if (!p.company || !p.plan || (needRoom && !p.roomRate)) {
+                showCustomError('กรุณาเลือกบริษัท แผนประกัน และค่าห้องให้ครบถ้วน');
+                return;
+            }
+        } else {
+            if (typeof calculate === 'function') calculate(currentMode, true);
+            if (!lastCalculationData || lastCalculationData.premium === 0) {
+                showCustomError("กรุณาตรวจสอบทุน/เบี้ย หรือกรอกตัวเลขให้ครบถ้วน");
+                return;
+            }
         }
     }
 
@@ -1451,7 +1460,7 @@ function selectAppPlan(planName) {
         // ให้แผนพวกนี้แสดงปุ่มตารางมูลค่า (และดูรายละเอียดในตัว) นอกนั้นโชว์ดูรายละเอียด
         if (planName === 'Medical Fund') {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ดูตารางเบี้ย`;
-            mainActionBtn.onclick = function() { const r = document.getElementById('mfInlineResult'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+            mainActionBtn.onclick = function() { switchView('table'); };
         } else if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ตาราง`;
             mainActionBtn.onclick = function() { switchView('table'); };
@@ -1468,9 +1477,9 @@ function selectAppPlan(planName) {
     setPlan(currentPlan);
     updateQuickPills(planName);
 
-    // TLA และ MF ไม่มีหน้าตารางแยก — ปิดปุ่ม ตาราง ให้เป็นสีเทา
+    // TLA ไม่มีหน้าตารางแยก — ปิดปุ่ม ตาราง ให้เป็นสีเทา
     const _navTbl = document.getElementById('navTableBtn');
-    const _noTablePlan = planName === 'Convertable Term' || planName === 'Medical Fund';
+    const _noTablePlan = planName === 'Convertable Term';
     if (_navTbl) {
         _navTbl.disabled = _noTablePlan;
         _navTbl.style.opacity = _noTablePlan ? '0.3' : '';
@@ -2818,6 +2827,10 @@ function formatThaiMillion(num) {
 }
 
 function generatePolicyTableData() {
+    if (currentAppPlan === 'Medical Fund') {
+        if (typeof mfGenerateTable === 'function') mfGenerateTable();
+        return;
+    }
     if (!lastCalculationData) return;
     const d = lastCalculationData;
     
