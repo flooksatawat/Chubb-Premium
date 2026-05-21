@@ -4352,7 +4352,6 @@ async function _exportMFTablePDF(actionType = 'preview') {
         // Title from header
         const titleEl = document.getElementById('tableHeaderTitle');
         const titleText = titleEl ? titleEl.innerText.trim() : 'Medical Fund';
-        const gender = (typeof currentGender !== 'undefined' && currentGender === 'female') ? 'หญิง' : 'ชาย';
         doc.setFont(fontName, 'bold');
         doc.setFontSize(14);
         doc.setTextColor(13, 148, 136);
