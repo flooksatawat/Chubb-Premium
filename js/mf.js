@@ -921,6 +921,16 @@ window.mfInlineSearchSelect = async function(item) {
     window.mfShowTotalPopup();
 };
 
+window.mfSelectMainPlan = function(planName, btn) {
+    document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
+    if (typeof selectAppPlan === 'function') {
+        selectAppPlan(planName);
+    } else {
+        window.currentAppPlan = planName;
+        if (typeof calculate === 'function') calculate('sum', true);
+    }
+};
+
 // ==================== MF Total Premium Popup ====================
 
 window.mfShowTotalPopup = async function() {
@@ -989,19 +999,38 @@ window.mfShowTotalPopup = async function() {
     // Remove both popup types to prevent overlap
     document.querySelectorAll('.mf-total-popup, .mf-alert-popup').forEach(el => el.remove());
     const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
+    const planBtns = [
+        { label: 'WXN', name: 'Whole Life Extra',       icon: 'fas fa-infinity',    color: '#1d4ed8' },
+        { label: 'TX',  name: '24 TX',                  icon: 'fas fa-chart-line',  color: '#0f766e' },
+        { label: 'Elite', name: '868 / 818 Elite Saving', icon: 'fas fa-star',      color: '#7c3aed' },
+    ];
     const overlay = document.createElement('div');
     overlay.className = 'mf-total-popup';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
     overlay.innerHTML = `
-        <div style="max-width:360px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:30px 24px 24px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;">
-            <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-                <i class="fas fa-shield-alt" style="font-size:28px;color:#fff;"></i>
+        <div style="max-width:380px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:28px 22px 22px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;">
+            <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                <i class="fas fa-shield-alt" style="font-size:26px;color:#fff;"></i>
             </div>
-            <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:2px;">เบี้ยประกันสุขภาพ ตลอดชีวิต</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:18px;">${coName} · ${planName}${roomLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${startAge}–${dataMax} ปี</div>
-            <div style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">${total.toLocaleString('en-US')}</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;margin-bottom:22px;">บาท (รวมทุกปีตลอดชีวิต)</div>
-            <button onclick="this.closest('.mf-total-popup').remove()" style="background:rgba(255,255,255,0.22);color:#fff;border:2px solid rgba(255,255,255,0.45);padding:10px 36px;border-radius:9999px;font-weight:700;font-size:14px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.22)'">ตกลง</button>
+            <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:2px;">เบี้ยประกันสุขภาพ ตลอดชีวิต</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:14px;">${coName} · ${planName}${roomLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${startAge}–${dataMax} ปี</div>
+            <div style="font-size:34px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">${total.toLocaleString('en-US')}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:3px;margin-bottom:18px;">บาท (รวมทุกปีตลอดชีวิต)</div>
+
+            <div style="background:rgba(255,255,255,0.12);border-radius:16px;padding:14px 12px 10px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:10px;letter-spacing:0.03em;">เลือกแบบประกันออมทรัพย์</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                    ${planBtns.map(b => `
+                    <button onclick="mfSelectMainPlan('${b.name}',this)" style="background:#fff;border:none;border-radius:12px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform 0.1s,box-shadow 0.1s;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width:32px;height:32px;border-radius:9px;background:${b.color};display:flex;align-items:center;justify-content:center;">
+                            <i class="${b.icon}" style="font-size:14px;color:#fff;"></i>
+                        </div>
+                        <span style="font-size:12px;font-weight:800;color:#1e293b;">${b.label}</span>
+                    </button>`).join('')}
+                </div>
+            </div>
+
+            <button onclick="this.closest('.mf-total-popup').remove()" style="background:rgba(255,255,255,0.18);color:#fff;border:2px solid rgba(255,255,255,0.35);padding:9px 32px;border-radius:9999px;font-weight:700;font-size:13px;cursor:pointer;width:100%;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">ปิด</button>
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
