@@ -32,12 +32,18 @@
     {
       "id": "TOKIO",
       "name": "TOKIO",
-      "plans": []
+      "plans": [
+        { "id": "HSHH",       "name": "HSHH",         "hasRoomRate": true, "roomRates": ["1600","2300","3000","4000","5000","7000","10000","15000"] },
+        { "id": "HSHH_COPAY", "name": "HSHH (Copay)", "hasRoomRate": true, "roomRates": ["1600","2300","3000","4000","5000","7000","10000","15000"] }
+      ]
     },
     {
       "id": "CHUBB_HI",
       "name": "CHUBB",
-      "plans": []
+      "plans": [
+        { "id": "HSP",  "name": "เฮลท์ โพรเทคเตอร์",       "hasRoomRate": true, "roomRates": ["HSP3","HSP6","HSP9","HSP12","HSP15"] },
+        { "id": "HSPP", "name": "เฮลท์ โพรเทคเตอร์ พลัส", "hasRoomRate": true, "roomRates": ["HSPP1","HSPP2","HSPP3","HSPP4","HSPP5"] }
+      ]
     },
     {
       "id": "TIPAYA",
