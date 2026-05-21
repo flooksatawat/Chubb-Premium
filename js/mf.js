@@ -14,7 +14,7 @@ window._mfState = {
 async function mfInit() {
     if (!window._mfData.companies) {
         try {
-            const res = await fetch('data/MF/companies.json');
+            const res = await fetch('data/MF/companies.json?v=' + Date.now());
             window._mfData.companies = await res.json();
         } catch (e) {
             window._mfData.companies = { companies: [] };
@@ -27,7 +27,7 @@ async function mfInit() {
 async function mfLoadRates(companyId) {
     if (window._mfData.rates[companyId]) return window._mfData.rates[companyId];
     try {
-        const res = await fetch(`data/MF/${companyId}.json`);
+        const res = await fetch(`data/MF/${companyId}.json?v=` + Date.now());
         if (!res.ok) throw new Error('not found');
         window._mfData.rates[companyId] = await res.json();
     } catch (e) {
@@ -205,7 +205,7 @@ window._mfInline = { company: null, plan: null, roomRate: null };
 window.mfInlineInit = async function() {
     if (!window._mfData.companies) {
         try {
-            const res = await fetch('data/MF/companies.json');
+            const res = await fetch('data/MF/companies.json?v=' + Date.now());
             window._mfData.companies = await res.json();
         } catch (e) { window._mfData.companies = { companies: [] }; }
     }
@@ -289,11 +289,25 @@ window.mfInlineSelectRoom = function(val) {
 };
 
 window.mfInlineRender = function() {
-    // No inline result — table shows in tableView via NAV ตาราง
-    // If tableView is currently active, refresh it
+    const p = window._mfInline || {};
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === p.company);
+    const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+    const needRoom = planMeta?.hasRoomRate;
+    const complete = !!(p.company && p.plan && (!needRoom || p.roomRate));
+
+    const isWide = window.innerWidth >= 700;
     const tv = document.getElementById('tableView');
     const rp = document.getElementById('rightPane');
-    const tableActive = tv && (tv.style.display !== 'none' || (rp && tv.parentElement === rp));
+    const tableActive = !!(tv && (tv.style.display !== 'none' || (rp && tv.parentElement === rp)));
+
+    // Wide screen: auto-show table in right pane when selection complete
+    if (complete && isWide && !tableActive) {
+        if (typeof switchView === 'function') switchView('table');
+        return;
+    }
+
+    // Already showing — refresh real-time
     if (tableActive && typeof generatePolicyTableData === 'function') generatePolicyTableData();
 };
 
@@ -304,7 +318,7 @@ window._mfPicker = { company: null, plan: null, roomRate: null };
 async function mfPickerInit() {
     if (!window._mfData.companies) {
         try {
-            const res = await fetch('data/MF/companies.json');
+            const res = await fetch('data/MF/companies.json?v=' + Date.now());
             window._mfData.companies = await res.json();
         } catch(e) { window._mfData.companies = { companies: [] }; }
     }
