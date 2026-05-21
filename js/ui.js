@@ -3033,8 +3033,14 @@ function generatePolicyTableData() {
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
     const showCVColumn = isTLA ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
 
+    // MF premium column
+    const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
+    const _mfGender = (typeof currentGender !== 'undefined' && currentGender) || (d.gender || 'male');
+    const _mfMap = hasMFCol ? window.mfBuildPremiumMap(_mfGender) : null;
+    const _mfLabel = (hasMFCol && _mfMap) ? (window._mfCurrentLabel || window.currentMF.split('|').join(' ')) : null;
+
     // --- 3. Header ---
-    const initialSA = Math.round(d.sum); 
+    const initialSA = Math.round(d.sum);
     const sumDisplay = formatThaiMillion(initialSA); // 💥 ใช้ฟังก์ชันย่อตัวเลขตรงหัวตาราง
 
     const initialPrem = Math.round(d.premium);
@@ -3110,6 +3116,7 @@ function generatePolicyTableData() {
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
         ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
+        ${_mfLabel ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">${_mfLabel}</th>` : ''}
     </tr>`;
     
     // --- 4. Main Loop ---
@@ -3138,7 +3145,8 @@ function generatePolicyTableData() {
         maxYear = payYears; // Term: คุ้มครองเฉพาะช่วงชำระเบี้ย
     }
 
-    let html = ''; 
+    let html = '';
+    let _mfPrevPrem = null;
     let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
     let currentSA = initialSA;
     let accCashFlow = 0;
@@ -3287,6 +3295,15 @@ function generatePolicyTableData() {
         if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
         if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
         if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
+        if (_mfLabel && _mfMap) {
+            const _mfP = window.mfPremForAge(_mfMap, currentAge);
+            const _mfChg = _mfP !== null && _mfP !== _mfPrevPrem;
+            if (_mfP !== null) _mfPrevPrem = _mfP;
+            const _mfStyle = _mfChg
+                ? `${_fSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
+                : `${_fSz}color:#94a3b8;`;
+            html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP !== null ? _mfP.toLocaleString('en-US') : '—'}</td>`;
+        }
         html += `</tr>`;
 
         if (y >= cfLoopEnd) break;

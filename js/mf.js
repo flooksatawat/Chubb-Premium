@@ -422,8 +422,9 @@ window.openMFPicker = async function() {
     await mfPickerInit();
 };
 
-window.mfPickerSelectCompany = function(val) {
+window.mfPickerSelectCompany = async function(val) {
     window._mfPicker = { company: val || null, plan: null, roomRate: null };
+    if (val) mfLoadRates(val); // pre-load data in background
     const companies = window._mfData.companies?.companies || [];
     const co = companies.find(c => c.id === val);
     const plans = co?.plans || [];
@@ -477,7 +478,7 @@ function mfPickerUpdateConfirm() {
     btn.classList.toggle('pointer-events-none', !ready);
 }
 
-window.mfPickerConfirm = function() {
+window.mfPickerConfirm = async function() {
     const p = window._mfPicker;
     const companies = window._mfData.companies?.companies || [];
     const co = companies.find(c => c.id === p.company);
@@ -487,8 +488,50 @@ window.mfPickerConfirm = function() {
     const label = [co?.name, plan?.name, p.roomRate].filter(Boolean).join(' · ');
     window.currentMF = key;
     window._mfCurrentLabel = label;
+    // Ensure rate data is loaded before recalculating
+    if (p.company) await mfLoadRates(p.company);
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+// ── Build {age: premium} map for the selected MF plan (for inline column in main table) ──
+window.mfBuildPremiumMap = function(gender) {
+    const mfKey = window.currentMF || '';
+    if (!mfKey || mfKey === 'ไม่เลือก') return null;
+    const parts = mfKey.split('|');
+    const companyId = parts[0], planId = parts[1], roomRate = parts[2] || null;
+    if (!companyId || !planId) return null;
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === companyId);
+    const planMeta = co?.plans?.find(p => p.id === planId);
+    const rawData = window._mfData?.rates?.[companyId] || {};
+    const isStepRate = Array.isArray(rawData.rates);
+    const map = {};
+    if (isStepRate) {
+        const gKey = gender === 'male' ? 'Male' : 'Female';
+        const pfName = `${co?.name || companyId} ${planMeta?.name || planId}`.trim();
+        rawData.rates.forEach(r => {
+            if (r.gender !== gKey && r.gender !== 'Unisex') return;
+            const pp = r.premiums?.[pfName];
+            if (!pp) return;
+            const prem = planMeta?.hasRoomRate ? pp[roomRate] : (typeof pp === 'number' ? pp : null);
+            if (typeof prem === 'number') map[r.age_band] = prem;
+        });
+    } else {
+        const planData = rawData[planId];
+        const rateTable = roomRate ? planData?.[roomRate]?.[gender] : planData?.[gender];
+        if (rateTable) Object.keys(rateTable).forEach(k => { const a = parseInt(k); if (!isNaN(a)) map[a] = rateTable[k]; });
+    }
+    return Object.keys(map).length > 0 ? map : null;
+};
+
+// Get step-rate premium for a specific age (find highest band <= age)
+window.mfPremForAge = function(map, age) {
+    if (!map) return null;
+    const ages = Object.keys(map).map(Number).sort((a, b) => a - b);
+    let prem = null;
+    for (const a of ages) { if (a <= age) prem = map[a]; else break; }
+    return prem;
 };
 
 window.mfPickerClear = function() {
