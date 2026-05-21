@@ -247,34 +247,22 @@ window.mfInlineInit = async function() {
             window._mfData.companies = await res.json();
         } catch (e) { window._mfData.companies = { companies: [] }; }
     }
-    // Pre-load all company data so we can filter by availability
-    await mfPreloadAll();
-
     const companies = window._mfData.companies?.companies || [];
     const sel = document.getElementById('mfInlineCompany');
     if (!sel) return;
     const p = window._mfInline;
-    // Only show companies that have at least one plan with data
-    const availCompanies = companies.filter(c =>
-        c.plans?.some(pl => mfHasData(c.id, pl.id, null, null))
-    );
     sel.innerHTML = `<option value="">— เลือกบริษัท —</option>` +
-        availCompanies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     sel.value = p.company || '';
 
     const planRow = document.getElementById('mfInlinePlanRow');
     const planSel = document.getElementById('mfInlinePlan');
     const co = companies.find(c => c.id === p.company);
     if (p.company && co?.plans?.length) {
-        const availPlans = co.plans.filter(pl => mfHasData(co.id, pl.id, null, null));
-        if (availPlans.length) {
-            planRow.classList.remove('hidden');
-            planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
-                availPlans.map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
-            planSel.value = p.plan || '';
-        } else {
-            planRow.classList.add('hidden');
-        }
+        planRow.classList.remove('hidden');
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            co.plans.map(pl => `<option value="${pl.id}">${pl.name}</option>`).join('');
+        planSel.value = p.plan || '';
     } else {
         planRow.classList.add('hidden');
     }
@@ -282,17 +270,11 @@ window.mfInlineInit = async function() {
     const plan = co?.plans?.find(pl => pl.id === p.plan);
     const rrRow = document.getElementById('mfInlineRoomRow');
     const rrSel = document.getElementById('mfInlineRoom');
-    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
     if (plan?.hasRoomRate && plan.roomRates?.length) {
-        const availRooms = plan.roomRates.filter(r => mfHasData(co.id, plan.id, r, gender));
-        if (availRooms.length) {
-            rrRow.classList.remove('hidden');
-            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
-                availRooms.map(r => `<option value="${r}">${r}</option>`).join('');
-            rrSel.value = p.roomRate || '';
-        } else {
-            rrRow.classList.add('hidden');
-        }
+        rrRow.classList.remove('hidden');
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
+            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+        rrSel.value = p.roomRate || '';
     } else {
         rrRow.classList.add('hidden');
     }
@@ -307,14 +289,13 @@ window.mfInlineSelectCompany = async function(val) {
     const companies = window._mfData.companies?.companies || [];
     const co = companies.find(c => c.id === val);
     const plans = co?.plans || [];
-    const availPlans = plans.filter(pl => mfHasData(co.id, pl.id, null, null));
     const planRow = document.getElementById('mfInlinePlanRow');
     const planSel = document.getElementById('mfInlinePlan');
     const rrRow = document.getElementById('mfInlineRoomRow');
-    if (availPlans.length) {
+    if (plans.length) {
         planRow.classList.remove('hidden');
         planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
-            availPlans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     } else {
         planRow.classList.add('hidden');
     }
@@ -330,16 +311,10 @@ window.mfInlineSelectPlan = function(val) {
     const plan = co?.plans?.find(p => p.id === val);
     const rrRow = document.getElementById('mfInlineRoomRow');
     const rrSel = document.getElementById('mfInlineRoom');
-    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
     if (plan?.hasRoomRate && plan.roomRates?.length) {
-        const availRooms = plan.roomRates.filter(r => mfHasData(co.id, plan.id, r, gender));
-        if (availRooms.length) {
-            rrRow.classList.remove('hidden');
-            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
-                availRooms.map(r => `<option value="${r}">${r}</option>`).join('');
-        } else {
-            rrRow.classList.add('hidden');
-        }
+        rrRow.classList.remove('hidden');
+        rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
+            plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
     } else {
         rrRow.classList.add('hidden');
     }
