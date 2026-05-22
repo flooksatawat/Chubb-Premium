@@ -3256,6 +3256,23 @@ function generatePolicyTableData() {
                   : _isCompact      ? 'py-2 px-1'
                   :                   'py-4 px-3';
 
+    // MF column: ใช้ font/padding เล็กกว่า column ปกติเสมอ (กันคอลัมน์กว้างเกินไป)
+    const _mfThCls = _isSuperCompact ? 'py-1 px-0.5 font-bold'
+                   : _isCompact      ? 'py-1.5 px-0.5 font-bold'
+                   : _isMobile       ? 'py-2 px-1 font-bold'
+                   :                   'py-3 px-1.5 font-bold';
+    const _mfThSz  = _isSuperCompact ? 'font-size:7px;white-space:nowrap;'
+                   : _isCompact      ? 'font-size:8px;white-space:nowrap;'
+                   : _isMobile       ? 'font-size:9px;white-space:nowrap;'
+                   :                   'font-size:11px;white-space:nowrap;';
+    const _mfTdBase = _isSuperCompact ? 'py-1 px-0.5'
+                    : _isCompact      ? 'py-2 px-0.5'
+                    :                   'py-4 px-1.5';
+    const _mfFontSz = _isSuperCompact ? 'font-size:8px;'
+                    : _isCompact      ? 'font-size:9px;'
+                    : _isMobile       ? 'font-size:10px;'
+                    :                   'font-size:11px;';
+
     // ชื่อหัวตาราง: compact/super-compact ใช้ label สั้น
     const _lSaving   = _isCompact ? 'ออม'    : 'ออมเงิน';
     const _lAccum    = _isCompact ? 'สะสม'   : 'ออมสะสม';
@@ -3271,7 +3288,7 @@ function generatePolicyTableData() {
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
-        ${_mfLabel ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">${_mfLabel}</th>` : ''}
+        ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
@@ -3494,9 +3511,9 @@ function generatePolicyTableData() {
             const _mfChg = _mfP !== _mfPrevPrem;
             _mfPrevPrem = _mfP;
             const _mfStyle = _mfChg
-                ? `${_fSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
-                : `${_fSz}color:#94a3b8;`;
-            html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
+                ? `${_mfFontSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
+                : `${_mfFontSz}color:#94a3b8;`;
+            html += `<td class="${_mfTdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
         }
         html += `${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
