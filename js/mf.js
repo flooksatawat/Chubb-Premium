@@ -1150,7 +1150,7 @@ window.mfShow3DProjectionPopup = function() {
     rows.forEach(r => { ageMap[r.age] = r.prem; });
     window._mf3DSource = {
         map: ageMap,
-        label: `3D Health · HX ${hxRoom}`,
+        label: `3D · HX${hxRoom}`,
         gender: gender,
         riderLabel: planLabel
     };
