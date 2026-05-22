@@ -495,6 +495,14 @@ window.mfPickerConfirm = async function() {
 window.mfBuildPremiumMap = function(gender) {
     const mfKey = window.currentMF || '';
     if (!mfKey || mfKey === 'ไม่เลือก') return null;
+    // 3D Health Excellence projection — premium map captured by mfShow3DProjectionPopup
+    if (mfKey === '_3D_HEALTH') {
+        const src = window._mf3DSource;
+        if (!src || !src.map) return null;
+        // Only use cached map when gender matches the capture, else recompute
+        if (src.gender && gender && src.gender !== gender) return null;
+        return src.map;
+    }
     const parts = mfKey.split('|');
     const companyId = parts[0], planId = parts[1], roomRate = parts[2] || null;
     if (!companyId || !planId) return null;
@@ -1137,6 +1145,16 @@ window.mfShow3DProjectionPopup = function() {
     if (hbfVal > 0) riderParts.push(`HBF ${hbfVal.toLocaleString('en-US')}`);
     const planLabel = riderParts.join(' · ');
 
+    // Stash per-age premium map so other plans can show it as the MF column
+    const ageMap = {};
+    rows.forEach(r => { ageMap[r.age] = r.prem; });
+    window._mf3DSource = {
+        map: ageMap,
+        label: `3D Health · HX ${hxRoom}`,
+        gender: gender,
+        riderLabel: planLabel
+    };
+
     const planBtns = [
         { label: 'WXN',   name: 'Whole Life Extra',        icon: 'fas fa-infinity',       color: '#1d4ed8' },
         { label: 'TX',    name: '24 TX',                   icon: 'fas fa-chart-line',     color: '#0f766e' },
@@ -1161,7 +1179,7 @@ window.mfShow3DProjectionPopup = function() {
                 <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:10px;letter-spacing:0.03em;">เลือกแบบประกันออมทรัพย์</div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
                     ${planBtns.map(b => `
-                    <button onclick="mfSelectMainPlan('${b.name}',this)" style="background:#fff;border:none;border-radius:12px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform 0.1s,box-shadow 0.1s;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <button onclick="mfSelect3DInto('${b.name}',this)" style="background:#fff;border:none;border-radius:12px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform 0.1s,box-shadow 0.1s;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         <div style="width:32px;height:32px;border-radius:9px;background:${b.color};display:flex;align-items:center;justify-content:center;">
                             <i class="${b.icon}" style="font-size:14px;color:#fff;"></i>
                         </div>
@@ -1174,4 +1192,23 @@ window.mfShow3DProjectionPopup = function() {
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
+};
+
+// Switch to a savings plan AND inject the captured 3D Health premium as that plan's MF column.
+// Also opens the table view so the user immediately sees the combined breakdown.
+window.mfSelect3DInto = function(planName) {
+    document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
+    if (window._mf3DSource && window._mf3DSource.map) {
+        window.currentMF = '_3D_HEALTH';
+        window._mfCurrentLabel = window._mf3DSource.label;
+    }
+    if (typeof selectAppPlan === 'function') {
+        selectAppPlan(planName);
+    } else {
+        window.currentAppPlan = planName;
+        if (typeof calculate === 'function') calculate('sum', true);
+    }
+    setTimeout(() => {
+        if (typeof switchView === 'function') switchView('table');
+    }, 120);
 };
