@@ -3257,14 +3257,15 @@ function generatePolicyTableData() {
                   :                   'py-4 px-3';
 
     // MF column: ใช้ font/padding เล็กกว่า column ปกติเสมอ (กันคอลัมน์กว้างเกินไป)
+    // หัวคอลัมน์อนุญาตให้ตัดบรรทัด (white-space:normal) เพื่อไม่ให้ชื่อแผนยาวดันคอลัมน์กว้าง
     const _mfThCls = _isSuperCompact ? 'py-1 px-0.5 font-bold'
                    : _isCompact      ? 'py-1.5 px-0.5 font-bold'
                    : _isMobile       ? 'py-2 px-1 font-bold'
                    :                   'py-3 px-1.5 font-bold';
-    const _mfThSz  = _isSuperCompact ? 'font-size:7px;white-space:nowrap;'
-                   : _isCompact      ? 'font-size:8px;white-space:nowrap;'
-                   : _isMobile       ? 'font-size:9px;white-space:nowrap;'
-                   :                   'font-size:11px;white-space:nowrap;';
+    const _mfThSz  = _isSuperCompact ? 'font-size:6px;line-height:1.1;white-space:normal;max-width:60px;word-break:break-word;'
+                   : _isCompact      ? 'font-size:7px;line-height:1.1;white-space:normal;max-width:64px;word-break:break-word;'
+                   : _isMobile       ? 'font-size:8px;line-height:1.15;white-space:normal;max-width:72px;word-break:break-word;'
+                   :                   'font-size:10px;line-height:1.15;white-space:normal;max-width:96px;word-break:break-word;';
     const _mfTdBase = _isSuperCompact ? 'py-1 px-0.5'
                     : _isCompact      ? 'py-2 px-0.5'
                     :                   'py-4 px-1.5';
