@@ -1008,6 +1008,7 @@ window.mfShowTotalPopup = async function() {
         { label: 'WXN', name: 'Whole Life Extra',       icon: 'fas fa-infinity',    color: '#1d4ed8' },
         { label: 'TX',  name: '24 TX',                  icon: 'fas fa-chart-line',  color: '#0f766e' },
         { label: 'Elite', name: '868 / 818 Elite Saving', icon: 'fas fa-star',      color: '#7c3aed' },
+        { label: 'LV',  name: 'LifeTime Value',         icon: 'fas fa-hourglass-half', color: '#7c3aed' },
     ];
     const overlay = document.createElement('div');
     overlay.className = 'mf-total-popup';
@@ -1024,7 +1025,7 @@ window.mfShowTotalPopup = async function() {
 
             <div style="background:rgba(255,255,255,0.12);border-radius:16px;padding:14px 12px 10px;margin-bottom:14px;">
                 <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:10px;letter-spacing:0.03em;">เลือกแบบประกันออมทรัพย์</div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
                     ${planBtns.map(b => `
                     <button onclick="mfSelectMainPlan('${b.name}',this)" style="background:#fff;border:none;border-radius:12px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform 0.1s,box-shadow 0.1s;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         <div style="width:32px;height:32px;border-radius:9px;background:${b.color};display:flex;align-items:center;justify-content:center;">

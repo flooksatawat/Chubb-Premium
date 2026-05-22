@@ -32,7 +32,7 @@ function fitHeaderTitle() {
 window.PRODUCT_CONDITIONS = {};
 
 // โหลดไฟล์ JSON ทั้งหมด
-const PRODUCT_FILES = ['cx.json', 'slb.json', '3d.json', 'cl.json', 'elite.json', 'hbf.json', 'lp.json', 'slpa.json', 'tla.json', 'tx.json', 'wxn.json']; 
+const PRODUCT_FILES = ['cx.json', 'slb.json', '3d.json', 'cl.json', 'elite.json', 'lv.json', 'hbf.json', 'lp.json', 'slpa.json', 'tla.json', 'tx.json', 'wxn.json'];
 
 async function loadAllProductConditions() {
     for (const file of PRODUCT_FILES) {
@@ -509,7 +509,7 @@ function openInstallmentModal() {
 
 // ==================== APP ROUTING & PLAN SELECTION ====================
 function getPlanAbbr(planName) {
-    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite" };
+    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite", "LifeTime Value": "LV", "Smart Plan 21/7": "7SM" };
     return abbrMap[planName] || planName;
 }
 
@@ -628,6 +628,8 @@ const modernPlansData = [
     { name: 'Whole Life Extra', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-trend-up', isHighlight: false, bg: 'bg-gradient-to-br from-blue-100 to-blue-200', text: 'text-blue-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-blue-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: '24 TX', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-money-bill-transfer', isHighlight: false, bg: 'bg-gradient-to-br from-violet-100 to-violet-200', text: 'text-violet-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-violet-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-violet-100 group-hover:text-violet-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: '868 / 818 Elite Saving', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-sack-dollar', isHighlight: false, bg: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200', text: 'text-fuchsia-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-fuchsia-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'LifeTime Value', desc: 'ออมยาว รับเงินคืนทุกปี ถึงอายุ 100', icon: 'fas fa-hourglass-half', isHighlight: false, bg: 'bg-gradient-to-br from-violet-100 to-violet-200', text: 'text-violet-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-violet-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-violet-100 group-hover:text-violet-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Smart Plan 21/7', desc: 'ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%', icon: 'fas fa-seedling', isHighlight: false, bg: 'bg-gradient-to-br from-teal-100 to-teal-200', text: 'text-teal-600', border: 'border border-white hover:border-teal-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-teal-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: 'Medical Fund', desc: 'ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง', icon: 'fas fa-hospital', isHighlight: false, bg: 'bg-gradient-to-br from-sky-100 to-sky-200', text: 'text-sky-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-sky-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' }
 ];
 
@@ -900,7 +902,7 @@ function updateQuickPills(planName) {
     } else if (planName === 'Whole Life Extra') {
         sumPillWrapper.innerHTML = '';
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
-    } else if (['868 / 818 Elite Saving', '24 TX'].includes(planName)) {
+    } else if (['868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7'].includes(planName)) {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
     } else if (['Life Protector 20', 'Supreme Life Protector'].includes(planName)) {
@@ -955,13 +957,45 @@ function updateQuickPills(planName) {
 
     } else if (['868 / 818 Elite Saving', '24 TX'].includes(planName)) {
         const newOpts = [
-            { label: '2.4 หมื่น', val: 24000 }, 
-            { label: '3.6 หมื่น', val: 36000 }, 
-            { label: '4.8 หมื่น', val: 48000 }, 
-            { label: '6 หมื่น', val: 60000 }, 
+            { label: '2.4 หมื่น', val: 24000 },
+            { label: '3.6 หมื่น', val: 36000 },
+            { label: '4.8 หมื่น', val: 48000 },
+            { label: '6 หมื่น', val: 60000 },
             { label: '1 แสน', val: 100000 }
         ];
         newOpts.forEach((opt, index) => {
+            let btn = document.getElementById('cashPill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`);
+            }
+        });
+    } else if (planName === 'LifeTime Value') {
+        // LV เงินคืนปีแรก = 1% ของทุน — ตัวเลือกกระแสเงินสด
+        const lvOpts = [
+            { label: '1 หมื่น', val: 10000 },
+            { label: '2 หมื่น', val: 20000 },
+            { label: '3 หมื่น', val: 30000 },
+            { label: '5 หมื่น', val: 50000 },
+            { label: '1 แสน', val: 100000 }
+        ];
+        lvOpts.forEach((opt, index) => {
+            let btn = document.getElementById('cashPill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`);
+            }
+        });
+    } else if (planName === 'Smart Plan 21/7') {
+        // 7SM เงินคืนรายปี = 2% ของทุน
+        const smOpts = [
+            { label: '2 หมื่น', val: 20000 },
+            { label: '4 หมื่น', val: 40000 },
+            { label: '6 หมื่น', val: 60000 },
+            { label: '1 แสน', val: 100000 },
+            { label: '2 แสน', val: 200000 }
+        ];
+        smOpts.forEach((opt, index) => {
             let btn = document.getElementById('cashPill' + (index + 1));
             if (btn) {
                 btn.innerText = opt.label;
@@ -1178,6 +1212,31 @@ window.setMFPlan = function(val) { window.currentMF = val; closePopup('mfPlanMod
 
 // ==================== ระบบดึงเงื่อนไข (เพื่อแสดงใน Popup กดค้าง) ====================
 function getConditionsHTML(planName) {
+    if (planName === 'LifeTime Value') {
+        let lvPlan = (typeof currentPlan === 'string' && currentPlan.includes('LV')) ? currentPlan : '10LV';
+        let lvAgeTxt = lvPlan === '15LV' ? '31 วัน - 45 ปี' : lvPlan === '20LV' ? '31 วัน - 40 ปี' : '31 วัน - 55 ปี';
+        let lvPayTxt = lvPlan === '15LV' ? 'ชำระเบี้ย 15 ปี' : lvPlan === '20LV' ? 'ชำระเบี้ย 20 ปี' : 'ชำระเบี้ย 10 ปี';
+        let lvMinSaTxt = lvPlan === '10LV' ? '80,000 บาท' : '100,000 บาท';
+
+        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
+        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${lvAgeTxt}</p></div></div>`;
+        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">คุ้มครองถึงอายุ 100 ปี / ${lvPayTxt}</p></div></div>`;
+        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${lvMinSaTxt}</p></div></div>`;
+        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ทุกปี 1% ของทุนประกัน<br>อายุครบ 60 ปี: 11% · 70 ปี: 22%<br>อายุครบ 80 ปี: 33% · 90 ปี: 44%<br>ครบสัญญาอายุ 100 ปี: 150%</p></div></div>`;
+        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1-10: 100%<br>ปีที่ 11-20: 150%<br>ปีที่ 21 ถึงอายุ 70: 200%<br>อายุ 71-100 ปี: 150%</p></div></div>`;
+        html += '</div></div>';
+        return html;
+    }
+    if (planName === 'Smart Plan 21/7') {
+        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
+        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">31 วัน - 70 ปี (ทุกเพศ)</p></div></div>`;
+        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">คุ้มครอง 21 ปี / ชำระเบี้ย 7 ปี</p></div></div>`;
+        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">100,000 บาท</p></div></div>`;
+        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ปีที่ 2-20: รับ 2% ของทุนประกัน/ปี<br>ครบสัญญา ปีที่ 21: รับ 212%</p></div></div>`;
+        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1-5: 100%<br>ปีที่ 6-21: 175%</p></div></div>`;
+        html += '</div></div>';
+        return html;
+    }
     if (planName === '868 / 818 Elite Saving' || planName.includes('Elite')) {
         let ageInput = parseInt(document.getElementById('ageInput')?.value) || 0;
         let pType = (window.currentPlan === 'S868' || ageInput <= 50) ? 'S868' : 'S818';
@@ -1322,10 +1381,38 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.add('flex');
         }
     } else if (planName === '868 / 818 Elite Saving') {
-        currentMode = 'premium'; 
+        currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
-        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden'); 
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            document.getElementById('singleCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('flex');
+        }
+    } else if (planName === 'LifeTime Value') {
+        currentMode = 'premium';
+        document.getElementById('premiumInput').value = "120,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            document.getElementById('singleCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('flex');
+        }
+    } else if (planName === 'Smart Plan 21/7') {
+        currentMode = 'premium';
+        document.getElementById('premiumInput').value = "120,000";
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.style.order = '1';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        const premSubLblSM = document.getElementById('premiumSubLabel');
+        if(premSubLblSM) premSubLblSM.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
@@ -1405,7 +1492,7 @@ function selectAppPlan(planName) {
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
     }
 
-    if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', '3D Health Excellence'].includes(planName)) {
+    if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', '3D Health Excellence'].includes(planName)) {
         if (globalMFContainer) globalMFContainer.classList.remove('hidden');
     } else {
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
@@ -1432,7 +1519,7 @@ function selectAppPlan(planName) {
     
     const medFundBtnContainer = document.getElementById('medicalFundBtnContainer');
     if (medFundBtnContainer) {
-        if (['24 TX', '868 / 818 Elite Saving', 'Whole Life Extra', '3D Health Excellence'].includes(planName)) {
+        if (['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence'].includes(planName)) {
             medFundBtnContainer.classList.remove('hidden');
         } else {
             medFundBtnContainer.classList.add('hidden');
@@ -1802,6 +1889,14 @@ function _injectToPearLCanvas(d) {
         rows += R('เงินคืนรายปี (12%)',          fmtP(Math.round(d.sum * 0.12)) + ' ฿', 'cg');
         rows += R('ครบสัญญา (720%)',             fmtP(Math.round(d.sum * 7.2))  + ' ฿', 'cg');
         rows += R('กรณีเสียชีวิตสูงสุด (800%)', fmtP(Math.round(d.sum * 8))    + ' ฿', 'rose');
+    } else if (currentAppPlan === 'LifeTime Value') {
+        rows += R('เงินคืนรายปี (1%)',                 fmtP(Math.round(d.sum * 0.01)) + ' ฿', 'cg');
+        rows += R('ครบสัญญา อายุ 100 ปี (150%)',       fmtP(Math.round(d.sum * 1.5))  + ' ฿', 'cg');
+        rows += R('กรณีเสียชีวิตสูงสุด (200%)',        fmtP(Math.round(d.sum * 2))    + ' ฿', 'rose');
+    } else if (currentAppPlan === 'Smart Plan 21/7') {
+        rows += R('เงินคืนรายปี (2%)',                 fmtP(Math.round(d.sum * 0.02)) + ' ฿', 'cg');
+        rows += R('ครบกำหนดสัญญา ปีที่ 21 (212%)',    fmtP(Math.round(d.sum * 2.12)) + ' ฿', 'cg');
+        rows += R('กรณีเสียชีวิตสูงสุด (175%)',        fmtP(Math.round(d.sum * 1.75)) + ' ฿', 'rose');
     } else if (currentAppPlan === 'Signature Legacy') {
         const acc = d.sum + Math.min(d.sum, 100000000);
         const can = Math.min(d.sum * 0.30, 30000000);
@@ -2234,10 +2329,66 @@ function openUniversalModal(d) {
     const _diseaseBtn = document.getElementById('shareDiseaseListBtn');
     if (_diseaseBtn) _diseaseBtn.classList.add('hidden');
     
-    if (currentAppPlan === '868 / 818 Elite Saving') {
-        setText('modalGender', d.gender); 
-        setText('modalAge', d.age + " ปี"); 
-        setText('modalYears', "8 ปี"); 
+    if (currentAppPlan === 'LifeTime Value') {
+        const lvYears = (currentPlan.match(/\d+/) || ['10'])[0];
+        setText('modalGender', d.gender);
+        setText('modalAge', d.age + " ปี");
+        setText('modalYears', lvYears + " ปี");
+        setText('modalPremium', Math.round(d.premium).toLocaleString());
+        setText('modalSum', formatNum(d.sum));
+
+        const childRow = document.getElementById('modalChildRow');
+        if (childRow) { childRow.classList.add('hidden'); childRow.classList.remove('flex'); }
+        const extraCIRow = document.getElementById('modalExtraCIRow');
+        const majorCIRow = document.getElementById('modalMajorCIRow');
+        const maturityRow = document.getElementById('modalMaturityRow');
+        if (extraCIRow) { extraCIRow.classList.remove('flex'); extraCIRow.classList.add('hidden'); }
+        if (majorCIRow) { majorCIRow.classList.remove('flex'); majorCIRow.classList.add('hidden'); }
+        if (maturityRow) { maturityRow.classList.remove('flex'); maturityRow.classList.add('hidden'); }
+
+        let dynamicContainer = document.getElementById('modalDynamicBenefits');
+        if (!dynamicContainer) {
+            const scrollArea = document.querySelector('#resultModal .overflow-y-auto');
+            if (scrollArea) {
+                dynamicContainer = document.createElement('div');
+                dynamicContainer.id = 'modalDynamicBenefits';
+                dynamicContainer.className = 'space-y-3 mt-4';
+                const shareBtn = scrollArea.querySelector('.mt-4:last-child');
+                if (shareBtn) scrollArea.insertBefore(dynamicContainer, shareBtn);
+                else scrollArea.appendChild(dynamicContainer);
+            }
+        }
+
+        if (dynamicContainer) {
+            dynamicContainer.classList.remove('hidden');
+            let lvYearlyCash = Math.round(d.sum * 0.01);
+            let lvMaturity = Math.round(d.sum * 1.50);
+            let lvDeathMax = Math.round(d.sum * 2.00);
+            dynamicContainer.innerHTML = `
+                <div class="flex flex-col p-3.5 bg-indigo-50/70 rounded-[14px] border border-indigo-100 mb-3">
+                    <div class="flex justify-between items-center gap-2 mb-2 border-b border-indigo-100/50 pb-2">
+                        <span class="text-[12px] text-indigo-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-hand-holding-usd text-indigo-500"></i> เงินคืนรายปี (1%)</span>
+                        <span class="text-[13px] font-extrabold text-indigo-700 text-right shrink-0">${lvYearlyCash.toLocaleString()} ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2 mb-2 border-b border-indigo-100/50 pb-2">
+                        <span class="text-[12px] text-indigo-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-gift text-indigo-500"></i> ครบกำหนดสัญญา อายุ 100 ปี (150%)</span>
+                        <span class="text-[13px] font-extrabold text-indigo-700 text-right shrink-0">${lvMaturity.toLocaleString()} ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-[12px] text-rose-900 font-bold flex items-center gap-1.5 leading-tight"><i class="fas fa-heartbeat text-rose-500"></i> กรณีเสียชีวิตสูงสุด (200%)</span>
+                        <span class="text-[13px] font-extrabold text-rose-700 text-right shrink-0">${lvDeathMax.toLocaleString()} ฿</span>
+                    </div>
+                </div>`;
+        }
+
+        const actionContainerLV = document.getElementById('modalActionBtnsContainer');
+        if (actionContainerLV) actionContainerLV.innerHTML = _MODAL_ACTION_HTML;
+        openPopup('resultModal');
+    }
+    else if (currentAppPlan === '868 / 818 Elite Saving') {
+        setText('modalGender', d.gender);
+        setText('modalAge', d.age + " ปี");
+        setText('modalYears', "8 ปี");
         setText('modalPremium', Math.round(d.premium).toLocaleString()); 
         setText('modalSum', formatNum(d.sum)); 
         
@@ -2843,6 +2994,8 @@ function generatePolicyTableData() {
     const isWXN = planAbbr === "WXN" || planName.includes("WXN") || planName.includes("WHOLE LIFE EXTRA");
     const isElite = planName.includes('ELITE') || planName.includes('868') || planName.includes('818');
     const isTX = planName.includes('24 TX') || planAbbr === 'TX';
+    const isLV = planAbbr === 'LV' || planName.includes('LIFETIME VALUE');
+    const isSM = planAbbr === '7SM' || planName.includes('SMART PLAN');
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
@@ -2882,7 +3035,7 @@ function generatePolicyTableData() {
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
                     </label>
                 `;
-            } else if (isWXN || isElite || isTX) {
+            } else if (isWXN || isElite || isTX || isLV || isSM) {
                 rightMenuHTML = `
                     <div class="flex items-center gap-1.5 min-w-0">
                         <i class="fas fa-shield-alt text-rose-500 text-[14px] w-4 text-center shrink-0"></i>
@@ -3025,13 +3178,13 @@ function generatePolicyTableData() {
         if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
     }
 
-    const showCashFlowBase = isWXN || isElite || isTX;
+    const showCashFlowBase = isWXN || isElite || isTX || isLV || isSM;
     const forceShowCashFlow = showCashFlowBase;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX) && isShowSAActive);
+    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
-    const showCVColumn = isTLA ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
+    const showCVColumn = (isTLA || isLV) ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
 
     // MF premium column
     const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
@@ -3088,7 +3241,7 @@ function generatePolicyTableData() {
         </div>`;
 
     // compact: WXN/Elite/TX บนจอแคบ (<400px) หรือเมื่อเปิด SA toggle
-    const _isCompact  = (isWXN || isElite || isTX) && (_isNarrow || (showSAColumn && isShowSAActive));
+    const _isCompact  = (isWXN || isElite || isTX || isLV || isSM) && (_isNarrow || (showSAColumn && isShowSAActive));
     // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
     const _isSuperCompact = _isCompact && _vw < 380;
     const _thCls = _isSuperCompact ? 'py-1 px-0.5 font-bold'
@@ -3145,10 +3298,37 @@ function generatePolicyTableData() {
     } else if (isTX) {
         payYears = 24;
         maxYear = 90 - d.age;
+    } else if (isLV) {
+        payYears = parseInt(d.years) || 10; // LV: ชำระเบี้ย 10 / 15 / 20 ปี
+        maxYear = 100 - d.age;              // คุ้มครองถึงอายุ 100 ปี
+    } else if (isSM) {
+        payYears = 7;   // ชำระเบี้ย 7 ปี
+        maxYear = 21;   // คุ้มครอง 21 ปี
     } else if (isCL) {
         maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
     } else if (isTLA) {
         maxYear = payYears; // Term: คุ้มครองเฉพาะช่วงชำระเบี้ย
+    }
+
+    // LV helpers — เงินจ่ายคืนตามอายุ และผลประโยชน์เสียชีวิตตามปีกรมธรรม์
+    const lvIs10LVB = isLV && currentPlan === '10LV' && d.age >= 50;
+    function lvCashbackPct(age) {
+        if (age <= 59) return 1;
+        if (age === 60) return 11;
+        if (age <= 69) return 1;
+        if (age === 70) return 22;
+        if (age <= 79) return 2;
+        if (age === 80) return 33;
+        if (age <= 89) return 3;
+        if (age === 90) return 44;
+        if (age <= 99) return 4;
+        return 0;
+    }
+    function lvDeathMultiplier(policyYear, attainedAge) {
+        if (lvIs10LVB) return policyYear <= 10 ? 1.0 : 1.5;
+        if (policyYear <= 10) return 1.0;
+        if (policyYear <= 20) return 1.5;
+        return attainedAge <= 70 ? 2.0 : 1.5;
     }
 
     let html = '';
@@ -3205,13 +3385,18 @@ function generatePolicyTableData() {
             : currentSA;
 
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
-        let annualSaving = 0; 
+        let annualSaving = 0;
         if (isElitePlan) {
             if (y <= 8) {
                 annualSaving = d.premium;
                 totalSaving += annualSaving;
             }
-        } else if (y <= payYears && currentSA > 0) { 
+        } else if (isLV || isSM) {
+            if (y <= payYears) {
+                annualSaving = d.premium;
+                totalSaving += annualSaving;
+            }
+        } else if (y <= payYears && currentSA > 0) {
             annualSaving = Math.round((currentSA / initialSA) * initialPrem); 
             totalSaving += annualSaving; 
         }
@@ -3243,8 +3428,14 @@ function generatePolicyTableData() {
                 else if (currentAge == 61) cashFlowAmt = Math.round(currentSA * 0.10);
                 else if (currentAge > 61 && currentAge < 90) cashFlowAmt = Math.round(currentSA * (0.10 + ((currentAge - 61) * 0.005)));
                 else if (currentAge == 90) cashFlowAmt = Math.round(currentSA);
+            } else if (isLV) {
+                if (currentAge >= 100) cashFlowAmt = Math.round(currentSA * 1.50); // ครบกำหนดสัญญา 150%
+                else cashFlowAmt = Math.round(currentSA * lvCashbackPct(currentAge) / 100);
+            } else if (isSM) {
+                if (y === 21) cashFlowAmt = Math.round(currentSA * 2.12); // ครบกำหนดสัญญา 212%
+                else if (y >= 2 && y <= 20) cashFlowAmt = Math.round(currentSA * 0.02); // คืน 2% ต่อปี
             }
-        } 
+        }
         else if (isSurrenderActive && hasSurrenderMenu && cfWithdrawalSchedule[y] !== undefined && currentSA > 0) {
             const wAmt = cfWithdrawalSchedule[y];
             const cvBefore = Math.round((currentSA * cvRate) / 1000);
@@ -3264,7 +3455,7 @@ function generatePolicyTableData() {
         
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
-            let breakevenValue = (isElitePlan || isTX || isWXN) ? surrenderTotal
+            let breakevenValue = (isElitePlan || isTX || isWXN || isLV || isSM) ? surrenderTotal
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
@@ -3274,8 +3465,10 @@ function generatePolicyTableData() {
         // 5. ความคุ้มครองชีวิต
         let deathBenefit = slpaEffectiveSA;
         if (isElitePlan && currentSA > 0) {
-            let eliteMultiplier = Math.min(y, 8) * 1.0; 
+            let eliteMultiplier = Math.min(y, 8) * 1.0;
             deathBenefit = Math.max(Math.round(currentSA * eliteMultiplier), cvTotal, totalSaving);
+        } else if (isLV && currentSA > 0) {
+            deathBenefit = Math.max(Math.round(currentSA * lvDeathMultiplier(y, currentAge)), Math.round(totalSaving * 1.05));
         }
 
         accCashFlow += cashFlowAmt; 

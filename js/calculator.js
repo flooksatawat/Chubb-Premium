@@ -31,9 +31,11 @@ const PLAN_CONFIG = {
     "Whole Life Extra": { abbr: "WXN", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['WXN10', 'WXN15'], hasCashFlow: true },
     "24 TX": { abbr: "TX", minAge: 0, maxAge: 55, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['24TX'], hasCashFlow: true },
     "868 / 818 Elite Saving": { abbr: "Elite", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['S868', 'S818'], hasCashFlow: true },
+    "LifeTime Value": { abbr: "LV", minAge: 0, maxAge: 55, minSum: 80000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10LV', '15LV', '20LV'], hasCashFlow: true },
     "Century Life": { abbr: "CL", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 150000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
+    "Smart Plan 21/7": { abbr: "7SM", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['7SM'], hasCashFlow: true },
     "Medical Fund": { abbr: "MF", minAge: 0, maxAge: 99, minSum: 0, minPrem: 0, getMaxSum: (age) => Infinity, options: [], hasCashFlow: false }
 };
 
@@ -48,15 +50,17 @@ const allInsurancePlans = [
     { name: "Whole Life Extra", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "24 TX", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "868 / 818 Elite Saving", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
+    { name: "LifeTime Value", desc: "ออมยาว รับเงินคืนทุกปี ถึงอายุ 100", icon: "fas fa-hourglass-half", color: "text-violet-500", bg: "bg-violet-100" },
+    { name: "Smart Plan 21/7", desc: "ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%", icon: "fas fa-seedling", color: "text-teal-500", bg: "bg-teal-100" },
     { name: "Medical Fund", desc: "ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง", icon: "fas fa-hospital", color: "text-sky-500", bg: "bg-sky-100" }
 ];
 
 async function loadAllRates() {
     const rateFiles = [
         'cx_rates.json', 'ci_rates.json', 'lp_rates.json', 'slb_rates.json', 'slpa_rates.json',
-        'tx_rates.json', 'elite_rates.json', 'cl_rates.json', 'tla_rates.json',
+        'tx_rates.json', 'elite_rates.json', 'lv_rates.json', 'cl_rates.json', 'tla_rates.json',
         'hx_rates.json', 'hxd_rates.json', 'hxo_rates.json', '3d_health.json',
-        'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json'
+        'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json', 'sm_rates.json'
     ];
     try {
         for (const file of rateFiles) {
@@ -192,6 +196,7 @@ function validateAndCapHBF(hbfVal, age, status, occupation, nationality, baseSum
 }
 
 function getCLMinSum() {
+    if (currentAppPlan === 'LifeTime Value') return (currentPlan === '10LV') ? 80000 : 100000;
     if (currentAppPlan !== 'Century Life') return PLAN_CONFIG[currentAppPlan]?.minSum || 100000;
     return ['60CL', '90CL', '100CL'].includes(currentPlan) ? 150000 : 100000;
 }
@@ -220,6 +225,7 @@ function _getPlanLabel() {
     if (currentAppPlan === '3D Health Excellence') return `แผน ${currentPlan}`;
     if (currentAppPlan === '24 TX') return 'แผน 24TX';
     if (currentAppPlan === '868 / 818 Elite Saving') return `แผน ${currentPlan}`;
+    if (currentAppPlan === 'LifeTime Value') return `แผน ${currentPlan}`;
     return `แผน ${currentPlan || currentAppPlan}`;
 }
 
@@ -239,6 +245,11 @@ function forceAgeValidation() {
     } else if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
         val = 55;
         showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    } else if (currentAppPlan === 'LifeTime Value') {
+        if (val < 0) val = 0;
+        if (currentPlan === '15LV' && val > 45) { val = 45; showCustomError("แผน 15LV รับประกันสูงสุดถึงอายุ 45 ปี"); }
+        else if (currentPlan === '20LV' && val > 40) { val = 40; showCustomError("แผน 20LV รับประกันสูงสุดถึงอายุ 40 ปี"); }
+        else if (currentPlan === '10LV' && val > 55) { val = 55; showCustomError("แผน 10LV รับประกันสูงสุดถึงอายุ 55 ปี"); }
     } else {
         val = _clampAgeWithWarn(val, limits, _getPlanLabel());
     }
@@ -261,6 +272,11 @@ function adjustAge(delta) {
     } else if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && val > 55) {
         val = 55;
         showCustomError("แผน CL60 รับอายุสูงสุด 55 ปี");
+    } else if (currentAppPlan === 'LifeTime Value') {
+        if (val < 0) val = 0;
+        if (currentPlan === '15LV' && val > 45) { val = 45; showCustomError("แผน 15LV รับประกันสูงสุดถึงอายุ 45 ปี"); }
+        else if (currentPlan === '20LV' && val > 40) { val = 40; showCustomError("แผน 20LV รับประกันสูงสุดถึงอายุ 40 ปี"); }
+        else if (currentPlan === '10LV' && val > 55) { val = 55; showCustomError("แผน 10LV รับประกันสูงสุดถึงอายุ 55 ปี"); }
     } else {
         val = _clampAgeWithWarn(val, limits, _getPlanLabel());
     }
@@ -476,6 +492,12 @@ function calculate(source, enforceMin = false) {
             currentPlan = age <= 50 ? 'S868' : 'S818';
         }
 
+        if (currentAppPlan === 'LifeTime Value') {
+            if (currentPlan === '15LV' && age > 45) age = 45;
+            if (currentPlan === '20LV' && age > 40) age = 40;
+            if (currentPlan === '10LV' && age > 55) age = 55;
+        }
+
         if (source === 'sum') fSum = getSafeValue('sumInsuredInput');
         else if (source === 'premium') fPrem = getSafeValue('premiumInput');
 
@@ -624,6 +646,79 @@ function calculate(source, enforceMin = false) {
                 document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 if(document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.12).toLocaleString();
             }
+        }
+
+        // ---------------- 3b. LifeTime Value (LV) ----------------
+        else if (currentAppPlan === 'LifeTime Value') {
+            // 10LV แยกเป็น 10LVA (อายุ <= 49) และ 10LVB (อายุ 50-55)
+            let lvRateKey = currentPlan;
+            if (currentPlan === '10LV') lvRateKey = age <= 49 ? '10LVA' : '10LVB';
+            let lvRate = LIFE_RATES[lvRateKey]?.[currentGender]?.[age] || 0;
+
+            if (lvRate > 0) {
+                let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
+
+                if (source === 'cashflow') {
+                    // เงินคืนปีแรก = 1% ของทุนประกัน
+                    let cf = getSafeValue('cashFlowInput');
+                    fSum = Math.round(cf / 0.01);
+                    fPrem = Math.round((fSum / 1000) * lvRate) + mfPrem;
+                } else if (source === 'sum') {
+                    fSum = Math.round(getSafeValue('sumInsuredInput'));
+                    fPrem = Math.round((fSum / 1000) * lvRate) + mfPrem;
+                } else {
+                    fPrem = getSafeValue('premiumInput') || 0;
+                    let basePrem = fPrem - mfPrem;
+                    if (basePrem < 0) basePrem = 0;
+                    // ไม่มีส่วนลดทุนประกันสำหรับ LV
+                    fSum = lvRate > 0 ? Math.round((basePrem * 1000) / lvRate) : 0;
+                }
+
+                let minLvSum = (currentPlan === '10LV') ? 80000 : 100000;
+                if (enforceMin && fSum < minLvSum) {
+                    fSum = minLvSum;
+                    fPrem = Math.round((fSum / 1000) * lvRate) + mfPrem;
+                }
+                if (enforceMin && fPrem < config.minPrem) {
+                    showCustomError(`เบี้ยประกันขั้นต่ำ ต้องไม่น้อยกว่า ${config.minPrem.toLocaleString()} บาท/ปี`);
+                    fPrem = config.minPrem;
+                    let basePrem = fPrem - mfPrem;
+                    fSum = lvRate > 0 ? Math.round((basePrem * 1000) / lvRate) : 0;
+                }
+
+                document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                if (document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.01).toLocaleString();
+            }
+        }
+
+        // ---------------- 3c. Smart Plan 21/7 (7SM) ----------------
+        else if (currentAppPlan === 'Smart Plan 21/7') {
+            let smRate = LIFE_RATES['7SM']?.[currentGender]?.[age] || 275;
+            let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
+
+            if (source === 'cashflow') {
+                let cf = getSafeValue('cashFlowInput');
+                fSum = Math.round(cf / 0.02);
+                fPrem = Math.round((fSum / 1000) * smRate) + mfPrem;
+            } else if (source === 'sum') {
+                fSum = Math.round(getSafeValue('sumInsuredInput'));
+                fPrem = Math.round((fSum / 1000) * smRate) + mfPrem;
+            } else {
+                fPrem = getSafeValue('premiumInput') || 0;
+                let basePrem = fPrem - mfPrem;
+                if (basePrem < 0) basePrem = 0;
+                fSum = smRate > 0 ? Math.round((basePrem * 1000) / smRate) : 0;
+            }
+
+            if (enforceMin && fSum < config.minSum) {
+                fSum = config.minSum;
+                fPrem = Math.round((fSum / 1000) * smRate) + mfPrem;
+            }
+
+            document.getElementById('sumInsuredInput').value = formatNum(fSum);
+            document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+            if (document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.02).toLocaleString();
         }
 
         // ---------------- 4. 3D Health Excellence ----------------

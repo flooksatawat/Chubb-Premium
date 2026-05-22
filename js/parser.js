@@ -85,6 +85,18 @@ const PLAN_ALIASES = [
     ], plan: '868 / 818 Elite Saving' },
 
     { keys: [
+        'lifetime value','life time value','ไลฟ์ไทม์ แวลู','ไลฟ์ไทม์แวลู',
+        'ไลฟ์ไทม์','lv','10lv','15lv','20lv','แวลู','value',
+        'แอลวี','lifetime','ไลฟ์ ไทม์','lv plan','ไลฟ์ไทม์ value',
+        'ออมยาว','ออมถึง 100','คุ้มครองถึง 100',
+    ], plan: 'LifeTime Value' },
+
+    { keys: [
+        'smart plan','สมาร์ท แพลน','สมาร์ทแพลน','7sm','21/7','21 7',
+        'smart plan 21','สมาร์ท','7สมาร์ท','ออมสมาร์ท','สมาร์ทเพลน',
+    ], plan: 'Smart Plan 21/7' },
+
+    { keys: [
         'medical fund','เมดิคัล ฟันด์','เมดิคัล','medical',
         'เมดิคัลฟันด์','medical fund plan','เมดิ','เมดิคอล','เมดิเคิล',
         'กองทุนสุขภาพ','กองทุนการแพทย์','med fund','medfund','เมด','เมดิคัล fund',
@@ -425,6 +437,7 @@ function executeCommand(parsed, showPopup = true) {
                 else               setPlan('100CL');
                 break;
             case 'Whole Life Extra': setPlan(y <= 10 ? 'WXN10' : 'WXN15'); break;
+            case 'LifeTime Value':   setPlan(y <= 10 ? '10LV' : (y <= 15 ? '15LV' : '20LV')); break;
         }
     }
 
@@ -449,7 +462,7 @@ function executeCommand(parsed, showPopup = true) {
             if (el && cur < 150000) el.value = '150,000';
         }
         if (typeof calculate === 'function') calculate('sum', true);
-    } else if (['24 TX','868 / 818 Elite Saving','Whole Life Extra'].includes(plan)) {
+    } else if (['24 TX','868 / 818 Elite Saving','LifeTime Value','Smart Plan 21/7','Whole Life Extra'].includes(plan)) {
         if (parsed.amountType === 'premium' && parsed.amount > 0) {
             const el = document.getElementById('premiumInput');
             if (el) el.value = parsed.amount.toLocaleString();
