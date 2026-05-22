@@ -579,7 +579,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <div id="mainActionsGroup" class="pb-2 shrink-0 flex flex-col gap-3 mt-1 transition-all duration-300">
                         <!-- Medical Fund shortcut: visible only for 24TX, Elite, WXN -->
                         <div id="medicalFundBtnContainer" class="hidden">
-                            <button onclick="openMFPicker()" class="w-full h-[48px] bg-gradient-to-br from-sky-400 to-cyan-600 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(14,165,233,0.3)] border border-sky-300/50 active:scale-[0.97] transition-all relative overflow-hidden">
+                            <button onclick="mfBtnClick()" class="w-full h-[48px] bg-gradient-to-br from-sky-400 to-cyan-600 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(14,165,233,0.3)] border border-sky-300/50 active:scale-[0.97] transition-all relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none rounded-t-[16px]"></div>
                                 <i class="fas fa-hospital text-[18px] relative z-10"></i>
                                 <span class="relative z-10 tracking-wide">Medical Fund</span>
@@ -1834,7 +1834,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <script src="js/ui.js?v=71"></script>
     <script src="js/compare.js?v=5"></script>
     <script src="js/share.js?v=8"></script>
-    <script src="js/mf.js?v=20"></script>
+    <script src="js/mf.js?v=21"></script>
     <script>
         // ถอน SW เก่าออก (เคยใช้ลอง trick download — ไม่ทำงานบน LINE Android WebView)
         if ('serviceWorker' in navigator) {

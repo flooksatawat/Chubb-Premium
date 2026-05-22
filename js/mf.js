@@ -1041,3 +1041,159 @@ window.mfShowTotalPopup = async function() {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
 };
+
+// ==================== Medical Fund button dispatcher ====================
+// 24TX / Elite / WXN / 7SM → open the MF rider picker (เลือกแบบประกันบริษัทอื่น)
+// 3D Health Excellence    → project the plan's own renewable health premium ตลอดชีพ
+window.mfBtnClick = function() {
+    const plan = (typeof currentAppPlan !== 'undefined' && currentAppPlan)
+        ? currentAppPlan
+        : (window.currentAppPlan || '');
+    if (plan === '3D Health Excellence') {
+        window.mfShow3DProjectionPopup();
+    } else if (typeof window.openMFPicker === 'function') {
+        window.openMFPicker();
+    }
+};
+
+// ==================== 3D Health Excellence — Lifetime Premium Projection ====================
+// Projects the renewable health premium (HX + HXO + HXD + HBF) of the current 3D plan
+// year-by-year from the customer's current age up to renewal age 99 (coverage to 100),
+// using the same rate tables (getHealthRate) as the main calculator — so the figures
+// match exactly. เริ่มต้นจากเบี้ยปีปัจจุบัน เหมือนการเลือกแบบประกันในเมนู Medical Fund.
+window.mfShow3DProjectionPopup = function() {
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
+    const curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+
+    const hxVal  = (window.currentHX  && window.currentHX  !== 'ไม่เลือก') ? window.currentHX  : null;
+    const hxoVal = (window.currentHXO && window.currentHXO !== 'ไม่เลือก') ? window.currentHXO : null;
+    const hxdVal = (window.currentHXD && window.currentHXD !== 'ไม่เลือก') ? window.currentHXD : null;
+    const hbfVal = parseInt(window.currentHBF) || 0;
+
+    // Clear any popup already on screen
+    document.querySelectorAll('.mf-total-popup, .mf-alert-popup').forEach(el => el.remove());
+
+    const showAlert = (title, msg) => {
+        const ov = document.createElement('div');
+        ov.className = 'mf-alert-popup';
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);';
+        ov.innerHTML = `
+            <div style="max-width:420px;width:100%;background:#fff;border-radius:24px;padding:28px 24px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.35);border:2px solid #fbbf24;">
+                <div style="width:72px;height:72px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:34px;color:#d97706;"></i>
+                </div>
+                <div style="font-size:18px;font-weight:800;color:#92400e;margin-bottom:8px;">${title}</div>
+                <div style="font-size:14px;font-weight:600;color:#78350f;line-height:1.55;margin-bottom:20px;">${msg}</div>
+                <button onclick="this.closest('.mf-alert-popup').remove()" style="background:#f59e0b;color:#fff;border:none;padding:10px 32px;border-radius:9999px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,0.35);">ตกลง</button>
+            </div>`;
+        ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
+        document.body.appendChild(ov);
+    };
+
+    if (typeof getHealthRate !== 'function') {
+        showAlert('ยังโหลดข้อมูลไม่เสร็จ', 'ระบบกำลังโหลดอัตราเบี้ย กรุณารอสักครู่แล้วลองใหม่อีกครั้ง');
+        return;
+    }
+    if (!hxVal) {
+        showAlert('ยังไม่ได้เลือกค่าห้อง (HX)', 'กรุณาเลือกแผนค่าห้อง HX ของ 3D Health Excellence ก่อน จึงจะคำนวณเบี้ยล่วงหน้าได้');
+        return;
+    }
+
+    const MIN_AGE = 11, MAX_RENEW_AGE = 99;
+    if (!curAge || curAge <= 0) {
+        showAlert('กรุณากรอกอายุลูกค้า', `แผน 3D Health Excellence รับประกันอายุ ${MIN_AGE}–75 ปี และต่ออายุได้ถึง ${MAX_RENEW_AGE} ปี`);
+        return;
+    }
+    if (curAge < MIN_AGE || curAge > MAX_RENEW_AGE) {
+        showAlert(`อายุ ${curAge} ปี ไม่อยู่ในช่วงที่รองรับ`, `แผนนี้คำนวณเบี้ยล่วงหน้าได้สำหรับอายุ ${MIN_AGE}–${MAX_RENEW_AGE} ปี`);
+        return;
+    }
+
+    // Project the renewable health premium year-by-year (เริ่มจากอายุปัจจุบัน → 100)
+    const rows = [];
+    let total = 0, prevPrem = null, lastAge = curAge;
+    for (let age = curAge; age <= MAX_RENEW_AGE; age++) {
+        const hx  = getHealthRate('HX',  hxVal,  age, gender) || 0;
+        const hxo = hxoVal ? (getHealthRate('HXO', hxoVal, age, gender) || 0) : 0;
+        const hxd = hxdVal ? (getHealthRate('HXD', hxdVal, age, gender) || 0) : 0;
+        const hbf = hbfVal > 0 ? (getHealthRate('HBF', String(hbfVal), age, gender) || 0) : 0;
+        const prem = hx + hxo + hxd + hbf;
+        if (prem <= 0) continue;
+        rows.push({ age, prem, changed: prevPrem === null || prem !== prevPrem });
+        prevPrem = prem;
+        total += prem;
+        lastAge = age;
+    }
+    if (rows.length === 0) {
+        showAlert('ไม่พบข้อมูลอัตราเบี้ย', 'ยังไม่มีข้อมูลอัตราเบี้ยสำหรับชุดความคุ้มครองที่เลือก');
+        return;
+    }
+
+    const firstPrem = rows[0].prem;
+    const hxRoom = (typeof HX_PLAN_INFO !== 'undefined' && HX_PLAN_INFO[hxVal]) ? HX_PLAN_INFO[hxVal].room : hxVal;
+    const riderParts = [`HX ${hxRoom}`];
+    if (hxoVal) riderParts.push('HXO');
+    if (hxdVal) riderParts.push('HXD');
+    if (hbfVal > 0) riderParts.push(`HBF ${hbfVal.toLocaleString('en-US')}`);
+    const planLabel = riderParts.join(' · ');
+
+    const rowsHtml = rows.map((r, i) => {
+        const isFirst = i === 0;
+        const bg = isFirst ? '#ecfeff' : (r.changed ? '#f0fdfa' : (i % 2 === 0 ? '#ffffff' : '#f8fafc'));
+        const borderTop = (!isFirst && r.changed) ? 'border-top:2px solid #5eead4;' : '';
+        const color = isFirst ? '#0e7490' : '#0f766e';
+        const ageColor = isFirst ? '#0e7490' : (r.changed ? '#0f766e' : '#475569');
+        const fw = (isFirst || r.changed) ? '800' : '500';
+        const tag = isFirst ? ` <span style="font-size:9px;background:#0891b2;color:#fff;padding:1px 6px;border-radius:9999px;vertical-align:middle;">ปีนี้</span>` : '';
+        return `<tr style="background:${bg};${borderTop}">
+            <td style="padding:5px 12px;text-align:center;color:${ageColor};font-size:12px;font-weight:${fw};">${r.age}${tag}</td>
+            <td style="padding:5px 12px;text-align:right;color:${color};font-size:12px;font-weight:${fw};">${r.prem.toLocaleString('en-US')}</td>
+        </tr>`;
+    }).join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'mf-total-popup';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+        <div style="max-width:380px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:24px 20px 20px;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;max-height:88vh;display:flex;flex-direction:column;">
+            <div style="text-align:center;">
+                <div style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                    <i class="fas fa-hand-holding-medical" style="font-size:24px;color:#fff;"></i>
+                </div>
+                <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.92);">เบี้ยประกันสุขภาพ 3D Health ตลอดชีพ</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">${planLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${curAge}–${lastAge} ปี</div>
+                <div style="font-size:33px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;margin-top:10px;">${total.toLocaleString('en-US')}</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:3px;">บาท (รวมเบี้ยทุกปีถึงอายุ ${lastAge} ปี · คุ้มครองถึงอายุ 100 ปี)</div>
+            </div>
+
+            <div style="background:#fff;border-radius:14px;margin-top:14px;overflow:hidden;display:flex;flex-direction:column;flex:1 1 auto;min-height:80px;">
+                <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                    <thead><tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;">
+                        <th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;">อายุ (ปี)</th>
+                        <th style="padding:7px 12px;text-align:right;font-size:11px;font-weight:700;">เบี้ย (บาท/ปี)</th>
+                    </tr></thead>
+                </table>
+                <div style="overflow-y:auto;">
+                    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+                <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                    <tfoot><tr style="background:#0369a1;color:#fff;">
+                        <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:700;">รวมเบี้ยตลอดชีพ</td>
+                        <td style="padding:8px 12px;text-align:right;font-size:14px;font-weight:900;">${total.toLocaleString('en-US')}</td>
+                    </tr></tfoot>
+                </table>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.8);margin-top:10px;padding:0 4px;">
+                <span>เบี้ยปีแรก (อายุ ${curAge}): <b style="color:#fff;">${firstPrem.toLocaleString('en-US')}</b></span>
+                <span>เฉลี่ย/ปี: <b style="color:#fff;">${Math.round(total / rows.length).toLocaleString('en-US')}</b></span>
+            </div>
+
+            <button onclick="this.closest('.mf-total-popup').remove()" style="background:rgba(255,255,255,0.18);color:#fff;border:2px solid rgba(255,255,255,0.35);padding:9px 32px;border-radius:9999px;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:12px;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">ปิด</button>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+};
