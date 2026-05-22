@@ -3184,7 +3184,7 @@ function generatePolicyTableData() {
     const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
-    const showCVColumn = (isTLA || isLV) ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
+    const showCVColumn = (isTLA || isLV || isSM) ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
 
     // MF premium column
     const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
