@@ -54,16 +54,18 @@ const _3D_HX_INFO = {
 };
 const _3D_HXO_AMT = { 'HXO10':'1,000','HXO20':'2,000','HXO30':'3,000','HXO50':'5,000' };
 const _3D_HXD_AMT = { 'HXD100':'10,000','HXD200':'20,000','HXD500':'50,000','HXD1000':'100,000' };
+function _fmtMillion(numStr) {
+    const n = parseInt(String(numStr).replace(/,/g, ''));
+    if (n >= 1000000) return (n / 1000000) + ' ล้าน';
+    if (n >= 10000) return (n / 10000).toFixed(0) + ' หมื่น';
+    return n.toLocaleString() + ' บาท';
+}
+
 function _get3DShareLines() {
-    const hx  = window.currentHX  || '';
     const hxo = window.currentHXO || 'ไม่เลือก';
     const hxd = window.currentHXD || 'ไม่เลือก';
     const hbf = parseInt(window.currentHBF) || 0;
     const lines = [];
-    if (hx && _3D_HX_INFO[hx]) {
-        const info = _3D_HX_INFO[hx];
-        lines.push(`🛏️ ค่าห้อง: ${info.room} บ./วัน | วงเงินเหมาจ่าย: ${info.limit} บ./ปี`);
-    }
     if (hxo !== 'ไม่เลือก' && _3D_HXO_AMT[hxo]) lines.push(`💊 OPD (ผู้ป่วยนอก): ${_3D_HXO_AMT[hxo]} บ./ครั้ง`);
     if (hxd !== 'ไม่เลือก' && _3D_HXD_AMT[hxd]) lines.push(`🔬 วงเงินตรวจ/วินิจฉัยเพิ่ม: ${_3D_HXD_AMT[hxd]} บ./ปี`);
     if (hbf > 0) lines.push(`🏨 ชดเชยรายวัน: ${hbf.toLocaleString()} บ./วัน`);
@@ -131,6 +133,27 @@ function generateSummaryText() {
     if (!lastCalculationData) return '';
     const d = lastCalculationData;
     const genderTh = d.gender;
+
+    if (currentAppPlan === '3D Health Excellence') {
+        const hx = window.currentHX || '';
+        const hxInfo = hx && _3D_HX_INFO[hx] ? _3D_HX_INFO[hx] : null;
+        const planLine = hxInfo
+            ? `📋 แผน: ค่าห้อง ${hxInfo.room} บ./วัน | วงเงินเหมาจ่าย ${_fmtMillion(hxInfo.limit)}`
+            : `📋 แผน: 3D Health Excellence`;
+        const ciAmt = d.sum * 2;
+        const ciLine = `🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`;
+        const lines = [
+            planLine,
+            `👤 เพศ: ${genderTh}`,
+            `🎂 อายุ: ${d.age} ปี`,
+            `💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
+            ciLine,
+        ];
+        const extraLines = _get3DShareLines();
+        extraLines.forEach(l => lines.push(l));
+        return lines.join('\n');
+    }
+
     const lines = [
         `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
         `👤 เพศ: ${genderTh}`,
@@ -139,10 +162,6 @@ function generateSummaryText() {
         `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
     ];
     if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
-    if (currentAppPlan === '3D Health Excellence') {
-        const extraLines = _get3DShareLines();
-        if (extraLines.length) extraLines.forEach(l => lines.push(l));
-    }
     return lines.join('\n');
 }
 
