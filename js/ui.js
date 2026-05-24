@@ -4618,7 +4618,7 @@ async function _exportMFTablePDF(actionType = 'preview') {
                 if (!shared) doc.save(pdfFileName);
             }
         } else {
-            window.open(doc.output('bloburl'), '_blank');
+            _fallbackDownload(doc.output('blob'), pdfFileName);
         }
     } catch(e) {
         if (toast.parentNode) toast.remove();
@@ -5084,8 +5084,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 });
                 setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
             } else {
-                doc.autoPrint();
-                window.open(doc.output('bloburl'), '_blank');
+                _fallbackDownload(doc.output('blob'), pdfFileName);
             }
 
         } else if (actionType === 'line') {
@@ -5111,12 +5110,12 @@ async function exportTableToPDF(actionType = 'preview') {
             } else {
                 // Browser ปกติ: ลอง share ไฟล์ก่อน
                 const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-                if (!shared) window.open(doc.output('bloburl'), '_blank');
+                if (!shared) _fallbackDownload(doc.output('blob'), pdfFileName);
             }
 
         } else if (actionType === 'messenger') {
             const shared = await tryShareFile(pdfFile, shareTitle, shareTitle);
-            if (!shared) window.open(doc.output('bloburl'), '_blank');
+            if (!shared) _fallbackDownload(doc.output('blob'), pdfFileName);
 
         } else if (actionType === 'modal') {
             await _showTableShareModal(pdfBlob, pdfFile, doc, d);
@@ -5427,7 +5426,10 @@ window.navShareAction = async function() {
     loadingEl.remove();
 
     const planAbbr = typeof getPlanAbbr === 'function' ? getPlanAbbr(currentAppPlan) : (currentAppPlan || 'insurance');
-    const imgName = `${planAbbr}_ตารางมูลค่า.png`;
+    const _d = lastCalculationData;
+    const _gNav = _d ? (_d.gender || '') : '';
+    const _ageNav = _d ? (_d.age || '') : '';
+    const imgName = `ตารางมูลค่า ${planAbbr}${_gNav ? ' ' + _gNav : ''}${_ageNav ? ' ' + _ageNav + 'ปี' : ''}.png`;
     _showTableImageViewer(blob, imgName);
 };
 
@@ -6053,8 +6055,7 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
 
     overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
         overlay.remove();
-        doc.autoPrint();
-        window.open(doc.output('bloburl'), '_blank');
+        _fallbackDownload(doc.output('blob'), pdfName);
         URL.revokeObjectURL(blobUrl);
     });
 

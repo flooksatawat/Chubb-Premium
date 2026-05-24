@@ -138,7 +138,7 @@ function generateSummaryText() {
         const hx = window.currentHX || '';
         const hxInfo = hx && _3D_HX_INFO[hx] ? _3D_HX_INFO[hx] : null;
         const planLine = hxInfo
-            ? `📋 แผน: ค่าห้อง ${hxInfo.room} บ./วัน | วงเงินเหมาจ่าย ${_fmtMillion(hxInfo.limit)}`
+            ? `📋 แผน: ค่าห้อง ${hxInfo.room} บ. | เหมาจ่าย ${_fmtMillion(hxInfo.limit)}`
             : `📋 แผน: 3D Health Excellence`;
         const ciAmt = d.sum * 2;
         const ciLine = `🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`;
