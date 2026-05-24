@@ -4677,7 +4677,25 @@ async function _export3DPDF(actionType = 'preview') {
         doc.text('สัญญาเพิ่มเติม:', 15, y);
         doc.setFont(fontName, 'normal'); doc.setTextColor(71,85,105);
         doc.text(`HXO: ${hxoVal} | HXD: ${hxdVal} | HBF: ${hbfVal > 0 ? hbfVal.toLocaleString()+' บ./วัน' : 'ไม่เลือก'}`, 55, y);
-        y += 8;
+        y += 9;
+
+        // Critical illness banner
+        const _ciBase = (lastCalculationData && lastCalculationData.sum) ? lastCalculationData.sum : 0;
+        const _ciAmt  = _ciBase * 2;
+        const _ciDisp = _ciAmt >= 1000000
+            ? (_ciAmt / 1000000 % 1 === 0 ? (_ciAmt / 1000000).toFixed(0) : (_ciAmt / 1000000).toFixed(2)) + ' ล้าน'
+            : _ciAmt.toLocaleString() + ' บาท';
+        doc.setFillColor(255, 241, 242);
+        doc.rect(15, y - 4, 180, 9, 'F');
+        doc.setDrawColor(244, 63, 94);
+        doc.rect(15, y - 4, 180, 9, 'S');
+        doc.setFont(fontName, 'bold'); doc.setFontSize(10.5); doc.setTextColor(190, 18, 60);
+        doc.text('🦠  โรคร้ายแรง — รับวงเงินคุ้มครอง 2 เท่า', 20, y + 1.5);
+        if (_ciAmt > 0) {
+            doc.setTextColor(159, 18, 57);
+            doc.text(`= ${_ciDisp}`, 192, y + 1.5, { align: 'right' });
+        }
+        y += 13;
 
         const checkPage = (h) => { if (y + h > 285) { doc.addPage(); y = 20; } };
 
