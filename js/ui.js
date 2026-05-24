@@ -1039,6 +1039,12 @@ window.render3DOptionsUI = function() {
     let hxdVal = window.currentHXD || '';
     let hbfVal = window.currentHBF || 0;
 
+    const _lcd3d = lastCalculationData || {};
+    const _hxPrem  = _lcd3d.hxPrem  || 0;
+    const _hxoPrem = _lcd3d.hxoPrem || 0;
+    const _hxdPrem = _lcd3d.hxdPrem || 0;
+    const _hbfPrem = _lcd3d.hbfPrem || 0;
+
     const hxOpts = ['HX15', 'HX20', 'HX40', 'HX60', 'HX150', 'HX300'];
     const hxoOpts = ['HXO10', 'HXO20', 'HXO30', 'HXO50'];
                 const hxdOpts = ['HXD100', 'HXD200', 'HXD500', 'HXD1000'];
@@ -1058,7 +1064,9 @@ window.render3DOptionsUI = function() {
         const hxLbl = (HX_PLAN_INFO[opt] && HX_PLAN_INFO[opt].room) || opt;
         html += `<button onclick="window.handle3DClick('HX', '${opt}')" class="${btnClass}">${hxLbl}</button>`;
     });
-    html += `</div></div></div>`;
+    html += `</div></div>`;
+    if (_hxPrem > 0) html += `<p class="mt-2 text-center text-[11px] font-bold text-teal-600">เบี้ย HX: ${_hxPrem.toLocaleString()} บาท/ปี</p>`;
+    html += `</div>`;
 
     if (hxVal && hxOpts.includes(hxVal)) {
         // ── HBF — pill grid (ไม่มีปิด) + X ปิดมุมขวาบน + fine-tune stepper ──
@@ -1081,7 +1089,9 @@ window.render3DOptionsUI = function() {
         html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(-100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(-100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">−</button>`;
         html += `<input id="hbfCustomInput" type="number" inputmode="numeric" min="0" max="5000" step="100" value="${hbfNum === 0 ? '' : hbfNum}" placeholder="—" onchange="window.handle3DClick('HBF', Math.floor((parseInt(this.value)||0)/100)*100); this.blur();" class="flex-1 text-center bg-slate-50 border border-slate-200 rounded-xl h-9 text-[13px] font-bold ${hbfNum === 0 ? 'text-slate-400' : 'text-rose-600'} outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">`;
         html += `<button ontouchstart="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" ontouchend="clearInterval(window._hbfInterval)" onmousedown="window._hbfInterval=setInterval(()=>window.adjustHBF(100),150)" onmouseup="clearInterval(window._hbfInterval)" onclick="window.adjustHBF(100)" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-100 active:text-rose-600 transition-all select-none touch-manipulation">+</button>`;
-        html += `</div></div>`;
+        html += `</div>`;
+        if (_hbfPrem > 0) html += `<p class="mt-2 text-center text-[11px] font-bold text-rose-600">เบี้ย HBF: ${_hbfPrem.toLocaleString()} บาท/ปี</p>`;
+        html += `</div>`;
 
         // ── HXO ──
         html += `<div id="rider-hxo" class="relative bg-white rounded-xl p-5 mb-3 shadow-sm border border-blue-100"><button onclick="window.closeRiderSection('rider-hxo', 'currentHXO')" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90" title="ซ่อน HXO"><i class="fas fa-times text-[12px]"></i></button><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5 pr-6"><i class="fas fa-plus-circle text-blue-500"></i> EXTRA (HXO)</p>`;
@@ -1092,7 +1102,9 @@ window.render3DOptionsUI = function() {
             let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-blue-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-blue-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
             html += `<button onclick="window.handle3DClick('HXO', '${opt}')" class="${btnClass}">${displayText}</button>`;
         });
-        html += `</div></div></div>`;
+        html += `</div></div>`;
+        if (_hxoPrem > 0) html += `<p class="mt-2 text-center text-[11px] font-bold text-blue-600">เบี้ย HXO: ${_hxoPrem.toLocaleString()} บาท/ปี</p>`;
+        html += `</div>`;
 
         // ── HXD (เมื่อ HXO เลือกอยู่) ──
         if (hxoVal && hxoVal !== 'ไม่เลือก') {
@@ -1104,7 +1116,9 @@ window.render3DOptionsUI = function() {
                 let btnClass = isSel ? 'w-full text-center py-2 text-sm font-bold text-indigo-600 bg-white shadow-md rounded-xl transition-all border-b-2 border-indigo-500/10' : 'w-full text-center py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200/50';
                 html += `<button onclick="window.handle3DClick('HXD', '${opt}')" class="${btnClass}">${displayText}</button>`;
             });
-            html += `</div></div></div>`;
+            html += `</div></div>`;
+            if (_hxdPrem > 0) html += `<p class="mt-2 text-center text-[11px] font-bold text-indigo-600">เบี้ย HXD: ${_hxdPrem.toLocaleString()} บาท/ปี</p>`;
+            html += `</div>`;
         }
     }
 
