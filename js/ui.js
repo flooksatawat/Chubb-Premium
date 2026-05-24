@@ -3324,6 +3324,8 @@ function generatePolicyTableData() {
         maxYear = 21;   // คุ้มครอง 21 ปี
     } else if (isCL) {
         maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
+    } else if (isSLB) {
+        maxYear = 99 - d.age; // Signature Legacy คุ้มครองถึงอายุ 99
     } else if (isTLA) {
         maxYear = payYears; // Term: คุ้มครองเฉพาะช่วงชำระเบี้ย
     }
