@@ -1394,8 +1394,14 @@ function selectAppPlan(planName) {
     } else if (planName === 'LifeTime Value') {
         currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
-        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden');
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.style.order = '1';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        const premSubLblLV = document.getElementById('premiumSubLabel');
+        if(premSubLblLV) premSubLblLV.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
@@ -3286,7 +3292,6 @@ function generatePolicyTableData() {
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
-        ${isLV ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">วงเงินคุ้มครอง</th>` : ''}
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
@@ -3507,7 +3512,6 @@ function generatePolicyTableData() {
         html += `<tr id="${rowId}" class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
-            ${isLV ? `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${deathBenefit > 0 ? deathBenefit.toLocaleString() : '—'}</td>` : ''}
             <td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
             ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}`;
