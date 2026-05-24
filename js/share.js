@@ -8,7 +8,7 @@ function triggerInstallmentShare(type) {
     
     const sumStr = formatNum(d.sum);
     const premOnlyText = `${amt.toLocaleString()}`;
-    const genderTh = d.gender === 'male' ? 'ชาย' : 'หญิง';
+    const genderTh = d.gender;
     const allText = [
         `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
         `👤 เพศ: ${genderTh}`,
@@ -130,7 +130,7 @@ function openGenericShareModal(type) {
 function generateSummaryText() {
     if (!lastCalculationData) return '';
     const d = lastCalculationData;
-    const genderTh = d.gender === 'male' ? 'ชาย' : 'หญิง';
+    const genderTh = d.gender;
     const lines = [
         `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
         `👤 เพศ: ${genderTh}`,
