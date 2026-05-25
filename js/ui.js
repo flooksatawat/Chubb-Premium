@@ -1511,7 +1511,7 @@ function selectAppPlan(planName) {
         if(extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
         const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.add('hidden');
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
-        const _3dp = document.getElementById('threeDPremDisplay'); if(_3dp) { _3dp.textContent = ''; _3dp.classList.add('hidden'); }
+
     }
 
     if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', '3D Health Excellence'].includes(planName)) {
@@ -2872,28 +2872,9 @@ function _updateSumResultDisplay() {
     }
 }
 
-function _update3DPremDisplay() {
-    const el = document.getElementById('threeDPremDisplay');
-    if (!el) return;
-    if (currentAppPlan === '3D Health Excellence' && lastCalculationData && lastCalculationData.clBasePrem !== undefined) {
-        const d = lastCalculationData;
-        const parts = [`เบี้ย CL: ${Math.round(d.clBasePrem).toLocaleString()}`];
-        if (d.hxPrem  > 0) parts.push(`HX: ${Math.round(d.hxPrem).toLocaleString()}`);
-        if (d.hxoPrem > 0) parts.push(`HXO: ${Math.round(d.hxoPrem).toLocaleString()}`);
-        if (d.hxdPrem > 0) parts.push(`HXD: ${Math.round(d.hxdPrem).toLocaleString()}`);
-        if (d.hbfPrem > 0) parts.push(`HBF: ${Math.round(d.hbfPrem).toLocaleString()}`);
-        if (d.tpdPrem > 0) parts.push(`TPD: ${Math.round(d.tpdPrem).toLocaleString()}`);
-        el.innerHTML = parts.join(' + ') + ' <span class="text-slate-500 font-medium">บาท/ปี</span>';
-        el.classList.remove('hidden');
-    } else {
-        el.textContent = '';
-        el.classList.add('hidden');
-    }
-}
 
 function refreshAllDisplays() {
     _updateTPDUI();
-    _update3DPremDisplay();
     _updateSumResultDisplay();
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return;
     const p = lastCalculationData.premium || 0;
