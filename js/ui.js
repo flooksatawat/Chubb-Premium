@@ -1499,13 +1499,14 @@ function selectAppPlan(planName) {
     }
     
     if (planName === '3D Health Excellence') {
+        currentMode = 'sum';
         window.currentHX = 'ไม่เลือก'; window.currentHXO = 'ไม่เลือก'; window.currentHXD = 'ไม่เลือก'; window.currentHBF = 0;
         if(hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
         if(extraOptions) { extraOptions.classList.remove('hidden'); render3DOptionsUI(); }
         const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.remove('hidden');
         if(pPills) pPills.classList.add('hidden');
         premiumInput.readOnly = true;
-        if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; 
+        if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)";
     } else {
         if(extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
         const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.add('hidden');
