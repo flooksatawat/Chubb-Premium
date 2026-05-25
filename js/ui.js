@@ -2867,10 +2867,10 @@ function _updateSumResultDisplay() {
     let label = '';
     if (currentAppPlan === '3D Health Excellence') {
         prem = Math.round(lastCalculationData.clBasePrem || 0);
-        label = `💰 สัญญาหลัก CL: ${prem.toLocaleString()} บาท/ปี`;
+        label = `เบี้ย CL: ${prem.toLocaleString()} บาท/ปี`;
     } else {
         prem = Math.round(lastCalculationData.premium || 0);
-        label = `💰 เบี้ยประกัน: ${prem.toLocaleString()} บาท/ปี`;
+        label = `เบี้ยประกัน: ${prem.toLocaleString()} บาท/ปี`;
     }
     if (prem > 0) {
         el.textContent = label;
