@@ -3830,6 +3830,34 @@ function closePdfViewer() {
     _pdfViewerImageBlobUrl = null;
 }
 
+function printFromPdfViewer() {
+    if (!_pdfViewerBlob) return;
+    const blob = _pdfViewerBlob;
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+        // มือถือ: เปิด blob URL ใหม่ให้ระบบจัดการ (browser share/print dialog)
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 60000);
+    } else {
+        // คอม: ใช้ iframe print เพื่อเปิด print dialog โดยตรง
+        const url = URL.createObjectURL(blob);
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+            try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e) {}
+            setTimeout(() => { try { iframe.remove(); URL.revokeObjectURL(url); } catch {} }, 60000);
+        };
+    }
+}
+
 async function _ensureLiffReady() {
     if (window._liffReady && typeof window._liffReady.then === 'function') {
         try { await window._liffReady; } catch {}
@@ -6152,19 +6180,10 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
         URL.revokeObjectURL(blobUrl);
     });
 
-    overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
+    overlay.querySelector('[data-action="print"]').addEventListener('click', async () => {
         overlay.remove();
         URL.revokeObjectURL(blobUrl);
-        const printBlob = doc.output('blob');
-        const printUrl = URL.createObjectURL(printBlob);
-        const iframe = document.createElement('iframe');
-        iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
-        iframe.src = printUrl;
-        document.body.appendChild(iframe);
-        iframe.onload = () => {
-            try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e) { window.print(); }
-            setTimeout(() => { try { iframe.remove(); URL.revokeObjectURL(printUrl); } catch {} }, 60000);
-        };
+        await showPdfViewer(pdfBlob, pdfName, cleanName);
     });
 
     overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
