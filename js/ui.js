@@ -4869,10 +4869,14 @@ async function _export3DPDF(actionType = 'preview') {
             doc.setFont(fontName, 'bold'); doc.setFontSize(11); doc.setTextColor(67, 56, 202);
             doc.text(`สัญญาเพิ่มเติม HXD — ${_DL[hxdVal]||hxdVal} บ./รอบ`, 18, y + 1.5);
             y += 10;
+            const _hxdBase = { 'HXD100':1,'HXD200':2,'HXD500':5,'HXD1000':10 };
+            const _hxdMul = _hxdBase[hxdVal] || 1;
+            const _hxdItem2Amt = (3000 * _hxdMul).toLocaleString();
+            const _hxdItem3Amt = (1000000 * _hxdMul).toLocaleString();
             const hxdItems = [
                 { t: 'ข้อ 1 — ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', c: 'ระยะรอคอย 30 วัน' },
-                { t: 'ข้อ 2 — การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', c: 'ระยะรอคอย 365 วัน' },
-                { t: 'ข้อ 3 — ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง (ตลอดชีวิต/ราย)', c: 'ระยะรอคอย 120 วัน' },
+                { t: `ข้อ 2 — การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)`, c: `${_hxdItem2Amt} บ./รอบ  |  ระยะรอคอย 365 วัน` },
+                { t: `ข้อ 3 — ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง`, c: `${_hxdItem3Amt} บ. ตลอดชีวิต/ราย  |  ระยะรอคอย 120 วัน` },
             ];
             doc.setFont(fontName, 'normal'); doc.setFontSize(9.5);
             hxdItems.forEach(item => {
@@ -5945,16 +5949,20 @@ window.render3DDetailsAccordion = function() {
             contentHtml += `<div class="mx-3 mt-4 mb-6">
                 <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-2">สัญญาเพิ่มเติม HXD — ${DL[hxdVal]||hxdVal} บ./รอบ</p>
                 <div class="space-y-0">`;
+            const hxdMul = { 'HXD100':1,'HXD200':2,'HXD500':5,'HXD1000':10 }[hxdVal] || 1;
+            const hxdItem2Amt = (3000 * hxdMul).toLocaleString();
+            const hxdItem3Amt = (1000000 * hxdMul).toLocaleString();
             [
-                { num:'1', title:'ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', cond:'ระยะรอคอย 30 วัน' },
-                { num:'2', title:'การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', cond:'ระยะรอคอย 365 วัน' },
-                { num:'3', title:'ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง (ตลอดชีวิต/ราย)', cond:'ระยะรอคอย 120 วัน' },
+                { num:'1', title:'ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', amt:'', cond:'ระยะรอคอย 30 วัน' },
+                { num:'2', title:'การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', amt:`${hxdItem2Amt} บ./รอบ`, cond:'ระยะรอคอย 365 วัน' },
+                { num:'3', title:'ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง (ตลอดชีวิต/ราย)', amt:`${hxdItem3Amt} บ.`, cond:'ระยะรอคอย 120 วัน' },
             ].forEach(r => {
                 contentHtml += `<div class="border-b border-indigo-50 py-2.5 flex items-start gap-2.5">
                     <i class="fas fa-check-circle text-indigo-400 shrink-0 text-sm mt-0.5"></i>
                     <div class="flex-1 min-w-0">
                         <span class="text-[9px] font-bold text-indigo-300 block leading-none mb-0.5">ข้อ ${r.num}</span>
                         <span class="text-[12px] font-medium text-slate-700">${r.title}</span>
+                        ${r.amt ? `<p class="text-[11px] font-semibold text-indigo-600 mt-0.5">${r.amt}</p>` : ''}
                         <p class="text-[10px] text-amber-500 mt-0.5"><i class="fas fa-clock text-[9px]"></i> ${r.cond}</p>
                     </div>
                 </div>`;
