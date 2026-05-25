@@ -5650,6 +5650,8 @@ window.open3DDetailsView = function() {
     const accordionBody = document.getElementById('threeDDetailsAccordionBody');
     if (accordionBody) {
         accordionBody.className = 'overflow-y-auto flex-1 custom-scrollbar';
+        accordionBody.style.minHeight = '0';
+        accordionBody.style.paddingBottom = 'max(24px, env(safe-area-inset-bottom))';
         view.appendChild(accordionBody);
     }
 
