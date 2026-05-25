@@ -2853,6 +2853,25 @@ function _updateTPDUI() {
     }
 }
 
+function _updateSumResultDisplay() {
+    const el = document.getElementById('sumResultDisplay');
+    if (!el) return;
+    const noDisplay = ['3D Health Excellence', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund'];
+    if (noDisplay.includes(currentAppPlan) || !lastCalculationData || !lastCalculationData.premium) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        return;
+    }
+    const prem = Math.round(lastCalculationData.premium);
+    if (prem > 0) {
+        el.textContent = `💰 เบี้ยประกัน: ${prem.toLocaleString()} บาท/ปี`;
+        el.classList.remove('hidden');
+    } else {
+        el.textContent = '';
+        el.classList.add('hidden');
+    }
+}
+
 function _update3DPremDisplay() {
     const el = document.getElementById('threeDPremDisplay');
     if (!el) return;
@@ -2875,6 +2894,7 @@ function _update3DPremDisplay() {
 function refreshAllDisplays() {
     _updateTPDUI();
     _update3DPremDisplay();
+    _updateSumResultDisplay();
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return;
     const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
