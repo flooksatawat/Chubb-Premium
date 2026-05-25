@@ -4742,7 +4742,7 @@ async function _export3DPDF(actionType = 'preview') {
         doc.text('🦠  โรคร้ายแรง — รับวงเงินคุ้มครอง 2 เท่า', 20, y + 1.5);
         if (_ciAmt > 0) {
             doc.setTextColor(159, 18, 57);
-            doc.text(`= ${_ciDisp}`, 192, y + 1.5, { align: 'right' });
+            doc.text(_ciDisp, 192, y + 1.5, { align: 'right' });
         }
         y += 13;
 
@@ -4771,9 +4771,9 @@ async function _export3DPDF(actionType = 'preview') {
             const titleLines = doc.splitTextToSize(cat.title, 140);
             doc.text(titleLines[0], 35, y + 1.5);
             doc.setFont(fontName, 'normal'); doc.setFontSize(9); doc.setTextColor(100,116,139);
-            // หมวด 03 และ 02 (ซึ่งรวม 02.4) ใช้ limit เฉพาะแผน HX
-            const _planLimit = (cat.num === '03' || cat.num === '02') && HX_LIMITS[cat.num === '02' ? '02.4' : '03']
-                ? HX_LIMITS[cat.num === '02' ? '02.4' : '03'][hxVal] || cat.limit
+            // หมวด 03 ใช้ limit เฉพาะแผน HX; หมวด 02 แสดง เหมาจ่าย/รอบปี ที่ header (2.4 แสดงแยกใน sub-item)
+            const _planLimit = cat.num === '03' && HX_LIMITS['03']
+                ? HX_LIMITS['03'][hxVal] || cat.limit
                 : (HX_LIMITS[cat.num] ? HX_LIMITS[cat.num][hxVal] || cat.limit : cat.limit);
             if (_planLimit) doc.text(_planLimit, 192, y + 1.5, { align: 'right' });
             y += 9;
@@ -4782,7 +4782,12 @@ async function _export3DPDF(actionType = 'preview') {
             if (subs && subs.length) {
                 doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
                 subs.forEach(s => {
-                    const lines = doc.splitTextToSize('• ' + s, 175);
+                    // หมวด 02: sub-item 2.4 แสดง limit เฉพาะแผนต่อท้าย
+                    let displayText = s;
+                    if (cat.num === '02' && s.startsWith('2.4') && HX_LIMITS['02.4'] && HX_LIMITS['02.4'][hxVal]) {
+                        displayText = s + ' — ' + HX_LIMITS['02.4'][hxVal];
+                    }
+                    const lines = doc.splitTextToSize('• ' + displayText, 175);
                     checkPage(lines.length * 5 + 2);
                     doc.text(lines, 20, y);
                     y += lines.length * 5;
