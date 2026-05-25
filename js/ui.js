@@ -98,11 +98,9 @@ const _3D_BASE_SUBS = {
         "2.2 ค่าบำบัดรักษา ค่าบริการโลหิตและส่วนประกอบ ค่าบริการทางการพยาบาล",
         "2.3 ค่ายา ค่าสารอาหารทางหลอดเลือด และค่าเวชภัณฑ์",
         "2.4 ค่ายาและเวชภัณฑ์สิ้นเปลือง (เวชภัณฑ์ 1) สำหรับกลับบ้าน",
-        "เหมาจ่าย ต่อรอบปีกรมธรรม์",
     ],
     '03': [
         "ค่าผู้ประกอบวิชาชีพเวชกรรม (แพทย์) ตรวจรักษา",
-        "เหมาจ่าย ต่อรอบปีกรมธรรม์",
     ],
     '04': [
         "4.1 ค่าห้องผ่าตัด และค่าห้องทำหัตถการ",
@@ -119,7 +117,6 @@ const _3D_BASE_SUBS = {
     '06': [
         "6.1 ค่าตรวจวินิจฉัยที่เกี่ยวข้องภายใน 30 วันก่อน IPD และภายใน 90 วันหลัง IPD",
         "6.2 ค่ารักษา OPD ต่อเนื่องภายใน 45 วันหลัง IPD (ไม่รวมค่าตรวจวินิจฉัย)",
-        "ต่อรอบปีกรมธรรม์ประกันภัย",
     ],
     '07': [
         "ค่ารักษาพยาบาลกรณีบาดเจ็บ — ผู้ป่วยนอกภายใน 48 ชั่วโมงของการเกิดอุบัติเหตุ",
@@ -127,7 +124,6 @@ const _3D_BASE_SUBS = {
     ],
     '08': [
         "ค่าเวชศาสตร์ฟื้นฟูหลังการเข้าพักรักษาตัวเป็นผู้ป่วยในแต่ละครั้ง",
-        "ต่อรอบปีกรมธรรม์ประกันภัย",
     ],
     '09': [
         "ค่าบริการทางการแพทย์เพื่อบำบัดรักษาโรคไตวายเรื้อรัง",
@@ -4771,9 +4767,11 @@ async function _export3DPDF(actionType = 'preview') {
             const titleLines = doc.splitTextToSize(cat.title, 140);
             doc.text(titleLines[0], 35, y + 1.5);
             doc.setFont(fontName, 'normal'); doc.setFontSize(9); doc.setTextColor(100,116,139);
-            // หมวด 03 ใช้ limit เฉพาะแผน HX; หมวด 02 แสดง เหมาจ่าย/รอบปี ที่ header (2.4 แสดงแยกใน sub-item)
+            // หมวด 03 ใช้ limit เฉพาะแผน HX; หมวด 08 ใช้ limit เฉพาะแผน; หมวด 02 แสดง เหมาจ่าย/รอบปี ที่ header
             const _planLimit = cat.num === '03' && HX_LIMITS['03']
                 ? HX_LIMITS['03'][hxVal] || cat.limit
+                : cat.num === '08' && HX_LIMITS['08']
+                ? HX_LIMITS['08'][hxVal] || cat.limit
                 : (HX_LIMITS[cat.num] ? HX_LIMITS[cat.num][hxVal] || cat.limit : cat.limit);
             if (_planLimit) doc.text(_planLimit, 192, y + 1.5, { align: 'right' });
             y += 9;
@@ -4782,10 +4780,37 @@ async function _export3DPDF(actionType = 'preview') {
             if (subs && subs.length) {
                 doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
                 subs.forEach(s => {
-                    // หมวด 02: sub-item 2.4 แสดง limit เฉพาะแผนต่อท้าย
                     let displayText = s;
+                    // หมวด 02: sub-item 2.4 แสดง limit เฉพาะแผนต่อท้าย (highlighted)
                     if (cat.num === '02' && s.startsWith('2.4') && HX_LIMITS['02.4'] && HX_LIMITS['02.4'][hxVal]) {
-                        displayText = s + ' — ' + HX_LIMITS['02.4'][hxVal];
+                        const lim24 = HX_LIMITS['02.4'][hxVal];
+                        const textW = 155;
+                        const lines = doc.splitTextToSize('• ' + s, textW);
+                        checkPage(lines.length * 5 + 4);
+                        // วาด background สีอ่อน
+                        doc.setFillColor(255, 251, 235);
+                        doc.rect(19, y - 3.5, 173, lines.length * 5 + 3, 'F');
+                        doc.setTextColor(71,85,105); doc.text(lines, 20, y);
+                        doc.setFont(fontName, 'bold'); doc.setFontSize(9); doc.setTextColor(180,83,9);
+                        doc.text(lim24, 192, y, { align: 'right' });
+                        doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
+                        y += lines.length * 5 + 1;
+                        return;
+                    }
+                    // หมวด 06: sub-item 6.2 แสดง limit เฉพาะแผนต่อท้าย
+                    if (cat.num === '06' && s.startsWith('6.2') && HX_LIMITS['06.2'] && HX_LIMITS['06.2'][hxVal]) {
+                        const lim62 = HX_LIMITS['06.2'][hxVal];
+                        const textW = 155;
+                        const lines = doc.splitTextToSize('• ' + s, textW);
+                        checkPage(lines.length * 5 + 4);
+                        doc.setFillColor(255, 251, 235);
+                        doc.rect(19, y - 3.5, 173, lines.length * 5 + 3, 'F');
+                        doc.setTextColor(71,85,105); doc.text(lines, 20, y);
+                        doc.setFont(fontName, 'bold'); doc.setFontSize(9); doc.setTextColor(180,83,9);
+                        doc.text(lim62, 192, y, { align: 'right' });
+                        doc.setFont(fontName, 'normal'); doc.setFontSize(9.5); doc.setTextColor(71,85,105);
+                        y += lines.length * 5 + 1;
+                        return;
                     }
                     const lines = doc.splitTextToSize('• ' + displayText, 175);
                     checkPage(lines.length * 5 + 2);
@@ -5792,29 +5817,48 @@ window.render3DDetailsAccordion = function() {
                     <span class="text-sm font-bold text-teal-700">${planInfo.lump}</span>
                 </div>
             </div>
-            <div class="flex items-center gap-2 p-2.5 bg-rose-50 rounded-xl border border-rose-100 mb-4">
-                <i class="fas fa-heart-pulse text-rose-500 text-sm shrink-0"></i>
-                <span class="text-[12px] font-bold text-rose-700">โรคร้ายแรง — รับวงเงินคุ้มครอง 2 เท่า</span>
-            </div>`;
+            ${(() => {
+                const _ciStr = (HX_LIMITS.maxCI && HX_LIMITS.maxCI[hxVal]) ? HX_LIMITS.maxCI[hxVal] : '0';
+                const _ciNum = parseInt(_ciStr.replace(/,/g,'')) || 0;
+                const _ciDisp = _ciNum >= 1000000
+                    ? (_ciNum/1000000%1===0 ? (_ciNum/1000000).toFixed(0) : (_ciNum/1000000).toFixed(2)) + ' ล้าน'
+                    : _ciNum.toLocaleString() + ' บาท';
+                return `<div class="flex items-center justify-between gap-2 p-2.5 bg-rose-50 rounded-xl border border-rose-100 mb-4">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-heart-pulse text-rose-500 text-sm shrink-0"></i>
+                        <span class="text-[12px] font-bold text-rose-700">โรคร้ายแรง — รับวงเงิน 2 เท่า</span>
+                    </div>
+                    ${_ciNum > 0 ? `<span class="text-[13px] font-bold text-rose-600 shrink-0">${_ciDisp}</span>` : ''}
+                </div>`;
+            })()}`;
 
         // Category accordion rows
         const accRow = (num, title, limit, subs, condNote) => {
             const isOpen = window._3dOpenCats.has(num);
             const subHtml = isOpen && subs && subs.length
-                ? `<div class="mt-2 space-y-1 pl-1">` +
-                  subs.map(s=>`<p class="text-[11px] text-slate-500 leading-snug flex items-start gap-1.5"><i class="fas fa-circle text-[4px] text-slate-300 mt-1.5 shrink-0"></i>${s}</p>`).join('') +
+                ? `<div class="mt-2.5 space-y-1.5 pl-0.5">` +
+                  subs.map(s => {
+                      if (s && typeof s === 'object' && s.special) {
+                          // ข้อที่มี limit เฉพาะแผน — highlight แยกออกมา
+                          return `<div class="flex items-start justify-between gap-2 px-2.5 py-1.5 bg-amber-50 rounded-lg border border-amber-100 mt-1">
+                              <p class="text-[11px] text-slate-600 leading-snug flex items-start gap-1.5 min-w-0"><i class="fas fa-circle text-[4px] text-amber-400 mt-1.5 shrink-0"></i>${s.text}</p>
+                              <span class="text-[11px] font-bold text-amber-600 shrink-0 whitespace-nowrap">${s.limit}</span>
+                          </div>`;
+                      }
+                      return `<p class="text-[11px] text-slate-500 leading-snug flex items-start gap-1.5"><i class="fas fa-circle text-[4px] text-slate-300 mt-1.5 shrink-0"></i>${s}</p>`;
+                  }).join('') +
                   (condNote ? `<p class="text-[10px] text-amber-600 italic mt-1.5 flex items-start gap-1"><i class="fas fa-clock text-[9px] mt-0.5 shrink-0"></i>${condNote}</p>` : '') +
                   `</div>` : '';
-            return `<div class="border-b border-slate-100 py-2.5 cursor-pointer" onclick="window.toggle3DCat('${num}')">
+            return `<div class="border-b border-slate-100 py-3 cursor-pointer" onclick="window.toggle3DCat('${num}')">
                 <div class="flex items-center gap-2.5">
                     <i class="fas fa-check-circle text-emerald-500 shrink-0 text-sm"></i>
                     <div class="flex-1 min-w-0">
                         <span class="text-[9px] font-bold text-slate-400 block leading-none mb-0.5">หมวด ${num}</span>
-                        <span class="text-[13px] font-semibold text-slate-700 leading-snug">${title}</span>
+                        <span class="text-[12px] font-semibold text-slate-700 leading-snug">${title}</span>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="text-[10px] text-slate-400 font-medium">${limit}</span>
-                        <i class="fas fa-chevron-${isOpen?'up':'down'} text-[10px] text-slate-300"></i>
+                    <div class="flex items-center gap-1.5 shrink-0 max-w-[45%] text-right">
+                        <span class="text-[10px] text-teal-600 font-semibold">${limit}</span>
+                        <i class="fas fa-chevron-${isOpen?'up':'down'} text-[10px] text-slate-300 shrink-0"></i>
                     </div>
                 </div>
                 ${subHtml}
@@ -5827,21 +5871,17 @@ window.render3DDetailsAccordion = function() {
                 "2.1 ค่าบริการทางการแพทย์เพื่อการตรวจวินิจฉัย",
                 "2.2 ค่าบำบัดรักษา ค่าบริการโลหิตและส่วนประกอบ ค่าบริการทางการพยาบาล",
                 "2.3 ค่ายา ค่าสารอาหารทางหลอดเลือด และค่าเวชภัณฑ์",
-                `2.4 ค่ายาและเวชภัณฑ์สิ้นเปลือง (เวชภัณฑ์ 1) สำหรับกลับบ้าน — ${HX_LIMITS['02.4'][hxVal]||'-'}`,
-                "เหมาจ่าย ต่อรอบปีกรมธรรม์",
+                { special: true, text: '2.4 ค่ายาและเวชภัณฑ์สิ้นเปลือง (เวชภัณฑ์ 1) สำหรับกลับบ้าน', limit: HX_LIMITS['02.4'][hxVal]||'-' },
             ],
             '03': [
-                `ค่าแพทย์ตรวจรักษา — ${HX_LIMITS['03'][hxVal]||'-'}`,
-                "ต่อรอบปีกรมธรรม์",
+                "ค่าผู้ประกอบวิชาชีพเวชกรรม (แพทย์) ตรวจรักษา",
             ],
             '06': [
                 "6.1 ค่าตรวจวินิจฉัยที่เกี่ยวข้องภายใน 30 วันก่อน IPD และภายใน 90 วันหลัง IPD",
-                `6.2 ค่ารักษา OPD ต่อเนื่องภายใน 45 วันหลัง IPD — ${HX_LIMITS['06.2'][hxVal]||'-'}`,
-                "ต่อรอบปีกรมธรรม์ประกันภัย",
+                { special: true, text: '6.2 ค่ารักษา OPD ต่อเนื่องภายใน 45 วันหลัง IPD (ไม่รวมค่าตรวจวินิจฉัย)', limit: HX_LIMITS['06.2'][hxVal]||'-' },
             ],
             '08': [
                 "ค่าเวชศาสตร์ฟื้นฟูหลังการเข้าพักรักษาตัวเป็นผู้ป่วยในแต่ละครั้ง",
-                `${HX_LIMITS['08'][hxVal]||'-'} ต่อรอบปีกรมธรรม์`,
             ],
         };
 
@@ -5892,11 +5932,12 @@ window.render3DDetailsAccordion = function() {
             contentHtml += `<div class="mx-3 mt-4 mb-1">
                 <p class="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-2">สัญญาเพิ่มเติม HXO — ${DL[hxoVal]||hxoVal} บ./ครั้ง</p>
                 <div class="space-y-0">`;
-            [
+            const _hxoAllItems = [
                 { num:'HXO-1', title:'ความคุ้มครองผู้ป่วยนอก (OPD)', limit:'สูงสุด 30 ครั้ง/รอบปี' },
                 { num:'HXO-2', title:'ความคุ้มครองสุขภาพจิต (ค่าใช้จ่ายร่วม 20%)', limit:'สูงสุด 4 ครั้ง/รอบปี' },
                 { num:'HXO-3', title:'ค่าตรวจรักษาทางทันตกรรม (ค่าใช้จ่ายร่วม 20%)', limit:'สูงสุด 2 ครั้ง/รอบปี' },
-            ].forEach(r => {
+            ];
+            (hxoVal === 'HXO10' ? _hxoAllItems.slice(0,1) : _hxoAllItems).forEach(r => {
                 contentHtml += `<div class="border-b border-purple-50 py-2.5 flex items-center gap-2.5">
                     <i class="fas fa-check-circle text-purple-400 shrink-0 text-sm"></i>
                     <div class="flex-1 min-w-0">
