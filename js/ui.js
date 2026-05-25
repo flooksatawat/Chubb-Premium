@@ -1057,10 +1057,6 @@ window.render3DOptionsUI = function() {
 
     let html = '';
 
-    if (_clBasePrem > 0) {
-        html += `<div class="px-3 py-2 mb-3 rounded-xl bg-blue-50 border border-blue-100 text-center text-[12px] font-bold text-blue-700">💰 สัญญาหลัก CL: ${Math.round(_clBasePrem).toLocaleString()} บาท/ปี</div>`;
-    }
-
     html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-slate-200/50"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-bed text-teal-500"></i> ค่าห้อง (HX)</p>`;
     html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-3 gap-1 w-full">`;
     hxOpts.forEach(opt => {
@@ -2861,15 +2857,23 @@ function _updateTPDUI() {
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
-    const noDisplay = ['3D Health Excellence', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund'];
-    if (noDisplay.includes(currentAppPlan) || !lastCalculationData || !lastCalculationData.premium) {
+    const noDisplay = ['Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund'];
+    if (noDisplay.includes(currentAppPlan) || !lastCalculationData) {
         el.textContent = '';
         el.classList.add('hidden');
         return;
     }
-    const prem = Math.round(lastCalculationData.premium);
+    let prem = 0;
+    let label = '';
+    if (currentAppPlan === '3D Health Excellence') {
+        prem = Math.round(lastCalculationData.clBasePrem || 0);
+        label = `💰 สัญญาหลัก CL: ${prem.toLocaleString()} บาท/ปี`;
+    } else {
+        prem = Math.round(lastCalculationData.premium || 0);
+        label = `💰 เบี้ยประกัน: ${prem.toLocaleString()} บาท/ปี`;
+    }
     if (prem > 0) {
-        el.textContent = `💰 เบี้ยประกัน: ${prem.toLocaleString()} บาท/ปี`;
+        el.textContent = label;
         el.classList.remove('hidden');
     } else {
         el.textContent = '';
