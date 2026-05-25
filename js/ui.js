@@ -4875,7 +4875,7 @@ async function _export3DPDF(actionType = 'preview') {
             const _hxdItem3Amt = (1000000 * _hxdMul).toLocaleString();
             const hxdItems = [
                 { t: 'ข้อ 1 — ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', c: 'ระยะรอคอย 30 วัน' },
-                { t: `ข้อ 2 — การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)`, c: `${_hxdItem2Amt} บ./รอบ  |  ระยะรอคอย 365 วัน` },
+                { t: `ข้อ 2 — การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)`, c: `${_hxdItem2Amt} บ./รอบปีกรมธรรม์  |  ระยะรอคอย 365 วัน` },
                 { t: `ข้อ 3 — ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง`, c: `${_hxdItem3Amt} บ. ตลอดชีวิต/ราย  |  ระยะรอคอย 120 วัน` },
             ];
             doc.setFont(fontName, 'normal'); doc.setFontSize(9.5);
@@ -5954,7 +5954,7 @@ window.render3DDetailsAccordion = function() {
             const hxdItem3Amt = (1000000 * hxdMul).toLocaleString();
             [
                 { num:'1', title:'ขยายวงเงินผู้ป่วยนอกเพื่อการตรวจวินิจฉัย', amt:'', cond:'ระยะรอคอย 30 วัน' },
-                { num:'2', title:'การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', amt:`${hxdItem2Amt} บ./รอบ`, cond:'ระยะรอคอย 365 วัน' },
+                { num:'2', title:'การตรวจสุขภาพประจำปีและค่าฉีดวัคซีน (ค่าใช้จ่ายร่วม 10%)', amt:`${hxdItem2Amt} บ./รอบปีกรมธรรม์`, cond:'ระยะรอคอย 365 วัน' },
                 { num:'3', title:'ความคุ้มครองพิเศษเพื่อรักษาโรคร้ายแรง (ตลอดชีวิต/ราย)', amt:`${hxdItem3Amt} บ.`, cond:'ระยะรอคอย 120 วัน' },
             ].forEach(r => {
                 contentHtml += `<div class="border-b border-indigo-50 py-2.5 flex items-start gap-2.5">
@@ -6154,8 +6154,17 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
 
     overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
         overlay.remove();
-        _fallbackDownload(doc.output('blob'), pdfName);
         URL.revokeObjectURL(blobUrl);
+        const printBlob = doc.output('blob');
+        const printUrl = URL.createObjectURL(printBlob);
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
+        iframe.src = printUrl;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+            try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e) { window.print(); }
+            setTimeout(() => { try { iframe.remove(); URL.revokeObjectURL(printUrl); } catch {} }, 60000);
+        };
     });
 
     overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
