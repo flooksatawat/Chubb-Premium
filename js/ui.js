@@ -1040,6 +1040,7 @@ window.render3DOptionsUI = function() {
     let hbfVal = window.currentHBF || 0;
 
     const _lcd3d = lastCalculationData || {};
+    const _clBasePrem = _lcd3d.clBasePrem || 0;
     const _hxPrem  = _lcd3d.hxPrem  || 0;
     const _hxoPrem = _lcd3d.hxoPrem || 0;
     const _hxdPrem = _lcd3d.hxdPrem || 0;
@@ -1055,6 +1056,10 @@ window.render3DOptionsUI = function() {
                 };
 
     let html = '';
+
+    if (_clBasePrem > 0) {
+        html += `<div class="px-3 py-2 mb-3 rounded-xl bg-blue-50 border border-blue-100 text-center text-[12px] font-bold text-blue-700">💰 สัญญาหลัก CL: ${Math.round(_clBasePrem).toLocaleString()} บาท/ปี</div>`;
+    }
 
     html += `<div class="bg-white rounded-xl p-5 mb-3 shadow-sm border border-slate-200/50"><p class="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fas fa-bed text-teal-500"></i> ค่าห้อง (HX)</p>`;
     html += `<div class="mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-200/60 shadow-inner w-full"><div class="grid grid-cols-3 gap-1 w-full">`;
@@ -2876,6 +2881,9 @@ function _updateSumResultDisplay() {
 function refreshAllDisplays() {
     _updateTPDUI();
     _updateSumResultDisplay();
+    if (currentAppPlan === '3D Health Excellence' && typeof window.render3DOptionsUI === 'function') {
+        window.render3DOptionsUI();
+    }
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return;
     const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
