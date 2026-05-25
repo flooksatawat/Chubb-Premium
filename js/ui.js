@@ -4662,6 +4662,8 @@ async function _exportMFTablePDF(actionType = 'preview') {
                 const shared = typeof tryShareFile === 'function' ? await tryShareFile(pdfFile, pdfFileName, pdfFileName) : false;
                 if (!shared) doc.save(pdfFileName);
             }
+        } else if (actionType === 'print') {
+            await showPdfViewer(pdfBlob, pdfFileName);
         } else {
             _fallbackDownload(doc.output('blob'), pdfFileName);
         }
@@ -5157,20 +5159,8 @@ async function exportTableToPDF(actionType = 'preview') {
             }
 
         } else if (actionType === 'print') {
-            if (inLine) {
-                // LIFF: พิมพ์ตรงไม่ได้ — แจ้ง user แล้วเปิด viewer ให้บันทึกแทน
-                console.log('[LIFF] print → save fallback');
-                Swal.fire({
-                    icon: 'info',
-                    title: 'LINE ไม่รองรับการพิมพ์โดยตรง',
-                    text: 'กำลังเปิดตัวอย่าง — กรุณาบันทึกรูปภาพแล้วพิมพ์จากแอป Photos',
-                    timer: 2400,
-                    showConfirmButton: false
-                });
-                setTimeout(() => showPdfViewer(pdfBlob, pdfFileName, planLabel), 1200);
-            } else {
-                _fallbackDownload(doc.output('blob'), pdfFileName);
-            }
+            // พรีวิวก่อนเสมอ — ทั้ง LINE และ browser ปกติ
+            await showPdfViewer(pdfBlob, pdfFileName, planLabel);
 
         } else if (actionType === 'line') {
             if (inLine
