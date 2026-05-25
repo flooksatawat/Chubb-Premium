@@ -4728,9 +4728,9 @@ async function _export3DPDF(actionType = 'preview') {
         doc.text(`HXO: ${hxoVal} | HXD: ${hxdVal} | HBF: ${hbfVal > 0 ? hbfVal.toLocaleString()+' บ./วัน' : 'ไม่เลือก'}`, 55, y);
         y += 9;
 
-        // Critical illness banner
-        const _ciBase = (lastCalculationData && lastCalculationData.sum) ? lastCalculationData.sum : 0;
-        const _ciAmt  = _ciBase * 2;
+        // Critical illness banner — วงเงิน 2 เท่า มาจาก วงเงินเหมาจ่าย HX ไม่ใช่ ทุนประกันสัญญาหลัก
+        const _ciAmtStr = (HX_LIMITS.maxCI && HX_LIMITS.maxCI[hxVal]) ? HX_LIMITS.maxCI[hxVal] : '0';
+        const _ciAmt  = parseInt(_ciAmtStr.replace(/,/g,'')) || 0;
         const _ciDisp = _ciAmt >= 1000000
             ? (_ciAmt / 1000000 % 1 === 0 ? (_ciAmt / 1000000).toFixed(0) : (_ciAmt / 1000000).toFixed(2)) + ' ล้าน'
             : _ciAmt.toLocaleString() + ' บาท';
@@ -4771,7 +4771,11 @@ async function _export3DPDF(actionType = 'preview') {
             const titleLines = doc.splitTextToSize(cat.title, 140);
             doc.text(titleLines[0], 35, y + 1.5);
             doc.setFont(fontName, 'normal'); doc.setFontSize(9); doc.setTextColor(100,116,139);
-            if (cat.limit) doc.text(cat.limit, 192, y + 1.5, { align: 'right' });
+            // หมวด 03 และ 02 (ซึ่งรวม 02.4) ใช้ limit เฉพาะแผน HX
+            const _planLimit = (cat.num === '03' || cat.num === '02') && HX_LIMITS[cat.num === '02' ? '02.4' : '03']
+                ? HX_LIMITS[cat.num === '02' ? '02.4' : '03'][hxVal] || cat.limit
+                : (HX_LIMITS[cat.num] ? HX_LIMITS[cat.num][hxVal] || cat.limit : cat.limit);
+            if (_planLimit) doc.text(_planLimit, 192, y + 1.5, { align: 'right' });
             y += 9;
 
             const subs = cat.subs || _3D_BASE_SUBS[cat.num];

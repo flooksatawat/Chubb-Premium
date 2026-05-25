@@ -140,7 +140,9 @@ function generateSummaryText() {
         const planLine = hxInfo
             ? `📋 แผน: ค่าห้อง ${hxInfo.room} บ. | เหมาจ่าย ${_fmtMillion(hxInfo.limit)}`
             : `📋 แผน: 3D Health Excellence`;
-        const ciAmt = d.sum * 2;
+        // วงเงินโรคร้ายแรง 2 เท่า = 2 × วงเงินเหมาจ่าย HX (ไม่ใช่ ทุนประกันสัญญาหลัก)
+        const _hxLimitNum = hxInfo ? parseInt(String(hxInfo.limit).replace(/,/g,'')) || 0 : 0;
+        const ciAmt = _hxLimitNum * 2;
         const ciLine = `🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`;
         const lines = [
             planLine,
