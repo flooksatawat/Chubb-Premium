@@ -134,7 +134,7 @@ function getHealthRate(categoryKey, planName, age, gender) {
         return Math.round((sa / 1000) * rate);
     }
 
-    // ส่วนของ HBF — สูตร: (ค่าชดเชยรายวัน / 1000) * Rate_HBF
+    // ส่วนของ HBF — สูตร: (ค่าชดเชยรายวัน / 100) * Rate_HBF
     if (categoryKey === 'HBF') {
         const dailyAmt = parseInt(planName) || 0;
         if (dailyAmt <= 0) return 0;
@@ -143,7 +143,7 @@ function getHealthRate(categoryKey, planName, age, gender) {
             const ageKey = String(Math.min(age, 69));
             const rateFromClass = hbfSource['class_1'][ageKey];
             if (rateFromClass !== undefined && rateFromClass > 0) {
-                return Math.round((dailyAmt / 1000) * rateFromClass);
+                return Math.round((dailyAmt / 100) * rateFromClass);
             }
         }
         return 0;
