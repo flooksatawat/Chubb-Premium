@@ -3677,13 +3677,18 @@ function generatePolicyTableData() {
             html += `<td class="${_mfTdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
         }
         html += `${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        let _dd50SARow = 0, _dd50RowPrem = 0;
         if (showDD50Column) {
             const _dd50SA = parseInt(window.currentDD50SA) || 0;
-            const _dd50RowPrem = (currentAge >= 16 && currentAge <= 84 && _dd50SA > 0 && typeof getHealthRate === 'function')
+            _dd50RowPrem = (currentAge >= 16 && currentAge <= 84 && _dd50SA > 0 && typeof getHealthRate === 'function')
                 ? getHealthRate('DD50', String(_dd50SA), currentAge, currentGender) : 0;
+            if (_dd50RowPrem > 0) _dd50SARow = _dd50SA;
             html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${_dd50RowPrem > 0 ? _dd50RowPrem.toLocaleString() : '—'}</td>`;
         }
-        if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
+        if (showCoverageColumn) {
+            const _covVal = slpaEffectiveSA + _dd50SARow;
+            html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${_covVal > 0 ? _covVal.toLocaleString() : '—'}</td>`;
+        }
         if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
         if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
         html += `</tr>`;
