@@ -482,6 +482,12 @@ function applyDayColorTheme() {
         centerCircle.style.background = `linear-gradient(135deg, ${dc.from}, ${dc.to})`;
         centerCircle.style.boxShadow = `0 8px 28px ${dc.from}66`;
     }
+
+    const voiceBtn = document.getElementById('modalVoiceBtn');
+    if (voiceBtn) {
+        voiceBtn.style.background = `linear-gradient(135deg, ${dc.from}, ${dc.to})`;
+        voiceBtn.style.boxShadow = `0 3px 14px ${dc.from}55`;
+    }
 }
 
 function openInstallmentModal() {

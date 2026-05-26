@@ -798,31 +798,30 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <!-- Floating AI Bottom Bar — always visible -->
                 <div id="modalBottomBar" class="absolute bottom-4 left-3 right-3 z-30">
                     <div class="relative rounded-[26px] overflow-hidden"
-                         style="background:rgba(36,60,148,0.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.18);box-shadow:0 8px_28px_rgba(36,60,148,0.3),0 2px 8px rgba(0,0,0,0.15);">
+                         style="background:rgba(20,38,110,0.38);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.13);box-shadow:0 6px 24px rgba(20,38,110,0.18),0 1.5px 6px rgba(0,0,0,0.10);">
                         <!-- Subtle top highlight -->
-                        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"></div>
+                        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
 
-                        <div class="px-3 py-2.5 flex items-center gap-2.5">
+                        <div class="px-3 py-2 flex items-center gap-2">
                             <!-- Text input -->
                             <div class="flex-1 min-w-0">
                                 <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
-                                    class="w-full rounded-[13px] py-2.5 px-4 focus:outline-none transition-all duration-200 text-[13px] font-medium"
-                                    style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.22);color:white;"
-                                    onfocus="this.style.background='rgba(255,255,255,0.22)';this.style.borderColor='rgba(255,255,255,0.45)';"
-                                    onblur="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.22)';"
+                                    class="w-full rounded-[13px] py-2 px-4 focus:outline-none transition-all duration-200 text-[13px] font-medium placeholder:text-white/40"
+                                    style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.90);"
+                                    onfocus="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)';"
+                                    onblur="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.14)';"
                                     placeholder="พิมพ์เพื่อคำนวณเบี้ยประกัน">
                             </div>
 
                             <!-- Divider -->
-                            <div class="w-px h-8 shrink-0" style="background:rgba(255,255,255,0.2);"></div>
+                            <div class="w-px h-7 shrink-0" style="background:rgba(255,255,255,0.14);"></div>
 
-                            <!-- Voice button -->
+                            <!-- Voice button — color set by applyDayColorTheme() -->
                             <button id="modalVoiceBtn"
                                 onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}"
-                                class="w-[46px] h-[46px] shrink-0 rounded-[15px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150"
-                                style="background:linear-gradient(135deg,#00b85a,#00A651,#008040);box-shadow:0 4px 16px rgba(0,166,81,0.4);">
+                                class="w-[42px] h-[42px] shrink-0 rounded-[13px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150">
                                 <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
-                                <i class="fas fa-microphone text-[19px] relative z-10"></i>
+                                <i class="fas fa-microphone text-[17px] relative z-10"></i>
                             </button>
                         </div>
                     </div>
