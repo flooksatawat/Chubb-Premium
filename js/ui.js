@@ -1907,8 +1907,17 @@ function _injectToPearLCanvas(d) {
             <td class="py-4 px-6 text-right font-bold text-[15px] ${clr[cls] || 'text-slate-800'}">${value}</td>
         </tr>`;
 
+    const _dd50P = (currentAppPlan === 'CI Extra Plus' && d.dd50Prem > 0) ? d.dd50Prem : 0;
+    const _cxBasePrem = _dd50P > 0 ? d.premium - _dd50P : d.premium;
+
     let rows = '';
-    rows += R(premLabel, fmtP(d.premium) + ' ฿ / ปี', hasCF ? 'cg' : 'rose');
+    if (_dd50P > 0) {
+        rows += R('เบี้ยประกัน CX', fmtP(_cxBasePrem) + ' ฿ / ปี', 'rose');
+        rows += R('เบี้ย DD50 (โรคร้ายแรง 50 โรค)', fmtP(_dd50P) + ' ฿ / ปี', 'rose');
+        rows += R('รวมเบี้ยทั้งหมด', fmtP(d.premium) + ' ฿ / ปี', 'rose');
+    } else {
+        rows += R(premLabel, fmtP(d.premium) + ' ฿ / ปี', hasCF ? 'cg' : 'rose');
+    }
     rows += R('ทุนประกันชีวิต', fmtN(d.sum) + ' ฿', '');
 
     if (hasCF && d.cashFlow > 0) rows += R('กระแสเงินสด / ปี', fmtP(d.cashFlow) + ' ฿', 'cg');
@@ -1951,6 +1960,9 @@ function _injectToPearLCanvas(d) {
     const period = d.years ? `${d.years} ปี` : null;
     const premiumDisplay = `${fmtP(d.premium)} ฿ / ปี`;
     const sumDisplay = `${fmtN(d.sum)} ฿`;
+    const _dd50Chip = _dd50P > 0
+        ? `<span class="px-3 py-1 text-[12px] rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200 shadow-sm">DD50: <span class="font-bold">${fmtP(_dd50P)} ฿/ปี</span></span>`
+        : '';
 
     const contentHtml = `
             <div class="max-w-4xl mx-auto p-4 sm:p-5 rounded-2xl bg-white/85 border border-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style="backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);">
@@ -1965,7 +1977,8 @@ function _injectToPearLCanvas(d) {
                     <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: ${d.gender}</span>
                     <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: ${d.age} ปี</span>
                     ${period ? `<span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: ${period}</span>` : ''}
-                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${premLabel}: <span class="font-bold text-slate-900">${premiumDisplay}</span></span>
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${_dd50P > 0 ? 'เบี้ย CX' : premLabel}: <span class="font-bold text-slate-900">${_dd50P > 0 ? fmtP(_cxBasePrem) + ' ฿/ปี' : premiumDisplay}</span></span>
+                    ${_dd50Chip}
                     <span class="px-3 py-1 text-[12px] rounded-full bg-[#00A651]/10 text-[#00A651] font-bold border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
                 </div>
 
