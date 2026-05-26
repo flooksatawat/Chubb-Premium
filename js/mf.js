@@ -644,8 +644,19 @@ window.mfGenerateTable = function() {
         document.body.appendChild(overlay);
     };
 
+    // ตรวจว่า user กำลังพิมพ์อยู่หรือไม่ — ถ้าพิมพ์อยู่ ห้ามเด้ง alert (รบกวนการแก้ไข)
+    const ageEl = document.getElementById('ageInput');
+    const isEditingAge = ageEl && document.activeElement === ageEl;
+
+    const renderTablePlaceholder = (text) => {
+        if (head) head.innerHTML = '';
+        if (body) body.innerHTML = `<tr><td colspan="2" class="py-10 text-center text-[12px] text-slate-400"><i class="fas fa-info-circle mr-1"></i>${text}</td></tr>`;
+        if (titleEl) titleEl.innerHTML = `<span class="text-[13px] font-bold text-sky-700">Medical Fund</span>`;
+    };
+
     // Alert if customer age is missing
     if (!curAge || curAge <= 0) {
+        if (isEditingAge) { renderTablePlaceholder('กรุณากรอกอายุลูกค้า'); return; }
         renderAlert(
             'กรุณากรอกอายุลูกค้า',
             `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี (${coName} ${planName}${roomLabel})`,
@@ -655,6 +666,10 @@ window.mfGenerateTable = function() {
     }
     // Alert if customer age is outside the data range
     if (curAge < dataMin || curAge > dataMax) {
+        if (isEditingAge) {
+            renderTablePlaceholder(`อายุ ${curAge} ไม่อยู่ในช่วง ${dataMin}–${dataMax} ปี`);
+            return;
+        }
         renderAlert(
             `อายุ ${curAge} ไม่อยู่ในช่วงที่รองรับ`,
             `แผนนี้รองรับอายุ ${dataMin}–${dataMax} ปี<br>(${coName} ${planName}${roomLabel})`,
