@@ -780,7 +780,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                type="text"
                                oninput="handleUnifiedPlanSearch()"
                                placeholder="ค้นหาแบบประกัน..."
-                               class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all"
+                               class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all text-center"
                                style="background:rgba(255,255,255,0.72);border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 10px rgba(37,99,235,0.08);">
                         <i id="planSearchIcon" class="fas fa-magnifying-glass absolute right-4 text-slate-400 text-[14px] pointer-events-none"></i>
                         <button id="planSearchClearBtn" onclick="clearPlanSearch()" class="absolute right-3 w-7 h-7 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 transition-colors hidden">
@@ -2010,8 +2010,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 'top:calc(env(safe-area-inset-top,0px) + 14px)',
                 'left:12px',
                 'z-index:60',
-                'width:36px',
-                'height:36px',
+                'width:48px',
+                'height:48px',
                 'padding:0',
                 'background:rgba(255,255,255,0.97)',
                 'border-radius:999px',
@@ -2025,7 +2025,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 'touch-action:manipulation',
                 'user-select:none',
             ].join(';');
-            btn.innerHTML = '<i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:12px;pointer-events:none;"></i>';
+            btn.innerHTML = '<i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:18px;pointer-events:none;"></i>';
             document.body.appendChild(btn);
 
             function updateBtnPosition() {
