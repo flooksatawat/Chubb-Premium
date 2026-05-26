@@ -831,9 +831,14 @@ function calculate(source, enforceMin = false) {
 
             if (totalRate > 0) {
                 const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
+                const _maxS = config.getMaxSum ? config.getMaxSum(age) : Infinity;
                 if (source === 'sum') {
                     if (enforceMin && fSum < _minS) {
                         fSum = _minS;
+                        document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                    }
+                    if (fSum > _maxS) {
+                        fSum = _maxS;
                         document.getElementById('sumInsuredInput').value = formatNum(fSum);
                     }
                     // คำนวณเบี้ยจากทุน: (ทุน/1000) * (เรทรวม - ส่วนลด)
@@ -853,6 +858,11 @@ function calculate(source, enforceMin = false) {
                     }
                     if (fSum === 0) fSum = (basePrem * 1000) / totalRate;
 
+                    if (fSum > _maxS) {
+                        fSum = _maxS;
+                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem;
+                        document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                    }
                     if (enforceMin && fSum < _minS) {
                         fSum = _minS;
                         fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem;
@@ -861,6 +871,19 @@ function calculate(source, enforceMin = false) {
                     document.getElementById('sumInsuredInput').value = formatNum(fSum);
                 }
             }
+        }
+
+        // CX underage: warning + ซ่อนเบี้ย
+        const _cxWarn = document.getElementById('cxUnderageWarning');
+        const _premContainer = document.getElementById('premiumContainer');
+        if (currentAppPlan === 'CI Extra Plus' && age < 16) {
+            if (_cxWarn) _cxWarn.classList.remove('hidden');
+            if (_premContainer) _premContainer.classList.add('hidden');
+            const premEl = document.getElementById('premiumInput');
+            if (premEl) premEl.value = '';
+        } else {
+            if (_cxWarn) _cxWarn.classList.add('hidden');
+            if (_premContainer) _premContainer.classList.remove('hidden');
         }
         
         let yearsStr = '20'; const matchYears = currentPlan.match(/\d+/); if (matchYears) yearsStr = matchYears[0];
