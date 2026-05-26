@@ -845,7 +845,9 @@ function handleUnifiedPlanSearch() {
     if(!input) return;
     const query = input.value.toLowerCase().trim();
     const clearBtn = document.getElementById('planSearchClearBtn');
+    const searchIcon = document.getElementById('planSearchIcon');
     if (clearBtn) clearBtn.classList.toggle('hidden', query === '');
+    if (searchIcon) searchIcon.classList.toggle('hidden', query !== '');
 
     if (query === '') {
         isModernSearchActive = false;
@@ -862,6 +864,8 @@ function clearPlanSearch() {
     if (input) { input.value = ''; input.focus(); }
     const clearBtn = document.getElementById('planSearchClearBtn');
     if (clearBtn) clearBtn.classList.add('hidden');
+    const searchIcon = document.getElementById('planSearchIcon');
+    if (searchIcon) searchIcon.classList.remove('hidden');
     isModernSearchActive = false;
     renderModernCards(modernPlansData, true);
 }

@@ -776,13 +776,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <!-- Frosted-glass top search header -->
                 <div class="absolute top-0 left-0 right-0 z-20 px-4 pb-3" style="padding-top:calc(env(safe-area-inset-top,0px) + 14px);background:rgba(245,247,255,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.6);">
                     <div class="relative flex items-center">
-                        <i class="fas fa-magnifying-glass absolute left-4 text-slate-400 text-[14px] pointer-events-none"></i>
                         <input id="unifiedPlanSearchInput"
                                type="text"
                                oninput="handleUnifiedPlanSearch()"
                                placeholder="ค้นหาแบบประกัน..."
-                               class="w-full h-[46px] pl-10 pr-10 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all"
+                               class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all"
                                style="background:rgba(255,255,255,0.72);border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 10px rgba(37,99,235,0.08);">
+                        <i id="planSearchIcon" class="fas fa-magnifying-glass absolute right-4 text-slate-400 text-[14px] pointer-events-none"></i>
                         <button id="planSearchClearBtn" onclick="clearPlanSearch()" class="absolute right-3 w-7 h-7 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 transition-colors hidden">
                             <i class="fas fa-xmark text-[12px]"></i>
                         </button>
@@ -2007,7 +2007,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             btn.title = 'ซ่อน/แสดงเมนูซ้าย';
             btn.style.cssText = [
                 'position:fixed',
-                'bottom:88px',
+                'top:calc(env(safe-area-inset-top,0px) + 14px)',
                 'left:12px',
                 'z-index:60',
                 'width:36px',
