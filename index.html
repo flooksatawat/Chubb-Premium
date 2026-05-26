@@ -807,11 +807,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                         <div class="px-3 py-3 flex items-stretch gap-3">
                             <!-- Text input section -->
-                            <div class="flex-1 flex flex-col gap-1.5 min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-calculator text-[#60a5fa] text-[12px]"></i>
-                                    <span class="text-[11px] font-extrabold text-white/90 tracking-wide">พิมพ์เพื่อคำนวณเบี้ยประกัน</span>
-                                </div>
+                            <div class="flex-1 flex flex-col gap-0 min-w-0">
                                 <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
                                     class="w-full rounded-[14px] py-2.5 px-3.5 focus:outline-none transition-all duration-200 text-[13px] font-medium"
                                     style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:white;"
@@ -832,7 +828,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                     <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-t-[18px]"></div>
                                     <i class="fas fa-microphone text-[21px] relative z-10 drop-shadow"></i>
                                 </button>
-                                <span class="text-[9px] font-bold tracking-wide whitespace-nowrap" style="color:rgba(134,239,172,0.9);">คำนวณด้วยเสียง</span>
                             </div>
                         </div>
                     </div>
