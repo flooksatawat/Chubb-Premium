@@ -873,16 +873,18 @@ function calculate(source, enforceMin = false) {
             }
         }
 
-        // CX underage: warning + ซ่อนเบี้ย
-        const _cxWarn = document.getElementById('cxUnderageWarning');
+        // CX underage: popup + ซ่อนเบี้ย
         const _premContainer = document.getElementById('premiumContainer');
         if (currentAppPlan === 'CI Extra Plus' && age < 16) {
-            if (_cxWarn) _cxWarn.classList.remove('hidden');
+            if (!window._cxUnderageWasShown) {
+                showCustomError('อายุต่ำกว่า 16 ปี — วงเงินสูงสุด 3,000,000 บาท\nต้องผ่านการพิจารณารับประกัน ไม่แสดงเบี้ยอัตโนมัติ');
+                window._cxUnderageWasShown = true;
+            }
             if (_premContainer) _premContainer.classList.add('hidden');
             const premEl = document.getElementById('premiumInput');
             if (premEl) premEl.value = '';
         } else {
-            if (_cxWarn) _cxWarn.classList.add('hidden');
+            window._cxUnderageWasShown = false;
             if (_premContainer) _premContainer.classList.remove('hidden');
         }
         
