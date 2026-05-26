@@ -922,10 +922,16 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <div class="space-y-3">
                     <!-- กล่องออมเงิน -->
                     <div class="flex justify-between items-center p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                        <span class="text-[13px] text-blue-900 font-bold">ออมเงิน</span>
+                        <span id="modalPremiumLabel" class="text-[13px] text-blue-900 font-bold">ออมเงิน</span>
                         <span class="text-[16px] font-extrabold text-blue-800"><span id="modalPremium">0</span> บาท</span>
                     </div>
-                    
+
+                    <!-- กล่อง DD50 (แสดงเฉพาะ CX + DD50 เปิด) -->
+                    <div id="modalDD50Row" class="hidden flex justify-between items-center p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                        <span class="text-[13px] text-rose-900 font-bold">เบี้ย DD50 (โรคร้ายแรง)</span>
+                        <span class="text-[16px] font-extrabold text-rose-700"><span id="modalDD50Prem">0</span> บาท</span>
+                    </div>
+
                     <!-- กล่องทุนประกัน -->
                     <div class="flex justify-between items-center p-4 bg-emerald-50/70 rounded-2xl border border-emerald-100">
                         <span class="text-[13px] text-emerald-900 font-bold">ทุนประกัน</span>

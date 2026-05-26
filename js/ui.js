@@ -2502,11 +2502,25 @@ function openUniversalModal(d) {
         openPopup('slbResultModal');
     } 
     else if (currentAppPlan === 'CI Extra Plus') {
-        setText('modalGender', d.gender); 
-        setText('modalAge', d.age + " ปี"); 
-        setText('modalYears', d.years + " ปี"); 
-        setText('modalPremium', Math.round(d.premium).toLocaleString()); 
-        setText('modalSum', formatNum(d.sum)); 
+        setText('modalGender', d.gender);
+        setText('modalAge', d.age + " ปี");
+        setText('modalYears', d.years + " ปี");
+
+        const _dd50P = (d.dd50Prem > 0) ? Math.round(d.dd50Prem) : 0;
+        const _premLabel = document.getElementById('modalPremiumLabel');
+        const _dd50Row = document.getElementById('modalDD50Row');
+        if (_dd50P > 0) {
+            if (_premLabel) _premLabel.textContent = 'เบี้ยประกัน CX';
+            setText('modalPremium', Math.round(d.premium - _dd50P).toLocaleString());
+            setText('modalDD50Prem', _dd50P.toLocaleString());
+            if (_dd50Row) { _dd50Row.classList.remove('hidden'); _dd50Row.classList.add('flex'); }
+        } else {
+            if (_premLabel) _premLabel.textContent = 'เบี้ยประกัน';
+            setText('modalPremium', Math.round(d.premium).toLocaleString());
+            if (_dd50Row) { _dd50Row.classList.add('hidden'); _dd50Row.classList.remove('flex'); }
+        }
+
+        setText('modalSum', formatNum(d.sum));
         
         const childRow = document.getElementById('modalChildRow'); 
         if (childRow) {
