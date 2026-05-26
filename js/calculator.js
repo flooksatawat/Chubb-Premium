@@ -573,6 +573,7 @@ function calculate(source, enforceMin = false) {
             if (sumEl) sumEl.value = '5,000,000';
         }
 
+        let dd50Prem = 0;
         // ---------------- 1. Whole Life Extra (WXN) ----------------
         if (currentAppPlan === 'Whole Life Extra') {
             let clRate = LIFE_RATES[currentPlan]?.[currentGender]?.[age] || 0;
@@ -894,7 +895,7 @@ function calculate(source, enforceMin = false) {
             _generalTPDPrem = tpdPrem;
 
             // DD50 (CX only): cap ทุน ≤ min(5×ทุนหลัก, 10M); อายุ 16-65 จึงคิดเบี้ย
-            let dd50Prem = 0;
+            dd50Prem = 0;
             let _cappedDD50SA = 0;
             if (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) {
                 const _rawDD50SA = parseInt(window.currentDD50SA) || 0;
