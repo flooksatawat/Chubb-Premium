@@ -802,11 +802,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         <!-- Subtle top highlight -->
                         <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
 
-                        <div class="px-3 py-2 flex items-center gap-2">
+                        <div class="px-4 py-3 flex items-center gap-3">
                             <!-- Text input -->
                             <div class="flex-1 min-w-0">
                                 <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
-                                    class="w-full rounded-[13px] py-2 px-4 focus:outline-none transition-all duration-200 text-[13px] font-medium placeholder:text-white/40"
+                                    class="w-full rounded-[16px] py-2.5 px-4 focus:outline-none transition-all duration-200 text-[14px] font-medium placeholder:text-white/40"
                                     style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.90);"
                                     onfocus="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)';"
                                     onblur="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.14)';"
@@ -814,14 +814,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             </div>
 
                             <!-- Divider -->
-                            <div class="w-px h-7 shrink-0" style="background:rgba(255,255,255,0.14);"></div>
+                            <div class="w-px h-8 shrink-0" style="background:rgba(255,255,255,0.14);"></div>
 
                             <!-- Voice button — color set by applyDayColorTheme() -->
                             <button id="modalVoiceBtn"
                                 onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}"
-                                class="w-[42px] h-[42px] shrink-0 rounded-[13px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150">
+                                class="w-[48px] h-[48px] shrink-0 rounded-[16px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150">
                                 <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
-                                <i class="fas fa-microphone text-[17px] relative z-10"></i>
+                                <i class="fas fa-microphone text-[19px] relative z-10"></i>
                             </button>
                         </div>
                     </div>
