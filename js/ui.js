@@ -2899,10 +2899,21 @@ function _updateDD50UI() {
     const enabled = toggle.checked;
     if (area) area.classList.toggle('hidden', !enabled);
     if (enabled) window.refreshDD50Pills && window.refreshDD50Pills();
-    if (enabled && display && lastCalculationData && lastCalculationData.dd50Prem > 0) {
-        display.textContent = `เบี้ย DD50: ${lastCalculationData.dd50Prem.toLocaleString()} บาท/ปี`;
-    } else if (display) {
-        display.textContent = '';
+
+    const breakdown = document.getElementById('premDD50BreakdownDisplay');
+    const cxOnlyEl = document.getElementById('premCXOnly');
+    const dd50OnlyEl = document.getElementById('premDD50Only');
+
+    if (enabled && lastCalculationData && lastCalculationData.dd50Prem > 0) {
+        const _d50 = Math.round(lastCalculationData.dd50Prem);
+        const _cx = Math.round(lastCalculationData.premium) - _d50;
+        if (display) display.textContent = `เบี้ย DD50: ${_d50.toLocaleString()} บาท/ปี`;
+        if (breakdown) { breakdown.classList.remove('hidden'); breakdown.classList.add('flex'); }
+        if (cxOnlyEl) cxOnlyEl.textContent = _cx.toLocaleString();
+        if (dd50OnlyEl) dd50OnlyEl.textContent = _d50.toLocaleString();
+    } else {
+        if (display) display.textContent = '';
+        if (breakdown) { breakdown.classList.add('hidden'); breakdown.classList.remove('flex'); }
     }
 }
 
@@ -3169,7 +3180,18 @@ function generatePolicyTableData() {
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
                     </label>
                 `;
-            } else if (isCX || isCL || isSLB) {
+            } else if (isCX) {
+                rightMenuHTML = `
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fas fa-heart-circle-plus text-rose-500 text-[14px] w-4 text-center shrink-0"></i>
+                        <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงเบี้ย DD50</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleShowDD50Col" class="sr-only peer" onchange="generatePolicyTableData();">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
+                    </label>
+                `;
+            } else if (isCL || isSLB) {
                 rightMenuHTML = `
                     <div class="flex items-center gap-2 min-w-0">
                         <i class="fas fa-wallet text-sky-500 text-[16px] w-5 text-center shrink-0"></i>
@@ -3285,6 +3307,7 @@ function generatePolicyTableData() {
     const isBreakevenActive = document.getElementById('toggleBreakeven')?.checked || false;
     const isShowSAActive = document.getElementById('toggleShowSA')?.checked || false;
     const isShowCVActive = document.getElementById('toggleShowCV')?.checked || false;
+    const isShowDD50ColActive = document.getElementById('toggleShowDD50Col')?.checked || false;
     
     let startAge = 61, endAge = 70;
     if (isSurrenderActive && hasSurrenderMenu) {
@@ -3307,7 +3330,8 @@ function generatePolicyTableData() {
     const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
-    const showCVColumn = (isTLA || isLV) ? false : (isCX || isCL || isSLB) ? isShowCVActive : true;
+    const showCVColumn = (isTLA || isLV) ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : true;
+    const showDD50Column = isCX && isShowDD50ColActive && window.currentDD50Enabled && window.DD50_RATES;
 
     // MF premium column
     const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
@@ -3414,6 +3438,7 @@ function generatePolicyTableData() {
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
+        ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
         ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
@@ -3642,6 +3667,12 @@ function generatePolicyTableData() {
             html += `<td class="${_mfTdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
         }
         html += `${showCVColumn ? `<td class="${_tdBase} ${isBreakevenActive && y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        if (showDD50Column) {
+            const _dd50SA = parseInt(window.currentDD50SA) || 0;
+            const _dd50RowPrem = (currentAge >= 16 && currentAge <= 84 && _dd50SA > 0 && typeof getHealthRate === 'function')
+                ? getHealthRate('DD50', String(_dd50SA), currentAge, currentGender) : 0;
+            html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${_dd50RowPrem > 0 ? _dd50RowPrem.toLocaleString() : '—'}</td>`;
+        }
         if (showCoverageColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${slpaEffectiveSA > 0 ? slpaEffectiveSA.toLocaleString() : '—'}</td>`;
         if (showSAColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${saCompact}</td>`;
         if (showAccidentColumn) html += `<td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${accidentCompact}</td>`;
