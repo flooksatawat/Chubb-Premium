@@ -60,7 +60,7 @@ async function loadAllRates() {
         'cx_rates.json', 'ci_rates.json', 'lp_rates.json', 'slb_rates.json', 'slpa_rates.json',
         'tx_rates.json', 'elite_rates.json', 'lv_rates.json', 'cl_rates.json', 'tla_rates.json',
         'hx_rates.json', 'hxd_rates.json', 'hxo_rates.json', '3d_health.json',
-        'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json', 'sm_rates.json'
+        'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json', 'sm_rates.json', 'dd50_rates.json'
     ];
     try {
         for (const file of rateFiles) {
@@ -72,6 +72,8 @@ async function loadAllRates() {
                         CI_RATES = { ...CI_RATES, ...d };
                     } else if (file === 'tpd_rates.json' || d.TPD_RATES) {
                         window.TPD_RATES = d.TPD_RATES || d;
+                    } else if (file === 'dd50_rates.json' || d.DD50_RATES) {
+                        window.DD50_RATES = d.DD50_RATES || d;
                     } else if (file === 'hbf_rates.json' || d.HBF_RATES) {
                         // โหลด HBF เข้าตัวแปร Global เพื่อให้เรียกใช้ได้ง่าย
                         window.HBF_RATES = d.HBF_RATES || d;
@@ -130,6 +132,20 @@ function getHealthRate(categoryKey, planName, age, gender) {
         const genderKey = (gender === 'male' || (gender || '').includes('ชาย')) ? 'male' : 'female';
         const ageKey = String(Math.min(Math.max(age, 0), 99));
         const rate = tpdSource[classKey]?.[genderKey]?.[ageKey];
+        if (rate === undefined) return 0;
+        return Math.round((sa / 1000) * rate);
+    }
+
+    // ส่วนของ DD50 — โรคร้ายแรง 50 โรค (CX rider)
+    if (categoryKey === 'DD50') {
+        const ddSource = window.DD50_RATES;
+        if (!ddSource) return 0;
+        const sa = parseInt(planName) || 0;
+        if (sa <= 0) return 0;
+        const genderKey = (gender === 'male' || (gender || '').includes('ชาย')) ? 'male' : 'female';
+        // อายุที่ออกใหม่ 16-65 (ต่ออายุได้ถึง 84)
+        if (age < 16 || age > 84) return 0;
+        const rate = ddSource[genderKey]?.[String(age)];
         if (rate === undefined) return 0;
         return Math.round((sa / 1000) * rate);
     }
@@ -461,6 +477,54 @@ window.refreshTPDPills = function() {
             ? 'w-full text-center py-1.5 text-[11px] font-bold text-orange-600 bg-white shadow rounded-xl border border-orange-200/60 transition-all'
             : 'w-full text-center py-1.5 text-[11px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
         return `<button onclick="window.setTPDMultiplier(${m})" class="${cls}">${labels[i]}</button>`;
+    }).join('');
+};
+
+// ==================== DD50 (CX rider) ====================
+// เงื่อนไข: ทุน ≤ min(5×ทุนหลัก, 10,000,000) · ขั้นต่ำ 100,000 · อายุออกใหม่ 16-65
+function _getDD50Max() {
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    return Math.min(mainSum * 5, 10000000);
+}
+function _getDD50Min() { return 100000; }
+
+window.adjustDD50 = function(delta) {
+    const el = document.getElementById('dd50SAInput');
+    if (!el) return;
+    const cur = parseInt((el.value || '').replace(/,/g, '')) || 0;
+    const max = _getDD50Max();
+    let next = Math.min(Math.max(0, cur + delta), max);
+    if (next === max && delta > 0) showCustomError(`ซื้อ DD50 ได้สูงสุด ${max.toLocaleString()} บาท (5×ทุนหลัก หรือไม่เกิน 10 ล้าน)`);
+    el.value = next.toLocaleString('en-US');
+    window.currentDD50SA = String(next);
+    window.refreshDD50Pills && window.refreshDD50Pills();
+    calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+window.setDD50Multiplier = function(mult) {
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    const v = Math.min(Math.round(mainSum * mult), _getDD50Max());
+    const el = document.getElementById('dd50SAInput');
+    if (el) el.value = v.toLocaleString('en-US');
+    window.currentDD50SA = String(v);
+    window.refreshDD50Pills && window.refreshDD50Pills();
+    calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+};
+
+window.refreshDD50Pills = function() {
+    const pillRow = document.getElementById('dd50PillRow');
+    if (!pillRow) return;
+    const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
+    const curDD = parseInt((document.getElementById('dd50SAInput')?.value || '').replace(/,/g, '')) || 0;
+    const mults = [1, 2, 3, 5];
+    const labels = ['×1', '×2', '×3', '×5'];
+    pillRow.innerHTML = mults.map((m, i) => {
+        const v = Math.min(Math.round(mainSum * m), _getDD50Max());
+        const isSel = curDD === v && v > 0;
+        const cls = isSel
+            ? 'w-full text-center py-1.5 text-[11px] font-bold text-rose-600 bg-white shadow rounded-xl border border-rose-200/60 transition-all'
+            : 'w-full text-center py-1.5 text-[11px] font-medium text-slate-500 hover:bg-white/60 rounded-xl transition-all';
+        return `<button onclick="window.setDD50Multiplier(${m})" class="${cls}">${labels[i]}</button>`;
     }).join('');
 };
 
@@ -829,6 +893,18 @@ function calculate(source, enforceMin = false) {
             let tpdPrem = getHealthRate('TPD', _tpdSAStr, age, currentGender);
             _generalTPDPrem = tpdPrem;
 
+            // DD50 (CX only): cap ทุน ≤ min(5×ทุนหลัก, 10M); อายุ 16-65 จึงคิดเบี้ย
+            let dd50Prem = 0;
+            let _cappedDD50SA = 0;
+            if (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) {
+                const _rawDD50SA = parseInt(window.currentDD50SA) || 0;
+                const _dd50Cap = Math.min((_fSumForCap || fSum) * 5, 10000000);
+                _cappedDD50SA = _fSumForCap > 0 ? Math.min(_rawDD50SA, _dd50Cap) : _rawDD50SA;
+                if (age >= 16 && age <= 65) {
+                    dd50Prem = getHealthRate('DD50', String(_cappedDD50SA), age, currentGender);
+                }
+            }
+
             if (totalRate > 0) {
                 const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
                 const _maxS = config.getMaxSum ? config.getMaxSum(age) : Infinity;
@@ -846,12 +922,12 @@ function calculate(source, enforceMin = false) {
                     }
                     // คำนวณเบี้ยจากทุน: (ทุน/1000) * (เรทรวม - ส่วนลด)
                     let basePrem = (fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan));
-                    fPrem = Math.round(basePrem) + mfPrem + tpdPrem;
+                    fPrem = Math.round(basePrem) + mfPrem + tpdPrem + dd50Prem;
                     document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 } else {
                     // คำนวณทุนจากเบี้ย (ย้อนกลับ)
                     fPrem = getSafeValue('premiumInput') || 0;
-                    let basePrem = fPrem - mfPrem - tpdPrem;
+                    let basePrem = fPrem - mfPrem - tpdPrem - dd50Prem;
                     if(basePrem < 0) basePrem = 0;
 
                     let baseDiscountArray = [3, 2, 1.5, 1, 0.5, 0];
@@ -863,12 +939,12 @@ function calculate(source, enforceMin = false) {
 
                     if (fSum > _maxS) {
                         fSum = _maxS;
-                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem;
+                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem + dd50Prem;
                         document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                     }
                     if (enforceMin && fSum < _minS) {
                         fSum = _minS;
-                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem;
+                        fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem + dd50Prem;
                         document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                     }
                     document.getElementById('sumInsuredInput').value = formatNum(fSum);
@@ -895,7 +971,9 @@ function calculate(source, enforceMin = false) {
         
         highlightActivePills(fSum, fPrem, cashFlowVal);
         const _tlaTpdPrem = (currentAppPlan === 'Convertable Term' && window.currentTPDEnabled) ? (typeof tpdPrem !== 'undefined' ? tpdPrem : 0) : 0;
-        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _tlaTpdPrem, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0') };
+        const _cxDD50Prem = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
+        const _cxDD50SA = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
+        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _tlaTpdPrem, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0'), dd50Prem: _cxDD50Prem, dd50SA: _cxDD50SA };
         
         if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
 

@@ -576,6 +576,29 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                     </div>
 
+                    <!-- DD50 Rider container: visible for CX only -->
+                    <div id="globalDD50Container" class="hidden mb-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-heart-circle-plus text-rose-500 text-[15px]"></i>
+                                <span class="text-[12px] font-bold text-rose-800">เพิ่ม DD50 (โรคร้ายแรง 50 โรค)</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="dd50Toggle" class="sr-only peer" onchange="(function(cb){ const ageEl=document.getElementById('ageInput'); const _age=parseInt(ageEl?.value)||0; if(cb.checked && (_age<16||_age>65)){ cb.checked=false; showCustomError('DD50 รับประกันอายุ 16-65 ปี เท่านั้น'); return; } window.currentDD50Enabled=cb.checked; if(cb.checked){ const s=parseInt((document.getElementById('sumInsuredInput')?.value||'').replace(/,/g,''))||0; const v=Math.min(s, 10000000); window.currentDD50SA=String(v); const inp=document.getElementById('dd50SAInput'); if(inp){inp.value=v.toLocaleString('en-US');} window.refreshDD50Pills&&window.refreshDD50Pills(); } if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true); })(this)">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
+                            </label>
+                        </div>
+                        <div id="dd50SAInputArea" class="hidden">
+                            <div id="dd50PillRow" class="bg-rose-50 p-1 rounded-2xl border border-rose-100 shadow-inner grid grid-cols-4 gap-1 mb-2"></div>
+                            <div class="flex items-center gap-1.5">
+                                <button onmousedown="window._dI=setInterval(()=>window.adjustDD50(-100000),150)" onmouseup="clearInterval(window._dI)" ontouchstart="window._dI=setInterval(()=>window.adjustDD50(-100000),150)" ontouchend="clearInterval(window._dI)" onclick="window.adjustDD50(-100000)" class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-200 transition-all select-none touch-manipulation">−</button>
+                                <input type="text" id="dd50SAInput" value="" class="flex-1 text-center bg-rose-50 border border-rose-200 rounded-xl h-9 text-[13px] font-bold text-rose-800 outline-none focus:border-rose-400 focus:bg-white transition-colors" oninput="this.value=this.value.replace(/[^0-9,]/g,''); var _v=parseInt(this.value.replace(/,/g,''))||0; var _mx=typeof _getDD50Max==='function'?_getDD50Max():0; if(_mx>0&&_v>_mx){_v=_mx; this.value=_mx.toLocaleString('en-US'); showCustomError&&showCustomError('ซื้อ DD50 ได้สูงสุด '+_mx.toLocaleString()+' บาท (5×ทุนหลัก หรือไม่เกิน 10 ล้าน)');} window.currentDD50SA=String(_v); window.refreshDD50Pills&&window.refreshDD50Pills(); if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
+                                <button onmousedown="window._dI=setInterval(()=>window.adjustDD50(100000),150)" onmouseup="clearInterval(window._dI)" ontouchstart="window._dI=setInterval(()=>window.adjustDD50(100000),150)" ontouchend="clearInterval(window._dI)" onclick="window.adjustDD50(100000)" class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-200 transition-all select-none touch-manipulation">+</button>
+                            </div>
+                            <div id="dd50PremDisplay" class="mt-1.5 text-center text-[11px] font-bold text-rose-700"></div>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div id="mainActionsGroup" class="pb-2 shrink-0 flex flex-col gap-3 mt-1 transition-all duration-300">
                         <!-- Medical Fund shortcut: visible only for 24TX, Elite, WXN -->

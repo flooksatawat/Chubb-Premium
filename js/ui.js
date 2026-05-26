@@ -1530,6 +1530,19 @@ function selectAppPlan(planName) {
         if (tpdArea) tpdArea.classList.add('hidden');
     }
 
+    // DD50 rider: show for CX only
+    const globalDD50Container = document.getElementById('globalDD50Container');
+    if (planName === 'CI Extra Plus') {
+        if (globalDD50Container) globalDD50Container.classList.remove('hidden');
+    } else {
+        if (globalDD50Container) globalDD50Container.classList.add('hidden');
+        window.currentDD50Enabled = false;
+        const dd50Toggle = document.getElementById('dd50Toggle');
+        if (dd50Toggle) dd50Toggle.checked = false;
+        const dd50Area = document.getElementById('dd50SAInputArea');
+        if (dd50Area) dd50Area.classList.add('hidden');
+    }
+
     if (['Signature Legacy', 'Convertable Term'].includes(planName)) {
         if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)"; if(pPills) pPills.classList.add('hidden'); 
     } else if (planName !== '3D Health Excellence') {
@@ -1556,6 +1569,7 @@ function selectAppPlan(planName) {
         if (hxRoomRateContainer) hxRoomRateContainer.classList.add('hidden');
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
         if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
+        if (globalDD50Container) globalDD50Container.classList.add('hidden');
         if (medFundBtnContainer) medFundBtnContainer.classList.add('hidden');
         if (mfInlineContainer) { mfInlineContainer.classList.remove('hidden'); if (window.mfInlineInit) window.mfInlineInit(); }
     } else {
@@ -2835,6 +2849,36 @@ window.toggleComTiers = function() {
     }
 };
 
+function _updateDD50UI() {
+    const toggle = document.getElementById('dd50Toggle');
+    const area = document.getElementById('dd50SAInputArea');
+    const display = document.getElementById('dd50PremDisplay');
+    if (!toggle) return;
+    const ageInputEl = document.getElementById('ageInput');
+    const _age = parseInt(ageInputEl?.value) || 0;
+    // ปิด DD50 อัตโนมัติเมื่ออายุนอกช่วง 16-65
+    if (window.currentDD50Enabled && (_age < 16 || _age > 65)) {
+        window.currentDD50Enabled = false;
+        toggle.checked = false;
+    }
+    // disable toggle ถ้าอายุนอกช่วง
+    if (_age < 16 || _age > 65) {
+        toggle.disabled = true;
+        toggle.parentElement?.classList.add('opacity-40', 'cursor-not-allowed');
+    } else {
+        toggle.disabled = false;
+        toggle.parentElement?.classList.remove('opacity-40', 'cursor-not-allowed');
+    }
+    const enabled = toggle.checked;
+    if (area) area.classList.toggle('hidden', !enabled);
+    if (enabled) window.refreshDD50Pills && window.refreshDD50Pills();
+    if (enabled && display && lastCalculationData && lastCalculationData.dd50Prem > 0) {
+        display.textContent = `เบี้ย DD50: ${lastCalculationData.dd50Prem.toLocaleString()} บาท/ปี`;
+    } else if (display) {
+        display.textContent = '';
+    }
+}
+
 function _updateTPDUI() {
     const toggle = document.getElementById('tpdToggle');
     const area = document.getElementById('tpdSAInputArea');
@@ -2880,6 +2924,7 @@ function _updateSumResultDisplay() {
 
 function refreshAllDisplays() {
     _updateTPDUI();
+    _updateDD50UI();
     _updateSumResultDisplay();
     if (currentAppPlan === '3D Health Excellence' && typeof window.render3DOptionsUI === 'function') {
         window.render3DOptionsUI();
