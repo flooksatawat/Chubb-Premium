@@ -597,12 +597,19 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             </div>
                             <div id="dd50SummaryBox" class="hidden mt-2 rounded-xl bg-white border border-rose-200 overflow-hidden">
                                 <div class="flex justify-between items-center px-3 py-2 border-b border-rose-100">
+                                    <span class="text-[11px] text-rose-500 font-bold">เบี้ย DD50</span>
+                                    <span class="text-[12px] font-extrabold text-rose-500"><span id="dd50OnlyPremDisplay">0</span> <span class="text-[10px] font-bold">บาท/ปี</span></span>
+                                </div>
+                                <div class="flex justify-between items-center px-3 py-2 border-b border-rose-100">
                                     <span class="text-[11px] text-rose-700 font-bold">รวมเบี้ย CX+DD50</span>
                                     <span class="text-[13px] font-extrabold text-rose-700"><span id="dd50TotalPrem">0</span> <span class="text-[10px] font-bold">บาท/ปี</span></span>
                                 </div>
-                                <div class="flex justify-between items-center px-3 py-2">
-                                    <span class="text-[11px] text-slate-600 font-bold">วงเงินคุ้มครอง DD50</span>
-                                    <span class="text-[13px] font-extrabold text-slate-700"><span id="dd50CoverageAmt">0</span> <span class="text-[10px] font-bold">บาท</span></span>
+                                <div class="px-3 py-2">
+                                    <span class="text-[11px] text-slate-500 font-bold block mb-1">วงเงินคุ้มครอง</span>
+                                    <div class="flex justify-between text-[11px]">
+                                        <span class="text-slate-500">CX: <span id="dd50CXCoverage" class="font-extrabold text-slate-700">0</span> บาท</span>
+                                        <span class="text-rose-500">DD50: <span id="dd50CoverageAmt" class="font-extrabold text-rose-700">0</span> บาท</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

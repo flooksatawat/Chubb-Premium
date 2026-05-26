@@ -2901,19 +2901,22 @@ function _updateDD50UI() {
     if (enabled) window.refreshDD50Pills && window.refreshDD50Pills();
 
     const summaryBox = document.getElementById('dd50SummaryBox');
-    const totalPremEl = document.getElementById('dd50TotalPrem');
-    const coverageEl = document.getElementById('dd50CoverageAmt');
 
-    if (enabled && lastCalculationData && lastCalculationData.dd50Prem > 0) {
-        const _d50 = Math.round(lastCalculationData.dd50Prem);
-        const _total = Math.round(lastCalculationData.premium);
-        const _sa = parseInt(window.currentDD50SA) || 0;
-        if (display) display.textContent = '';
+    const _sa = parseInt(window.currentDD50SA) || 0;
+    if (enabled && _sa > 0 && lastCalculationData) {
+        const _d50 = Math.round(lastCalculationData.dd50Prem || 0);
+        const _total = Math.round(lastCalculationData.premium || 0);
+        const _cxSum = Math.round(lastCalculationData.sum || 0);
         if (summaryBox) summaryBox.classList.remove('hidden');
-        if (totalPremEl) totalPremEl.textContent = _total.toLocaleString();
-        if (coverageEl) coverageEl.textContent = _sa.toLocaleString();
+        const _onlyEl = document.getElementById('dd50OnlyPremDisplay');
+        const _totEl = document.getElementById('dd50TotalPrem');
+        const _cxCovEl = document.getElementById('dd50CXCoverage');
+        const _covEl = document.getElementById('dd50CoverageAmt');
+        if (_onlyEl) _onlyEl.textContent = _d50.toLocaleString();
+        if (_totEl) _totEl.textContent = _total.toLocaleString();
+        if (_cxCovEl) _cxCovEl.textContent = _cxSum.toLocaleString();
+        if (_covEl) _covEl.textContent = _sa.toLocaleString();
     } else {
-        if (display) display.textContent = '';
         if (summaryBox) summaryBox.classList.add('hidden');
     }
 }
