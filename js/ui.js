@@ -2900,20 +2900,21 @@ function _updateDD50UI() {
     if (area) area.classList.toggle('hidden', !enabled);
     if (enabled) window.refreshDD50Pills && window.refreshDD50Pills();
 
-    const breakdown = document.getElementById('premDD50BreakdownDisplay');
-    const cxOnlyEl = document.getElementById('premCXOnly');
-    const dd50OnlyEl = document.getElementById('premDD50Only');
+    const summaryBox = document.getElementById('dd50SummaryBox');
+    const totalPremEl = document.getElementById('dd50TotalPrem');
+    const coverageEl = document.getElementById('dd50CoverageAmt');
 
     if (enabled && lastCalculationData && lastCalculationData.dd50Prem > 0) {
         const _d50 = Math.round(lastCalculationData.dd50Prem);
-        const _cx = Math.round(lastCalculationData.premium) - _d50;
-        if (display) display.textContent = `เบี้ย DD50: ${_d50.toLocaleString()} บาท/ปี`;
-        if (breakdown) { breakdown.classList.remove('hidden'); breakdown.classList.add('flex'); }
-        if (cxOnlyEl) cxOnlyEl.textContent = _cx.toLocaleString();
-        if (dd50OnlyEl) dd50OnlyEl.textContent = _d50.toLocaleString();
+        const _total = Math.round(lastCalculationData.premium);
+        const _sa = parseInt(window.currentDD50SA) || 0;
+        if (display) display.textContent = '';
+        if (summaryBox) summaryBox.classList.remove('hidden');
+        if (totalPremEl) totalPremEl.textContent = _total.toLocaleString();
+        if (coverageEl) coverageEl.textContent = _sa.toLocaleString();
     } else {
         if (display) display.textContent = '';
-        if (breakdown) { breakdown.classList.add('hidden'); breakdown.classList.remove('flex'); }
+        if (summaryBox) summaryBox.classList.add('hidden');
     }
 }
 
