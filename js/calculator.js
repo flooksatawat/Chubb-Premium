@@ -516,8 +516,8 @@ window.refreshDD50Pills = function() {
     if (!pillRow) return;
     const mainSum = parseInt((document.getElementById('sumInsuredInput')?.value || '').replace(/,/g, '')) || 0;
     const curDD = parseInt((document.getElementById('dd50SAInput')?.value || '').replace(/,/g, '')) || 0;
-    const mults = [1, 2, 3, 5];
-    const labels = ['×1', '×2', '×3', '×5'];
+    const mults = [1, 2, 3, 4, 5];
+    const labels = ['×1', '×2', '×3', '×4', '×5'];
     pillRow.innerHTML = mults.map((m, i) => {
         const v = Math.min(Math.round(mainSum * m), _getDD50Max());
         const isSel = curDD === v && v > 0;
