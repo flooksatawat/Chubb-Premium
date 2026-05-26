@@ -555,17 +555,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                     <!-- TPD Rider container: visible for TL and 3D -->
                     <div id="globalTPDContainer" class="hidden mb-2 p-3 bg-orange-50 border border-orange-200 rounded-2xl">
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center justify-between min-h-[28px]">
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-person-cane text-orange-500 text-[15px]"></i>
-                                <span class="text-[12px] font-bold text-orange-800">สัญญาเพิ่มเติม TPD</span>
+                                <span class="text-[12px] font-bold text-orange-800 leading-none">สัญญาเพิ่มเติม TPD</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="tpdToggle" class="sr-only peer" onchange="window.currentTPDEnabled=this.checked; if(this.checked){ const s=parseInt((document.getElementById('sumInsuredInput')?.value||'').replace(/,/g,''))||0; const v=s*2; window.currentTPDSA=String(v); const inp=document.getElementById('tpdSAInput'); if(inp){inp.value=v.toLocaleString('en-US');} window.refreshTPDPills&&window.refreshTPDPills(); } if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
                                 <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
                             </label>
                         </div>
-                        <div id="tpdSAInputArea" class="hidden">
+                        <div id="tpdSAInputArea" class="hidden mt-2">
                             <div id="tpdPillRow" class="bg-orange-50 p-1 rounded-2xl border border-orange-100 shadow-inner grid grid-cols-4 gap-1 mb-2"></div>
                             <div class="flex items-center gap-1.5">
                                 <button onmousedown="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" onmouseup="clearInterval(window._tI)" ontouchstart="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" ontouchend="clearInterval(window._tI)" onclick="window.adjustTPD(-100000)" class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-orange-200 transition-all select-none touch-manipulation">−</button>
@@ -578,17 +578,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                     <!-- DD50 Rider container: visible for CX only -->
                     <div id="globalDD50Container" class="hidden mb-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl">
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center justify-between min-h-[28px]">
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-heart-circle-plus text-rose-500 text-[15px]"></i>
-                                <span class="text-[12px] font-bold text-rose-800">เพิ่ม DD50 (โรคร้ายแรง 50 โรค)</span>
+                                <span class="text-[12px] font-bold text-rose-800 leading-none">เพิ่ม DD50 (โรคร้ายแรง 50 โรค)</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="dd50Toggle" class="sr-only peer" onchange="(function(cb){ const ageEl=document.getElementById('ageInput'); const _age=parseInt(ageEl?.value)||0; if(cb.checked && (_age<16||_age>65)){ cb.checked=false; showCustomError('DD50 รับประกันอายุ 16-65 ปี เท่านั้น'); return; } window.currentDD50Enabled=cb.checked; if(cb.checked){ const s=parseInt((document.getElementById('sumInsuredInput')?.value||'').replace(/,/g,''))||0; const v=Math.min(s, 10000000); window.currentDD50SA=String(v); const inp=document.getElementById('dd50SAInput'); if(inp){inp.value=v.toLocaleString('en-US');} window.refreshDD50Pills&&window.refreshDD50Pills(); } if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true); })(this)">
                                 <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
                             </label>
                         </div>
-                        <div id="dd50SAInputArea" class="hidden">
+                        <div id="dd50SAInputArea" class="hidden mt-2">
                             <div id="dd50PillRow" class="bg-rose-50 p-1 rounded-2xl border border-rose-100 shadow-inner grid grid-cols-4 gap-1 mb-2"></div>
                             <div class="flex items-center gap-1.5">
                                 <button onmousedown="window._dI=setInterval(()=>window.adjustDD50(-100000),150)" onmouseup="clearInterval(window._dI)" ontouchstart="window._dI=setInterval(()=>window.adjustDD50(-100000),150)" ontouchend="clearInterval(window._dI)" onclick="window.adjustDD50(-100000)" class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-rose-200 transition-all select-none touch-manipulation">−</button>
