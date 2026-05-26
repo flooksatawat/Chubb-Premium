@@ -797,19 +797,28 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                 <div id="bottomFadeOverlay" class="absolute bottom-0 left-0 right-0 h-36 pointer-events-none z-20 transition-opacity duration-500" style="background:linear-gradient(to top,#eff6ff 20%,transparent);"></div>
 
-                <!-- Floating AI Bottom Bar -->
-                <div id="modalBottomBar" class="absolute bottom-6 left-4 right-4 z-30 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                    <div class="bg-slate-900/85 backdrop-blur-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] rounded-[28px] p-2 flex items-center gap-2 transform transition-all hover:bg-slate-900/95 shimmer-bg">
-                        <div class="flex-1 relative flex items-center group">
-                            <div class="absolute left-1.5 w-10 h-10 rounded-[18px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-blue-300 group-focus-within:ai-pulse transition-all"><i class="fas fa-sparkles text-[15px]"></i></div>
-                            <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)" class="w-full bg-transparent border border-white/10 text-white rounded-[20px] py-3.5 pl-[3.25rem] pr-4 focus:outline-none focus:bg-white/10 focus:border-blue-400/50 transition-all text-[13px] font-medium placeholder:text-slate-400/80" placeholder="พิมพ์เพื่อคำนวณเบี้ยประกัน...">
+                <!-- Floating AI Bottom Bar — always visible -->
+                <div id="modalBottomBar" class="absolute bottom-5 left-3 right-3 z-30">
+                    <div class="bg-gradient-to-br from-[#0f172a] to-[#1e293b] backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] rounded-[26px] p-2.5 flex items-center gap-2.5">
+                        <!-- Input area -->
+                        <div class="flex-1 flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2 px-1">
+                                <i class="fas fa-keyboard text-blue-400 text-[11px]"></i>
+                                <span class="text-[10px] font-bold text-blue-300/80 tracking-wide">พิมพ์เพื่อคำนวณ</span>
+                            </div>
+                            <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
+                                class="w-full bg-white/8 border border-white/12 text-white rounded-[16px] py-3 px-4 focus:outline-none focus:bg-white/15 focus:border-blue-400/60 transition-all text-[13px] font-medium placeholder:text-slate-500"
+                                placeholder="เช่น ชาย 35 ทุน 2 ล้าน CX 10 ปี...">
                         </div>
-                       <!-- ปุ่มไมโครโฟนที่เชื่อมกับระบบเดิม -->
-                            <button id="modalVoiceBtn" 
-                            onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}" 
-                            class="w-[52px] h-[52px] shrink-0 rounded-[22px] bg-blue-600 flex items-center justify-center text-white shadow-[0_5px_15px_rgba(37,99,235,0.4)] active:scale-90 transition-all">
-                            <i class="fas fa-microphone text-[19px]"></i>
-                        </button>
+                        <!-- Voice button -->
+                        <div class="flex flex-col items-center gap-0.5 shrink-0">
+                            <button id="modalVoiceBtn"
+                                onclick="if(typeof startVoiceRecognition==='function'){startVoiceRecognition();}"
+                                class="w-[52px] h-[52px] rounded-[20px] bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-[0_6px_20px_rgba(37,99,235,0.5)] active:scale-90 transition-all border border-blue-400/30">
+                                <i class="fas fa-microphone text-[20px]"></i>
+                            </button>
+                            <span class="text-[9px] font-bold text-blue-300/70 tracking-wide whitespace-nowrap">คำนวณด้วยเสียง</span>
+                        </div>
                     </div>
                 </div>
 

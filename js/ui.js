@@ -812,14 +812,8 @@ function initModernScrollInteractions() {
             rafPending = false;
             const st = container.scrollTop;
 
-            // ① Show / hide the floating bottom bar based on scroll direction
-            if (st > lastScrollTop && st > 60) {
-                if (bottomBar) { bottomBar.style.transform = 'translateY(150%)'; bottomBar.style.opacity = '0'; }
-                if (fadeOverlay) fadeOverlay.style.opacity = '0';
-            } else {
-                if (bottomBar) { bottomBar.style.transform = 'translateY(0)'; bottomBar.style.opacity = '1'; }
-                if (fadeOverlay) fadeOverlay.style.opacity = '1';
-            }
+            // ① bottom bar แสดงเสมอ ไม่ซ่อนเมื่อ scroll
+            if (fadeOverlay) fadeOverlay.style.opacity = st > 60 ? '0.5' : '1';
 
             // ② Bidirectional seamless loop (disabled while search is active)
             //    Safe band: [0.5 × H, 1.5 × H] — one full copy above and below.
