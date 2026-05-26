@@ -924,10 +924,15 @@ function calculate(source, enforceMin = false) {
                     // คำนวณเบี้ยจากทุน: (ทุน/1000) * (เรทรวม - ส่วนลด)
                     let basePrem = (fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan));
                     fPrem = Math.round(basePrem) + mfPrem + tpdPrem + dd50Prem;
-                    document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                    // CX+DD50: แสดงเฉพาะเบี้ย CX ในช่องออมเงิน (ไม่รวม DD50)
+                    const _cxDispPrem = (currentAppPlan === 'CI Extra Plus' && dd50Prem > 0) ? fPrem - dd50Prem : fPrem;
+                    document.getElementById('premiumInput').value = Math.round(_cxDispPrem).toLocaleString();
                 } else {
                     // คำนวณทุนจากเบี้ย (ย้อนกลับ)
+                    // CX+DD50: premiumInput แสดง CX-only ดังนั้นต้องบวก dd50Prem กลับก่อนคำนวณย้อนกลับ
+                    const _isCXDD50 = currentAppPlan === 'CI Extra Plus' && dd50Prem > 0;
                     fPrem = getSafeValue('premiumInput') || 0;
+                    if (_isCXDD50) fPrem = fPrem + dd50Prem;
                     let basePrem = fPrem - mfPrem - tpdPrem - dd50Prem;
                     if(basePrem < 0) basePrem = 0;
 
@@ -941,12 +946,14 @@ function calculate(source, enforceMin = false) {
                     if (fSum > _maxS) {
                         fSum = _maxS;
                         fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem + dd50Prem;
-                        document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                        const _cd2 = _isCXDD50 ? fPrem - dd50Prem : fPrem;
+                        document.getElementById('premiumInput').value = Math.round(_cd2).toLocaleString();
                     }
                     if (enforceMin && fSum < _minS) {
                         fSum = _minS;
                         fPrem = Math.round((fSum / 1000) * (totalRate - getDiscount(fSum, currentPlan))) + mfPrem + tpdPrem + dd50Prem;
-                        document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                        const _cd3 = _isCXDD50 ? fPrem - dd50Prem : fPrem;
+                        document.getElementById('premiumInput').value = Math.round(_cd3).toLocaleString();
                     }
                     document.getElementById('sumInsuredInput').value = formatNum(fSum);
                 }

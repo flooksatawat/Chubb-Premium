@@ -2912,10 +2912,12 @@ function _updateDD50UI() {
         const _totEl = document.getElementById('dd50TotalPrem');
         const _cxCovEl = document.getElementById('dd50CXCoverage');
         const _covEl = document.getElementById('dd50CoverageAmt');
+        const _totalCovEl = document.getElementById('dd50TotalCoverage');
         if (_onlyEl) _onlyEl.textContent = _d50.toLocaleString();
         if (_totEl) _totEl.textContent = _total.toLocaleString();
         if (_cxCovEl) _cxCovEl.textContent = _cxSum.toLocaleString();
         if (_covEl) _covEl.textContent = _sa.toLocaleString();
+        if (_totalCovEl) _totalCovEl.textContent = (_cxSum + _sa).toLocaleString();
     } else {
         if (summaryBox) summaryBox.classList.add('hidden');
     }
