@@ -269,73 +269,124 @@ function executeShare(text, platform) {
 }
 
 let voiceRecog = null; let isVoiceListening = false; let _voiceAnalyzing = false;
+let _voiceSilenceTimer = null; let _voiceAccumulated = '';
+
+// ตัดคำที่ไม่เกี่ยวข้องกับการคำนวณออกจากข้อความที่แสดง
+function cleanVoiceDisplay(text) {
+    const fillers = [
+        /\b(ครับผม|ครับ|ค่ะ|คะ|นะครับ|นะคะ|นะ|จ้า|จ้ะ|จา)\b/g,
+        /\b(อ่า+|เอ่อ+|อืม+|อ๊ะ|อ้า|เออ)\b/g,
+        /\b(ก็คือ|แล้วก็|ก็|คือว่า|คือ)\b/g,
+        /\b(ขอทราบ|อยากทราบ|อยากรู้|ขอดู|ช่วยดู|ช่วยหน่อย|หน่อย)\b/g,
+        /\b(ลอง|ช่วย|ขอ)\b/g,
+        /\bคำนวณ(ให้)?(หน่อย)?\b/g,
+        /\bให้หน่อย\b/g,
+        /\bดูหน่อย\b/g,
+    ];
+    let t = text;
+    for (const re of fillers) t = t.replace(re, '');
+    return t.replace(/\s+/g, ' ').trim();
+}
+
+function _voiceFinalize() {
+    if (_voiceSilenceTimer) { clearTimeout(_voiceSilenceTimer); _voiceSilenceTimer = null; }
+    const raw = _voiceAccumulated.trim();
+    _voiceAccumulated = '';
+    if (!raw) return;
+    _voiceAnalyzing = true;
+    document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+    const lt = document.getElementById('voiceLiveText');
+    const _old = document.getElementById('voiceAnalyzingLabel'); if (_old) _old.remove();
+    if (lt) {
+        lt.className = '';
+        lt.textContent = cleanVoiceDisplay(raw);
+        lt.insertAdjacentHTML('afterend', '<br><span id="voiceAnalyzingLabel" style="color:#00A651;font-size:12px;opacity:0.8;">กำลังวิเคราะห์...</span>');
+    }
+    if (voiceRecog) { try { voiceRecog.stop(); } catch(e) {} }
+    setTimeout(() => {
+        _voiceAnalyzing = false;
+        const overlay = document.getElementById('voiceOverlay');
+        if (overlay) overlay.classList.remove('active');
+        processVoiceCommand(raw);
+    }, 600);
+}
 
 function startVoiceRecognition() {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     if (!SpeechRecognition) { showCustomError("อุปกรณ์ไม่รองรับคำสั่งเสียง"); return; }
-    if (isVoiceListening) { if (voiceRecog) voiceRecog.stop(); return; }
-    if (!voiceRecog) {
-        voiceRecog = new SpeechRecognition();
-        voiceRecog.lang = 'th-TH';
-        voiceRecog.continuous = false;
-        voiceRecog.interimResults = true;
-        const _setListening = (on) => {
-            isVoiceListening = on;
-            if (!on && _voiceAnalyzing) return; // keep overlay alive during analyzing pause
-            const overlay = document.getElementById('voiceOverlay');
-            if (overlay) overlay.classList.toggle('active', on);
-            ['navVoiceIcon','mainVoiceIcon'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.parentElement.classList.toggle('listening-active', on);
-            });
-        };
-        voiceRecog.onstart = () => {
-            _voiceAnalyzing = false;
-            _setListening(true);
-            const lt = document.getElementById('voiceLiveText');
-            if (lt) { lt.className = 'interim'; lt.textContent = 'กำลังฟัง...'; }
-            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.add('text-red-500', 'animate-pulse'));
-        };
-        voiceRecog.onend = () => {
-            _setListening(false);
-            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
-        };
-        voiceRecog.onerror = () => {
-            _voiceAnalyzing = false;
-            _setListening(false);
-            document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
-        };
-        voiceRecog.onresult = (event) => {
-            const lt = document.getElementById('voiceLiveText');
-            let interim = '', final = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) final += event.results[i][0].transcript;
-                else interim += event.results[i][0].transcript;
-            }
-            if (lt) {
-                if (final) {
-                    lt.className = '';
-                    lt.textContent = final;
-                } else if (interim) {
-                    lt.className = 'interim';
-                    lt.textContent = interim;
-                }
-            }
-            if (final) {
-                _voiceAnalyzing = true;
-                document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
-                const _old = document.getElementById('voiceAnalyzingLabel'); if (_old) _old.remove();
-                if (lt) { lt.insertAdjacentHTML('afterend', '<br><span id="voiceAnalyzingLabel" style="color:#00A651;font-size:12px;opacity:0.8;">กำลังวิเคราะห์...</span>'); }
-                setTimeout(() => {
-                    _voiceAnalyzing = false;
-                    const overlay = document.getElementById('voiceOverlay');
-                    if (overlay) overlay.classList.remove('active');
-                    processVoiceCommand(final);
-                }, 800);
-            }
-        };
+    if (isVoiceListening) {
+        if (_voiceAccumulated.trim()) { _voiceFinalize(); }
+        else { if (voiceRecog) { try { voiceRecog.stop(); } catch(e) {} } }
+        return;
     }
-    try { voiceRecog.start(); } catch(e) {}
+    voiceRecog = null; // reset so we always create fresh
+    const recog = new SpeechRecognition();
+    voiceRecog = recog;
+    recog.lang = 'th-TH';
+    recog.continuous = true;
+    recog.interimResults = true;
+    recog.maxAlternatives = 1;
+    _voiceAccumulated = '';
+
+    const _setListening = (on) => {
+        isVoiceListening = on;
+        if (!on && _voiceAnalyzing) return;
+        const overlay = document.getElementById('voiceOverlay');
+        if (overlay) overlay.classList.toggle('active', on);
+        ['navVoiceIcon','mainVoiceIcon'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.parentElement.classList.toggle('listening-active', on);
+        });
+    };
+
+    recog.onstart = () => {
+        _voiceAnalyzing = false;
+        _voiceAccumulated = '';
+        _setListening(true);
+        const lt = document.getElementById('voiceLiveText');
+        if (lt) { lt.className = 'interim'; lt.textContent = 'กำลังฟัง...'; }
+        document.querySelectorAll('.fa-microphone').forEach(i => i.classList.add('text-red-500', 'animate-pulse'));
+    };
+
+    recog.onend = () => {
+        _setListening(false);
+        document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+        if (_voiceSilenceTimer) { clearTimeout(_voiceSilenceTimer); _voiceSilenceTimer = null; }
+    };
+
+    recog.onerror = (e) => {
+        if (e.error === 'no-speech') return; // ฟังต่อ อย่าหยุด
+        _voiceAnalyzing = false;
+        _setListening(false);
+        if (_voiceSilenceTimer) { clearTimeout(_voiceSilenceTimer); _voiceSilenceTimer = null; }
+        document.querySelectorAll('.fa-microphone').forEach(i => i.classList.remove('text-red-500', 'animate-pulse'));
+    };
+
+    recog.onresult = (event) => {
+        const lt = document.getElementById('voiceLiveText');
+        let interim = '', newFinal = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) newFinal += event.results[i][0].transcript;
+            else interim += event.results[i][0].transcript;
+        }
+        if (newFinal) {
+            _voiceAccumulated += (_voiceAccumulated ? ' ' : '') + newFinal;
+        }
+        if (lt) {
+            const display = cleanVoiceDisplay(_voiceAccumulated + (interim ? ' ' + interim : ''));
+            if (display) {
+                lt.className = interim ? 'interim' : '';
+                lt.textContent = display || 'กำลังฟัง...';
+            }
+        }
+        // รีเซ็ต silence timer ทุกครั้งที่ได้ยินเสียง
+        if (_voiceSilenceTimer) clearTimeout(_voiceSilenceTimer);
+        if (_voiceAccumulated.trim()) {
+            _voiceSilenceTimer = setTimeout(() => _voiceFinalize(), 2500);
+        }
+    };
+
+    try { recog.start(); } catch(e) {}
 }
 
 function showVoiceResultPopup(d) {
