@@ -2034,7 +2034,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     return;
                 }
                 btn.style.display = 'flex';
+                // หน้าแรก (mainView visible) → อยู่ด้านล่าง / หน้าคำนวณ → อยู่ด้านบนกึ่งกลาง header
+                const view = document.body.getAttribute('data-view') || 'main';
+                if (view === 'main') {
+                    btn.style.top = '';
+                    btn.style.bottom = '88px';
+                } else {
+                    btn.style.bottom = '';
+                    btn.style.top = 'calc(env(safe-area-inset-top,0px) + 40px)';
+                }
             }
+            window._updateLeftPaneBtnPos = updateBtnPosition;
 
             window.toggleLeftPane = function() {
                 const hidden = layout.classList.toggle('left-pane-hidden');

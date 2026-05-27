@@ -559,6 +559,7 @@ function switchView(targetView) {
     }
 
     document.body.setAttribute('data-view', targetView);
+    if (typeof window._updateLeftPaneBtnPos === 'function') window._updateLeftPaneBtnPos();
 
     const isWide        = window.innerWidth >= 700;
     const rightPane     = document.getElementById('rightPane');
