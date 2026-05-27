@@ -2040,7 +2040,16 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 }
                 btn.style.display = 'flex';
                 btn.style.top = '';
-                btn.style.bottom = 'calc(env(safe-area-inset-bottom,0px) + 10px)';
+                // align กับกึ่งกลางแนวตั้งของ Nav Bar pill จริงๆ
+                const nav = document.getElementById('bottomNavContainer');
+                if (nav) {
+                    const r = nav.getBoundingClientRect();
+                    const navCenterY = r.top + r.height / 2;
+                    const fromBottom = window.innerHeight - navCenterY - 24; // 24 = half btn height
+                    btn.style.bottom = Math.max(fromBottom, 4) + 'px';
+                } else {
+                    btn.style.bottom = 'calc(env(safe-area-inset-bottom,0px) + 10px)';
+                }
             }
             window._updateLeftPaneBtnPos = updateBtnPosition;
 
