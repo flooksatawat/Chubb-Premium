@@ -2033,17 +2033,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     btn.style.display = 'none';
                     return;
                 }
-                btn.style.display = 'flex';
-                // หน้าแรก (mainView visible) → อยู่ด้านบนกึ่งกลาง header (ตำแหน่งเดิม)
-                // หน้าคำนวณ/ตาราง → อยู่ด้านล่าง (เพื่อไม่บังตาราง)
                 const view = document.body.getAttribute('data-view') || 'main';
                 if (view === 'main') {
-                    btn.style.bottom = '';
-                    btn.style.top = 'calc(env(safe-area-inset-top,0px) + 40px)';
-                } else {
-                    btn.style.top = '';
-                    btn.style.bottom = '88px';
+                    btn.style.display = 'none';
+                    return;
                 }
+                btn.style.display = 'flex';
+                btn.style.top = '';
+                btn.style.bottom = 'calc(env(safe-area-inset-bottom,0px) + 10px)';
             }
             window._updateLeftPaneBtnPos = updateBtnPosition;
 
