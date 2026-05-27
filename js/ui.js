@@ -3709,12 +3709,9 @@ function generatePolicyTableData() {
     }
     // ไม่ auto-scroll เพื่อไม่ให้ตารางค้างบน mobile
 
-    // แสดง/ซ่อน breakevenSummary ตาม toggle สำหรับทุกแผน
+    // ซ่อน breakevenSummary banner ไม่ใช้แล้ว — ใช้การ scroll ไปยังแถวแทน
     const summary = document.getElementById('breakevenSummary');
-    if (summary) {
-        if (isBreakevenActive && foundBreakeven) summary.classList.remove('hidden');
-        else if (!isBreakevenActive) summary.classList.add('hidden');
-    }
+    if (summary) summary.classList.add('hidden');
 
 
     const cfContainer = document.getElementById('cashFlowPlanContainer');
@@ -3727,14 +3724,24 @@ function toggleBreakevenDisplay(smoothScroll = true) {
     const isChecked = document.getElementById('toggleBreakeven')?.checked;
 
     if (!tableBody) return;
+    if (summary) summary.classList.add('hidden'); // ไม่ใช้ banner แล้ว
 
     if (isChecked) {
         tableBody.classList.add('show-breakeven');
-        if (summary) summary.classList.remove('hidden');
-        // ไม่ auto-scroll เพื่อไม่ให้ตารางค้างบน mobile
+        // เลื่อนไปที่แถวจุดคุ้มทุนภายในตาราง (ไม่ค้าง ใช้งานตารางต่อได้ปกติ)
+        const beRow = document.getElementById('breakevenRow');
+        if (beRow) {
+            const scroller = beRow.closest('.overflow-y-auto, .overflow-auto, [data-table-scroller]') || tableBody.parentElement;
+            if (scroller && typeof scroller.scrollTo === 'function') {
+                const rowTop = beRow.offsetTop - scroller.offsetTop;
+                const target = Math.max(0, rowTop - (scroller.clientHeight / 2) + (beRow.clientHeight / 2));
+                scroller.scrollTo({ top: target, behavior: smoothScroll ? 'smooth' : 'auto' });
+            } else {
+                beRow.scrollIntoView({ behavior: smoothScroll ? 'smooth' : 'auto', block: 'center' });
+            }
+        }
     } else {
         tableBody.classList.remove('show-breakeven');
-        if (summary) summary.classList.add('hidden');
     }
 }
 
