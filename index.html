@@ -2007,11 +2007,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             btn.title = 'ซ่อน/แสดงเมนูซ้าย';
             btn.style.cssText = [
                 'position:fixed',
-                'top:calc(env(safe-area-inset-top,0px) + 40px)',
+                'top:0',
                 'left:12px',
                 'z-index:60',
-                'width:48px',
-                'height:48px',
+                'width:34px',
+                'height:34px',
                 'padding:0',
                 'background:rgba(255,255,255,0.97)',
                 'border-radius:999px',
@@ -2025,7 +2025,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 'touch-action:manipulation',
                 'user-select:none',
             ].join(';');
-            btn.innerHTML = '<i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:18px;pointer-events:none;"></i>';
+            btn.innerHTML = '<i id="toggleLeftPaneIcon" class="fas fa-chevron-left" style="color:#243c94;font-size:14px;pointer-events:none;"></i>';
             document.body.appendChild(btn);
 
             function updateBtnPosition() {
@@ -2039,16 +2039,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     return;
                 }
                 btn.style.display = 'flex';
-                btn.style.top = '';
-                // align กับกึ่งกลางแนวตั้งของ Nav Bar pill จริงๆ
-                const nav = document.getElementById('bottomNavContainer');
-                if (nav) {
-                    const r = nav.getBoundingClientRect();
-                    const navCenterY = r.top + r.height / 2;
-                    const fromBottom = window.innerHeight - navCenterY - 24; // 24 = half btn height
-                    btn.style.bottom = Math.max(fromBottom, 4) + 'px';
+                btn.style.bottom = '';
+                // align กึ่งกลางแนวตั้งกับ header ชื่อแบบประกันของ view ปัจจุบัน
+                const headerEl = view === 'table'
+                    ? document.getElementById('tableHeaderRow')
+                    : document.querySelector('#cashView > div:first-child');
+                if (headerEl) {
+                    const r = headerEl.getBoundingClientRect();
+                    const centerY = r.top + r.height / 2;
+                    btn.style.top = (centerY - 17) + 'px'; // 17 = half of 34px btn
                 } else {
-                    btn.style.bottom = 'calc(env(safe-area-inset-bottom,0px) + 10px)';
+                    btn.style.top = 'calc(env(safe-area-inset-top,0px) + 16px)';
                 }
             }
             window._updateLeftPaneBtnPos = updateBtnPosition;
