@@ -3341,7 +3341,7 @@ function generatePolicyTableData() {
     const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
-    const showCVColumn = (isTLA || isLV) ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : true;
+    const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB || isLV) ? isShowCVActive : true;
     const showDD50Column = isCX && isShowDD50ColActive && window.currentDD50Enabled && window.DD50_RATES;
 
     // MF premium column
