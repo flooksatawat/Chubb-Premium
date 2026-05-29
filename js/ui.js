@@ -3420,16 +3420,16 @@ function generatePolicyTableData() {
     const _thCls = _isSuperCompact ? 'py-1 px-0.5 font-bold'
                  : _isCompact      ? 'py-1.5 px-1 font-bold'
                  : _isMobile       ? 'py-2 px-1.5 font-bold'
-                 : _isMedium       ? 'py-2.5 px-2 font-bold'
+                 : _isMedium       ? 'py-2.5 px-1.5 font-bold'
                  :                   'py-3 px-3 font-bold';
     const _thSz  = _isSuperCompact ? 'font-size:8px;white-space:nowrap;'
                  : _isCompact      ? 'font-size:9px;white-space:nowrap;'
                  : _isMobile       ? 'font-size:10px;white-space:nowrap;'
-                 : _isMedium       ? 'font-size:12px;white-space:nowrap;'
+                 : _isMedium       ? 'font-size:13px;white-space:nowrap;'
                  :                   'font-size:13px;white-space:nowrap;';
     const _tdBase = _isSuperCompact ? 'py-1 px-0.5'
                   : _isCompact      ? 'py-2 px-1'
-                  : _isMedium       ? 'py-3 px-2'
+                  : _isMedium       ? 'py-3 px-1.5'
                   :                   'py-4 px-3';
 
     // MF column: ใช้ font/padding เล็กกว่า column ปกติเสมอ (กันคอลัมน์กว้างเกินไป)
@@ -3442,8 +3442,8 @@ function generatePolicyTableData() {
     const _mfThSz  = _isSuperCompact ? 'font-size:6px;line-height:1.1;white-space:normal;max-width:60px;word-break:break-word;'
                    : _isCompact      ? 'font-size:7px;line-height:1.1;white-space:normal;max-width:64px;word-break:break-word;'
                    : _isMobile       ? 'font-size:8px;line-height:1.15;white-space:normal;max-width:72px;word-break:break-word;'
-                   : _isMedium       ? 'font-size:11px;line-height:1.15;white-space:normal;max-width:88px;word-break:break-word;'
-                   :                   'font-size:11px;line-height:1.15;white-space:normal;max-width:96px;word-break:break-word;';
+                   : _isMedium       ? 'font-size:12px;line-height:1.15;white-space:normal;max-width:88px;word-break:break-word;'
+                   :                   'font-size:12px;line-height:1.15;white-space:normal;max-width:96px;word-break:break-word;';
     const _mfTdBase = _isSuperCompact ? 'py-1 px-0.5'
                     : _isCompact      ? 'py-2 px-0.5'
                     : _isMedium       ? 'py-3 px-1.5'
@@ -3451,8 +3451,8 @@ function generatePolicyTableData() {
     const _mfFontSz = _isSuperCompact ? 'font-size:8px;'
                     : _isCompact      ? 'font-size:9px;'
                     : _isMobile       ? 'font-size:10px;'
-                    : _isMedium       ? 'font-size:12px;'
-                    :                   'font-size:12px;';
+                    : _isMedium       ? 'font-size:13px;'
+                    :                   'font-size:13px;';
 
     // ชื่อหัวตาราง: compact/super-compact/medium ใช้ label สั้น
     const _lSaving   = (_isCompact || _isMedium) ? 'ออม'  : 'ออมเงิน';
@@ -3463,7 +3463,7 @@ function generatePolicyTableData() {
     const _lCoverage = isSLPA ? ((_isCompact || _isMedium) ? 'ทุน' : 'ทุนประกัน') : isTLA ? ((_isCompact || _isMedium) ? 'คุ้มครอง' : 'วงเงินคุ้มครอง') : ((_isCompact || _isMedium) ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
     const _lSA       = 'ทุนประกัน';
 
-    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : (_isMedium ? 'font-size:12px;' : 'font-size:13px;'))}">
+    document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
@@ -3683,7 +3683,7 @@ function generatePolicyTableData() {
         if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
-        const _fSz = _isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:12px;' : '');
+        const _fSz = _isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '');
         html += `<tr id="${rowId}" class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
