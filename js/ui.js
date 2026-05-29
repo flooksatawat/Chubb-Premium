@@ -3461,7 +3461,7 @@ function generatePolicyTableData() {
     const _lTotal    = _isSuperCompact ? 'รวม' : ((_isCompact || _isMedium) ? 'รวมรับ' : 'รวมรับเงิน');
     const _lCV       = 'เงินสดพร้อมใช้';
     const _lCoverage = isSLPA ? ((_isCompact || _isMedium) ? 'ทุน' : 'ทุนประกัน') : isTLA ? ((_isCompact || _isMedium) ? 'คุ้มครอง' : 'วงเงินคุ้มครอง') : ((_isCompact || _isMedium) ? 'คุ้มครอง' : 'วงเงินคุ้มครอง');
-    const _lSA       = (_isCompact || _isMedium) ? 'ทุน'  : 'ทุนประกัน';
+    const _lSA       = 'ทุนประกัน';
 
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : (_isMedium ? 'font-size:11px;' : 'font-size:13px;'))}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
@@ -3675,7 +3675,7 @@ function generatePolicyTableData() {
         accCashFlow += cashFlowAmt; 
 
         // 6. สร้างแถวตาราง
-        const saCompact = (isLPB || isSLPA) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
+        const saCompact = (isLPB || isSLPA || isLV) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
         const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
