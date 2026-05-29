@@ -3669,7 +3669,13 @@ function generatePolicyTableData() {
             let eliteMultiplier = Math.min(y, 8) * 1.0;
             deathBenefit = Math.max(Math.round(currentSA * eliteMultiplier), cvTotal, totalSaving);
         } else if (isLV && currentSA > 0) {
-            deathBenefit = Math.max(Math.round(currentSA * lvDeathMultiplier(y, currentAge)), Math.round(totalSaving * 1.05));
+            // รับเงินก้อน (เสียชีวิต) = สูงสุดของ 3 ค่า:
+            //   1) %ทุน × ทุนประกัน (100/150/200% ตามปี/อายุ)
+            //   2) เงินสดพร้อมใช้ (cvTotal)
+            //   3) 105% ของเบี้ยสะสม − เงินคืนสะสม (รวมปีปัจจุบัน)
+            const _lvTier  = Math.round(currentSA * lvDeathMultiplier(y, currentAge));
+            const _lvFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
+            deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
         }
 
         accCashFlow += cashFlowAmt; 
