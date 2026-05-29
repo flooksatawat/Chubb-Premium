@@ -3448,11 +3448,11 @@ function generatePolicyTableData() {
                     : _isCompact      ? 'py-2 px-0.5'
                     : _isMedium       ? 'py-3 px-1.5'
                     :                   'py-4 px-1.5';
-    const _mfFontSz = _isSuperCompact ? 'font-size:8px;'
+    const _mfFontSz = (_isSuperCompact ? 'font-size:8px;'
                     : _isCompact      ? 'font-size:9px;'
                     : _isMobile       ? 'font-size:10px;'
                     : _isMedium       ? 'font-size:13px;'
-                    :                   'font-size:13px;';
+                    :                   'font-size:13px;') + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
 
     // ชื่อหัวตาราง: compact/super-compact/medium ใช้ label สั้น
     const _lSaving   = (_isCompact || _isMedium) ? 'ออม'  : 'ออมเงิน';
@@ -3683,7 +3683,7 @@ function generatePolicyTableData() {
         if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
-        const _fSz = _isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '');
+        const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
         html += `<tr id="${rowId}" class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
