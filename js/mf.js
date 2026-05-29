@@ -779,9 +779,10 @@ window.mfGenerateTable = function() {
         return val;
     };
 
-    // detect per-age vs band-based
-    const avgGapM = maleData.ages.length > 1 ? (maleData.ages[maleData.ages.length-1] - maleData.ages[0]) / (maleData.ages.length-1) : 1;
-    const isPerAge = avgGapM <= 1.1;
+    // detect per-age vs band-based (use selected gender's data for detection)
+    const _selAges = (typeof currentGender !== 'undefined' && currentGender === 'female') ? femaleData.ages : maleData.ages;
+    const _avgGap = _selAges.length > 1 ? (_selAges[_selAges.length-1] - _selAges[0]) / (_selAges.length-1) : 1;
+    const isPerAge = _avgGap <= 1.1;
 
     // Build rows for a single gender + age range
     const buildRows = (gMap, gAges, fromAge, toAge, colColor) => {
@@ -867,10 +868,6 @@ window.mfGenerateTable = function() {
     const grandTotal  = totalBefore + totalAfter;
 
     // For band-based: only show rows where premium changes
-    const avgGap = selData.ages.length > 1
-        ? (selData.ages[selData.ages.length-1] - selData.ages[0]) / (selData.ages.length-1) : 1;
-    const isPerAge = avgGap <= 1.1;
-
     const filterRows = (rows) => {
         if (isPerAge) return rows;
         // band-based: keep only first row of each band (where prem changes)
