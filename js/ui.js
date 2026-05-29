@@ -6330,10 +6330,24 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
         URL.revokeObjectURL(blobUrl);
     });
 
-    overlay.querySelector('[data-action="print"]').addEventListener('click', async () => {
+    overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
         overlay.remove();
-        URL.revokeObjectURL(blobUrl);
-        await showPdfViewer(pdfBlob, pdfName, cleanName);
+        // เปิด PDF ใน iframe ซ่อน แล้วเรียก print dialog โดยตรง (ข้ามขั้นตอน preview)
+        const printUrl = URL.createObjectURL(pdfBlob);
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;border:none;';
+        iframe.src = printUrl;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch(e) {
+                // fallback: เปิด PDF ใน tab ใหม่ให้ user พิมพ์เอง
+                window.open(printUrl, '_blank');
+            }
+            setTimeout(() => { iframe.remove(); URL.revokeObjectURL(printUrl); }, 5000);
+        };
     });
 
     overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
