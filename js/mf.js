@@ -158,7 +158,7 @@ window.mfSetGender = function(g) {
 };
 
 window.mfCalculate = async function() {
-    const { company, plan, roomRate, gender } = window._mfState;
+    const { company, plan, roomRate } = window._mfState;
     const ageStartEl = document.getElementById('mfAgeStart');
     const ageEndEl = document.getElementById('mfAgeEnd');
     const ageStart = parseInt(ageStartEl?.value) || 1;
@@ -171,57 +171,98 @@ window.mfCalculate = async function() {
     const planData = rates[plan];
     if (!planData) { mfShowError('ยังไม่มีข้อมูลอัตราเบี้ยของแผนนี้'); return; }
 
-    let rateTable = roomRate ? planData[roomRate]?.[gender] : planData[gender];
-    if (!rateTable) { mfShowError('ยังไม่มีข้อมูลอัตราเบี้ยของแผนนี้'); return; }
-
     const companies = window._mfData.companies?.companies || [];
     const companyName = companies.find(c => c.id === company)?.name || company;
     const planName = planData.name || plan;
-    const planAgeRange = planData.ageRange || [1, 70];
+    const planAgeRange = planData.ageRange || [1, 99];
     const start = Math.max(ageStart, planAgeRange[0]);
     const end = Math.min(ageEnd, planAgeRange[1]);
-
-    let rows = '';
-    let total = 0;
-    let hasData = false;
-    for (let age = start; age <= end; age++) {
-        const prem = rateTable[String(age)] ?? rateTable[age] ?? null;
-        const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
-        if (prem != null) { total += prem; hasData = true; }
-        rows += `<tr class="${age % 2 === 0 ? 'bg-white' : 'bg-sky-50/40'}">
-            <td class="py-2 px-3 text-center text-[12px] font-bold text-slate-700">${age}</td>
-            <td class="py-2 px-3 text-right text-[12px] font-bold ${prem != null ? 'text-slate-800' : 'text-slate-400'}">${premStr}</td>
-        </tr>`;
-    }
-
-    const totalStr = hasData ? total.toLocaleString('en-US') : '—';
     const roomLabel = roomRate ? ` · ${roomRate}` : '';
+    const SPLIT = 60;
 
-    document.getElementById('mfResultArea').innerHTML = `
-        <div class="mt-4">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[12px] font-bold text-sky-700">${companyName} · ${planName}${roomLabel}</span>
-                <span class="text-[11px] text-slate-500">${gender === 'male' ? 'ชาย' : 'หญิง'} | อายุ ${start}–${end} ปี</span>
-            </div>
-            <div class="rounded-[14px] overflow-hidden border border-sky-200 shadow-sm">
-                <table class="w-full border-collapse">
+    const buildRows = (rateTable, fromAge, toAge) => {
+        let rows = '', total = 0, hasData = false;
+        for (let age = fromAge; age <= toAge; age++) {
+            const prem = rateTable[String(age)] ?? rateTable[age] ?? null;
+            const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
+            if (prem != null) { total += prem; hasData = true; }
+            rows += `<tr style="background:${age % 2 === 0 ? '#fff' : '#f0f9ff'};">
+                <td style="padding:5px 8px;text-align:center;font-size:12px;font-weight:600;color:#334155;">${age}</td>
+                <td style="padding:5px 8px;text-align:right;font-size:12px;font-weight:600;color:${prem != null ? '#0f766e' : '#94a3b8'};">${premStr}</td>
+            </tr>`;
+        }
+        return { rows, total, hasData };
+    };
+
+    const buildTable = (rateTable, fromAge, toAge, gLabel, gradFrom, gradTo) => {
+        if (!rateTable) return `<div style="padding:16px;text-align:center;font-size:11px;color:#94a3b8;">ไม่มีข้อมูล</div>`;
+        const actualFrom = Math.max(fromAge, start);
+        const actualTo = Math.min(toAge, end);
+        if (actualFrom > actualTo) return `<div style="padding:12px;text-align:center;font-size:11px;color:#94a3b8;">—</div>`;
+        const { rows, total, hasData } = buildRows(rateTable, actualFrom, actualTo);
+        const totalStr = hasData ? total.toLocaleString('en-US') : '—';
+        return `
+            <div style="border-radius:12px;overflow:hidden;border:1px solid #bae6fd;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+                <div style="background:linear-gradient(135deg,${gradFrom},${gradTo});padding:6px 10px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:11px;font-weight:700;color:#fff;">${gLabel}</span>
+                    <span style="font-size:10px;color:rgba(255,255,255,0.8);">อายุ ${actualFrom}–${actualTo}</span>
+                </div>
+                <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr class="bg-gradient-to-r from-sky-500 to-cyan-600 text-white">
-                            <th class="py-2.5 px-3 text-center text-[11px] font-bold">อายุ (ปี)</th>
-                            <th class="py-2.5 px-3 text-right text-[11px] font-bold">เบี้ย (บาท/ปี)</th>
+                        <tr style="background:rgba(14,165,233,0.08);">
+                            <th style="padding:5px 8px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;">อายุ</th>
+                            <th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;">เบี้ย/ปี</th>
                         </tr>
                     </thead>
-                    <tbody>${rows}</tbody>
+                    <tbody>${rows || '<tr><td colspan="2" style="padding:10px;text-align:center;font-size:11px;color:#94a3b8;">—</td></tr>'}</tbody>
                     <tfoot>
-                        <tr class="bg-sky-600 text-white">
-                            <td class="py-2.5 px-3 text-[12px] font-bold">รวมทั้งหมด</td>
-                            <td class="py-2.5 px-3 text-right text-[13px] font-black">${totalStr}</td>
+                        <tr style="background:linear-gradient(135deg,${gradFrom},${gradTo});">
+                            <td style="padding:6px 8px;font-size:11px;font-weight:700;color:#fff;">รวม</td>
+                            <td style="padding:6px 8px;text-align:right;font-size:12px;font-weight:900;color:#fff;">${totalStr}</td>
                         </tr>
                     </tfoot>
                 </table>
+            </div>`;
+    };
+
+    const maleTable   = roomRate ? planData[roomRate]?.['male']   : planData['male'];
+    const femaleTable = roomRate ? planData[roomRate]?.['female']  : planData['female'];
+
+    const mBefore = buildTable(maleTable,   start, SPLIT - 1, 'ชาย',  '#0369a1', '#0284c7');
+    const fBefore = buildTable(femaleTable, start, SPLIT - 1, 'หญิง', '#db2777', '#ec4899');
+    const mAfter  = buildTable(maleTable,   SPLIT, end,       'ชาย',  '#0369a1', '#0284c7');
+    const fAfter  = buildTable(femaleTable, SPLIT, end,       'หญิง', '#db2777', '#ec4899');
+
+    document.getElementById('mfResultArea').innerHTML = `
+        <div style="margin-top:16px;">
+            <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:10px;text-align:center;">${companyName} · ${planName}${roomLabel}</div>
+
+            <!-- ช่วงก่อน 60 -->
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <div style="flex:1;height:1px;background:#bae6fd;"></div>
+                    <span style="font-size:11px;font-weight:800;color:#0369a1;background:#e0f2fe;padding:3px 10px;border-radius:999px;white-space:nowrap;">ก่อนอายุ 60 ปี</span>
+                    <div style="flex:1;height:1px;background:#bae6fd;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    ${mBefore}
+                    ${fBefore}
+                </div>
             </div>
-            ${!hasData ? `<p class="text-center text-[11px] text-slate-400 mt-3"><i class="fas fa-info-circle mr-1"></i>ยังไม่มีข้อมูลอัตราเบี้ย — จะอัปเดตเร็วๆ นี้</p>` : ''}
-        </div>`;
+
+            <!-- ช่วงหลัง 60 -->
+            <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <div style="flex:1;height:1px;background:#fed7aa;"></div>
+                    <span style="font-size:11px;font-weight:800;color:#c2410c;background:#fff7ed;padding:3px 10px;border-radius:999px;white-space:nowrap;">60 ปีขึ้นไป</span>
+                    <div style="flex:1;height:1px;background:#fed7aa;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    ${mAfter}
+                    ${fAfter}
+                </div>
+            </div>
+        </div>`
 };
 
 function mfShowError(msg) {
