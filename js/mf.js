@@ -309,7 +309,7 @@ window.mfCalculate = async function() {
             <div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <div style="flex:1;height:1px;background:#fed7aa;"></div>
-                    <span style="font-size:11px;font-weight:800;color:#c2410c;background:#fff7ed;padding:3px 12px;border-radius:999px;white-space:nowrap;">60 ปีขึ้นไป</span>
+                    <span style="font-size:11px;font-weight:800;color:#c2410c;background:#fff7ed;padding:3px 12px;border-radius:999px;white-space:nowrap;">หลังอายุ 60 ปี</span>
                     <div style="flex:1;height:1px;background:#fed7aa;"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -886,7 +886,7 @@ window.mfGenerateTable = function() {
     // Header
     if (head) head.innerHTML = `<tr style="background:linear-gradient(135deg,#0d9488,#0369a1);">
         <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:2px solid rgba(255,255,255,0.3);">ก่อนอายุ 60 ปี</th>
-        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">60 ปีขึ้นไป</th>
+        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">หลังอายุ 60 ปี</th>
     </tr>
     <tr style="background:rgba(14,165,233,0.08);">
         <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
