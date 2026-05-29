@@ -833,44 +833,106 @@ window.mfGenerateTable = function() {
         </div>`;
     };
 
+    // Use selected gender only
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const gThai = gender === 'male' ? 'ชาย' : 'หญิง';
+    const selData = gender === 'male' ? maleData : femaleData;
+
     const _vw = window.innerWidth;
     const _isMobile = _vw < 700;
     const _badge = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border';
     if (titleEl) titleEl.innerHTML = `
         <div class="flex flex-wrap gap-1 items-center w-full">
             <span class="${_badge} bg-sky-600 text-white border-sky-700">Medical Fund</span>
+            <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">${gThai}</span>
             <span class="${_badge} bg-white/80 text-slate-700 border-slate-200">อายุ: ${start}–${end} ปี</span>
             <span class="${_badge} bg-white text-slate-800 border-slate-200 shadow-sm">${coName} · ${planName}${roomLabel}</span>
         </div>`;
 
-    // Clear real thead — layout is handled inside tbody
-    if (head) head.innerHTML = '';
+    // Build rows for a range, returns [{age, prem}]
+    const getRows = (fromAge, toAge) => {
+        const out = [];
+        for (let age = fromAge; age <= toAge; age++) {
+            const prem = stepFor(selData.map, selData.ages, age);
+            if (prem != null) out.push({ age, prem });
+        }
+        return out;
+    };
 
-    const gap = _isMobile ? '6px' : '8px';
-    const pad = _isMobile ? '8px' : '10px';
+    const beforeRows = getRows(start, Math.min(SPLIT - 1, end));
+    const afterRows  = getRows(Math.max(SPLIT, start), end);
 
-    const sectionDivider = (label, bgColor, textColor, lineColor) =>
-        `<div style="display:flex;align-items:center;gap:8px;margin-bottom:${gap};">
-            <div style="flex:1;height:1px;background:${lineColor};"></div>
-            <span style="font-size:11px;font-weight:800;color:${textColor};background:${bgColor};padding:3px 12px;border-radius:999px;white-space:nowrap;">${label}</span>
-            <div style="flex:1;height:1px;background:${lineColor};"></div>
-        </div>`;
+    const totalBefore = beforeRows.reduce((s, r) => s + r.prem, 0);
+    const totalAfter  = afterRows.reduce((s, r) => s + r.prem, 0);
+    const grandTotal  = totalBefore + totalAfter;
 
-    const mBefore = miniTable(maleData.map,   maleData.ages,   start, SPLIT-1, 'ชาย',  '#0369a1', '#0284c7');
-    const fBefore = miniTable(femaleData.map,  femaleData.ages, start, SPLIT-1, 'หญิง', '#be185d', '#db2777');
-    const mAfter  = miniTable(maleData.map,   maleData.ages,   SPLIT, end,     'ชาย',  '#0369a1', '#0284c7');
-    const fAfter  = miniTable(femaleData.map,  femaleData.ages, SPLIT, end,     'หญิง', '#be185d', '#db2777');
+    // For band-based: only show rows where premium changes
+    const avgGap = selData.ages.length > 1
+        ? (selData.ages[selData.ages.length-1] - selData.ages[0]) / (selData.ages.length-1) : 1;
+    const isPerAge = avgGap <= 1.1;
 
-    if (body) body.innerHTML = `<tr><td colspan="2" style="padding:${pad};vertical-align:top;">
-        <div style="margin-bottom:${pad};">
-            ${sectionDivider('ก่อนอายุ 60 ปี', '#e0f2fe', '#0369a1', '#bae6fd')}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:${gap};">${mBefore}${fBefore}</div>
-        </div>
-        <div>
-            ${sectionDivider('60 ปีขึ้นไป', '#fff7ed', '#c2410c', '#fed7aa')}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:${gap};">${mAfter}${fAfter}</div>
-        </div>
-    </td></tr>`;
+    const filterRows = (rows) => {
+        if (isPerAge) return rows;
+        // band-based: keep only first row of each band (where prem changes)
+        let prev = null;
+        return rows.filter(r => { const keep = r.prem !== prev; prev = r.prem; return keep; });
+    };
+
+    const bRows = filterRows(beforeRows);
+    const aRows = filterRows(afterRows);
+    const maxLen = Math.max(bRows.length, aRows.length);
+
+    const _fs = _isMobile ? '11' : '12';
+    const _pd = _isMobile ? '5px 6px' : '6px 10px';
+    const _pdH = _isMobile ? '6px 6px' : '7px 10px';
+
+    // Header
+    if (head) head.innerHTML = `<tr style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:2px solid rgba(255,255,255,0.3);">ก่อนอายุ 60 ปี</th>
+        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">60 ปีขึ้นไป</th>
+    </tr>
+    <tr style="background:rgba(14,165,233,0.08);">
+        <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
+        <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;border-right:2px solid #bae6fd;">เบี้ย/ปี</th>
+        <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #e2e8f0;">อายุ</th>
+        <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี</th>
+    </tr>`;
+
+    let bodyHtml = '';
+    for (let i = 0; i < maxLen; i++) {
+        const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+        const b = bRows[i];
+        const a = aRows[i];
+        const bAge  = b ? b.age  : '';
+        const bPrem = b ? b.prem.toLocaleString('en-US') : '';
+        const aAge  = a ? a.age  : '';
+        const aPrem = a ? a.prem.toLocaleString('en-US') : '';
+        bodyHtml += `<tr style="background:${bg};border-bottom:1px solid #f1f5f9;">
+            <td style="padding:${_pd};text-align:center;font-size:${_fs}px;color:#334155;border-right:1px solid #f1f5f9;">${bAge}</td>
+            <td style="padding:${_pd};text-align:right;font-size:${_fs}px;font-weight:600;color:#0f766e;border-right:2px solid #bae6fd;">${bPrem}</td>
+            <td style="padding:${_pd};text-align:center;font-size:${_fs}px;color:#334155;border-right:1px solid #f1f5f9;">${aAge}</td>
+            <td style="padding:${_pd};text-align:right;font-size:${_fs}px;font-weight:600;color:#c2410c;">${aPrem}</td>
+        </tr>`;
+    }
+
+    // Footer totals
+    bodyHtml += `<tr style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+        <td style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,0.3);">รวม</td>
+        <td style="padding:${_pdH};text-align:right;font-size:${_fs}px;font-weight:900;color:#fff;border-right:2px solid rgba(255,255,255,0.4);">${totalBefore > 0 ? totalBefore.toLocaleString('en-US') : '—'}</td>
+        <td style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,0.3);">รวม</td>
+        <td style="padding:${_pdH};text-align:right;font-size:${_fs}px;font-weight:900;color:#fff;">${totalAfter > 0 ? totalAfter.toLocaleString('en-US') : '—'}</td>
+    </tr>
+    <tr style="background:#0c4a6e;">
+        <td colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:rgba(255,255,255,0.8);border-right:2px solid rgba(255,255,255,0.2);">รวมก่อน 60 ปี</td>
+        <td colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:rgba(255,255,255,0.8);">รวมหลัง 60 ปี</td>
+    </tr>
+    <tr style="background:#082f49;">
+        <td colspan="4" style="padding:${_pdH};text-align:center;font-size:${_isMobile?'13':'14'}px;font-weight:900;color:#fff;">
+            รวมตลอดชีพ: ${grandTotal > 0 ? grandTotal.toLocaleString('en-US') : '—'} บาท
+        </td>
+    </tr>`;
+
+    if (body) body.innerHTML = bodyHtml || `<tr><td colspan="4" class="py-10 text-center text-[12px] text-slate-400">ไม่มีข้อมูลในช่วงอายุนี้</td></tr>`;
 };
 
 // ==================== MF Inline Search ====================
