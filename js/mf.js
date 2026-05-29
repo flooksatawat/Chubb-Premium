@@ -167,54 +167,112 @@ window.mfCalculate = async function() {
     if (!company) { mfShowError('กรุณาเลือกบริษัท'); return; }
     if (!plan) { mfShowError('กรุณาเลือกแผนประกัน'); return; }
 
-    const rates = await mfLoadRates(company);
-    const planData = rates[plan];
-    if (!planData) { mfShowError('ยังไม่มีข้อมูลอัตราเบี้ยของแผนนี้'); return; }
-
+    const rawData = await mfLoadRates(company);
     const companies = window._mfData.companies?.companies || [];
-    const companyName = companies.find(c => c.id === company)?.name || company;
-    const planName = planData.name || plan;
-    const planAgeRange = planData.ageRange || [1, 99];
-    const start = Math.max(ageStart, planAgeRange[0]);
-    const end = Math.min(ageEnd, planAgeRange[1]);
+    const co = companies.find(c => c.id === company);
+    const planMeta = co?.plans?.find(p => p.id === plan);
+    const companyName = co?.name || company;
+    const planName = planMeta?.name || plan;
+    const planFullName = `${companyName} ${planName}`.trim();
     const roomLabel = roomRate ? ` · ${roomRate}` : '';
     const SPLIT = 60;
 
-    const buildRows = (rateTable, fromAge, toAge) => {
-        let rows = '', total = 0, hasData = false;
-        for (let age = fromAge; age <= toAge; age++) {
-            const prem = rateTable[String(age)] ?? rateTable[age] ?? null;
-            const premStr = prem != null ? prem.toLocaleString('en-US') : '—';
-            if (prem != null) { total += prem; hasData = true; }
-            rows += `<tr style="background:${age % 2 === 0 ? '#fff' : '#f0f9ff'};">
-                <td style="padding:5px 8px;text-align:center;font-size:12px;font-weight:600;color:#334155;">${age}</td>
-                <td style="padding:5px 8px;text-align:right;font-size:12px;font-weight:600;color:${prem != null ? '#0f766e' : '#94a3b8'};">${premStr}</td>
-            </tr>`;
+    // Build {age: premium} map for a given gender from step-rate array format
+    const buildMap = (gender) => {
+        const map = {};
+        if (!Array.isArray(rawData.rates)) {
+            // Legacy format: rawData[plan][roomRate?][gender]
+            const planData = rawData[plan];
+            if (!planData) return map;
+            const rateTable = roomRate ? planData[roomRate]?.[gender] : planData[gender];
+            if (rateTable) {
+                Object.keys(rateTable).forEach(k => {
+                    const a = parseInt(k);
+                    if (!isNaN(a)) map[a] = rateTable[k];
+                });
+            }
+            return map;
         }
-        return { rows, total, hasData };
+        const gKey = gender === 'male' ? 'Male' : 'Female';
+        rawData.rates.forEach(r => {
+            if (r.gender !== gKey && r.gender !== 'Unisex') return;
+            const pp = r.premiums?.[planFullName];
+            if (!pp) return;
+            const prem = planMeta?.hasRoomRate ? pp[roomRate] : (typeof pp === 'number' ? pp : null);
+            if (typeof prem === 'number') map[r.age_band] = prem;
+        });
+        return map;
     };
 
-    const buildTable = (rateTable, fromAge, toAge, gLabel, gradFrom, gradTo) => {
-        if (!rateTable) return `<div style="padding:16px;text-align:center;font-size:11px;color:#94a3b8;">ไม่มีข้อมูล</div>`;
-        const actualFrom = Math.max(fromAge, start);
-        const actualTo = Math.min(toAge, end);
-        if (actualFrom > actualTo) return `<div style="padding:12px;text-align:center;font-size:11px;color:#94a3b8;">—</div>`;
-        const { rows, total, hasData } = buildRows(rateTable, actualFrom, actualTo);
+    const maleMap   = buildMap('male');
+    const femaleMap = buildMap('female');
+
+    if (Object.keys(maleMap).length === 0 && Object.keys(femaleMap).length === 0) {
+        mfShowError('ยังไม่มีข้อมูลอัตราเบี้ยของแผนนี้'); return;
+    }
+
+    // From map, compute premium for a given age (step-rate: highest band <= age)
+    const premForAge = (map, age) => {
+        const bands = Object.keys(map).map(Number).sort((a, b) => a - b);
+        if (bands.length === 0) return null;
+        // Per-age exact match first
+        if (map[age] !== undefined) return map[age];
+        // Step-rate: find highest band <= age
+        let val = null;
+        for (const b of bands) { if (b <= age) val = map[b]; else break; }
+        return val;
+    };
+
+    // Build HTML rows + total for a gender map and age range
+    const buildSection = (map, fromAge, toAge) => {
+        const actualFrom = Math.max(fromAge, ageStart);
+        const actualTo = Math.min(toAge, ageEnd);
+        if (actualFrom > actualTo || Object.keys(map).length === 0) {
+            return { html: '<tr><td colspan="2" style="padding:10px;text-align:center;font-size:11px;color:#94a3b8;">—</td></tr>', total: 0, hasData: false, actualFrom, actualTo };
+        }
+        let html = '', total = 0, hasData = false, prevPrem = null;
+        for (let age = actualFrom; age <= actualTo; age++) {
+            const prem = premForAge(map, age);
+            if (prem != null) { total += prem; hasData = true; }
+            // For step-rate bands: only show the band-start row (when prem changes)
+            const bands = Object.keys(map).map(Number).sort((a, b) => a - b);
+            const avgGap = bands.length > 1 ? (bands[bands.length-1] - bands[0]) / (bands.length - 1) : 1;
+            const isPerAge = avgGap <= 1.1;
+            if (isPerAge) {
+                html += `<tr style="background:${(age - actualFrom) % 2 === 0 ? '#fff' : '#f0f9ff'};">
+                    <td style="padding:5px 8px;text-align:center;font-size:12px;color:#334155;">${age}</td>
+                    <td style="padding:5px 8px;text-align:right;font-size:12px;font-weight:600;color:${prem != null ? '#0f766e' : '#94a3b8'};">${prem != null ? prem.toLocaleString('en-US') : '—'}</td>
+                </tr>`;
+            } else {
+                if (prem !== prevPrem && prem != null) {
+                    html += `<tr style="background:#f0fdfa;border-top:2px solid #5eead4;">
+                        <td style="padding:6px 8px;text-align:center;font-weight:700;font-size:12px;color:#0f766e;">${age}</td>
+                        <td style="padding:6px 8px;text-align:right;font-weight:700;font-size:12px;color:#0f766e;">${prem.toLocaleString('en-US')}</td>
+                    </tr>`;
+                }
+            }
+            prevPrem = prem;
+        }
+        return { html, total, hasData, actualFrom, actualTo };
+    };
+
+    const buildTableHtml = (map, fromAge, toAge, gLabel, gradFrom, gradTo) => {
+        const { html, total, hasData, actualFrom, actualTo } = buildSection(map, fromAge, toAge);
         const totalStr = hasData ? total.toLocaleString('en-US') : '—';
         return `
-            <div style="border-radius:12px;overflow:hidden;border:1px solid #bae6fd;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
                 <div style="background:linear-gradient(135deg,${gradFrom},${gradTo});padding:6px 10px;display:flex;justify-content:space-between;align-items:center;">
                     <span style="font-size:11px;font-weight:700;color:#fff;">${gLabel}</span>
-                    <span style="font-size:10px;color:rgba(255,255,255,0.8);">อายุ ${actualFrom}–${actualTo}</span>
+                    <span style="font-size:10px;color:rgba(255,255,255,0.85);">${actualFrom}–${actualTo} ปี</span>
                 </div>
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr style="background:rgba(14,165,233,0.08);">
-                            <th style="padding:5px 8px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;">อายุ</th>
-                            <th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;">เบี้ย/ปี</th>
+                        <tr style="background:rgba(0,0,0,0.04);">
+                            <th style="padding:4px 8px;text-align:center;font-size:10px;font-weight:700;color:#475569;">อายุ</th>
+                            <th style="padding:4px 8px;text-align:right;font-size:10px;font-weight:700;color:#475569;">เบี้ย/ปี</th>
                         </tr>
                     </thead>
-                    <tbody>${rows || '<tr><td colspan="2" style="padding:10px;text-align:center;font-size:11px;color:#94a3b8;">—</td></tr>'}</tbody>
+                    <tbody>${html}</tbody>
                     <tfoot>
                         <tr style="background:linear-gradient(135deg,${gradFrom},${gradTo});">
                             <td style="padding:6px 8px;font-size:11px;font-weight:700;color:#fff;">รวม</td>
@@ -225,23 +283,20 @@ window.mfCalculate = async function() {
             </div>`;
     };
 
-    const maleTable   = roomRate ? planData[roomRate]?.['male']   : planData['male'];
-    const femaleTable = roomRate ? planData[roomRate]?.['female']  : planData['female'];
-
-    const mBefore = buildTable(maleTable,   start, SPLIT - 1, 'ชาย',  '#0369a1', '#0284c7');
-    const fBefore = buildTable(femaleTable, start, SPLIT - 1, 'หญิง', '#db2777', '#ec4899');
-    const mAfter  = buildTable(maleTable,   SPLIT, end,       'ชาย',  '#0369a1', '#0284c7');
-    const fAfter  = buildTable(femaleTable, SPLIT, end,       'หญิง', '#db2777', '#ec4899');
+    const mBefore = buildTableHtml(maleMap,   ageStart, SPLIT - 1, 'ชาย',  '#0369a1', '#0284c7');
+    const fBefore = buildTableHtml(femaleMap, ageStart, SPLIT - 1, 'หญิง', '#be185d', '#db2777');
+    const mAfter  = buildTableHtml(maleMap,   SPLIT,    ageEnd,    'ชาย',  '#0369a1', '#0284c7');
+    const fAfter  = buildTableHtml(femaleMap, SPLIT,    ageEnd,    'หญิง', '#be185d', '#db2777');
 
     document.getElementById('mfResultArea').innerHTML = `
         <div style="margin-top:16px;">
-            <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:10px;text-align:center;">${companyName} · ${planName}${roomLabel}</div>
+            <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:12px;text-align:center;">${companyName} · ${planName}${roomLabel}</div>
 
             <!-- ช่วงก่อน 60 -->
             <div style="margin-bottom:14px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <div style="flex:1;height:1px;background:#bae6fd;"></div>
-                    <span style="font-size:11px;font-weight:800;color:#0369a1;background:#e0f2fe;padding:3px 10px;border-radius:999px;white-space:nowrap;">ก่อนอายุ 60 ปี</span>
+                    <span style="font-size:11px;font-weight:800;color:#0369a1;background:#e0f2fe;padding:3px 12px;border-radius:999px;white-space:nowrap;">ก่อนอายุ 60 ปี</span>
                     <div style="flex:1;height:1px;background:#bae6fd;"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -254,7 +309,7 @@ window.mfCalculate = async function() {
             <div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <div style="flex:1;height:1px;background:#fed7aa;"></div>
-                    <span style="font-size:11px;font-weight:800;color:#c2410c;background:#fff7ed;padding:3px 10px;border-radius:999px;white-space:nowrap;">60 ปีขึ้นไป</span>
+                    <span style="font-size:11px;font-weight:800;color:#c2410c;background:#fff7ed;padding:3px 12px;border-radius:999px;white-space:nowrap;">60 ปีขึ้นไป</span>
                     <div style="flex:1;height:1px;background:#fed7aa;"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -262,7 +317,7 @@ window.mfCalculate = async function() {
                     ${fAfter}
                 </div>
             </div>
-        </div>`
+        </div>`;
 };
 
 function mfShowError(msg) {
