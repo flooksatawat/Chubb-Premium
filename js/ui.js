@@ -1931,12 +1931,25 @@ window.renderCompareView = function(planA, planB) {
     const tdBase = 'style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;"';
     const tdAge  = 'style="font-size:12px;padding:6px 6px;text-align:center;border-bottom:1px solid #f1f5f9;color:#475569;"';
 
+    // Pre-compute breakeven index for each plan
+    let beIdxA = -1, beIdxB = -1;
+    for (let i = 0; i < rowsA.length; i++) {
+        const r = rowsA[i];
+        if (beIdxA < 0 && r.totalSaving > 0 && r.netCash >= r.totalSaving) beIdxA = i;
+    }
+    for (let i = 0; i < rowsB.length; i++) {
+        const r = rowsB[i];
+        if (beIdxB < 0 && r.totalSaving > 0 && r.netCash >= r.totalSaving) beIdxB = i;
+    }
+
     let bodyRows = '';
     for (let i = 0; i < maxRows; i++) {
         const rA = rowsA[i];
         const rB = rowsB[i];
         const age = rA ? rA.age : rB.age;
         const odd = i % 2 === 0;
+        const isBeA = i === beIdxA;
+        const isBeB = i === beIdxB;
 
         const fA  = (v, bold, color) => v !== null && v !== undefined && v > 0
             ? `<span style="${bold?'font-weight:700;':''}color:${color};">${fmt(v)}</span>`
@@ -1950,13 +1963,18 @@ window.renderCompareView = function(planA, planB) {
         const cfB  = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
         const netB = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
-        const bgA = odd ? '#fff' : '#f8fafc';
-        const bgB = odd ? '#fff' : '#f8fafc';
-        const tdAStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgA};border-bottom:1px solid #f1f5f9;`;
-        const tdBStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgB};border-bottom:1px solid #f1f5f9;`;
+        const bgA = isBeA ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
+        const bgB = isBeB ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
+        const borderA = isBeA ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
+        const borderB = isBeB ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
+        const ageBg = (isBeA || isBeB) ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
+        const ageBorder = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
+
+        const tdAStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgA};${borderA}`;
+        const tdBStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgB};${borderB}`;
 
         bodyRows += `<tr class="cmp-row">
-            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${bgA};border-bottom:1px solid #f1f5f9;">${age}</td>
+            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBorder}">${age}${(isBeA||isBeB)?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
             <td style="${tdAStyle}">${savA}</td>
             <td style="${tdAStyle}">${cfA}</td>
             <td style="${tdAStyle}border-right:2px solid #e2e8f0;">${netA}</td>
