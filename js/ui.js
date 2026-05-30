@@ -1976,8 +1976,8 @@ window.renderCompareView = function(planA, planB) {
             <thead>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
-                    <th ${thS} colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;">${planA} · อายุ ${dA.age} ${genderA}</th>
-                    <th ${thS} colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;">${planB} · อายุ ${dB.age} ${genderB}</th>
+                    <th colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;">${planA} · อายุ ${dA.age} ${genderA}</th>
+                    <th colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;">${planB} · อายุ ${dB.age} ${genderB}</th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
