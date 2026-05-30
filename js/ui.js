@@ -1836,7 +1836,6 @@ window.cancelCompareMode = function() {
 
 window.renderCompareView = function(planA, planB) {
     window.cancelCompareMode();
-    if (!window.isWideLayout()) return;
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
@@ -2039,7 +2038,21 @@ window.renderCompareView = function(planA, planB) {
         </div>
     </div>`;
 
-    window.injectToWorkspace(html);
+    if (window.isWideLayout()) {
+        window.injectToWorkspace(html);
+    } else {
+        // Mobile: bottom sheet แบ่งบน-ล่าง
+        let sheet = document.getElementById('_cmpMobileSheet');
+        if (!sheet) {
+            sheet = document.createElement('div');
+            sheet.id = '_cmpMobileSheet';
+            sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9990;height:62vh;background:white;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;font-family:Kanit,sans-serif;transform:translateY(100%);transition:transform 0.3s ease;';
+            document.body.appendChild(sheet);
+        }
+        sheet.innerHTML = html;
+        sheet.style.display = 'flex';
+        requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+    }
 };
 
 // Long-press delegation — เริ่ม compare mode (ทุก layout)
@@ -2054,7 +2067,6 @@ window.renderCompareView = function(planA, planB) {
     function cancel() { clearTimeout(_timer); _timer = null; _downPlan = null; }
 
     document.addEventListener('touchstart', e => {
-        if (!window.isWideLayout()) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
@@ -2555,6 +2567,8 @@ window.resetRightPaneToPlaceholder = function() {
     window.__cmpViewPlanA = null;
     window.__cmpViewPlanB = null;
     window.__rightPaneActive = false;
+    const sheet = document.getElementById('_cmpMobileSheet');
+    if (sheet) { sheet.style.transform = 'translateY(100%)'; setTimeout(() => { sheet.style.display = 'none'; }, 300); }
     _unmountViewsFromRightPane();
     ['navMainBtn','navTableBtn','navCashBtn','navAiBtn'].forEach(id => {
         const el = document.getElementById(id); if (el) el.classList.remove('active');
