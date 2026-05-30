@@ -290,7 +290,7 @@ function showPlansByAge(age) {
         'Signature Legacy':        { icon: 'fa-crown',              color: 'amber',   label: 'Signature Legacy',     sub: 'ส่งมอบมรดก · 5/10 ปี' },
         'Life Protector 20':       { icon: 'fa-umbrella',           color: 'blue',    label: 'Life Protector 20',    sub: 'บำนาญ · 20 ปี' },
         'Supreme Life Protector':  { icon: 'fa-star',               color: 'indigo',  label: 'Supreme Life Protector', sub: 'บำนาญพรีเมียม · 20 ปี' },
-        'Whole Life Extra':        { icon: 'fa-infinity',           color: 'purple',  label: 'Whole Life Extra',     sub: 'ตลอดชีพ · 10/15 ปี' },
+        'Whole Life Extra':        { icon: 'fa-infinity',           color: 'purple',  label: 'Whole Life Extra',     sub: 'ตลอดชีพ · WXN10≤50, WXN15≤45' },
         '24 TX':                   { icon: 'fa-piggy-bank',         color: 'teal',    label: '24 TX',                sub: 'ออมทรัพย์ · 24 ปี' },
         '868 / 818 Elite Saving':  { icon: 'fa-gem',                color: 'emerald', label: 'Elite Saving 868/818', sub: 'ออมทรัพย์' },
         'LifeTime Value':          { icon: 'fa-chart-line',         color: 'sky',     label: 'LifeTime Value',       sub: 'ออมถึง 100 ปี · 10LV≤55, 15LV≤45, 20LV≤40' },
