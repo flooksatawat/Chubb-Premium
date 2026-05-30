@@ -1963,24 +1963,24 @@ window.renderCompareView = function(planA, planB) {
         const cfB  = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
         const netB = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
-        const bgA = isBeA ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
-        const bgB = isBeB ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
-        const borderA = isBeA ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
-        const borderB = isBeB ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
-        const ageBg = (isBeA || isBeB) ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
-        const ageBorder = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : 'border-bottom:1px solid #f1f5f9;';
+        const bg    = odd ? '#fff' : '#f8fafc';
+        const bdBot = 'border-bottom:1px solid #f1f5f9;';
+        const beStyle = 'background:#d1fae5;border-top:2px solid #34d399;border-bottom:2px solid #34d399;';
 
-        const tdAStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgA};${borderA}`;
-        const tdBStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgB};${borderB}`;
+        const tdBase  = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bg};${bdBot}`;
+        const tdNetA  = isBeA ? `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-right:2px solid #e2e8f0;${beStyle}` : `${tdBase}border-right:2px solid #e2e8f0;`;
+        const tdNetB  = isBeB ? `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;${beStyle}` : tdBase;
+        const ageBg   = (isBeA || isBeB) ? '#d1fae5' : bg;
+        const ageBdr  = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : bdBot;
 
         bodyRows += `<tr class="cmp-row">
-            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBorder}">${age}${(isBeA||isBeB)?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
-            <td style="${tdAStyle}">${savA}</td>
-            <td style="${tdAStyle}">${cfA}</td>
-            <td style="${tdAStyle}border-right:2px solid #e2e8f0;">${netA}</td>
-            <td style="${tdBStyle}">${savB}</td>
-            <td style="${tdBStyle}">${cfB}</td>
-            <td style="${tdBStyle}">${netB}</td>
+            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBdr}">${age}${(isBeA||isBeB)?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
+            <td style="${tdBase}">${savA}</td>
+            <td style="${tdBase}">${cfA}</td>
+            <td style="${tdNetA}">${netA}</td>
+            <td style="${tdBase}">${savB}</td>
+            <td style="${tdBase}">${cfB}</td>
+            <td style="${tdNetB}">${netB}</td>
         </tr>`;
     }
 
