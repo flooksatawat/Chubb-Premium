@@ -2050,22 +2050,18 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     btn.style.display = 'none';
                     return;
                 }
-                const view = document.body.getAttribute('data-view') || 'main';
-                if (view === 'main') {
-                    btn.style.display = 'none';
-                    return;
-                }
                 btn.style.display = 'flex';
-                btn.style.bottom = '';
+                const view = document.body.getAttribute('data-view') || 'main';
                 const headerEl = view === 'table'
                     ? document.getElementById('tableHeaderRow')
-                    : document.querySelector('#cashView > div:first-child');
+                    : view === 'cash'
+                        ? document.querySelector('#cashView > div:first-child')
+                        : null;
                 if (headerEl) {
                     const r = headerEl.getBoundingClientRect();
-                    const centerY = r.top + r.height / 2;
-                    btn.style.top = (centerY - 17) + 'px';
+                    btn.style.top = (r.top + r.height / 2 - 17) + 'px';
                 } else {
-                    btn.style.top = 'calc(env(safe-area-inset-top,0px) + 16px)';
+                    btn.style.top = 'calc(env(safe-area-inset-top,0px) + 52px)';
                 }
             }
             window._updateLeftPaneBtnPos = updateBtnPosition;
