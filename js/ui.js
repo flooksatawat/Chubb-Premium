@@ -1840,6 +1840,10 @@ window.renderCompareView = function(planA, planB) {
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
+    // บันทึกแผนที่กำลังเปรียบเทียบ เพื่อให้ refreshAllDisplays re-render ได้
+    window.__cmpViewPlanA = planA;
+    window.__cmpViewPlanB = planB;
+
     // สลับหน้าคำนวณไปที่ planA เพื่อรอรับการเปลี่ยนแปลงข้อมูล
     if (planA !== currentAppPlan) selectAppPlan(planA);
 
@@ -2548,6 +2552,8 @@ window.openAIPanel = function() {
 };
 
 window.resetRightPaneToPlaceholder = function() {
+    window.__cmpViewPlanA = null;
+    window.__cmpViewPlanB = null;
     window.__rightPaneActive = false;
     _unmountViewsFromRightPane();
     ['navMainBtn','navTableBtn','navCashBtn','navAiBtn'].forEach(id => {
@@ -3227,6 +3233,19 @@ function _updateSumResultDisplay() {
 
 
 function refreshAllDisplays() {
+    // Re-render compare yearly table ถ้ากำลังแสดงอยู่
+    if (window.__cmpViewPlanA && window.__cmpViewPlanB) {
+        const _rp = document.getElementById('rightPane');
+        const _hasCompare = _rp && _rp.querySelector('.cmp-row');
+        if (_hasCompare) {
+            window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB);
+            return;
+        } else {
+            window.__cmpViewPlanA = null;
+            window.__cmpViewPlanB = null;
+        }
+    }
+
     _updateTPDUI();
     _updateDD50UI();
     _updateSumResultDisplay();
