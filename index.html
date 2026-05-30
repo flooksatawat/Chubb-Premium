@@ -2043,7 +2043,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             document.body.appendChild(btn);
 
             function updateBtnPosition() {
-                if (!window.isWideLayout || !window.isWideLayout()) {
+                // ตรวจสอบจาก DOM จริง ว่า right pane แสดงผลอยู่หรือไม่
+                const rp = rightPane ? rightPane.getBoundingClientRect() : null;
+                const rpVisible = rp && rp.width > 10;
+                if (!rpVisible) {
                     btn.style.display = 'none';
                     return;
                 }
@@ -2054,14 +2057,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 }
                 btn.style.display = 'flex';
                 btn.style.bottom = '';
-                // align กึ่งกลางแนวตั้งกับ header ชื่อแบบประกันของ view ปัจจุบัน
                 const headerEl = view === 'table'
                     ? document.getElementById('tableHeaderRow')
                     : document.querySelector('#cashView > div:first-child');
                 if (headerEl) {
                     const r = headerEl.getBoundingClientRect();
                     const centerY = r.top + r.height / 2;
-                    btn.style.top = (centerY - 17) + 'px'; // 17 = half of 34px btn
+                    btn.style.top = (centerY - 17) + 'px';
                 } else {
                     btn.style.top = 'calc(env(safe-area-inset-top,0px) + 16px)';
                 }
@@ -2086,7 +2088,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
             window.addEventListener('resize', () => {
                 setTimeout(() => {
-                    if (!window.isWideLayout || !window.isWideLayout()) {
+                    const rp = rightPane ? rightPane.getBoundingClientRect() : null;
+                    if (!rp || rp.width <= 10) {
                         layout.classList.remove('left-pane-hidden');
                         const icon = document.getElementById('toggleLeftPaneIcon');
                         if (icon) icon.className = 'fas fa-chevron-left';
