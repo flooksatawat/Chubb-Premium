@@ -121,7 +121,7 @@ window._buildCompareHTML = function() {
                 { label: 'CV ปีที่ 20',      getVal: r => r.cv20,          fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
                 { label: 'จุดคุ้มทุน (อายุ)',getVal: r => r.beAge || 999,  fmt: v => v < 999 ? v + ' ปี' : '-',       best: 'min' },
             ];
-            const hdrCells = results.map(r => `<th style="padding:10px 8px;background:${r.plan.color};color:white;font-size:12px;font-family:'Kanit',sans-serif;min-width:100px;text-align:center;line-height:1.4;word-break:keep-all;">${r.plan.label.replace(/ /g,'<br>')}</th>`).join('');
+            const hdrCells = results.map(r => `<th style="padding:10px 8px;background:${r.plan.color};color:white;font-size:11px;font-family:'Kanit',sans-serif;min-width:100px;text-align:center;white-space:nowrap;">${r.plan.label}</th>`).join('');
             const bodyRows = rows.map(row => {
                 const vals = results.map(r => row.getVal(r));
                 const positiveVals = vals.filter(v => v > 0 && v < 999);
