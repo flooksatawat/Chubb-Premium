@@ -301,7 +301,8 @@ function showPlansByAge(age) {
         'Medical Fund':            { icon: 'fa-briefcase-medical',  color: 'cyan',    label: 'Medical Fund',         sub: 'ประกันสุขภาพ' },
     };
 
-    const matched = Object.entries(PLAN_CONFIG).filter(([name, cfg]) => name !== 'Medical Fund' && age >= cfg.minAge && age <= cfg.maxAge);
+    const EXCLUDE_FROM_AGE_SEARCH = ['Medical Fund'];
+    const matched = Object.entries(PLAN_CONFIG).filter(([name, cfg]) => !EXCLUDE_FROM_AGE_SEARCH.includes(name) && age >= cfg.minAge && age <= cfg.maxAge);
 
     const titleEl = document.getElementById('ageSearchTitle');
     const bodyEl  = document.getElementById('ageSearchBody');
