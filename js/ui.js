@@ -337,7 +337,7 @@ function showPlansByAge(age) {
 
     let html = '';
     for (const p of matched) {
-        const ageRange = p.minAge === 0 ? `31 วัน – ${p.maxAge} ปี` : `${p.minAge} – ${p.maxAge} ปี`;
+        const ageRange = p.planName === 'CI Extra Plus' ? `แรกเกิด – ${p.maxAge} ปี` : p.minAge === 0 ? `31 วัน – ${p.maxAge} ปี` : `${p.minAge} – ${p.maxAge} ปี`;
         html += `<button onclick="closePopup('ageSearchModal');selectAppPlan('${p.planName}');setTimeout(()=>setPlan('${p.abbr}'),80)"
             class="w-full flex justify-between items-center p-3 bg-${p.color}-50 border border-${p.color}-200 rounded-xl active:bg-${p.color}-100 transition-colors shadow-sm text-left">
             <div class="flex items-center gap-3 min-w-0">
@@ -1383,7 +1383,7 @@ function getConditionsHTML(planName) {
     
     let config = PLAN_CONFIG[planName] || PLAN_CONFIG[planData?.name];
     if (config) {
-        issueAge = config.minAge === 0 ? `1 เดือน - ${config.maxAge} ปี` : `${config.minAge} - ${config.maxAge} ปี`;
+        issueAge = config.minAge === 0 ? `แรกเกิด - ${config.maxAge} ปี` : `${config.minAge} - ${config.maxAge} ปี`;
         minSA = config.minSum ? `${config.minSum.toLocaleString()} บาท` : minSA;
     }
     
