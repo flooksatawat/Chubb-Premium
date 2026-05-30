@@ -1951,7 +1951,7 @@ window.renderCompareView = function(planA, planB) {
         const netB = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
         const bgA = odd ? '#fff' : '#f8fafc';
-        const bgB = odd ? '#f0fdf4' : '#dcfce7';
+        const bgB = odd ? '#fff' : '#f8fafc';
         const tdAStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgA};border-bottom:1px solid #f1f5f9;`;
         const tdBStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgB};border-bottom:1px solid #f1f5f9;`;
 
