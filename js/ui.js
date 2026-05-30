@@ -1417,6 +1417,8 @@ function selectAppPlan(planName) {
         window.__cmpReplaceSlot = null;
         window.__cmpSlotPlanA  = null;
         window.__cmpSlotPlanB  = null;
+        const banner = document.getElementById('_cmpReplaceBanner');
+        if (banner) banner.style.display = 'none';
         const newA = slot === 'A' ? planName : curA;
         const newB = slot === 'B' ? planName : curB;
         if (newA !== newB) window.renderCompareView(newA, newB);
@@ -1834,6 +1836,45 @@ window.cancelCompareMode = function() {
     if (banner) banner.style.display = 'none';
 };
 
+window._cmpStartReplace = function(slot, curA, curB) {
+    window.__cmpReplaceSlot = slot;
+    window.__cmpSlotPlanA  = curA;
+    window.__cmpSlotPlanB  = curB;
+
+    // banner แจ้งผู้ใช้ว่ารอเลือกแบบ
+    let banner = document.getElementById('_cmpReplaceBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = '_cmpReplaceBanner';
+        banner.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:9px 16px;border-radius:14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25);white-space:nowrap;font-family:Kanit,sans-serif;';
+        document.body.appendChild(banner);
+    }
+    const slotLabel = slot === 'A' ? curA : curB;
+    banner.innerHTML = `<i class="fas fa-pen"></i> เปลี่ยน <span style="color:#fef9c3">${slotLabel}</span> → เลือกแบบใหม่ &nbsp;<button onclick="window._cmpCancelReplace()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
+    banner.style.display = 'flex';
+
+    // บนมือถือ: ซ่อน sheet ให้เห็น plan list
+    const sheet = document.getElementById('_cmpMobileSheet');
+    if (sheet && sheet.style.display !== 'none') {
+        sheet.style.transform = 'translateY(100%)';
+    } else {
+        // desktop: เปิดแถบซ้าย
+        const layout = document.querySelector('.command-center-layout');
+        if (layout && layout.classList.contains('left-pane-hidden')) window.toggleLeftPane?.();
+    }
+};
+
+window._cmpCancelReplace = function() {
+    window.__cmpReplaceSlot = null;
+    window.__cmpSlotPlanA  = null;
+    window.__cmpSlotPlanB  = null;
+    const banner = document.getElementById('_cmpReplaceBanner');
+    if (banner) banner.style.display = 'none';
+    // คืน sheet บนมือถือ
+    const sheet = document.getElementById('_cmpMobileSheet');
+    if (sheet && window.__cmpViewPlanA) sheet.style.transform = 'translateY(0)';
+};
+
 window.renderCompareView = function(planA, planB) {
     window.cancelCompareMode();
 
@@ -2017,8 +2058,8 @@ window.renderCompareView = function(planA, planB) {
             <thead>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
-                    <th id="cmpHdrA" colspan="3" onclick="window.__cmpReplaceSlot='A';window.__cmpSlotPlanA='${planA}';window.__cmpSlotPlanB='${planB}';document.getElementById('cmpHdrA').style.outline='3px solid #fbbf24';document.getElementById('cmpHdrB').style.outline='none';if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
-                    <th id="cmpHdrB" colspan="3" onclick="window.__cmpReplaceSlot='B';window.__cmpSlotPlanA='${planA}';window.__cmpSlotPlanB='${planB}';document.getElementById('cmpHdrB').style.outline='3px solid #fbbf24';document.getElementById('cmpHdrA').style.outline='none';if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrA" colspan="3" onclick="window._cmpStartReplace('A','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrB" colspan="3" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
@@ -3247,12 +3288,16 @@ function _updateSumResultDisplay() {
 
 
 function refreshAllDisplays() {
-    // Re-render compare yearly table ถ้ากำลังแสดงอยู่
-    if (window.__cmpViewPlanA && window.__cmpViewPlanB) {
-        const _rp = document.getElementById('rightPane');
-        const _hasCompare = _rp && _rp.querySelector('.cmp-row');
+    // Re-render compare yearly table ถ้ากำลังแสดงอยู่ (guard ป้องกัน recursive loop)
+    if (window.__cmpViewPlanA && window.__cmpViewPlanB && !window.__cmpRefreshing) {
+        const _rp  = document.getElementById('rightPane');
+        const _sh  = document.getElementById('_cmpMobileSheet');
+        const _hasCompare = (_rp && _rp.querySelector('.cmp-row'))
+                         || (_sh && _sh.style.display !== 'none' && _sh.querySelector('.cmp-row'));
         if (_hasCompare) {
+            window.__cmpRefreshing = true;
             window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB);
+            window.__cmpRefreshing = false;
             return;
         } else {
             window.__cmpViewPlanA = null;
