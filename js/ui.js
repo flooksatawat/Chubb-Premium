@@ -293,14 +293,14 @@ function showPlansByAge(age) {
         { planName:'Signature Legacy',       abbr:'5SLB',   icon:'fa-crown',             color:'amber',   label:'Signature Legacy',       badge:'5SLC',   desc:'ส่งมอบมรดก · ชำระ 5 ปี',             minAge:0,  maxAge:70 },
         { planName:'Signature Legacy',       abbr:'10SLB',  icon:'fa-crown',             color:'amber',   label:'Signature Legacy',       badge:'10SLB',  desc:'ส่งมอบมรดก · ชำระ 10 ปี',            minAge:0,  maxAge:70 },
         // Life Protector 20
-        { planName:'Life Protector 20',      abbr:'20LPB',  icon:'fa-umbrella',          color:'blue',    label:'Life Protector 20',      badge:'20LPB',  desc:'บำนาญ · ชำระ 20 ปี คุ้มครอง 90 ปี', minAge:0,  maxAge:70 },
+        { planName:'Life Protector 20',      abbr:'20LPB',  icon:'fa-umbrella',          color:'blue',    label:'Life Protector 20',      badge:'',       desc:'บำนาญ · ชำระ 20 ปี คุ้มครอง 90 ปี', minAge:0,  maxAge:70 },
         // Supreme Life Protector
-        { planName:'Supreme Life Protector', abbr:'20SLPA', icon:'fa-star',              color:'indigo',  label:'Supreme Life Protector', badge:'20SLPA', desc:'บำนาญพรีเมียม · ชำระ 20 ปี',         minAge:0,  maxAge:70 },
+        { planName:'Supreme Life Protector', abbr:'20SLPA', icon:'fa-star',              color:'indigo',  label:'Supreme Life Protector', badge:'',       desc:'บำนาญพรีเมียม · ชำระ 20 ปี',         minAge:0,  maxAge:70 },
         // Whole Life Extra
         { planName:'Whole Life Extra',       abbr:'WXN10',  icon:'fa-infinity',          color:'purple',  label:'Whole Life Extra',       badge:'WXN10',  desc:'ตลอดชีพ · ชำระ 10 ปี',               minAge:0,  maxAge:50 },
         { planName:'Whole Life Extra',       abbr:'WXN15',  icon:'fa-infinity',          color:'purple',  label:'Whole Life Extra',       badge:'WXN15',  desc:'ตลอดชีพ · ชำระ 15 ปี',               minAge:11, maxAge:45 },
         // 24 TX
-        { planName:'24 TX',                  abbr:'24TX',   icon:'fa-piggy-bank',        color:'teal',    label:'24 TX',                  badge:'24TX',   desc:'ออมทรัพย์ · คุ้มครอง 24 ปี',         minAge:0,  maxAge:55 },
+        { planName:'24 TX',                  abbr:'24TX',   icon:'fa-piggy-bank',        color:'teal',    label:'24 TX',                  badge:'',       desc:'ออมทรัพย์ · คุ้มครอง 24 ปี',         minAge:0,  maxAge:55 },
         // Elite Saving
         { planName:'868 / 818 Elite Saving', abbr:'S868',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S868',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครอง 18 ปี', minAge:0, maxAge:50 },
         { planName:'868 / 818 Elite Saving', abbr:'S818',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S818',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครองถึง 68 ปี', minAge:51, maxAge:65 },
@@ -314,11 +314,11 @@ function showPlansByAge(age) {
         { planName:'Century Life',           abbr:'60CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'60CL',   desc:'ตลอดชีพ · ชำระ 60 ปี',               minAge:0,  maxAge:55 },
         { planName:'Century Life',           abbr:'90CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'90CL',   desc:'ตลอดชีพ · ชำระ 90 ปี',               minAge:0,  maxAge:75 },
         // 3D Health Excellence
-        { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'3D HX',  desc:'ประกันสุขภาพ · รับอายุ 11–75 ปี',     minAge:11, maxAge:75 },
+        { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'',       desc:'ประกันสุขภาพ · รับอายุ 11–75 ปี',     minAge:11, maxAge:75 },
         // Convertable Term
-        { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'TLA',    desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:65 },
+        { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'',       desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:65 },
         // Smart Plan 21/7
-        { planName:'Smart Plan 21/7',        abbr:'7SM',    icon:'fa-bolt',              color:'yellow',  label:'Smart Plan 21/7',        badge:'7SM',    desc:'ออม 21 ปี · ชำระ 7 ปี',              minAge:0,  maxAge:70 },
+        { planName:'Smart Plan 21/7',        abbr:'7SM',    icon:'fa-bolt',              color:'yellow',  label:'Smart Plan 21/7',        badge:'',       desc:'ออม 21 ปี · ชำระ 7 ปี',              minAge:0,  maxAge:70 },
     ];
 
     const matched = ALL_SUB_PLANS.filter(p => age >= p.minAge && age <= p.maxAge);
@@ -347,7 +347,7 @@ function showPlansByAge(age) {
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="text-[12.5px] font-bold text-${p.color}-800 leading-tight">${p.label}</span>
-                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-${p.color}-200 text-${p.color}-800 leading-none">${p.badge}</span>
+                        ${p.badge ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-${p.color}-200 text-${p.color}-800 leading-none">${p.badge}</span>` : ''}
                     </div>
                     <span class="text-[10.5px] text-${p.color}-500 leading-tight block">${ageRange} · ${p.desc}</span>
                 </div>
