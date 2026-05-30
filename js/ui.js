@@ -285,30 +285,52 @@ function handleQuickCalc(event) {
 }
 
 function showPlansByAge(age) {
-    const PLAN_DISPLAY = {
-        'CI Extra Plus':           { icon: 'fa-shield-virus',       color: 'rose',    label: 'CI Extra Plus',        sub: 'โรคร้ายแรง · 10/20 ปี' },
-        'Signature Legacy':        { icon: 'fa-crown',              color: 'amber',   label: 'Signature Legacy',     sub: 'ส่งมอบมรดก · 5/10 ปี' },
-        'Life Protector 20':       { icon: 'fa-umbrella',           color: 'blue',    label: 'Life Protector 20',    sub: 'บำนาญ · 20 ปี' },
-        'Supreme Life Protector':  { icon: 'fa-star',               color: 'indigo',  label: 'Supreme Life Protector', sub: 'บำนาญพรีเมียม · 20 ปี' },
-        'Whole Life Extra':        { icon: 'fa-infinity',           color: 'purple',  label: 'Whole Life Extra',     sub: 'ตลอดชีพ · WXN10≤50, WXN15≤45' },
-        '24 TX':                   { icon: 'fa-piggy-bank',         color: 'teal',    label: '24 TX',                sub: 'ออมทรัพย์ · 24 ปี' },
-        '868 / 818 Elite Saving':  { icon: 'fa-gem',                color: 'emerald', label: 'Elite Saving 868/818', sub: 'ออมทรัพย์' },
-        'LifeTime Value':          { icon: 'fa-chart-line',         color: 'sky',     label: 'LifeTime Value',       sub: 'ออมถึง 100 ปี · 10LV≤55, 15LV≤45, 20LV≤40' },
-        'Century Life':            { icon: 'fa-shield-heart',       color: 'violet',  label: 'Century Life',         sub: 'ตลอดชีพ · 10/20/60/90 ปี' },
-        '3D Health Excellence':    { icon: 'fa-hospital',           color: 'pink',    label: '3D Health Excellence', sub: 'สุขภาพ · 10/20/60/90 ปี' },
-        'Convertable Term':        { icon: 'fa-rotate',             color: 'orange',  label: 'Convertable Term',     sub: 'ชั่วคราว · ต่ออายุได้' },
-        'Smart Plan 21/7':         { icon: 'fa-bolt',               color: 'yellow',  label: 'Smart Plan 21/7',      sub: 'ออม 21 ปี · ชำระ 7 ปี' },
-        'Medical Fund':            { icon: 'fa-briefcase-medical',  color: 'cyan',    label: 'Medical Fund',         sub: 'ประกันสุขภาพ' },
-    };
+    const ALL_SUB_PLANS = [
+        // CI Extra Plus
+        { planName:'CI Extra Plus',          abbr:'10CX',   icon:'fa-shield-virus',      color:'rose',    label:'CI Extra Plus',          badge:'10CX',   desc:'โรคร้ายแรง · ชำระ 10 ปี',            minAge:0,  maxAge:65 },
+        { planName:'CI Extra Plus',          abbr:'20CX',   icon:'fa-shield-virus',      color:'rose',    label:'CI Extra Plus',          badge:'20CX',   desc:'โรคร้ายแรง · ชำระ 20 ปี',            minAge:0,  maxAge:65 },
+        // Signature Legacy
+        { planName:'Signature Legacy',       abbr:'5SLB',   icon:'fa-crown',             color:'amber',   label:'Signature Legacy',       badge:'5SLC',   desc:'ส่งมอบมรดก · ชำระ 5 ปี',             minAge:0,  maxAge:70 },
+        { planName:'Signature Legacy',       abbr:'10SLB',  icon:'fa-crown',             color:'amber',   label:'Signature Legacy',       badge:'10SLB',  desc:'ส่งมอบมรดก · ชำระ 10 ปี',            minAge:0,  maxAge:70 },
+        // Life Protector 20
+        { planName:'Life Protector 20',      abbr:'20LPB',  icon:'fa-umbrella',          color:'blue',    label:'Life Protector 20',      badge:'20LPB',  desc:'บำนาญ · ชำระ 20 ปี คุ้มครอง 90 ปี', minAge:0,  maxAge:70 },
+        // Supreme Life Protector
+        { planName:'Supreme Life Protector', abbr:'20SLPA', icon:'fa-star',              color:'indigo',  label:'Supreme Life Protector', badge:'20SLPA', desc:'บำนาญพรีเมียม · ชำระ 20 ปี',         minAge:0,  maxAge:70 },
+        // Whole Life Extra
+        { planName:'Whole Life Extra',       abbr:'WXN10',  icon:'fa-infinity',          color:'purple',  label:'Whole Life Extra',       badge:'WXN10',  desc:'ตลอดชีพ · ชำระ 10 ปี',               minAge:0,  maxAge:50 },
+        { planName:'Whole Life Extra',       abbr:'WXN15',  icon:'fa-infinity',          color:'purple',  label:'Whole Life Extra',       badge:'WXN15',  desc:'ตลอดชีพ · ชำระ 15 ปี',               minAge:11, maxAge:45 },
+        // 24 TX
+        { planName:'24 TX',                  abbr:'24TX',   icon:'fa-piggy-bank',        color:'teal',    label:'24 TX',                  badge:'24TX',   desc:'ออมทรัพย์ · คุ้มครอง 24 ปี',         minAge:0,  maxAge:55 },
+        // Elite Saving
+        { planName:'868 / 818 Elite Saving', abbr:'S868',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S868',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครอง 18 ปี', minAge:0, maxAge:50 },
+        { planName:'868 / 818 Elite Saving', abbr:'S818',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S818',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครองถึง 68 ปี', minAge:51, maxAge:65 },
+        // LifeTime Value
+        { planName:'LifeTime Value',         abbr:'10LV',   icon:'fa-chart-line',        color:'sky',     label:'LifeTime Value',         badge:'10LV',   desc:'ออมถึง 100 ปี · ชำระ 10 ปี',         minAge:0,  maxAge:55 },
+        { planName:'LifeTime Value',         abbr:'15LV',   icon:'fa-chart-line',        color:'sky',     label:'LifeTime Value',         badge:'15LV',   desc:'ออมถึง 100 ปี · ชำระ 15 ปี',         minAge:0,  maxAge:45 },
+        { planName:'LifeTime Value',         abbr:'20LV',   icon:'fa-chart-line',        color:'sky',     label:'LifeTime Value',         badge:'20LV',   desc:'ออมถึง 100 ปี · ชำระ 20 ปี',         minAge:0,  maxAge:40 },
+        // Century Life
+        { planName:'Century Life',           abbr:'10CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'10CL',   desc:'ตลอดชีพ · ชำระ 10 ปี',               minAge:0,  maxAge:75 },
+        { planName:'Century Life',           abbr:'20CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'20CL',   desc:'ตลอดชีพ · ชำระ 20 ปี',               minAge:0,  maxAge:75 },
+        { planName:'Century Life',           abbr:'60CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'60CL',   desc:'ตลอดชีพ · ชำระ 60 ปี',               minAge:0,  maxAge:55 },
+        { planName:'Century Life',           abbr:'90CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'90CL',   desc:'ตลอดชีพ · ชำระ 90 ปี',               minAge:0,  maxAge:75 },
+        // 3D Health Excellence
+        { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/10',  desc:'สุขภาพ · ชำระ 10 ปี',                minAge:11, maxAge:75 },
+        { planName:'3D Health Excellence',   abbr:'20CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/20',  desc:'สุขภาพ · ชำระ 20 ปี',                minAge:11, maxAge:75 },
+        { planName:'3D Health Excellence',   abbr:'60CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/60',  desc:'สุขภาพ · ชำระ 60 ปี',                minAge:11, maxAge:55 },
+        { planName:'3D Health Excellence',   abbr:'90CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/90',  desc:'สุขภาพ · ชำระ 90 ปี',                minAge:11, maxAge:75 },
+        // Convertable Term
+        { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'TLA',    desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:65 },
+        // Smart Plan 21/7
+        { planName:'Smart Plan 21/7',        abbr:'7SM',    icon:'fa-bolt',              color:'yellow',  label:'Smart Plan 21/7',        badge:'7SM',    desc:'ออม 21 ปี · ชำระ 7 ปี',              minAge:0,  maxAge:70 },
+    ];
 
-    const EXCLUDE_FROM_AGE_SEARCH = ['Medical Fund'];
-    const matched = Object.entries(PLAN_CONFIG).filter(([name, cfg]) => !EXCLUDE_FROM_AGE_SEARCH.includes(name) && age >= cfg.minAge && age <= cfg.maxAge);
+    const matched = ALL_SUB_PLANS.filter(p => age >= p.minAge && age <= p.maxAge);
 
     const titleEl = document.getElementById('ageSearchTitle');
     const bodyEl  = document.getElementById('ageSearchBody');
     if (!titleEl || !bodyEl) return;
 
-    titleEl.innerHTML = `<i class="fas fa-birthday-cake mr-2 text-blue-500"></i> แบบที่รับอายุ ${age} ปี (${matched.length} แบบ)`;
+    titleEl.innerHTML = `<i class="fas fa-birthday-cake mr-2 text-blue-500"></i> แบบที่รับอายุ ${age} ปี (${matched.length} แผน)`;
 
     if (!matched.length) {
         bodyEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-times-circle text-3xl mb-3 block text-red-300"></i>ไม่มีแบบประกันที่รับอายุ ${age} ปี</div>`;
@@ -317,21 +339,23 @@ function showPlansByAge(age) {
     }
 
     let html = '';
-    for (const [name, cfg] of matched) {
-        const d = PLAN_DISPLAY[name] || { icon: 'fa-shield', color: 'slate', label: name, sub: '' };
-        const ageRange = cfg.minAge === 0 ? `31 วัน – ${cfg.maxAge} ปี` : `${cfg.minAge} – ${cfg.maxAge} ปี`;
-        html += `<button onclick="closePopup('ageSearchModal');selectAppPlan('${name}')"
-            class="w-full flex justify-between items-center p-3 bg-${d.color}-50 border border-${d.color}-200 rounded-xl active:bg-${d.color}-100 transition-colors shadow-sm text-left">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-${d.color}-600 shadow-sm shrink-0">
-                    <i class="fas ${d.icon} text-[14px]"></i>
+    for (const p of matched) {
+        const ageRange = p.minAge === 0 ? `31 วัน – ${p.maxAge} ปี` : `${p.minAge} – ${p.maxAge} ปี`;
+        html += `<button onclick="closePopup('ageSearchModal');selectAppPlan('${p.planName}');setTimeout(()=>setPlan('${p.abbr}'),80)"
+            class="w-full flex justify-between items-center p-3 bg-${p.color}-50 border border-${p.color}-200 rounded-xl active:bg-${p.color}-100 transition-colors shadow-sm text-left">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-${p.color}-600 shadow-sm shrink-0">
+                    <i class="fas ${p.icon} text-[13px]"></i>
                 </div>
-                <div>
-                    <span class="text-[13px] font-bold text-${d.color}-800 block leading-tight">${d.label}</span>
-                    <span class="text-[10.5px] text-${d.color}-500 leading-tight">${ageRange} · ${d.sub}</span>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[12.5px] font-bold text-${p.color}-800 leading-tight">${p.label}</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-${p.color}-200 text-${p.color}-800 leading-none">${p.badge}</span>
+                    </div>
+                    <span class="text-[10.5px] text-${p.color}-500 leading-tight block">${ageRange} · ${p.desc}</span>
                 </div>
             </div>
-            <i class="fas fa-chevron-right text-xs text-${d.color}-400 shrink-0"></i>
+            <i class="fas fa-chevron-right text-xs text-${p.color}-400 shrink-0 ml-1"></i>
         </button>`;
     }
     bodyEl.innerHTML = html;
