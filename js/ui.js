@@ -643,7 +643,7 @@ function switchView(targetView) {
     document.body.setAttribute('data-view', targetView);
     if (typeof window._updateLeftPaneBtnPos === 'function') window._updateLeftPaneBtnPos();
 
-    const isWide        = window.innerWidth >= 700;
+    const isWide        = typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 600;
     const rightPane     = document.getElementById('rightPane');
     const rightPaneMain = document.getElementById('rightPaneMain');
 
