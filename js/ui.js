@@ -1830,49 +1830,130 @@ window.renderCompareView = function(planA, planB) {
     const dB = window.computeForPlan(planB);
     if (!dA || !dB) { showCustomError('ไม่สามารถคำนวณข้อมูลเปรียบเทียบได้'); return; }
 
-    const fmtP = n => Math.round(n).toLocaleString();
-    const fmtN = n => typeof formatNum === 'function' ? formatNum(n) : Math.round(n).toLocaleString();
+    const fmt  = n => Math.round(n).toLocaleString();
+    const cfgA = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planA]) || {};
+    const cfgB = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planB]) || {};
+    const hasCF_A = !!cfgA.hasCashFlow;
+    const hasCF_B = !!cfgB.hasCashFlow;
 
-    function cardHTML(plan, d) {
-        const cfg = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[plan]) || {};
-        const hasCF = !!cfg.hasCashFlow;
-        const premLabel = hasCF ? 'จำนวนเงินออม' : 'เบี้ยประกัน';
-        let rows = '';
-        rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">${premLabel}</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-rose-600">${fmtP(d.premium)} ฿/ปี</td></tr>`;
-        rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">ทุนประกันชีวิต</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-slate-800">${fmtN(d.sum)} ฿</td></tr>`;
-        if (hasCF && d.cashFlow > 0) rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">กระแสเงินสด/ปี</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-emerald-600">${fmtP(d.cashFlow)} ฿</td></tr>`;
-        const pd = window.PRODUCT_CONDITIONS && window.PRODUCT_CONDITIONS[plan];
-        if (pd && pd.benefits) {
-            pd.benefits.slice(0, 4).forEach(b => {
-                let plain = (typeof replacePercentWithAmount === 'function' ? replacePercentWithAmount(b, d.sum, d.premium) : b).replace(/<[^>]+>/g,'');
-                const [lbl, ...rest] = plain.split(':');
-                if (rest.length) rows += `<tr class="odd:bg-white even:bg-slate-50"><td class="py-2.5 px-4 text-[13px] text-slate-600">${lbl.replace(/^\S\s/,'').trim()}</td><td class="py-2.5 px-4 text-right font-bold text-[13px] text-slate-700">${rest.join(':').trim()}</td></tr>`;
-            });
-        }
+    function planIcon(plan) {
         const planInfo = typeof allInsurancePlans !== 'undefined' ? allInsurancePlans.find(p => p.name === plan) : null;
-        const icon = planInfo ? `<i class="${planInfo.icon} text-xl"></i>` : '<i class="fas fa-shield-heart text-xl"></i>';
-        return `<div class="flex-1 min-w-0 flex flex-col bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden">
-            <div class="flex items-center gap-3 px-4 py-3" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
-                <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">${icon}</div>
-                <div class="min-w-0"><div class="text-white font-bold text-[13px] leading-tight truncate">${plan}</div>
-                <div class="text-white/70 text-[11px]">อายุ ${d.age} | ${(d.gender==='male'||d.gender==='ชาย')?'ชาย':'หญิง'}</div></div>
-            </div>
-            <table class="w-full border-collapse flex-1"><tbody>${rows}</tbody></table>
-            <div class="p-3 border-t border-slate-100">
-                <button onclick="selectAppPlan('${plan}');closePlanModal();" class="w-full py-2 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
-                    <i class="fas fa-arrow-right"></i> เลือกแบบนี้
-                </button>
-            </div>
-        </div>`;
+        return planInfo ? `<i class="${planInfo.icon}"></i>` : '<i class="fas fa-shield-heart"></i>';
     }
 
-    const html = `<div class="p-4 h-full overflow-y-auto">
-        <div class="flex items-center gap-2 mb-3">
-            <i class="fas fa-code-compare text-blue-600"></i>
+    function cell(val, highlight, suffix = '') {
+        const cls = highlight === 'good' ? 'text-emerald-600 font-extrabold' :
+                    highlight === 'cost' ? 'text-rose-500 font-bold' :
+                    'text-slate-700 font-bold';
+        return `<td class="py-3 px-3 text-right text-[13px] ${cls} tabular-nums">${val}${suffix ? `<span class="text-[10px] font-normal text-slate-400 ml-0.5">${suffix}</span>` : ''}</td>`;
+    }
+
+    // ── เมตริกทั้งหมดที่จะแสดง ──
+    const rows = [];
+
+    // 1. ออมเงิน (เบี้ยประกัน/ปี)
+    const premA = dA.premium, premB = dB.premium;
+    const premBetter = premA < premB ? 'A' : premB < premA ? 'B' : 'eq';
+    rows.push({
+        label: 'ออมเงิน', icon: 'fa-piggy-bank', color: 'rose',
+        valA: fmt(premA), valB: fmt(premB), suffix: '฿/ปี',
+        hlA: premBetter === 'A' ? 'good' : premBetter === 'B' ? 'cost' : '',
+        hlB: premBetter === 'B' ? 'good' : premBetter === 'A' ? 'cost' : '',
+    });
+
+    // 2. เงินสดพร้อมใช้ (กระแสเงินสด/ปี — แสดงเฉพาะแผนที่มี)
+    const cfA = hasCF_A ? (dA.cashFlow || 0) : null;
+    const cfB = hasCF_B ? (dB.cashFlow || 0) : null;
+    if (cfA !== null || cfB !== null) {
+        const cfBetter = (cfA !== null && cfB !== null) ? (cfA > cfB ? 'A' : cfB > cfA ? 'B' : 'eq') :
+                         cfA !== null ? 'A' : 'B';
+        rows.push({
+            label: 'เงินสดพร้อมใช้', icon: 'fa-hand-holding-dollar', color: 'emerald',
+            valA: cfA !== null ? fmt(cfA) : '—',
+            valB: cfB !== null ? fmt(cfB) : '—',
+            suffix: '฿/ปี',
+            hlA: cfA !== null && cfBetter === 'A' ? 'good' : '',
+            hlB: cfB !== null && cfBetter === 'B' ? 'good' : '',
+        });
+    }
+
+    // 3. ทุนประกัน
+    const sumA = dA.sum, sumB = dB.sum;
+    const sumBetter = sumA > sumB ? 'A' : sumB > sumA ? 'B' : 'eq';
+    rows.push({
+        label: 'ทุนประกัน', icon: 'fa-shield-heart', color: 'blue',
+        valA: fmt(sumA), valB: fmt(sumB), suffix: '฿',
+        hlA: sumBetter === 'A' ? 'good' : '',
+        hlB: sumBetter === 'B' ? 'good' : '',
+    });
+
+    // 4. กระแสเงินสดรวม (ถ้ามี) — ต่างจากรายปี: คือ sum × %cashback ถ้าไม่มี ใช้ cashFlow × 10 โดยประมาณ
+    const totalCfA = hasCF_A && dA.cashFlow ? dA.cashFlow * 10 : null;
+    const totalCfB = hasCF_B && dB.cashFlow ? dB.cashFlow * 10 : null;
+    if (totalCfA !== null || totalCfB !== null) {
+        const tcBetter = (totalCfA !== null && totalCfB !== null) ? (totalCfA > totalCfB ? 'A' : totalCfB > totalCfA ? 'B' : 'eq') :
+                         totalCfA !== null ? 'A' : 'B';
+        rows.push({
+            label: 'กระแสเงินสด (10 ปี)', icon: 'fa-chart-line', color: 'violet',
+            valA: totalCfA !== null ? fmt(totalCfA) : '—',
+            valB: totalCfB !== null ? fmt(totalCfB) : '—',
+            suffix: '฿',
+            hlA: totalCfA !== null && tcBetter === 'A' ? 'good' : '',
+            hlB: totalCfB !== null && tcBetter === 'B' ? 'good' : '',
+        });
+    }
+
+    const genderA = (dA.gender === 'male' || dA.gender === 'ชาย') ? 'ชาย' : 'หญิง';
+    const genderB = (dB.gender === 'male' || dB.gender === 'ชาย') ? 'ชาย' : 'หญิง';
+
+    const tableRows = rows.map(r => `
+        <tr class="border-b border-slate-100 last:border-0">
+            <td class="py-3 px-3 text-[12px] text-slate-500 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5">
+                    <i class="fas ${r.icon} text-${r.color}-400 text-[11px]"></i>${r.label}
+                </span>
+            </td>
+            ${cell(r.valA, r.hlA, r.suffix)}
+            ${cell(r.valB, r.hlB, r.suffix)}
+        </tr>`).join('');
+
+    const html = `<div class="p-4 h-full overflow-y-auto no-scrollbar">
+        <div class="flex items-center gap-2 mb-4">
+            <i class="fas fa-code-compare text-blue-600 text-[15px]"></i>
             <span class="font-bold text-slate-700 text-[14px]">เปรียบเทียบแบบประกัน</span>
             <button onclick="window.resetRightPaneToPlaceholder()" class="ml-auto text-[11px] text-slate-400 hover:text-slate-600 flex items-center gap-1"><i class="fas fa-xmark"></i> ปิด</button>
         </div>
-        <div class="flex gap-3">${cardHTML(planA, dA)}${cardHTML(planB, dB)}</div>
+
+        <div class="bg-white rounded-[18px] border border-slate-200 shadow-sm overflow-hidden">
+            <!-- header -->
+            <div class="grid grid-cols-[1fr_1fr_1fr] bg-gradient-to-r from-teal-600 to-blue-600 text-white">
+                <div class="py-3 px-3 text-[11px] font-semibold text-white/70">รายการ</div>
+                <div class="py-3 px-3 text-right">
+                    <div class="text-[12px] font-bold leading-tight truncate">${planA}</div>
+                    <div class="text-[10px] text-white/70">อายุ ${dA.age} · ${genderA}</div>
+                </div>
+                <div class="py-3 px-3 text-right border-l border-white/20">
+                    <div class="text-[12px] font-bold leading-tight truncate">${planB}</div>
+                    <div class="text-[10px] text-white/70">อายุ ${dB.age} · ${genderB}</div>
+                </div>
+            </div>
+            <!-- rows -->
+            <table class="w-full border-collapse">
+                <colgroup><col style="width:38%"><col style="width:31%"><col style="width:31%"></colgroup>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+
+        <!-- select buttons -->
+        <div class="grid grid-cols-2 gap-3 mt-4">
+            <button onclick="selectAppPlan('${planA}')" class="py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+                <i class="fas fa-arrow-right"></i> เลือก ${planA}
+            </button>
+            <button onclick="selectAppPlan('${planB}')" class="py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#7c3aed,#2563eb);">
+                <i class="fas fa-arrow-right"></i> เลือก ${planB}
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-slate-400 mt-2"><i class="fas fa-star text-emerald-400 mr-1"></i>ตัวหนาสีเขียว = ดีกว่าในแต่ละรายการ</p>
     </div>`;
 
     window.injectToWorkspace(html);
