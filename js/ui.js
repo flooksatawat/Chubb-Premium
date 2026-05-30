@@ -271,10 +271,70 @@ function handleQuickCalc(event) {
         const input = event.target;
         const rawValue = input.value.trim();
         if (rawValue === '') return;
+        const ageMatch = rawValue.match(/^อายุ\s*(\d+)/);
+        if (ageMatch) {
+            showPlansByAge(parseInt(ageMatch[1]));
+            input.value = '';
+            input.blur();
+            return;
+        }
         submitQuickCalc(rawValue);
         input.value = '';
         input.blur();
     }
+}
+
+function showPlansByAge(age) {
+    const PLAN_DISPLAY = {
+        'CI Extra Plus':           { icon: 'fa-shield-virus',       color: 'rose',    label: 'CI Extra Plus',        sub: 'โรคร้ายแรง · 10/20 ปี' },
+        'Signature Legacy':        { icon: 'fa-crown',              color: 'amber',   label: 'Signature Legacy',     sub: 'ส่งมอบมรดก · 5/10 ปี' },
+        'Life Protector 20':       { icon: 'fa-umbrella',           color: 'blue',    label: 'Life Protector 20',    sub: 'บำนาญ · 20 ปี' },
+        'Supreme Life Protector':  { icon: 'fa-star',               color: 'indigo',  label: 'Supreme Life Protector', sub: 'บำนาญพรีเมียม · 20 ปี' },
+        'Whole Life Extra':        { icon: 'fa-infinity',           color: 'purple',  label: 'Whole Life Extra',     sub: 'ตลอดชีพ · 10/15 ปี' },
+        '24 TX':                   { icon: 'fa-piggy-bank',         color: 'teal',    label: '24 TX',                sub: 'ออมทรัพย์ · 24 ปี' },
+        '868 / 818 Elite Saving':  { icon: 'fa-gem',                color: 'emerald', label: 'Elite Saving 868/818', sub: 'ออมทรัพย์' },
+        'LifeTime Value':          { icon: 'fa-chart-line',         color: 'sky',     label: 'LifeTime Value',       sub: 'ออมถึง 100 ปี · 10LV≤55, 15LV≤45, 20LV≤40' },
+        'Century Life':            { icon: 'fa-shield-heart',       color: 'violet',  label: 'Century Life',         sub: 'ตลอดชีพ · 10/20/60/90 ปี' },
+        '3D Health Excellence':    { icon: 'fa-hospital',           color: 'pink',    label: '3D Health Excellence', sub: 'สุขภาพ · 10/20/60/90 ปี' },
+        'Convertable Term':        { icon: 'fa-rotate',             color: 'orange',  label: 'Convertable Term',     sub: 'ชั่วคราว · ต่ออายุได้' },
+        'Smart Plan 21/7':         { icon: 'fa-bolt',               color: 'yellow',  label: 'Smart Plan 21/7',      sub: 'ออม 21 ปี · ชำระ 7 ปี' },
+        'Medical Fund':            { icon: 'fa-briefcase-medical',  color: 'cyan',    label: 'Medical Fund',         sub: 'ประกันสุขภาพ' },
+    };
+
+    const matched = Object.entries(PLAN_CONFIG).filter(([name, cfg]) => age >= cfg.minAge && age <= cfg.maxAge);
+
+    const titleEl = document.getElementById('ageSearchTitle');
+    const bodyEl  = document.getElementById('ageSearchBody');
+    if (!titleEl || !bodyEl) return;
+
+    titleEl.innerHTML = `<i class="fas fa-birthday-cake mr-2 text-blue-500"></i> แบบที่รับอายุ ${age} ปี (${matched.length} แบบ)`;
+
+    if (!matched.length) {
+        bodyEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-times-circle text-3xl mb-3 block text-red-300"></i>ไม่มีแบบประกันที่รับอายุ ${age} ปี</div>`;
+        openPopup('ageSearchModal');
+        return;
+    }
+
+    let html = '';
+    for (const [name, cfg] of matched) {
+        const d = PLAN_DISPLAY[name] || { icon: 'fa-shield', color: 'slate', label: name, sub: '' };
+        const ageRange = cfg.minAge === 0 ? `31 วัน – ${cfg.maxAge} ปี` : `${cfg.minAge} – ${cfg.maxAge} ปี`;
+        html += `<button onclick="closePopup('ageSearchModal');selectAppPlan('${name}')"
+            class="w-full flex justify-between items-center p-3 bg-${d.color}-50 border border-${d.color}-200 rounded-xl active:bg-${d.color}-100 transition-colors shadow-sm text-left">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-${d.color}-600 shadow-sm shrink-0">
+                    <i class="fas ${d.icon} text-[14px]"></i>
+                </div>
+                <div>
+                    <span class="text-[13px] font-bold text-${d.color}-800 block leading-tight">${d.label}</span>
+                    <span class="text-[10.5px] text-${d.color}-500 leading-tight">${ageRange} · ${d.sub}</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-${d.color}-400 shrink-0"></i>
+        </button>`;
+    }
+    bodyEl.innerHTML = html;
+    openPopup('ageSearchModal');
 }
 
 function submitQuickCalc(rawValue) {

@@ -924,6 +924,20 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     
     <!-- ========================================== -->
+    <!-- Age Search Modal — แบบประกันตามอายุ -->
+    <!-- ========================================== -->
+    <div id="ageSearchModal" class="modal-overlay hidden">
+        <div class="modal-content-card p-5" style="max-height:85vh;display:flex;flex-direction:column;">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2.5 flex-shrink-0">
+                <h3 id="ageSearchTitle" class="text-base font-bold text-[#1e3a8a]"><i class="fas fa-birthday-cake mr-2 text-blue-500"></i> แบบประกันที่รับอายุ</h3>
+                <button onclick="closePopup('ageSearchModal')" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors text-2xl font-bold shadow-sm leading-none">&times;</button>
+            </div>
+            <div id="ageSearchBody" class="overflow-y-auto space-y-2 flex-1 pr-0.5 custom-scrollbar"></div>
+            <p class="text-[10px] text-slate-400 text-center mt-3 flex-shrink-0">แตะชื่อแบบประกันเพื่อเลือก</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- 1. หน้าสรุปผลหลัก (Result Modal) ดีไซน์ใหม่ -->
     <!-- ========================================== -->
     <div id="resultModal" class="modal-overlay hidden">
