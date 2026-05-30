@@ -1880,13 +1880,6 @@ window.renderCompareView = function(planA, planB) {
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
-    // บันทึกแผนที่กำลังเปรียบเทียบ เพื่อให้ refreshAllDisplays re-render ได้
-    window.__cmpViewPlanA = planA;
-    window.__cmpViewPlanB = planB;
-
-    // สลับหน้าคำนวณไปที่ planA เพื่อรอรับการเปลี่ยนแปลงข้อมูล
-    if (planA !== currentAppPlan) selectAppPlan(planA);
-
     const savedPlan = currentPlan;
     const dA = planA === currentAppPlan ? Object.assign({}, lastCalculationData, { _planName: planA }) : window.computeForPlan(planA);
     const optA = planA === currentAppPlan ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
@@ -2094,6 +2087,10 @@ window.renderCompareView = function(planA, planB) {
         sheet.style.display = 'flex';
         requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
     }
+
+    // บันทึก state หลัง inject เสมอ (ป้องกัน state ถูกล้างก่อน render เสร็จ)
+    window.__cmpViewPlanA = planA;
+    window.__cmpViewPlanB = planB;
 };
 
 // Long-press delegation — เริ่ม compare mode (ทุก layout)
@@ -3290,19 +3287,10 @@ function _updateSumResultDisplay() {
 function refreshAllDisplays() {
     // Re-render compare yearly table ถ้ากำลังแสดงอยู่ (guard ป้องกัน recursive loop)
     if (window.__cmpViewPlanA && window.__cmpViewPlanB && !window.__cmpRefreshing) {
-        const _rp  = document.getElementById('rightPane');
-        const _sh  = document.getElementById('_cmpMobileSheet');
-        const _hasCompare = (_rp && _rp.querySelector('.cmp-row'))
-                         || (_sh && _sh.style.display !== 'none' && _sh.querySelector('.cmp-row'));
-        if (_hasCompare) {
-            window.__cmpRefreshing = true;
-            window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB);
-            window.__cmpRefreshing = false;
-            return;
-        } else {
-            window.__cmpViewPlanA = null;
-            window.__cmpViewPlanB = null;
-        }
+        window.__cmpRefreshing = true;
+        window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB);
+        window.__cmpRefreshing = false;
+        return;
     }
 
     _updateTPDUI();
