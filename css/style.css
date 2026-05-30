@@ -131,10 +131,10 @@
         /* Tablet / iPad / Desktop / Foldable inner screen
            - iPad portrait/landscape (≥ 768 × 600)
            - Galaxy Z Fold inner screen ทั้งสองแนว (~893×821 และ 821×893)
-           - ใช้ 700px (ไม่ใช่ 768px) เพราะ document viewport จริงอาจเล็กกว่า window
-             เนื่องจาก scrollbar/DevTools/sidebar กินพื้นที่
-           - กันจอนอกพับแนว landscape (792×353) ไม่ให้หลุดเป็น desktop เพราะสูงไม่พอ */
-        @media (min-width: 700px) and (min-height: 600px) {
+           - Honor Magic V3 inner screen (~719×781 CSS px ที่ DPR 3)
+           - ลด threshold เป็น 600×500 เพื่อรองรับ foldable inner screen
+           - กันจอนอกพับแนว landscape (792×353) ด้วย min-height: 500 */
+        @media (min-width: 600px) and (min-height: 500px) {
             body {
                 justify-content: flex-start;
                 align-items: flex-start;
@@ -836,7 +836,7 @@
         }
 
         /* ==================== SWIPE-TO-HIDE LEFT PANE ==================== */
-        @media (min-width: 700px) and (min-height: 600px) {
+        @media (min-width: 600px) and (min-height: 500px) {
             .app-container {
                 transition: max-width 0.35s cubic-bezier(0.4,0,0.2,1),
                             min-width 0.35s cubic-bezier(0.4,0,0.2,1),
