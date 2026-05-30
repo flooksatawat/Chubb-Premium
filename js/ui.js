@@ -1826,6 +1826,9 @@ window.renderCompareView = function(planA, planB) {
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
+    // สลับหน้าคำนวณไปที่ planA เพื่อรอรับการเปลี่ยนแปลงข้อมูล
+    if (planA !== currentAppPlan) selectAppPlan(planA);
+
     const savedPlan = currentPlan;
     const dA = planA === currentAppPlan ? Object.assign({}, lastCalculationData, { _planName: planA }) : window.computeForPlan(planA);
     const optA = planA === currentAppPlan ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
