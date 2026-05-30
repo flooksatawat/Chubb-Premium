@@ -905,7 +905,8 @@ function initModernScrollInteractions() {
 function handleUnifiedPlanSearch() {
     const input = document.getElementById('unifiedPlanSearchInput');
     if(!input) return;
-    const query = input.value.toLowerCase().trim();
+    const raw = input.value.trim();
+    const query = raw.toLowerCase();
     const clearBtn = document.getElementById('planSearchClearBtn');
     const searchIcon = document.getElementById('planSearchIcon');
     if (clearBtn) clearBtn.classList.toggle('hidden', query === '');
@@ -914,11 +915,23 @@ function handleUnifiedPlanSearch() {
     if (query === '') {
         isModernSearchActive = false;
         renderModernCards(modernPlansData, true);
-    } else {
-        isModernSearchActive = true;
-        const filtered = modernPlansData.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
-        renderModernCards(filtered, true);
+        return;
     }
+
+    const ageMatch = raw.match(/^อายุ\s*(\d+)/) || raw.match(/^(\d+)(\s*ปี)?$/);
+    if (ageMatch) {
+        showPlansByAge(parseInt(ageMatch[1]));
+        input.value = '';
+        if (clearBtn) clearBtn.classList.add('hidden');
+        if (searchIcon) searchIcon.classList.remove('hidden');
+        isModernSearchActive = false;
+        renderModernCards(modernPlansData, true);
+        return;
+    }
+
+    isModernSearchActive = true;
+    const filtered = modernPlansData.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+    renderModernCards(filtered, true);
 }
 
 function clearPlanSearch() {
