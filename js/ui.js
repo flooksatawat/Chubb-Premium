@@ -1409,6 +1409,20 @@ function replacePercentWithAmount(text, sum, premium) {
 }
 
 function selectAppPlan(planName) {
+    // ── Compare yearly table replace slot ──
+    if (window.__cmpReplaceSlot) {
+        const slot  = window.__cmpReplaceSlot;
+        const curA  = window.__cmpSlotPlanA;
+        const curB  = window.__cmpSlotPlanB;
+        window.__cmpReplaceSlot = null;
+        window.__cmpSlotPlanA  = null;
+        window.__cmpSlotPlanB  = null;
+        const newA = slot === 'A' ? planName : curA;
+        const newB = slot === 'B' ? planName : curB;
+        if (newA !== newB) window.renderCompareView(newA, newB);
+        return;
+    }
+
     // ── Compare mode intercept ──
     if (window.__compareMode && window.__comparePlanA) {
         const planA = window.__comparePlanA;
@@ -2000,8 +2014,8 @@ window.renderCompareView = function(planA, planB) {
             <thead>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
-                    <th colspan="3" onclick="if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();selectAppPlan('${planA}');" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
-                    <th colspan="3" onclick="if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();selectAppPlan('${planB}');" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrA" colspan="3" onclick="window.__cmpReplaceSlot='A';window.__cmpSlotPlanA='${planA}';window.__cmpSlotPlanB='${planB}';document.getElementById('cmpHdrA').style.outline='3px solid #fbbf24';document.getElementById('cmpHdrB').style.outline='none';if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrB" colspan="3" onclick="window.__cmpReplaceSlot='B';window.__cmpSlotPlanA='${planA}';window.__cmpSlotPlanB='${planB}';document.getElementById('cmpHdrB').style.outline='3px solid #fbbf24';document.getElementById('cmpHdrA').style.outline='none';if(document.querySelector('.command-center-layout')?.classList.contains('left-pane-hidden'))window.toggleLeftPane?.();" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
