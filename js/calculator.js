@@ -218,10 +218,12 @@ function getCLMinSum() {
 }
 
 function getPlanAgeLimit(planName, appPlanName) {
-    const config = PLAN_CONFIG[appPlanName] || { maxAge: 75, minAge: 11 };
+    let config = PLAN_CONFIG[appPlanName];
+    if (!config) config = Object.values(PLAN_CONFIG).find(c => c.options && c.options.includes(planName));
+    config = config || { maxAge: 75, minAge: 0 };
     let max = config.maxAge;
     if (appPlanName === 'Century Life' && planName === '60CL') max = 55;
-    return { min: config.minAge !== undefined ? config.minAge : 11, max };
+    return { min: config.minAge !== undefined ? config.minAge : 0, max };
 }
 
 function _clampAgeWithWarn(val, limits, planLabel) {
