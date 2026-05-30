@@ -11,7 +11,8 @@
 //   - มือถือทั่วไป
 window.isWideLayout = function () {
     const w = document.documentElement.clientWidth || window.innerWidth;
-    return w >= 700;
+    const h = document.documentElement.clientHeight || window.innerHeight;
+    return w >= 600 && h >= 500;
 };
 
 function fitHeaderTitle() {
