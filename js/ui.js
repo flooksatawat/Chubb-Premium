@@ -314,10 +314,7 @@ function showPlansByAge(age) {
         { planName:'Century Life',           abbr:'60CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'60CL',   desc:'ตลอดชีพ · ชำระ 60 ปี',               minAge:0,  maxAge:55 },
         { planName:'Century Life',           abbr:'90CL',   icon:'fa-shield-heart',      color:'violet',  label:'Century Life',           badge:'90CL',   desc:'ตลอดชีพ · ชำระ 90 ปี',               minAge:0,  maxAge:75 },
         // 3D Health Excellence
-        { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/10',  desc:'สุขภาพ · ชำระ 10 ปี',                minAge:11, maxAge:75 },
-        { planName:'3D Health Excellence',   abbr:'20CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/20',  desc:'สุขภาพ · ชำระ 20 ปี',                minAge:11, maxAge:75 },
-        { planName:'3D Health Excellence',   abbr:'60CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/60',  desc:'สุขภาพ · ชำระ 60 ปี',                minAge:11, maxAge:55 },
-        { planName:'3D Health Excellence',   abbr:'90CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'HX/90',  desc:'สุขภาพ · ชำระ 90 ปี',                minAge:11, maxAge:75 },
+        { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'3D HX',  desc:'ประกันสุขภาพ · รับอายุ 11–75 ปี',     minAge:11, maxAge:75 },
         // Convertable Term
         { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'TLA',    desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:65 },
         // Smart Plan 21/7
