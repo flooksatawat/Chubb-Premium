@@ -1931,13 +1931,43 @@ window.renderCompareView = function(planA, planB) {
     const tdBase = 'style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;"';
     const tdAge  = 'style="font-size:12px;padding:6px 6px;text-align:center;border-bottom:1px solid #f1f5f9;color:#475569;"';
 
+    // Pre-compute breakeven index and last-pay index for each plan
+    let beIdxA = -1, beIdxB = -1, lastPayIdxA = -1, lastPayIdxB = -1;
+    for (let i = 0; i < rowsA.length; i++) {
+        const r = rowsA[i];
+        if (r.annSav > 0) lastPayIdxA = i;
+        if (beIdxA < 0 && r.totalSaving > 0 && r.netCash >= r.totalSaving) beIdxA = i;
+    }
+    for (let i = 0; i < rowsB.length; i++) {
+        const r = rowsB[i];
+        if (r.annSav > 0) lastPayIdxB = i;
+        if (beIdxB < 0 && r.totalSaving > 0 && r.netCash >= r.totalSaving) beIdxB = i;
+    }
+
     let bodyRows = '';
     for (let i = 0; i < maxRows; i++) {
         const rA = rowsA[i];
         const rB = rowsB[i];
         const age = rA ? rA.age : rB.age;
         const odd = i % 2 === 0;
-        const bg  = odd ? 'background:#fff;' : 'background:#f8fafc;';
+
+        const isBeA = i === beIdxA;
+        const isBeB = i === beIdxB;
+        const isEndPayA = i === lastPayIdxA;
+        const isEndPayB = i === lastPayIdxB;
+        const isEndPay = isEndPayA || isEndPayB;
+
+        // Row-level border for pay-end or breakeven
+        const rowBorderTop = isEndPay ? 'border-top:2px solid #f59e0b;' : '';
+        const rowBorderBot = isEndPay ? 'border-bottom:2px solid #f59e0b;' : 'border-bottom:1px solid #f1f5f9;';
+
+        // Per-plan cell backgrounds
+        const bgA = isBeA ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
+        const bgB = isBeB ? '#d1fae5' : (odd ? '#f0fdf4' : '#dcfce7');
+        const borderA = isBeA ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : rowBorderBot;
+        const borderB = isBeB ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : rowBorderBot;
+        const ageRowBg = (isBeA && isBeB) ? '#d1fae5' : (odd ? '#fff' : '#f8fafc');
+        const ageBorder = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : rowBorderBot;
 
         const fA  = (v, bold, color) => v !== null && v !== undefined && v > 0
             ? `<span style="${bold?'font-weight:700;':''}color:${color};">${fmt(v)}</span>`
@@ -1953,19 +1983,23 @@ window.renderCompareView = function(planA, planB) {
         const cfB    = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
         const netB   = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
-        bodyRows += `<tr style="${bg}">
-            <td ${tdAge}>${age}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#fff;':'background:#f8fafc;'}">${savA}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#fff;':'background:#f8fafc;'}">${cfA}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;border-right:2px solid #e2e8f0;${odd?'background:#fff;':'background:#f8fafc;'}">${netA}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${savB}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${cfB}</td>
-            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${netB}</td>
+        const tdAStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgA};${borderA}`;
+        const tdBStyle = `font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;background:${bgB};${borderB}`;
+
+        bodyRows += `<tr class="cmp-row" style="background:${ageRowBg};">
+            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageRowBg};${ageBorder}">${age}${isEndPayA||isEndPayB?'<span style="font-size:9px;color:#f59e0b;display:block;line-height:1;">หมดชำระ</span>':''}</td>
+            <td style="${tdAStyle}">${savA}</td>
+            <td style="${tdAStyle}">${cfA}</td>
+            <td style="${tdAStyle}border-right:2px solid #e2e8f0;">${netA}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
+            <td style="${tdBStyle}">${savB}</td>
+            <td style="${tdBStyle}">${cfB}</td>
+            <td style="${tdBStyle}">${netB}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
         </tr>`;
     }
 
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
-    const html = `<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+    const html = `<style>.cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}</style>
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
         <div style="padding:12px 14px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <i class="fas fa-code-compare" style="color:#2563eb;"></i>
             <span style="font-weight:700;color:#334155;font-size:14px;">เปรียบเทียบแบบประกัน</span>
