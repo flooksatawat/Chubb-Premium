@@ -271,7 +271,7 @@ function handleQuickCalc(event) {
         const input = event.target;
         const rawValue = input.value.trim();
         if (rawValue === '') return;
-        const ageMatch = rawValue.match(/^อายุ\s*(\d+)/);
+        const ageMatch = rawValue.match(/^อายุ\s*(\d+)/) || rawValue.match(/^(\d+)(\s*ปี)?$/);
         if (ageMatch) {
             showPlansByAge(parseInt(ageMatch[1]));
             input.value = '';
