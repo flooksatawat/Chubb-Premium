@@ -1826,8 +1826,11 @@ window.renderCompareView = function(planA, planB) {
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
+    const savedPlan = currentPlan;
     const dA = planA === currentAppPlan ? Object.assign({}, lastCalculationData, { _planName: planA }) : window.computeForPlan(planA);
+    const optA = planA === currentAppPlan ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
     const dB = window.computeForPlan(planB);
+    const optB = (PLAN_CONFIG[planB]?.options || [])[0] || '';
     if (!dA || !dB) { showCustomError('ไม่สามารถคำนวณข้อมูลเปรียบเทียบได้'); return; }
 
     const fmt  = n => Math.round(n).toLocaleString();
@@ -1836,124 +1839,162 @@ window.renderCompareView = function(planA, planB) {
     const hasCF_A = !!cfgA.hasCashFlow;
     const hasCF_B = !!cfgB.hasCashFlow;
 
-    function planIcon(plan) {
-        const planInfo = typeof allInsurancePlans !== 'undefined' ? allInsurancePlans.find(p => p.name === plan) : null;
-        return planInfo ? `<i class="${planInfo.icon}"></i>` : '<i class="fas fa-shield-heart"></i>';
+    // ── คำนวณ row ต่อปีสำหรับแต่ละแผน ──
+    function _lvCashbackPct(age) {
+        if (age <= 59) return 1; if (age === 60) return 11;
+        if (age <= 69) return 1; if (age === 70) return 22;
+        if (age <= 79) return 2; if (age === 80) return 33;
+        if (age <= 89) return 3; if (age === 90) return 44;
+        if (age <= 99) return 4; return 0;
+    }
+    function _computePlanRows(pName, pOpt, d, hasCF) {
+        const pN = pName.toUpperCase();
+        const isElite = pN.includes('ELITE') || pN.includes('868') || pN.includes('818');
+        const isTX    = pName === '24 TX';
+        const isWXN   = pName === 'Whole Life Extra';
+        const isLV    = pName === 'LifeTime Value';
+        const isSM    = pName === 'Smart Plan 21/7';
+        const isCL    = pName === 'Century Life';
+        const isSLB   = pName === 'Signature Legacy';
+        const isTLA   = pName === 'Convertable Term';
+
+        let payYears = parseInt(d.years) || 20;
+        let maxYear  = 90 - d.age;
+        if (isElite) { payYears = 8; maxYear = d.age <= 50 ? 68 - d.age : 18; }
+        else if (isTX)  { payYears = 24; maxYear = 90 - d.age; }
+        else if (isLV)  { payYears = parseInt(d.years) || 10; maxYear = 100 - d.age; }
+        else if (isSM)  { payYears = 7;  maxYear = 21; }
+        else if (isCL)  { maxYear = 100 - d.age; }
+        else if (isSLB) { maxYear = 99  - d.age; }
+        else if (isTLA) { maxYear = payYears; }
+        if (maxYear <= 0) return [];
+
+        const cvData   = window.cvDataLookup || {};
+        const gKey     = (d.gender === 'male' || d.gender === 'ชาย') ? 'male' : 'female';
+        const initSA   = d.sum, initPrem = d.premium;
+        let totalSaving = 0, accCF = 0, currentSA = initSA;
+        const rows = [];
+
+        for (let y = 1; y <= maxYear; y++) {
+            const age = d.age + y;
+
+            // ออม
+            let annSav = 0;
+            if (isElite) { if (y <= 8)  { annSav = initPrem; totalSaving += annSav; } }
+            else if (y <= payYears)      { annSav = initPrem; totalSaving += annSav; }
+
+            // CV rate
+            let cvRate = 0;
+            const ageDataCV = cvData[pOpt]?.[gKey]?.[d.age.toString()];
+            if (ageDataCV && ageDataCV[y.toString()] !== undefined) cvRate = ageDataCV[y.toString()];
+            const cvTotal = Math.round((currentSA * cvRate) / 1000);
+
+            // กระแสเงินสด
+            let cfAmt = 0;
+            if (hasCF) {
+                if (isElite) {
+                    cfAmt = y < maxYear ? Math.round(currentSA * 0.12) : Math.round(currentSA * 7.20);
+                } else if (isTX) {
+                    if (y % 3 === 0 && y <= 24) cfAmt = Math.round(initSA * 0.05);
+                    else if (y === 25) cfAmt = Math.round(initSA * 0.70);
+                    else if (y >= 26 && age < 90) cfAmt = Math.round(initSA * 0.08);
+                    else if (age === 90) cfAmt = initSA;
+                } else if (isWXN) {
+                    if (age <= 60) cfAmt = Math.round(initSA * 0.0225);
+                    else if (age === 61) cfAmt = Math.round(initSA * 0.10);
+                    else if (age > 61 && age < 90) cfAmt = Math.round(initSA * (0.10 + (age - 61) * 0.005));
+                    else if (age === 90) cfAmt = initSA;
+                } else if (isLV) {
+                    cfAmt = age >= 100 ? Math.round(initSA * 1.50) : Math.round(initSA * _lvCashbackPct(age) / 100);
+                } else if (isSM) {
+                    if (y === 21) cfAmt = Math.round(initSA * 2.12);
+                    else if (y >= 2 && y <= 20) cfAmt = Math.round(initSA * 0.02);
+                }
+            }
+
+            accCF += cfAmt;
+            const netCash = cvTotal + accCF;
+            rows.push({ age, annSav, totalSaving, cfAmt, accCF, netCash, cvTotal, currentSA });
+        }
+        return rows;
     }
 
-    function cell(val, highlight, suffix = '') {
-        const cls = highlight === 'good' ? 'text-emerald-600 font-extrabold' :
-                    highlight === 'cost' ? 'text-rose-500 font-bold' :
-                    'text-slate-700 font-bold';
-        return `<td class="py-3 px-3 text-right text-[13px] ${cls} tabular-nums">${val}${suffix ? `<span class="text-[10px] font-normal text-slate-400 ml-0.5">${suffix}</span>` : ''}</td>`;
-    }
-
-    // ── เมตริกทั้งหมดที่จะแสดง ──
-    const rows = [];
-
-    // 1. ออมเงิน (เบี้ยประกัน/ปี)
-    const premA = dA.premium, premB = dB.premium;
-    const premBetter = premA < premB ? 'A' : premB < premA ? 'B' : 'eq';
-    rows.push({
-        label: 'ออมเงิน', icon: 'fa-piggy-bank', color: 'rose',
-        valA: fmt(premA), valB: fmt(premB), suffix: '฿/ปี',
-        hlA: premBetter === 'A' ? 'good' : premBetter === 'B' ? 'cost' : '',
-        hlB: premBetter === 'B' ? 'good' : premBetter === 'A' ? 'cost' : '',
-    });
-
-    // 2. เงินสดพร้อมใช้ (กระแสเงินสด/ปี — แสดงเฉพาะแผนที่มี)
-    const cfA = hasCF_A ? (dA.cashFlow || 0) : null;
-    const cfB = hasCF_B ? (dB.cashFlow || 0) : null;
-    if (cfA !== null || cfB !== null) {
-        const cfBetter = (cfA !== null && cfB !== null) ? (cfA > cfB ? 'A' : cfB > cfA ? 'B' : 'eq') :
-                         cfA !== null ? 'A' : 'B';
-        rows.push({
-            label: 'เงินสดพร้อมใช้', icon: 'fa-hand-holding-dollar', color: 'emerald',
-            valA: cfA !== null ? fmt(cfA) : '—',
-            valB: cfB !== null ? fmt(cfB) : '—',
-            suffix: '฿/ปี',
-            hlA: cfA !== null && cfBetter === 'A' ? 'good' : '',
-            hlB: cfB !== null && cfBetter === 'B' ? 'good' : '',
-        });
-    }
-
-    // 3. ทุนประกัน
-    const sumA = dA.sum, sumB = dB.sum;
-    const sumBetter = sumA > sumB ? 'A' : sumB > sumA ? 'B' : 'eq';
-    rows.push({
-        label: 'ทุนประกัน', icon: 'fa-shield-heart', color: 'blue',
-        valA: fmt(sumA), valB: fmt(sumB), suffix: '฿',
-        hlA: sumBetter === 'A' ? 'good' : '',
-        hlB: sumBetter === 'B' ? 'good' : '',
-    });
-
-    // 4. กระแสเงินสดรวม (ถ้ามี) — ต่างจากรายปี: คือ sum × %cashback ถ้าไม่มี ใช้ cashFlow × 10 โดยประมาณ
-    const totalCfA = hasCF_A && dA.cashFlow ? dA.cashFlow * 10 : null;
-    const totalCfB = hasCF_B && dB.cashFlow ? dB.cashFlow * 10 : null;
-    if (totalCfA !== null || totalCfB !== null) {
-        const tcBetter = (totalCfA !== null && totalCfB !== null) ? (totalCfA > totalCfB ? 'A' : totalCfB > totalCfA ? 'B' : 'eq') :
-                         totalCfA !== null ? 'A' : 'B';
-        rows.push({
-            label: 'กระแสเงินสด (10 ปี)', icon: 'fa-chart-line', color: 'violet',
-            valA: totalCfA !== null ? fmt(totalCfA) : '—',
-            valB: totalCfB !== null ? fmt(totalCfB) : '—',
-            suffix: '฿',
-            hlA: totalCfA !== null && tcBetter === 'A' ? 'good' : '',
-            hlB: totalCfB !== null && tcBetter === 'B' ? 'good' : '',
-        });
-    }
+    const rowsA = _computePlanRows(planA, optA, dA, hasCF_A);
+    const rowsB = _computePlanRows(planB, optB, dB, hasCF_B);
+    const maxRows = Math.max(rowsA.length, rowsB.length);
 
     const genderA = (dA.gender === 'male' || dA.gender === 'ชาย') ? 'ชาย' : 'หญิง';
     const genderB = (dB.gender === 'male' || dB.gender === 'ชาย') ? 'ชาย' : 'หญิง';
+    const cfHdrA  = hasCF_A ? 'กระแสเงินสด' : 'ทุนประกัน';
+    const cfHdrB  = hasCF_B ? 'กระแสเงินสด' : 'ทุนประกัน';
 
-    const tableRows = rows.map(r => `
-        <tr class="border-b border-slate-100 last:border-0">
-            <td class="py-3 px-3 text-[12px] text-slate-500 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1.5">
-                    <i class="fas ${r.icon} text-${r.color}-400 text-[11px]"></i>${r.label}
-                </span>
-            </td>
-            ${cell(r.valA, r.hlA, r.suffix)}
-            ${cell(r.valB, r.hlB, r.suffix)}
-        </tr>`).join('');
+    const tdBase = 'style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;"';
+    const tdAge  = 'style="font-size:12px;padding:6px 6px;text-align:center;border-bottom:1px solid #f1f5f9;color:#475569;"';
 
-    const html = `<div class="p-4 h-full overflow-y-auto no-scrollbar">
-        <div class="flex items-center gap-2 mb-4">
-            <i class="fas fa-code-compare text-blue-600 text-[15px]"></i>
-            <span class="font-bold text-slate-700 text-[14px]">เปรียบเทียบแบบประกัน</span>
-            <button onclick="window.resetRightPaneToPlaceholder()" class="ml-auto text-[11px] text-slate-400 hover:text-slate-600 flex items-center gap-1"><i class="fas fa-xmark"></i> ปิด</button>
+    let bodyRows = '';
+    for (let i = 0; i < maxRows; i++) {
+        const rA = rowsA[i];
+        const rB = rowsB[i];
+        const age = rA ? rA.age : rB.age;
+        const odd = i % 2 === 0;
+        const bg  = odd ? 'background:#fff;' : 'background:#f8fafc;';
+
+        const fA  = (v, bold, color) => v !== null && v !== undefined && v > 0
+            ? `<span style="${bold?'font-weight:700;':''}color:${color};">${fmt(v)}</span>`
+            : '<span style="color:#cbd5e1;">—</span>';
+        const fAn = (v) => v > 0 ? fmt(v) : '<span style="color:#cbd5e1;">—</span>';
+
+        // Plan A columns
+        const savA   = rA ? fAn(rA.annSav)   : '—';
+        const cfA    = rA ? (hasCF_A ? fA(rA.cfAmt, true, '#2563eb') : fA(rA.currentSA, false, '#475569')) : '—';
+        const netA   = rA ? fA(rA.netCash, true, '#059669') : '—';
+        // Plan B columns
+        const savB   = rB ? fAn(rB.annSav)   : '—';
+        const cfB    = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
+        const netB   = rB ? fA(rB.netCash, true, '#0891b2') : '—';
+
+        bodyRows += `<tr style="${bg}">
+            <td ${tdAge}>${age}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#fff;':'background:#f8fafc;'}">${savA}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#fff;':'background:#f8fafc;'}">${cfA}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;border-right:2px solid #e2e8f0;${odd?'background:#fff;':'background:#f8fafc;'}">${netA}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${savB}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${cfB}</td>
+            <td ${tdBase} style="font-size:12px;font-variant-numeric:tabular-nums;padding:6px 6px;text-align:right;border-bottom:1px solid #f1f5f9;${odd?'background:#f0fdf4;':'background:#dcfce7;'}">${netB}</td>
+        </tr>`;
+    }
+
+    const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
+    const html = `<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div style="padding:12px 14px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <i class="fas fa-code-compare" style="color:#2563eb;"></i>
+            <span style="font-weight:700;color:#334155;font-size:14px;">เปรียบเทียบแบบประกัน</span>
+            <button onclick="window.resetRightPaneToPlaceholder()" style="margin-left:auto;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="fas fa-xmark"></i> ปิด</button>
         </div>
-
-        <div class="bg-white rounded-[18px] border border-slate-200 shadow-sm overflow-hidden">
-            <!-- header -->
-            <div class="grid grid-cols-[1fr_1fr_1fr] bg-gradient-to-r from-teal-600 to-blue-600 text-white">
-                <div class="py-3 px-3 text-[11px] font-semibold text-white/70">รายการ</div>
-                <div class="py-3 px-3 text-right">
-                    <div class="text-[12px] font-bold leading-tight truncate">${planA}</div>
-                    <div class="text-[10px] text-white/70">อายุ ${dA.age} · ${genderA}</div>
-                </div>
-                <div class="py-3 px-3 text-right border-l border-white/20">
-                    <div class="text-[12px] font-bold leading-tight truncate">${planB}</div>
-                    <div class="text-[10px] text-white/70">อายุ ${dB.age} · ${genderB}</div>
-                </div>
-            </div>
-            <!-- rows -->
-            <table class="w-full border-collapse">
-                <colgroup><col style="width:38%"><col style="width:31%"><col style="width:31%"></colgroup>
-                <tbody>${tableRows}</tbody>
-            </table>
+        <div style="overflow-x:auto;overflow-y:auto;flex:1;">
+        <table style="width:100%;border-collapse:collapse;min-width:480px;">
+            <thead>
+                <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
+                    <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
+                    <th ${thS} colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;">${planA} · อายุ ${dA.age} ${genderA}</th>
+                    <th ${thS} colspan="3" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;">${planB} · อายุ ${dB.age} ${genderB}</th>
+                </tr>
+                <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
+                    <th ${thS}>ออมเงิน</th>
+                    <th ${thS}>${cfHdrA}</th>
+                    <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;border-right:2px solid rgba(255,255,255,0.3);">เงินสดพร้อมใช้</th>
+                    <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">ออมเงิน</th>
+                    <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">${cfHdrB}</th>
+                    <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">เงินสดพร้อมใช้</th>
+                </tr>
+            </thead>
+            <tbody>${bodyRows}</tbody>
+        </table>
         </div>
-
-        <!-- select buttons -->
-        <div class="grid grid-cols-2 gap-3 mt-4">
-            <button onclick="selectAppPlan('${planA}')" class="py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#0d9488,#0369a1);">
-                <i class="fas fa-arrow-right"></i> เลือก ${planA}
-            </button>
-            <button onclick="selectAppPlan('${planB}')" class="py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style="background:linear-gradient(135deg,#7c3aed,#2563eb);">
-                <i class="fas fa-arrow-right"></i> เลือก ${planB}
-            </button>
+        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;border-top:1px solid #e2e8f0;">
+            <button onclick="selectAppPlan('${planA}')" style="padding:8px;border-radius:10px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;"><i class="fas fa-arrow-right"></i> เลือก ${planA}</button>
+            <button onclick="selectAppPlan('${planB}')" style="padding:8px;border-radius:10px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;cursor:pointer;"><i class="fas fa-arrow-right"></i> เลือก ${planB}</button>
         </div>
-        <p class="text-center text-[10px] text-slate-400 mt-2"><i class="fas fa-star text-emerald-400 mr-1"></i>ตัวหนาสีเขียว = ดีกว่าในแต่ละรายการ</p>
     </div>`;
 
     window.injectToWorkspace(html);
