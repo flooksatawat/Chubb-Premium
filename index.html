@@ -2056,7 +2056,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     ? document.getElementById('tableHeaderRow')
                     : view === 'cash'
                         ? document.querySelector('#cashView > div:first-child')
-                        : null;
+                        : document.getElementById('mainHeaderBtn');
                 if (headerEl) {
                     const r = headerEl.getBoundingClientRect();
                     btn.style.top = (r.top + r.height / 2 - 17) + 'px';
