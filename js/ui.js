@@ -2230,7 +2230,7 @@ function selectAppPlan(planName) {
     updateConditionsModal(planName);
     setPlan(currentPlan);
     updateQuickPills(planName);
-    if (typeof window._updateTablePlanPickerLabel === 'function') window._updateTablePlanPickerLabel();
+    if (typeof window._updateMFPlanSelectorVisibility === 'function') window._updateMFPlanSelectorVisibility(planName);
 
     // TLA ไม่มีหน้าตารางแยก — ปิดปุ่ม ตาราง ให้เป็นสีเทา
     const _navTbl = document.getElementById('navTableBtn');
@@ -2328,50 +2328,54 @@ function injectMaturityModal() {
 // (save state → switch plan → calculate → restore — กัน side effects ด้วย __suppressLive flag)
 window.__comparePlan = null;
 
-// ==================== TABLE PLAN PICKER ====================
+// ==================== TABLE PLAN PICKER (เฉพาะหน้า Medical Fund) ====================
 (function() {
-    // แบบประกันที่มีกระแสเงินสด — ดึงจาก PLAN_CONFIG (hasCashFlow: true)
     const CF_PLANS = [
-        { name: 'Whole Life Extra',       abbr: 'WXN',   icon: 'fa-infinity',         color: '#4f46e5', bg: '#eef2ff' },
-        { name: '24 TX',                  abbr: 'TX',    icon: 'fa-coins',            color: '#0284c7', bg: '#eff6ff' },
-        { name: '868 / 818 Elite Saving', abbr: 'Elite', icon: 'fa-crown',            color: '#9333ea', bg: '#faf5ff' },
-        { name: 'LifeTime Value',         abbr: 'LV',    icon: 'fa-chart-line',       color: '#7c3aed', bg: '#f5f3ff' },
-        { name: 'Smart Plan 21/7',        abbr: '7SM',   icon: 'fa-piggy-bank',       color: '#0d9488', bg: '#f0fdfa' },
+        { name: 'Whole Life Extra',       abbr: 'WXN',   icon: 'fa-infinity',   color: '#4f46e5', bg: '#eef2ff' },
+        { name: '24 TX',                  abbr: 'TX',    icon: 'fa-coins',      color: '#0284c7', bg: '#eff6ff' },
+        { name: '868 / 818 Elite Saving', abbr: 'Elite', icon: 'fa-crown',      color: '#9333ea', bg: '#faf5ff' },
+        { name: 'LifeTime Value',         abbr: 'LV',    icon: 'fa-chart-line', color: '#7c3aed', bg: '#f5f3ff' },
+        { name: 'Smart Plan 21/7',        abbr: '7SM',   icon: 'fa-piggy-bank', color: '#0d9488', bg: '#f0fdfa' },
     ];
 
-    // HX plans ที่ใช้ใน hxPlanModal (sync กับ hxPlanSelect)
-    const HX_PLANS = [
-        { code: 'HX15',  title: 'HX15',  desc: 'ค่าห้อง 1,500 / เหมาจ่าย 1 ล้าน' },
-        { code: 'HX20',  title: 'HX20',  desc: 'ค่าห้อง 2,000 / เหมาจ่าย 3 ล้าน' },
-        { code: 'HX40',  title: 'HX40',  desc: 'ค่าห้อง 4,000 / เหมาจ่าย 5 ล้าน' },
-        { code: 'HX60',  title: 'HX60',  desc: 'ค่าห้อง 6,000 / เหมาจ่าย 10 ล้าน' },
-        { code: 'HX150', title: 'HX150', desc: 'ค่าห้อง 15,000 / เหมาจ่าย 60 ล้าน' },
-        { code: 'HX300', title: 'HX300', desc: 'ค่าห้อง 30,000 / เหมาจ่าย 120 ล้าน' },
-    ];
-
-    function _syncHxDisplay() {
-        const code = document.getElementById('hxPlanSelect')?.value || 'HX15';
-        const hx = HX_PLANS.find(h => h.code === code) || HX_PLANS[0];
+    // ซิงค์ส่วน "ประกันสุขภาพที่เลือก" จาก mfInlineContainer
+    function _syncMFDisplay() {
         const title = document.getElementById('tppHxTitle');
         const desc  = document.getElementById('tppHxDesc');
-        if (title) title.textContent = hx.title;
-        if (desc)  desc.textContent  = hx.desc;
+        if (!title || !desc) return;
+
+        const p = window._mfInline || {};
+        const companies = window._mfData?.companies?.companies || [];
+        const co   = companies.find(c => c.id === p.company);
+        const plan = co?.plans?.find(pl => pl.id === p.plan);
+
+        if (co && plan) {
+            title.textContent = plan.name;
+            desc.textContent  = co.name + (p.roomRate ? ' · ' + p.roomRate : '');
+        } else if (co) {
+            title.textContent = co.name;
+            desc.textContent  = 'ยังไม่เลือกแผน';
+        } else {
+            title.textContent = 'ยังไม่เลือก';
+            desc.textContent  = 'กดเพื่อเลือกประกันสุขภาพ Medical Fund';
+        }
+
+        // อัปเดต label ปุ่มใน mainActionsGroup
+        const lbl = document.getElementById('mfPlanSelectorLabel');
+        if (lbl) lbl.textContent = plan ? plan.name : (co ? co.name : '');
     }
 
     function _buildPlanGrid() {
         const grid = document.getElementById('tppPlanGrid');
         if (!grid) return;
-        const cur = window.currentAppPlan || '';
         grid.innerHTML = CF_PLANS.map(p => {
-            const active = p.name === cur;
             return `<button onclick="window._tppSelectPlan('${p.name}')"
-                style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;border-radius:16px;border:2px solid ${active ? p.color : '#e2e8f0'};background:${active ? p.bg : 'white'};cursor:pointer;transition:all 0.15s;box-shadow:${active ? '0 4px 12px ' + p.color + '30' : '0 1px 4px rgba(0,0,0,0.06)'};position:relative;overflow:hidden;">
-                ${active ? `<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;"><i class="fas fa-check" style="color:white;font-size:8px;"></i></div>` : ''}
+                style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;border-radius:16px;border:2px solid #e2e8f0;background:white;cursor:pointer;transition:all 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
                 <div style="width:44px;height:44px;border-radius:13px;background:${p.bg};border:1.5px solid ${p.color}30;display:flex;align-items:center;justify-content:center;">
                     <i class="fas ${p.icon}" style="color:${p.color};font-size:18px;"></i>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:13px;font-weight:800;color:${active ? p.color : '#1e293b'};font-family:'Kanit',sans-serif;">${p.abbr}</div>
+                    <div style="font-size:13px;font-weight:800;color:#1e293b;font-family:'Kanit',sans-serif;">${p.abbr}</div>
                     <div style="font-size:10px;color:#94a3b8;font-weight:500;font-family:'Kanit',sans-serif;line-height:1.3;">${p.name.replace(' / ', '/')}</div>
                 </div>
             </button>`;
@@ -2383,7 +2387,7 @@ window.__comparePlan = null;
         const sheet   = document.getElementById('tablePlanPickerSheet');
         if (!overlay || !sheet) return;
         _buildPlanGrid();
-        _syncHxDisplay();
+        _syncMFDisplay();
         overlay.style.display = 'block';
         sheet.style.display = 'flex';
         requestAnimationFrame(() => {
@@ -2409,23 +2413,27 @@ window.__comparePlan = null;
         setTimeout(() => {
             if (typeof selectAppPlan === 'function') selectAppPlan(planName);
             if (typeof calculate === 'function') calculate('premium');
-            // switch ไปหน้าตารางถ้ายังไม่อยู่
             setTimeout(() => { if (typeof switchView === 'function') switchView('table'); }, 80);
         }, 100);
     };
 
+    // ปุ่มประกันสุขภาพใน sheet → เปิด mfInlineContainer เพื่อเลือก MF plan
     window._tppOpenHxModal = function() {
         window.closeTablePlanPicker();
-        setTimeout(() => { if (typeof openPopup === 'function') openPopup('hxPlanModal'); }, 150);
+        // กลับไปหน้าหลัก Medical Fund เพื่อเลือก MF plan
+        setTimeout(() => { if (typeof switchView === 'function') switchView('main'); }, 150);
     };
 
-    // อัปเดต label ปุ่มเมื่อ currentAppPlan เปลี่ยน
-    window._updateTablePlanPickerLabel = function() {
-        const label = document.getElementById('tablePlanPickerLabel');
-        if (!label) return;
-        const cur = window.currentAppPlan || '';
-        const found = CF_PLANS.find(p => p.name === cur);
-        label.textContent = found ? found.abbr : 'เลือกแบบ';
+    // แสดง/ซ่อนปุ่มและซิงค์ label
+    window._updateMFPlanSelectorVisibility = function(planName) {
+        const container = document.getElementById('mfPlanSelectorContainer');
+        if (!container) return;
+        if (planName === 'Medical Fund') {
+            container.classList.remove('hidden');
+            _syncMFDisplay();
+        } else {
+            container.classList.add('hidden');
+        }
     };
 })();
 
