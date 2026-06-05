@@ -1812,16 +1812,9 @@ function selectAppPlan(planName) {
         }
     }
     const lvIRRBtn = document.getElementById('lvIRRBtn');
+    if (lvIRRBtn) lvIRRBtn.classList.add('hidden');
     const mfMainBtn = document.getElementById('mfMainBtn');
-    if (lvIRRBtn) {
-        if (planName === 'LifeTime Value') {
-            lvIRRBtn.classList.remove('hidden');
-            if (mfMainBtn) { mfMainBtn.style.flex = ''; mfMainBtn.style.minWidth = '0'; }
-        } else {
-            lvIRRBtn.classList.add('hidden');
-            if (mfMainBtn) { mfMainBtn.style.flex = '1'; }
-        }
-    }
+    if (mfMainBtn) mfMainBtn.style.flex = '1';
 
     // ── Medical Fund: inline plan view (no popup) ──
     const mfInlineContainer = document.getElementById('mfInlineContainer');
@@ -3366,7 +3359,9 @@ window._planIrrLongStart = function(e) {
     clearTimeout(_planIrrTimer);
     _planIrrTimer = setTimeout(() => {
         const p = (currentAppPlan || '').toUpperCase();
-        if (p.includes('WHOLE LIFE') || p.includes('24 TX') || p.includes('ELITE') || p.includes('868') || p.includes('818') || p.includes('SMART')) {
+        if (p.includes('LIFETIME') || p.includes('LIFE TIME') || p === 'LIFETIME VALUE') {
+            if (typeof showLVIRRPopup === 'function') showLVIRRPopup();
+        } else if (p.includes('WHOLE LIFE') || p.includes('24 TX') || p.includes('ELITE') || p.includes('868') || p.includes('818') || p.includes('SMART')) {
             showPlanIRRPopup();
         }
     }, 500);
