@@ -709,6 +709,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
                 <div id="tableHeaderRow" class="flex items-center gap-1.5 px-2 py-1.5">
                     <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight"></div>
+                    <button id="tablePlanPickerBtn" onclick="window.openTablePlanPicker()" class="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-[10px] text-[11px] font-bold text-white bg-gradient-to-br from-blue-500 to-indigo-600 shadow-sm active:scale-95 transition-all border border-blue-400/40" style="white-space:nowrap;">
+                        <i class="fas fa-layer-group text-[10px]"></i>
+                        <span id="tablePlanPickerLabel">เลือกแบบ</span>
+                        <i class="fas fa-chevron-down text-[9px] opacity-70"></i>
+                    </button>
                 </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
@@ -2508,5 +2513,53 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     run();
 })();
 </script>
+
+<!-- ==================== TABLE PLAN PICKER SHEET ==================== -->
+<div id="tablePlanPickerOverlay" onclick="window.closeTablePlanPicker()" style="display:none;position:fixed;inset:0;z-index:9980;background:rgba(0,0,0,0.35);backdrop-filter:blur(2px);transition:opacity 0.25s;"></div>
+<div id="tablePlanPickerSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9981;background:white;border-radius:24px 24px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,0.18);transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.16,1,0.3,1);font-family:'Kanit',sans-serif;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+    <!-- Handle -->
+    <div style="display:flex;justify-content:center;padding:12px 0 4px;">
+        <div style="width:40px;height:4px;border-radius:2px;background:#e2e8f0;"></div>
+    </div>
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-layer-group" style="color:white;font-size:15px;"></i>
+            </div>
+            <div>
+                <div style="font-size:16px;font-weight:800;color:#1e293b;">เลือกแบบประกัน</div>
+                <div style="font-size:11px;color:#94a3b8;font-weight:500;">แบบที่มีกระแสเงินสด</div>
+            </div>
+        </div>
+        <button onclick="window.closeTablePlanPicker()" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;transition:background 0.15s;" onmousedown="this.style.background='#e2e8f0'" onmouseup="this.style.background='#f1f5f9'">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="overflow-y:auto;flex:1;padding:0 16px 24px;">
+        <!-- Plan grid -->
+        <div id="tppPlanGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;"></div>
+
+        <!-- ประกันสุขภาพที่เลือก -->
+        <div id="tppHealthSection" style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:16px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <i class="fas fa-hospital-user" style="color:#0d9488;font-size:14px;"></i>
+                <span style="font-size:13px;font-weight:700;color:#0f766e;">ประกันสุขภาพที่เลือก</span>
+            </div>
+            <button id="tppHxBtn" onclick="window._tppOpenHxModal()" style="width:100%;background:white;border:1px solid #ccfbf1;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;box-shadow:0 2px 8px rgba(13,148,136,0.06);" onmousedown="this.style.background='#f0fdfa'" onmouseup="this.style.background='white'">
+                <div style="width:38px;height:38px;border-radius:10px;background:#f0fdfa;border:1px solid #99f6e4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-bed" style="color:#0d9488;font-size:15px;"></i>
+                </div>
+                <div style="flex:1;text-align:left;">
+                    <div id="tppHxTitle" style="font-size:14px;font-weight:700;color:#134e4a;"></div>
+                    <div id="tppHxDesc" style="font-size:11px;color:#0d9488;font-weight:500;margin-top:1px;"></div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#0d9488;font-size:11px;opacity:0.6;"></i>
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
