@@ -2765,7 +2765,7 @@ function _readAge(d) {
     return Number.isFinite(a) ? a : 0;
 }
 
-// คำนวณ IRR ณ อายุที่ระบุ แล้วอัปเดตผลในป็อปอัพ (เรียกจาก input)
+// คำนวณ IRR ณ อายุที่ระบุ แล้วอัปเดตผลในป็อปอัพ
 window._updateLVIRR = function() {
     if (!_lvIrrState) return;
     const { startAge, premium, sa, payYears } = _lvIrrState;
@@ -2777,107 +2777,206 @@ window._updateLVIRR = function() {
     if (!Number.isFinite(targetAge)) targetAge = 100;
     if (targetAge < minTarget) targetAge = minTarget;
     if (targetAge > 100) targetAge = 100;
+    inp.value = targetAge;
 
-    const resultEl = document.getElementById('lvIrrResult');
-    const noteEl   = document.getElementById('lvIrrNote');
-    const yearsEl  = document.getElementById('lvIrrYears');
-    if (yearsEl) yearsEl.textContent = (targetAge - startAge) + ' ปี';
+    // อัป active state ปุ่ม milestone
+    document.querySelectorAll('.lv-irr-pill').forEach(b => {
+        const isActive = parseInt(b.dataset.age) === targetAge;
+        b.style.background    = isActive ? 'linear-gradient(135deg,#7c3aed,#4f46e5)' : '#f1f5f9';
+        b.style.color         = isActive ? '#fff' : '#7c3aed';
+        b.style.borderColor   = isActive ? 'transparent' : '#ddd6fe';
+        b.style.fontWeight    = isActive ? '800' : '600';
+        b.style.boxShadow     = isActive ? '0 3px 10px rgba(124,58,237,0.3)' : 'none';
+    });
 
+    // ระยะเวลาถือ
+    const yearsHeld = targetAge - startAge;
+    const yearsEl = document.getElementById('lvIrrYears');
+    if (yearsEl) yearsEl.textContent = yearsHeld + ' ปี';
+
+    // คำนวณ IRR
     const cfs = _buildLVCashFlows(startAge, premium, sa, payYears, targetAge);
     const irr = _calcIRR(cfs);
 
-    // รวมเงินรับคืนสะสม + เบี้ยที่จ่าย เพื่อแสดงประกอบ
-    let totalReturn = 0, totalPaid = 0;
-    for (let yr = 1; yr <= targetAge - startAge; yr++) {
+    // สะสมเบี้ย + รับคืน + กำไร
+    let totalPaid = 0, totalReturn = 0;
+    for (let yr = 1; yr <= yearsHeld; yr++) {
         const age = startAge + yr;
         if (yr <= payYears) totalPaid += premium;
         totalReturn += Math.round(sa * _lvCashPctGlobal(age) / 100);
     }
+    const profit = totalReturn - totalPaid;
+
+    const resultEl  = document.getElementById('lvIrrResult');
+    const barFill   = document.getElementById('lvIrrBarFill');
+    const levelEl   = document.getElementById('lvIrrLevel');
+    const paidEl    = document.getElementById('lvIrrPaid');
+    const retEl     = document.getElementById('lvIrrReturn');
+    const profitEl  = document.getElementById('lvIrrProfit');
+    const profitRow = document.getElementById('lvIrrProfitRow');
+
+    if (paidEl)   paidEl.textContent   = Math.round(totalPaid).toLocaleString() + ' ฿';
+    if (retEl)    retEl.textContent    = Math.round(totalReturn).toLocaleString() + ' ฿';
+    if (profitEl) profitEl.textContent = (profit >= 0 ? '+' : '') + Math.round(profit).toLocaleString() + ' ฿';
+    if (profitRow) profitRow.style.color = profit >= 0 ? '#15803d' : '#dc2626';
 
     if (irr === null || irr <= -0.5) {
         if (resultEl) { resultEl.textContent = '—'; resultEl.style.color = '#94a3b8'; }
-        if (noteEl) noteEl.innerHTML = 'ยังไม่สามารถคำนวณ IRR ได้ในช่วงอายุนี้';
+        if (barFill)  { barFill.style.width = '0%'; barFill.style.background = '#e2e8f0'; }
+        if (levelEl)  { levelEl.textContent = ''; levelEl.style.background = '#f1f5f9'; levelEl.style.color = '#94a3b8'; }
     } else {
-        const pct = (irr * 100).toFixed(2);
+        const pct   = (irr * 100).toFixed(2);
         const color = irr >= 0.04 ? '#15803d' : irr >= 0.02 ? '#0369a1' : '#92400e';
-        const level = irr >= 0.04 ? 'ดี' : irr >= 0.02 ? 'ปานกลาง' : 'ต่ำ';
+        const bg    = irr >= 0.04 ? '#dcfce7' : irr >= 0.02 ? '#dbeafe' : '#fef3c7';
+        const level = irr >= 0.04 ? '🟢 ดี' : irr >= 0.02 ? '🔵 ปานกลาง' : '🟡 ต่ำ';
+        const barW  = Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
+        const barClr = irr >= 0.04 ? 'linear-gradient(90deg,#4ade80,#16a34a)' : irr >= 0.02 ? 'linear-gradient(90deg,#60a5fa,#2563eb)' : 'linear-gradient(90deg,#fbbf24,#d97706)';
         if (resultEl) { resultEl.textContent = pct + '%'; resultEl.style.color = color; }
-        if (noteEl) noteEl.innerHTML =
-            `ระดับผลตอบแทน: <b style="color:${color};">${level}</b> · ต่อปี<br>` +
-            `<span style="color:#64748b;">เบี้ยสะสม ${Math.round(totalPaid).toLocaleString()} ฿ · เงินรับคืนสะสม ${Math.round(totalReturn).toLocaleString()} ฿</span>`;
+        if (barFill)  { barFill.style.width = barW + '%'; barFill.style.background = barClr; }
+        if (levelEl)  { levelEl.textContent = level; levelEl.style.background = bg; levelEl.style.color = color; }
     }
 };
 
 window._stepLVIRR = function(delta) {
     const inp = document.getElementById('lvIrrAgeInput');
     if (!inp) return;
-    let v = parseInt(inp.value) || 0;
-    inp.value = v + delta;
+    inp.value = (parseInt(inp.value) || 100) + delta;
     window._updateLVIRR();
+};
+
+window._pickLVIRRAge = function(age) {
+    const inp = document.getElementById('lvIrrAgeInput');
+    if (inp) { inp.value = age; window._updateLVIRR(); }
 };
 
 window.showLVIRRPopup = function() {
     try {
-        // คำนวณใหม่จากฟอร์มให้ได้ค่าล่าสุดก่อน (กันข้อมูลเก่าค้าง)
         if (typeof calculate === 'function') {
             try { calculate(typeof currentMode !== 'undefined' ? currentMode : 'premium', true); } catch(e) {}
         }
         const d = lastCalculationData;
         if (!d) { alert('กรุณาคำนวณข้อมูลก่อน'); return; }
 
-        const startAge = _readAge(d);
-        const premium  = Math.round(parseFloat(d.premium) || 0);
-        const sa       = Math.round(parseFloat(d.sum) || 0);
-        const matchPY  = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
-        const payYears = matchPY ? parseInt(matchPY[1]) : 10;
+        const startAge  = _readAge(d);
+        const premium   = Math.round(parseFloat(d.premium) || 0);
+        const sa        = Math.round(parseFloat(d.sum) || 0);
+        const matchPY   = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
+        const payYears  = matchPY ? parseInt(matchPY[1]) : 10;
         const genderTxt = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
+        const genderIcon = (d.gender === 'male' || d.gender === 'ชาย') ? '👨' : '👩';
 
-        // เก็บ state ไว้ให้ _updateLVIRR ใช้
         _lvIrrState = { startAge, premium, sa, payYears };
 
-        // อายุเริ่มต้นที่ใช้คำนวณ = ครบสัญญาอายุ 100 (ผู้ใช้ปรับเองได้)
-        const defaultTarget = 100;
+        // milestone ages ที่ LV มีเงินคืนพิเศษ
+        const milestones = [60, 70, 80, 85, 90, 100].filter(a => a > startAge);
+        const pillsHTML = milestones.map(a =>
+            `<button type="button" class="lv-irr-pill" data-age="${a}" onclick="window._pickLVIRRAge(${a})"
+             style="flex:1;min-width:0;padding:6px 2px;border-radius:10px;border:1px solid #ddd6fe;
+                    background:#f1f5f9;color:#7c3aed;font-size:12px;font-weight:600;cursor:pointer;
+                    transition:all 0.15s;touch-action:manipulation;">${a}</button>`
+        ).join('');
 
-        const html = `<div style="text-align:left;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(124,58,237,0.3);">
-                    <i class="fas fa-chart-line" style="color:#fff;font-size:15px;"></i>
-                </div>
-                <div>
-                    <div style="font-size:16px;font-weight:800;color:#1e1b4b;line-height:1.2;">คำนวณ IRR ผลตอบแทน</div>
-                    <div style="font-size:11px;color:#94a3b8;font-weight:500;">Internal Rate of Return — LifeTime Value</div>
-                </div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px;">
-                <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:99px;font-weight:600;">${genderTxt} · อายุ ${startAge} ปี</span>
-                <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:99px;font-weight:600;">ชำระ ${payYears} ปี</span>
-                <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:99px;font-weight:600;">ออม ${premium.toLocaleString()} ฿/ปี</span>
-                <span style="font-size:11px;background:#ecfdf5;color:#065f46;padding:3px 9px;border-radius:99px;font-weight:600;">ทุน ${sa.toLocaleString()} ฿</span>
-            </div>
+        const html = `
+<div style="margin:-4px;">
+  <!-- Header gradient -->
+  <div style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:20px 20px 0 0;padding:18px 18px 20px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
+    <div style="position:absolute;bottom:-30px;left:30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
+    <div style="position:relative;z-index:1;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;backdrop-filter:blur(8px);">
+          <i class="fas fa-chart-line" style="color:#fff;font-size:14px;"></i>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.1;">IRR ผลตอบแทน</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:500;letter-spacing:0.04em;">LIFETIME VALUE · INTERNAL RATE OF RETURN</div>
+        </div>
+      </div>
+      <!-- Info pills row -->
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;backdrop-filter:blur(4px);">${genderIcon} ${genderTxt} · ${startAge} ปี</span>
+        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ชำระ ${payYears} ปี</span>
+        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ออม ${premium.toLocaleString()} ฿/ปี</span>
+        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ทุน ${sa.toLocaleString()} ฿</span>
+      </div>
+    </div>
+  </div>
 
-            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-                <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-align:center;">คำนวณ IRR ณ อายุ</div>
-                <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">
-                    <button type="button" onclick="window._stepLVIRR(-1)" style="width:38px;height:38px;border-radius:12px;border:1px solid #e2e8f0;background:#f8fafc;color:#7c3aed;font-size:20px;font-weight:700;cursor:pointer;line-height:1;">−</button>
-                    <input id="lvIrrAgeInput" type="number" value="${defaultTarget}" min="${startAge + 1}" max="100" oninput="window._updateLVIRR()" style="width:84px;height:44px;text-align:center;font-size:20px;font-weight:800;color:#1e1b4b;border:1.5px solid #c4b5fd;border-radius:12px;outline:none;background:#faf5ff;">
-                    <button type="button" onclick="window._stepLVIRR(1)" style="width:38px;height:38px;border-radius:12px;border:1px solid #e2e8f0;background:#f8fafc;color:#7c3aed;font-size:20px;font-weight:700;cursor:pointer;line-height:1;">+</button>
-                </div>
-                <div style="text-align:center;font-size:11px;color:#94a3b8;margin-bottom:14px;">ปี (ระยะเวลาถือกรมธรรม์ <span id="lvIrrYears" style="font-weight:700;color:#7c3aed;">—</span>)</div>
+  <!-- Body -->
+  <div style="background:#fff;border-radius:0 0 20px 20px;padding:16px 16px 14px;">
 
-                <div style="text-align:center;padding:14px 0;border-top:1px dashed #e2e8f0;">
-                    <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:4px;">IRR ผลตอบแทนต่อปี</div>
-                    <div id="lvIrrResult" style="font-size:38px;font-weight:900;color:#7c3aed;line-height:1;letter-spacing:-0.02em;">—</div>
-                    <div id="lvIrrNote" style="font-size:11px;color:#64748b;margin-top:8px;line-height:1.6;"></div>
-                </div>
-            </div>
-            <p style="margin-top:10px;font-size:10px;color:#94a3b8;line-height:1.6;">* คำนวณจากกระแสเงินสดรับ-จ่ายจริง ไม่รวมภาษี · ปรับอายุเพื่อดู IRR ในแต่ละช่วง</p>
-        </div>`;
+    <!-- Milestone age pills -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">คำนวณ ณ อายุ (ปี)</div>
+      <div style="display:flex;gap:5px;">${pillsHTML}</div>
+    </div>
+
+    <!-- Custom age stepper -->
+    <div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #ede9fe;border-radius:14px;padding:8px 10px;margin-bottom:14px;">
+      <button type="button" onclick="window._stepLVIRR(-1)"
+              style="width:32px;height:32px;border-radius:9px;border:1px solid #ddd6fe;background:#fff;color:#7c3aed;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">−</button>
+      <input id="lvIrrAgeInput" type="number" value="100" min="${startAge+1}" max="100"
+             oninput="window._updateLVIRR()"
+             style="flex:1;text-align:center;font-size:22px;font-weight:800;color:#4f46e5;border:none;outline:none;background:transparent;min-width:0;">
+      <span style="font-size:11px;color:#94a3b8;font-weight:600;flex-shrink:0;">ปี · <span id="lvIrrYears" style="color:#7c3aed;font-weight:700;">—</span></span>
+      <button type="button" onclick="window._stepLVIRR(1)"
+              style="width:32px;height:32px;border-radius:9px;border:1px solid #ddd6fe;background:#fff;color:#7c3aed;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">+</button>
+    </div>
+
+    <!-- IRR Result big display -->
+    <div style="background:linear-gradient(135deg,#faf5ff,#f5f3ff);border:1px solid #ede9fe;border-radius:16px;padding:16px 14px 12px;margin-bottom:12px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <div style="font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2px;">IRR ต่อปี</div>
+          <div id="lvIrrResult" style="font-size:42px;font-weight:900;color:#7c3aed;line-height:1;letter-spacing:-0.03em;">—</div>
+        </div>
+        <span id="lvIrrLevel" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:#f1f5f9;color:#94a3b8;align-self:center;"></span>
+      </div>
+      <!-- Progress bar -->
+      <div style="background:#e8e0fe;border-radius:99px;height:6px;overflow:hidden;">
+        <div id="lvIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.35s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px;">
+        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">0%</span>
+        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">ดี ≥ 4%</span>
+        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">6%+</span>
+      </div>
+    </div>
+
+    <!-- Stats grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+      <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;">
+        <div style="font-size:9px;color:#94a3b8;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;">เบี้ยสะสม</div>
+        <div id="lvIrrPaid" style="font-size:11px;font-weight:800;color:#ef4444;">—</div>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;">
+        <div style="font-size:9px;color:#94a3b8;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;">รับคืนสะสม</div>
+        <div id="lvIrrReturn" style="font-size:11px;font-weight:800;color:#0369a1;">—</div>
+      </div>
+      <div id="lvIrrProfitRow" style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;color:#15803d;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;color:#94a3b8;">กำไร/ขาดทุน</div>
+        <div id="lvIrrProfit" style="font-size:11px;font-weight:800;">—</div>
+      </div>
+    </div>
+
+    <p style="margin-top:10px;margin-bottom:0;font-size:9.5px;color:#c4b5fd;line-height:1.5;text-align:center;">คำนวณจากกระแสเงินสดรับ-จ่ายจริง · ไม่รวมภาษี</p>
+  </div>
+</div>`;
 
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                html, background: '#f8fafc', showConfirmButton: false, showCloseButton: true,
-                width: '360px', padding: '20px',
-                didOpen: () => { window._updateLVIRR(); }
+                html, background: 'transparent',
+                showConfirmButton: false, showCloseButton: true,
+                width: '340px', padding: '0px',
+                customClass: { popup: 'lv-irr-swal-popup', closeButton: 'lv-irr-close-btn' },
+                didOpen: () => {
+                    // style close button
+                    const closeBtn = document.querySelector('.lv-irr-close-btn');
+                    if (closeBtn) {
+                        closeBtn.style.cssText = 'position:absolute;top:10px;right:12px;color:rgba(255,255,255,0.8);font-size:22px;z-index:10;background:rgba(255,255,255,0.15);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;';
+                    }
+                    window._updateLVIRR();
+                }
             });
         }
     } catch(err) {
