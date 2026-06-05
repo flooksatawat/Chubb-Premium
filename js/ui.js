@@ -2332,7 +2332,6 @@ window.__compareMode  = false;
 window.__comparePlanA = null;
 
 window.startCompareMode = function(planName) {
-    if (!window.isWideLayout()) return;
     window.__compareMode  = true;
     window.__comparePlanA = planName;
     // show floating banner — ทำงานทุก layout
@@ -2611,76 +2610,56 @@ window.renderCompareView = function(planA, planB) {
     window.__cmpViewPlanB = planB;
 };
 
-// Long-press delegation — เริ่ม compare mode (ทุก layout)
+// Long-press delegation — เริ่ม compare mode (ทุกอุปกรณ์: touch / mouse / stylus)
 (function initCompareLongPress() {
     const THRESHOLD = 500;
-    const MOVE_DEAD_ZONE = 8;
+    const MOVE_DEAD_ZONE = 10;
     let _timer = null, _downPlan = null, _startX = 0, _startY = 0;
+    let _longPressFired = false;
+
     function getTargetPlan(e) {
-        const btn = e.target.closest('[data-plan]');
+        const btn = (e.target || e.changedTouches?.[0]?.target)?.closest?.('[data-plan]');
         return btn ? btn.getAttribute('data-plan') : null;
     }
     function cancel() { clearTimeout(_timer); _timer = null; _downPlan = null; }
 
-    document.addEventListener('touchstart', e => {
+    // ใช้ Pointer Events — ทำงานได้กับ mouse / touch / stylus ในตัวเดียว
+    document.addEventListener('pointerdown', e => {
+        // เฉพาะ left-click สำหรับ mouse; touch/pen ไม่มี button constraint
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
         const container = document.getElementById('planListContainer');
         if (!container || !container.contains(e.target)) return;
         _downPlan = getTargetPlan(e);
         if (!_downPlan) return;
-        _startX = e.touches[0].clientX;
-        _startY = e.touches[0].clientY;
+        _startX = e.clientX; _startY = e.clientY;
+        _longPressFired = false;
         _timer = setTimeout(() => {
+            _longPressFired = true;
             const plan = _downPlan;
             _downPlan = null;
             if (navigator.vibrate) navigator.vibrate(40);
             window.startCompareMode(plan);
         }, THRESHOLD);
-    }, { passive: true });
+    });
 
-    document.addEventListener('touchmove', e => {
+    document.addEventListener('pointermove', e => {
         if (!_timer) return;
-        const dx = e.touches[0].clientX - _startX;
-        const dy = e.touches[0].clientY - _startY;
+        const dx = e.clientX - _startX, dy = e.clientY - _startY;
         if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
-    }, { passive: true });
+    });
 
-    // non-passive — preventDefault ป้องกัน click หลัง long-press บน planA เดิม
-    document.addEventListener('touchend', e => {
-        if (window.__compareMode && window.__comparePlanA) {
-            // long-press เพิ่งยิง กัน click ที่ตามมา
-            if (getTargetPlan(e) === window.__comparePlanA) e.preventDefault();
+    // pointerup — กัน click ที่ตามหลัง long-press
+    document.addEventListener('pointerup', e => {
+        if (_longPressFired) {
+            // บล็อก click event ถัดไป 1 ครั้ง (กัน selectAppPlan ยิงซ้ำ)
+            document.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); },
+                { capture: true, once: true });
+            _longPressFired = false;
         }
         cancel();
-    }, { passive: false });
-    document.addEventListener('touchcancel', cancel, { passive: true });
+    });
 
-    // mouse long-press for desktop/notebook
-    let _mouseStartX = 0, _mouseStartY = 0;
-    let _mouseLongPressFired = false;
-    document.addEventListener('mousedown', e => {
-        if (e.button !== 0 || !window.isWideLayout()) return;
-        const container = document.getElementById('planListContainer');
-        if (!container || !container.contains(e.target)) return;
-        _downPlan = getTargetPlan(e);
-        if (!_downPlan) return;
-        _mouseStartX = e.clientX; _mouseStartY = e.clientY;
-        _mouseLongPressFired = false;
-        _timer = setTimeout(() => {
-            _mouseLongPressFired = true;
-            window.startCompareMode(_downPlan);
-            _downPlan = null;
-        }, THRESHOLD);
-    });
-    document.addEventListener('mousemove', e => {
-        if (!_timer) return;
-        const dx = e.clientX - _mouseStartX, dy = e.clientY - _mouseStartY;
-        if (Math.sqrt(dx * dx + dy * dy) > MOVE_DEAD_ZONE) cancel();
-    });
-    document.addEventListener('click', e => {
-        if (_mouseLongPressFired) { e.stopPropagation(); e.preventDefault(); _mouseLongPressFired = false; }
-    }, true);
-    document.addEventListener('mouseup',    cancel);
-    document.addEventListener('mouseleave', cancel);
+    document.addEventListener('pointercancel', () => { _longPressFired = false; cancel(); });
 })();
 
 window.computeForPlan = function (planName) {
