@@ -2710,37 +2710,44 @@ function _lvCashPctGlobal(age) {
     return 0;
 }
 
-// IRR by Newton-Raphson (Excel-compatible: cashFlows[0] = period 0)
+// NPV ของกระแสเงินสด ณ อัตราคิดลด rate (cashFlows[0] = period 0 ตาม Excel)
+function _npv(rate, cashFlows) {
+    let v = 0;
+    for (let t = 0; t < cashFlows.length; t++) {
+        v += cashFlows[t] / Math.pow(1 + rate, t);
+    }
+    return v;
+}
+
+// IRR ด้วยวิธี bisection (robust — หา root ได้แน่นอน รองรับ IRR ติดลบมาก)
+// ตรงกับ Excel IRR(): cashFlows[0] = period 0
 function _calcIRR(cashFlows) {
     try {
         if (!cashFlows || cashFlows.length < 2) return null;
-        // ต้องมีอย่างน้อย 1 ค่าบวก และ 1 ค่าลบ
-        const hasPos = cashFlows.some(c => c > 0);
-        const hasNeg = cashFlows.some(c => c < 0);
-        if (!hasPos || !hasNeg) return null;
+        if (!cashFlows.some(c => c > 0) || !cashFlows.some(c => c < 0)) return null;
 
-        // ลอง initial guess หลายค่าเพื่อป้องกัน non-convergence
-        const guesses = [0.05, 0.1, 0.01, 0.2, -0.05];
-        for (const guess of guesses) {
-            let rate = guess;
-            for (let iter = 0; iter < 500; iter++) {
-                let npv = 0, dnpv = 0;
-                for (let t = 0; t < cashFlows.length; t++) {
-                    const pv = cashFlows[t] / Math.pow(1 + rate, t); // period 0 = ไม่ discount
-                    npv += pv;
-                    dnpv -= t * pv / (1 + rate);
-                }
-                if (Math.abs(dnpv) < 1e-14) break;
-                const nr = rate - npv / dnpv;
-                if (!isFinite(nr) || nr <= -1) break;
-                if (Math.abs(nr - rate) < 1e-9) {
-                    if (nr > -1 && isFinite(nr)) return nr;
-                    break;
-                }
-                rate = nr;
+        // สแกนหาช่วงที่ NPV เปลี่ยนเครื่องหมาย (สแกนจาก -99% ถึง +100%)
+        const lo = -0.9999, hi = 100, step = 0.0025;
+        let prevR = lo, prevV = _npv(lo, cashFlows);
+        let a = null, b = null;
+        for (let r = lo + step; r <= hi; r += step) {
+            const v = _npv(r, cashFlows);
+            if (isFinite(prevV) && isFinite(v) && prevV * v <= 0) {
+                a = prevR; b = r; break;
             }
+            prevR = r; prevV = v;
         }
-        return null;
+        if (a === null) return null;
+
+        // bisection หา root ในช่วง [a, b]
+        let fa = _npv(a, cashFlows);
+        for (let i = 0; i < 200; i++) {
+            const m  = (a + b) / 2;
+            const fm = _npv(m, cashFlows);
+            if (Math.abs(fm) < 1e-7 || (b - a) < 1e-11) return m;
+            if (fa * fm < 0) { b = m; } else { a = m; fa = fm; }
+        }
+        return (a + b) / 2;
     } catch(e) { return null; }
 }
 
@@ -2820,18 +2827,29 @@ window._updateLVIRR = function() {
     if (profitEl) profitEl.textContent = (profit >= 0 ? '+' : '') + Math.round(profit).toLocaleString() + ' ฿';
     if (profitRow) profitRow.style.color = profit >= 0 ? '#15803d' : '#dc2626';
 
-    if (irr === null || irr <= -0.5) {
+    if (irr === null || irr <= -0.95) {
         if (resultEl) { resultEl.textContent = '—'; resultEl.style.color = '#94a3b8'; }
         if (barFill)  { barFill.style.width = '0%'; barFill.style.background = '#e2e8f0'; }
         if (levelEl)  { levelEl.textContent = ''; levelEl.style.background = '#f1f5f9'; levelEl.style.color = '#94a3b8'; }
     } else {
-        const pct   = (irr * 100).toFixed(2);
-        const color = irr >= 0.04 ? '#15803d' : irr >= 0.02 ? '#0369a1' : '#92400e';
-        const bg    = irr >= 0.04 ? '#dcfce7' : irr >= 0.02 ? '#dbeafe' : '#fef3c7';
-        const level = irr >= 0.04 ? '🟢 ดี' : irr >= 0.02 ? '🔵 ปานกลาง' : '🟡 ต่ำ';
-        const barW  = Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
-        const barClr = irr >= 0.04 ? 'linear-gradient(90deg,#4ade80,#16a34a)' : irr >= 0.02 ? 'linear-gradient(90deg,#60a5fa,#2563eb)' : 'linear-gradient(90deg,#fbbf24,#d97706)';
-        if (resultEl) { resultEl.textContent = pct + '%'; resultEl.style.color = color; }
+        const pct = (irr * 100).toFixed(2);
+        let color, bg, level, barClr;
+        if (irr < 0) {
+            color = '#dc2626'; bg = '#fee2e2'; level = '🔴 ขาดทุน';
+            barClr = 'linear-gradient(90deg,#f87171,#dc2626)';
+        } else if (irr >= 0.04) {
+            color = '#15803d'; bg = '#dcfce7'; level = '🟢 ดีมาก';
+            barClr = 'linear-gradient(90deg,#4ade80,#16a34a)';
+        } else if (irr >= 0.02) {
+            color = '#0369a1'; bg = '#dbeafe'; level = '🔵 ปานกลาง';
+            barClr = 'linear-gradient(90deg,#60a5fa,#2563eb)';
+        } else {
+            color = '#92400e'; bg = '#fef3c7'; level = '🟡 ต่ำ';
+            barClr = 'linear-gradient(90deg,#fbbf24,#d97706)';
+        }
+        // bar: ติดลบ = 0%, บวก = สเกล 0–6%
+        const barW = irr < 0 ? 0 : Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
+        if (resultEl) { resultEl.textContent = (irr > 0 ? '+' : '') + pct + '%'; resultEl.style.color = color; }
         if (barFill)  { barFill.style.width = barW + '%'; barFill.style.background = barClr; }
         if (levelEl)  { levelEl.textContent = level; levelEl.style.background = bg; levelEl.style.color = color; }
     }
