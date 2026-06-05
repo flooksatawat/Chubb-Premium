@@ -245,6 +245,83 @@ function validateInputMinimum(inputElement, fieldType) {
 }
 
 let hasShownCongratsMB = false, hasShownCongratsMYB = false, hasShownCongratsNAB = false;
+
+// ==================== ฝากสะสม ทบต้น ====================
+window._tableDepositEnabled = false;
+window._tableDepositUntilAge = null;
+window._tableDepositRate = 0.02;
+
+window._showDepositConfig = function() {
+    document.getElementById('depositConfigBackdrop')?.remove();
+    document.getElementById('depositConfigPopup')?.remove();
+
+    const untilAge = window._tableDepositUntilAge || '';
+    const rate = ((window._tableDepositRate || 0.02) * 100).toFixed(2);
+    const enabled = window._tableDepositEnabled;
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'depositConfigBackdrop';
+    backdrop.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.35);backdrop-filter:blur(2px);';
+    backdrop.onclick = () => { backdrop.remove(); document.getElementById('depositConfigPopup')?.remove(); };
+    document.body.appendChild(backdrop);
+
+    const popup = document.createElement('div');
+    popup.id = 'depositConfigPopup';
+    popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border-radius:24px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.25);width:290px;font-family:inherit;';
+    popup.innerHTML = `
+        <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#10b981,#059669);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-piggy-bank" style="color:white;font-size:16px;"></i>
+            </div>
+            ฝากสะสม ดอกเบี้ยทบต้น
+        </div>
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:#15803d;font-weight:600;">ดอกเบี้ยต่อปี</span>
+            <span style="font-size:20px;font-weight:800;color:#059669;">${rate}%</span>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:6px;">สะสมถึงอายุ (ปี)</label>
+            <input id="depositUntilAgeInput" type="number" value="${untilAge}" min="1" max="99" placeholder="เช่น 61"
+                style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:20px;font-weight:800;text-align:center;outline:none;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#059669';this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.15)'"
+                onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'"
+                onkeydown="if(event.key==='Enter')window._applyDepositConfig()">
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button onclick="document.getElementById('depositConfigPopup')?.remove();document.getElementById('depositConfigBackdrop')?.remove();"
+                style="flex:1;padding:11px;background:#f1f5f9;border:none;border-radius:12px;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;">
+                ยกเลิก
+            </button>
+            ${enabled ? `<button onclick="window._clearDepositConfig()"
+                style="padding:11px 14px;background:#fef2f2;border:none;border-radius:12px;font-size:13px;font-weight:700;color:#ef4444;cursor:pointer;">
+                <i class="fas fa-xmark"></i>
+            </button>` : ''}
+            <button onclick="window._applyDepositConfig()"
+                style="flex:1;padding:11px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:12px;font-size:13px;font-weight:700;color:white;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,0.3);">
+                ยืนยัน
+            </button>
+        </div>`;
+    document.body.appendChild(popup);
+    setTimeout(() => document.getElementById('depositUntilAgeInput')?.focus(), 80);
+};
+
+window._applyDepositConfig = function() {
+    const age = parseInt(document.getElementById('depositUntilAgeInput')?.value);
+    if (!age || age < 1 || age > 120) return;
+    window._tableDepositEnabled = true;
+    window._tableDepositUntilAge = age;
+    document.getElementById('depositConfigPopup')?.remove();
+    document.getElementById('depositConfigBackdrop')?.remove();
+    if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+};
+
+window._clearDepositConfig = function() {
+    window._tableDepositEnabled = false;
+    window._tableDepositUntilAge = null;
+    document.getElementById('depositConfigPopup')?.remove();
+    document.getElementById('depositConfigBackdrop')?.remove();
+    if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+};
 function showCongratsToast(msg) {
     const cashView = document.getElementById('cashView'); if (!cashView || cashView.classList.contains('hidden') || cashView.style.display === 'none') return;
     const toast = document.createElement('div'); toast.className = "fixed top-16 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-4 rounded-[24px] z-[9999] shadow-[0_10px_30px_rgba(16,185,129,0.4)] text-center transition-all duration-500 flex items-center gap-3.5 transform -translate-y-10 opacity-0 scale-90 w-[90%] max-w-[340px]"; 
@@ -4264,6 +4341,7 @@ function generatePolicyTableData() {
 
     const showCashFlowBase = isWXN || isElite || isTX || isLV || isSM;
     const forceShowCashFlow = showCashFlowBase;
+    const showDepositColumn = forceShowCashFlow && window._tableDepositEnabled && window._tableDepositUntilAge > 0;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
     const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
     const showAccidentColumn = isSLB;
@@ -4336,6 +4414,7 @@ function generatePolicyTableData() {
         + 1
         + (hideAnnualSaving ? 1 : 0)
         + (forceShowCashFlow ? 2 : 0)
+        + (showDepositColumn ? 1 : 0)
         + ((_mfLabel && _mfMap) ? 1 : 0)
         + (showCVColumn ? 1 : 0)
         + (showDD50Column ? 1 : 0)
@@ -4395,7 +4474,8 @@ function generatePolicyTableData() {
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz}">${_lCF}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;" onclick="window._showDepositConfig()" title="คลิกเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-plus-circle\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
+        ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};white-space:normal;line-height:1.2;">ฝากสะสม<br>ดอกเบี้ย ${(window._tableDepositRate*100).toFixed(2)}%</th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
@@ -4467,6 +4547,7 @@ function generatePolicyTableData() {
     let cfMainMode = 'continuous';
     let cfWithdrawalSchedule = {};
     let cfFirstWithdrawalYear = null;
+    let depositPool = 0;
 
     if (isSurrenderActive && hasSurrenderMenu) {
         const planKeyW = (currentAppPlan === 'Supreme Life Protector') ? '20SLPA' : '20LPB';
@@ -4605,7 +4686,16 @@ function generatePolicyTableData() {
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
         }
 
-        accCashFlow += cashFlowAmt; 
+        accCashFlow += cashFlowAmt;
+
+        // ฝากสะสม ทบต้น: pool × (1+rate) + cashFlow ของปีนี้ (สะสมถึงอายุที่กำหนด)
+        if (showDepositColumn) {
+            if (currentAge <= window._tableDepositUntilAge) {
+                depositPool = Math.round(depositPool * (1 + window._tableDepositRate) + cashFlowAmt);
+            } else {
+                depositPool = Math.round(depositPool * (1 + window._tableDepositRate));
+            }
+        }
 
         // 6. สร้างแถวตาราง
         const saCompact = (isLPB || isSLPA || isLV) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
@@ -4622,7 +4712,8 @@ function generatePolicyTableData() {
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             <td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
-            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}`;
+            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
+            ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
         if (_mfLabel && _mfMap) {
             const _mfP = window.mfPremForAge(_mfMap, currentAge);
             const _mfChg = _mfP !== _mfPrevPrem;
