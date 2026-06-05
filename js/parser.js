@@ -532,18 +532,26 @@ function processVoiceCommand(transcript) {
     if (typeof parseCommand !== 'function') return;
     const parsed = parseCommand(transcript);
 
+    // ต้องการระยะเวลาเฉพาะเมื่อมีการ "เปลี่ยนแผนใหม่" เท่านั้น
     const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','Whole Life Extra'];
     const targetPlan = parsed.plan || (typeof currentAppPlan !== 'undefined' ? currentAppPlan : '');
-    if (PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
-        const hint = {
-            'CI Extra Plus':    '10 หรือ 20 ปี',
-            'Signature Legacy': '5 หรือ 10 ปี',
-            'Century Life':     '10, 20, 60, 90 หรือ 100 ปี',
-            'Whole Life Extra': '10 หรือ 15 ปี',
-        };
-        if (typeof showCustomError === 'function')
-            showCustomError('กรุณาระบุระยะเวลาชำระ เช่น ' + (hint[targetPlan] || '10 ปี'));
-        return;
+    if (parsed.plan && PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
+        const inferred = (typeof _inferYearsForPlan === 'function')
+            ? _inferYearsForPlan(targetPlan, typeof currentPlan !== 'undefined' ? currentPlan : '')
+            : null;
+        if (inferred !== null) {
+            parsed.years = inferred;
+        } else {
+            const hint = {
+                'CI Extra Plus':    '10 หรือ 20 ปี',
+                'Signature Legacy': '5 หรือ 10 ปี',
+                'Century Life':     '10, 20, 60, 90 หรือ 100 ปี',
+                'Whole Life Extra': '10 หรือ 15 ปี',
+            };
+            if (typeof showCustomError === 'function')
+                showCustomError('กรุณาระบุระยะเวลาชำระ เช่น ' + (hint[targetPlan] || '10 ปี'));
+            return;
+        }
     }
     if (typeof executeCommand === 'function') executeCommand(parsed, true);
 }

@@ -271,13 +271,6 @@ function handleQuickCalc(event) {
         const input = event.target;
         const rawValue = input.value.trim();
         if (rawValue === '') return;
-        const ageMatch = rawValue.match(/^อายุ\s*(\d+)/) || rawValue.match(/^(\d+)(\s*ปี)?$/);
-        if (ageMatch) {
-            showPlansByAge(parseInt(ageMatch[1]));
-            input.value = '';
-            input.blur();
-            return;
-        }
         submitQuickCalc(rawValue);
         input.value = '';
         input.blur();
@@ -290,13 +283,6 @@ window.submitModalAiCalc = function() {
     if (!input) return;
     const rawValue = input.value.trim();
     if (rawValue === '') { input.focus(); return; }
-    const ageMatch = rawValue.match(/^อายุ\s*(\d+)/) || rawValue.match(/^(\d+)(\s*ปี)?$/);
-    if (ageMatch) {
-        showPlansByAge(parseInt(ageMatch[1]));
-        input.value = '';
-        input.blur();
-        return;
-    }
     submitQuickCalc(rawValue);
     input.value = '';
     input.blur();
@@ -377,34 +363,56 @@ function showPlansByAge(age) {
     openPopup('ageSearchModal');
 }
 
+// คืนค่าปีที่เหมาะสมสำหรับแผนที่ระบุ โดย infer จาก abbr ปัจจุบัน
+function _inferYearsForPlan(planName, abbrStr) {
+    const validYears = {
+        'CI Extra Plus':        [10, 20],
+        'Signature Legacy':     [5, 10],
+        'Century Life':         [10, 20, 60, 90],
+        'Whole Life Extra':     [10, 15],
+        '3D Health Excellence': [10, 20, 60, 90],
+    };
+    const valid = validYears[planName] || [];
+    const m = (abbrStr || '').match(/(\d+)/);
+    const y = m ? parseInt(m[1]) : null;
+    if (y && valid.includes(y)) return y;
+    return valid[0] || null;
+}
+
 function submitQuickCalc(rawValue) {
     if (!rawValue || rawValue.trim() === '') return;
     const parsed = (typeof parseCommand === 'function') ? parseCommand(rawValue) : null;
     if (!parsed) { if(typeof showCustomError==='function') showCustomError('ไม่เข้าใจคำสั่ง กรุณาลองใหม่'); return; }
 
-    // แผนที่ต้องระบุระยะเวลา
-    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','3D Health Excellence','Whole Life Extra'];
-    // ถ้าไม่พบชื่อแผนในคำสั่ง และยังไม่ได้เลือกแผนไว้ก่อน → แจ้งเตือน
+    // ไม่มีแผนในคำสั่ง และยังไม่ได้เลือกแผนไว้ก่อน
     if (!parsed.plan && !currentAppPlan) {
         if (typeof showCustomError === 'function') showCustomError('ไม่พบชื่อแบบประกัน\nกรุณาระบุชื่อแบบ เช่น CI Extra Plus, Century Life, 3D Health');
         return;
     }
 
     const targetPlan = parsed.plan || currentAppPlan;
-    if (PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
-        const planMap = {
-            'CI Extra Plus':       'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 20 ปี',
-            'Signature Legacy':    'ต้องระบุระยะเวลา เช่น 5 ปี หรือ 10 ปี',
-            'Century Life':        'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
-            '3D Health Excellence':'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
-            'Whole Life Extra':    'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 15 ปี',
-        };
-        if(typeof showCustomError==='function') showCustomError(`${targetPlan}
-${planMap[targetPlan]}`);
-        return;
+
+    // ต้องการระยะเวลาเฉพาะเมื่อมีการ "เปลี่ยนแผนใหม่" เท่านั้น
+    // ถ้าไม่ได้เปลี่ยนแผน (parsed.plan === null) ให้ใช้ค่า currentPlan ที่ตั้งไว้แล้วได้เลย
+    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','3D Health Excellence','Whole Life Extra'];
+    if (parsed.plan && PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
+        const inferred = _inferYearsForPlan(targetPlan, typeof currentPlan !== 'undefined' ? currentPlan : '');
+        if (inferred !== null) {
+            parsed.years = inferred;
+        } else {
+            const planMap = {
+                'CI Extra Plus':        'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 20 ปี',
+                'Signature Legacy':     'ต้องระบุระยะเวลา เช่น 5 ปี หรือ 10 ปี',
+                'Century Life':         'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
+                '3D Health Excellence': 'ต้องระบุระยะเวลา เช่น 10, 20, 60 หรือ 90 ปี',
+                'Whole Life Extra':     'ต้องระบุระยะเวลา เช่น 10 ปี หรือ 15 ปี',
+            };
+            if(typeof showCustomError==='function') showCustomError(`${targetPlan}\n${planMap[targetPlan]}`);
+            return;
+        }
     }
 
-    // เปลี่ยนแผนถ้าจำเป็น (ไม่ต้องเปิด modal)
+    // เปลี่ยนแผนถ้าจำเป็น
     if (parsed.plan && parsed.plan !== currentAppPlan) {
         selectAppPlan(parsed.plan);
     }
