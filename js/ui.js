@@ -1673,6 +1673,17 @@ function selectAppPlan(planName) {
             medFundBtnContainer.classList.add('hidden');
         }
     }
+    const lvIRRBtn = document.getElementById('lvIRRBtn');
+    const mfMainBtn = document.getElementById('mfMainBtn');
+    if (lvIRRBtn) {
+        if (planName === 'LifeTime Value') {
+            lvIRRBtn.classList.remove('hidden');
+            if (mfMainBtn) { mfMainBtn.style.flex = ''; mfMainBtn.style.minWidth = '0'; }
+        } else {
+            lvIRRBtn.classList.add('hidden');
+            if (mfMainBtn) { mfMainBtn.style.flex = '1'; }
+        }
+    }
 
     // ── Medical Fund: inline plan view (no popup) ──
     const mfInlineContainer = document.getElementById('mfInlineContainer');
@@ -2699,120 +2710,139 @@ function _lvCashPctGlobal(age) {
     return 0;
 }
 
+// IRR by Newton-Raphson (Excel-compatible: cashFlows[0] = period 0)
 function _calcIRR(cashFlows) {
-    if (!cashFlows || cashFlows.length === 0) return null;
-    const allNeg = cashFlows.every(c => c <= 0);
-    const allPos = cashFlows.every(c => c >= 0);
-    if (allNeg || allPos) return null;
-    let rate = 0.05;
-    for (let iter = 0; iter < 300; iter++) {
-        let npv = 0, dnpv = 0;
-        for (let t = 0; t < cashFlows.length; t++) {
-            const d = Math.pow(1 + rate, t + 1);
-            npv += cashFlows[t] / d;
-            dnpv -= (t + 1) * cashFlows[t] / (d * (1 + rate));
+    try {
+        if (!cashFlows || cashFlows.length < 2) return null;
+        // ต้องมีอย่างน้อย 1 ค่าบวก และ 1 ค่าลบ
+        const hasPos = cashFlows.some(c => c > 0);
+        const hasNeg = cashFlows.some(c => c < 0);
+        if (!hasPos || !hasNeg) return null;
+
+        // ลอง initial guess หลายค่าเพื่อป้องกัน non-convergence
+        const guesses = [0.05, 0.1, 0.01, 0.2, -0.05];
+        for (const guess of guesses) {
+            let rate = guess;
+            for (let iter = 0; iter < 500; iter++) {
+                let npv = 0, dnpv = 0;
+                for (let t = 0; t < cashFlows.length; t++) {
+                    const pv = cashFlows[t] / Math.pow(1 + rate, t); // period 0 = ไม่ discount
+                    npv += pv;
+                    dnpv -= t * pv / (1 + rate);
+                }
+                if (Math.abs(dnpv) < 1e-14) break;
+                const nr = rate - npv / dnpv;
+                if (!isFinite(nr) || nr <= -1) break;
+                if (Math.abs(nr - rate) < 1e-9) {
+                    if (nr > -1 && isFinite(nr)) return nr;
+                    break;
+                }
+                rate = nr;
+            }
         }
-        if (Math.abs(dnpv) < 1e-15) break;
-        const nr = rate - npv / dnpv;
-        if (!isFinite(nr) || nr < -0.9999) break;
-        if (Math.abs(nr - rate) < 1e-10) return nr;
-        rate = nr;
+        return null;
+    } catch(e) { return null; }
+}
+
+function _buildLVCashFlows(startAge, premium, sa, payYears, targetAge) {
+    const cfs = [];
+    // period 0 = ปีแรก (ปีที่จ่ายเบี้ย + รับเงินคืน) ตาม Excel convention
+    for (let yr = 1; yr <= targetAge - startAge; yr++) {
+        const age = startAge + yr;
+        const prem = yr <= payYears ? premium : 0;
+        const ret  = Math.round(sa * _lvCashPctGlobal(age) / 100);
+        cfs.push(ret - prem);
     }
-    return isFinite(rate) && rate > -0.9999 ? rate : null;
+    return cfs;
 }
 
 window.showLVIRRPopup = function() {
-    const d = window.lastCalculationData;
-    if (!d || currentAppPlan !== 'LifeTime Value') return;
+    try {
+        // ใช้ตัวแปร global โดยตรง (ไม่ใช้ window. เพราะ let ไม่ใช่ property ของ window)
+        const d = lastCalculationData;
+        if (!d) { alert('กรุณาคำนวณข้อมูลก่อน'); return; }
 
-    const startAge = parseInt(d.age) || 20;
-    const premium  = parseFloat(d.premium) || 0;
-    const sa       = parseFloat(d.sum) || 0;
-    const payYears = parseInt((currentPlan.match(/\d+/) || ['10'])[0]);
+        const startAge = parseInt(d.age) || 20;
+        const premium  = Math.round(parseFloat(d.premium) || 0);
+        const sa       = Math.round(parseFloat(d.sum) || 0);
+        // payYears จาก currentPlan เช่น '10LV' → 10
+        const matchPY  = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
+        const payYears = matchPY ? parseInt(matchPY[1]) : 10;
+        const genderTxt = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
 
-    // อายุที่จะแสดง IRR: ทุก 5 ปี ตั้งแต่อายุ 55 ขึ้นไป และ 100
-    const targetAges = [];
-    const firstCheck = Math.max(startAge + payYears + 1, 50);
-    const firstRounded = Math.ceil(firstCheck / 5) * 5;
-    for (let a = firstRounded; a <= 100; a += 5) targetAges.push(a);
-    if (!targetAges.includes(100)) targetAges.push(100);
+        // อายุที่แสดง: ทุก 5 ปี ตั้งแต่หลังชำระเสร็จถึง 100
+        const minAge = Math.max(startAge + payYears, 50);
+        const startRound = Math.ceil((minAge + 1) / 5) * 5;
+        const targetAges = [];
+        for (let a = startRound; a <= 100; a += 5) {
+            if (a > startAge) targetAges.push(a);
+        }
+        if (targetAges.length === 0 || targetAges[targetAges.length - 1] !== 100) targetAges.push(100);
 
-    const irrRows = targetAges
-        .filter(ta => ta > startAge)
-        .map(targetAge => {
-            const cfs = [];
-            for (let yr = 1; yr <= targetAge - startAge; yr++) {
-                const age  = startAge + yr;
-                const prem = yr <= payYears ? premium : 0;
-                const ret  = Math.round(sa * _lvCashPctGlobal(age) / 100);
-                cfs.push(ret - prem);
-            }
+        // คำนวณ IRR แต่ละอายุ
+        const irrRows = targetAges.map(targetAge => {
+            const cfs = _buildLVCashFlows(startAge, premium, sa, payYears, targetAge);
             const irr = _calcIRR(cfs);
-            return { age: targetAge, irr };
-        })
-        .filter(r => r.irr !== null);
+            return { age: targetAge, irr, valid: irr !== null && irr > -0.5 };
+        });
 
-    if (irrRows.length === 0) {
-        Swal.fire({ icon: 'info', title: 'IRR', text: 'ไม่สามารถคำนวณ IRR ได้สำหรับข้อมูลนี้', confirmButtonText: 'ตกลง' });
-        return;
+        // สร้าง table rows
+        let tableRows = '';
+        irrRows.forEach(r => {
+            const pct   = r.valid ? (r.irr * 100).toFixed(2) + '%' : '—';
+            const color = !r.valid ? '#94a3b8' : r.irr >= 0.04 ? '#15803d' : r.irr >= 0.02 ? '#0369a1' : '#64748b';
+            const badge = !r.valid
+                ? '<span style="font-size:10px;background:#f1f5f9;color:#94a3b8;padding:2px 7px;border-radius:99px;font-weight:700;">—</span>'
+                : r.irr >= 0.04
+                    ? '<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;font-weight:700;">ดี</span>'
+                    : r.irr >= 0.02
+                        ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:99px;font-weight:700;">ปานกลาง</span>'
+                        : '<span style="font-size:10px;background:#fef9c3;color:#92400e;padding:2px 7px;border-radius:99px;font-weight:700;">ต่ำ</span>';
+            tableRows += `<tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:9px 14px;font-size:13px;color:#475569;font-weight:600;">อายุ ${r.age} ปี</td>
+                <td style="padding:9px 14px;font-size:14px;font-weight:800;color:${color};text-align:right;">${pct}</td>
+                <td style="padding:9px 14px;text-align:center;">${badge}</td>
+            </tr>`;
+        });
+
+        const html = `<div style="text-align:left;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(124,58,237,0.3);">
+                    <i class="fas fa-chart-line" style="color:#fff;font-size:15px;"></i>
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:800;color:#1e1b4b;line-height:1.2;">IRR ผลตอบแทนต่อปี</div>
+                    <div style="font-size:11px;color:#94a3b8;font-weight:500;">Internal Rate of Return — LifeTime Value</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">
+                <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:99px;font-weight:600;">${genderTxt} · อายุ ${startAge} ปี</span>
+                <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:99px;font-weight:600;">ชำระ ${payYears} ปี</span>
+                <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:99px;font-weight:600;">ออม ${premium.toLocaleString()} ฿/ปี</span>
+                <span style="font-size:11px;background:#ecfdf5;color:#065f46;padding:3px 9px;border-radius:99px;font-weight:600;">ทุน ${sa.toLocaleString()} ฿</span>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;">
+                            <th style="padding:10px 14px;font-size:11px;font-weight:700;text-align:left;letter-spacing:0.03em;">อายุ</th>
+                            <th style="padding:10px 14px;font-size:11px;font-weight:700;text-align:right;letter-spacing:0.03em;">IRR (%/ปี)</th>
+                            <th style="padding:10px 14px;font-size:11px;font-weight:700;text-align:center;letter-spacing:0.03em;">ระดับ</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+            <p style="margin-top:10px;font-size:10px;color:#94a3b8;line-height:1.6;">* คำนวณจากกระแสเงินสดรับ-จ่ายจริง ไม่รวมภาษี<br>ผลตอบแทน ≥ 4% = ดี, 2-4% = ปานกลาง, &lt;2% = ต่ำ</p>
+        </div>`;
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ html, background: '#f8fafc', showConfirmButton: false, showCloseButton: true, width: '360px', padding: '20px' });
+        }
+    } catch(err) {
+        console.error('showLVIRRPopup error:', err);
+        alert('เกิดข้อผิดพลาด: ' + err.message);
     }
-
-    const lvYears = payYears + 'LV';
-    const genderTxt = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-
-    let tableRows = '';
-    irrRows.forEach(r => {
-        const pct = (r.irr * 100).toFixed(2);
-        const isBig = r.irr >= 0.04;
-        const color = r.irr >= 0.04 ? '#15803d' : r.irr >= 0.02 ? '#0369a1' : '#64748b';
-        tableRows += `<tr style="border-bottom:1px solid #f1f5f9;">
-            <td style="padding:10px 14px;font-size:13px;color:#475569;font-weight:600;">อายุ ${r.age} ปี</td>
-            <td style="padding:10px 14px;font-size:14px;font-weight:800;color:${color};text-align:right;">${pct}%</td>
-            <td style="padding:10px 14px;text-align:center;">${r.irr >= 0.04 ? '<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;font-weight:700;">ดี</span>' : r.irr >= 0.02 ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:99px;font-weight:700;">ปานกลาง</span>' : '<span style="font-size:10px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:99px;font-weight:700;">ต่ำ</span>'}</td>
-        </tr>`;
-    });
-
-    const html = `
-    <div style="text-align:left;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-            <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="fas fa-chart-line" style="color:#fff;font-size:14px;"></i>
-            </div>
-            <div>
-                <div style="font-size:15px;font-weight:800;color:#1e1b4b;">IRR ผลตอบแทนต่อปี</div>
-                <div style="font-size:11px;color:#94a3b8;font-weight:500;">Internal Rate of Return</div>
-            </div>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
-            <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:99px;font-weight:600;">เพศ: ${genderTxt}</span>
-            <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:99px;font-weight:600;">อายุ: ${startAge} ปี</span>
-            <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 10px;border-radius:99px;font-weight:600;">${lvYears} (ชำระ ${payYears} ปี)</span>
-            <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 10px;border-radius:99px;font-weight:600;">ออมปีละ ${Math.round(premium).toLocaleString()} ฿</span>
-        </div>
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-            <table style="width:100%;border-collapse:collapse;">
-                <thead>
-                    <tr style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;">
-                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:left;">อายุ</th>
-                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:right;">IRR (%/ปี)</th>
-                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:center;">ระดับ</th>
-                    </tr>
-                </thead>
-                <tbody>${tableRows}</tbody>
-            </table>
-        </div>
-        <p style="margin-top:10px;font-size:10px;color:#94a3b8;line-height:1.5;">* คำนวณจากกระแสเงินสดรับ-จ่ายจริง (ไม่รวมภาษี) · ผลตอบแทนที่ดี ≥ 4%</p>
-    </div>`;
-
-    Swal.fire({
-        html,
-        background: '#f8fafc',
-        showConfirmButton: false,
-        showCloseButton: true,
-        width: '360px',
-        padding: '20px',
-        customClass: { popup: 'rounded-[24px]' }
-    });
 };
 
 function openUniversalModal(d) {
