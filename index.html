@@ -814,22 +814,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
 
                         <div class="px-4 py-4 flex items-center gap-3">
-                            <!-- Text input + Send button -->
-                            <div class="flex-1 min-w-0 flex items-center gap-2">
+                            <!-- Text input + Send button (inline) -->
+                            <div class="flex-1 min-w-0 relative">
                                 <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
-                                    class="flex-1 min-w-0 rounded-[16px] py-2.5 px-4 focus:outline-none transition-all duration-200 text-[14px] font-medium placeholder:text-white/40"
+                                    class="w-full rounded-[16px] py-2.5 pl-4 pr-[46px] focus:outline-none transition-all duration-200 text-[14px] font-medium placeholder:text-white/40"
                                     style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.90);"
                                     onfocus="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)';"
                                     onblur="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.14)';"
                                     placeholder="พิมพ์เพื่อคำนวณเบี้ยประกัน">
 
-                                <!-- Send button -->
+                                <!-- Send button inside input -->
                                 <button id="modalSendBtn"
                                     onclick="window.submitModalAiCalc()"
-                                    class="w-[42px] h-[42px] shrink-0 rounded-[14px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150"
-                                    style="background:linear-gradient(135deg,#3b82f6,#6366f1);box-shadow:0 4px 12px rgba(59,130,246,0.35);">
-                                    <div class="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent pointer-events-none"></div>
-                                    <i class="fas fa-paper-plane text-[15px] relative z-10"></i>
+                                    class="absolute right-2 w-8 h-8 rounded-[10px] flex items-center justify-center text-white/70 hover:text-white active:scale-90 transition-all duration-150"
+                                    style="top:50%;transform:translateY(-50%);">
+                                    <i class="fas fa-paper-plane text-[13px]"></i>
                                 </button>
                             </div>
 
@@ -2071,12 +2070,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     return;
                 }
                 btn.style.display = 'flex';
-                const view = document.body.getAttribute('data-view') || 'main';
-                const headerEl = view === 'table'
-                    ? document.getElementById('tableHeaderRow')
-                    : view === 'cash'
-                        ? document.querySelector('#cashView > div:first-child')
-                        : document.getElementById('mainHeaderBtn');
+                const headerEl = document.getElementById('mainHeaderBtn');
                 if (headerEl) {
                     const r = headerEl.getBoundingClientRect();
                     btn.style.top = (r.top + r.height / 2 - 17) + 'px';
