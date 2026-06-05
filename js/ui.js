@@ -294,7 +294,7 @@ window.showCalcPopup = function() {
                 <div style="display:flex;align-items:center;gap:10px;">
                     <div style="flex:1;position:relative;">
                         <input id="calcPopupInput" type="text" autocomplete="off"
-                            placeholder="เช่น  ชาย 35  ทุน 2 ล้าน  10 ปี"
+                            placeholder="เช่น  ชาย 35 century life ทุน 2 ล้าน 10 ปี"
                             style="width:100%;padding:16px 52px 16px 18px;border-radius:18px;border:2px solid #e2e8f0;background:#f8fafc;color:#0f172a;font-size:16px;font-weight:600;outline:none;box-sizing:border-box;transition:all 0.2s;"
                             onfocus="this.style.borderColor='#3b82f6';this.style.background='#fff';this.style.boxShadow='0 0 0 4px rgba(59,130,246,0.12)'"
                             onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc';this.style.boxShadow='none'"
