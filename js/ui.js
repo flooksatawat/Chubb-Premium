@@ -284,6 +284,24 @@ function handleQuickCalc(event) {
     }
 }
 
+// ส่งข้อความจากช่อง modalAiCalcInput (ปุ่มส่ง) — ทำงานเหมือนกด Enter
+window.submitModalAiCalc = function() {
+    const input = document.getElementById('modalAiCalcInput');
+    if (!input) return;
+    const rawValue = input.value.trim();
+    if (rawValue === '') { input.focus(); return; }
+    const ageMatch = rawValue.match(/^อายุ\s*(\d+)/) || rawValue.match(/^(\d+)(\s*ปี)?$/);
+    if (ageMatch) {
+        showPlansByAge(parseInt(ageMatch[1]));
+        input.value = '';
+        input.blur();
+        return;
+    }
+    submitQuickCalc(rawValue);
+    input.value = '';
+    input.blur();
+};
+
 function showPlansByAge(age) {
     const ALL_SUB_PLANS = [
         // CI Extra Plus
@@ -923,20 +941,30 @@ function initModernScrollInteractions() {
 }
 
 // 🌟 ระบบค้นหา
-// oninput: สลับไอคอน/ปุ่มล้างเท่านั้น — ไม่ค้นหาอัตโนมัติ (รอ Enter)
+// oninput: ค้นหาอัตโนมัติเมื่อพิมพ์ข้อความ — ถ้าเป็นตัวเลขล้วนให้รอกดส่ง/Enter
 function handleUnifiedPlanSearchInput() {
     const input = document.getElementById('unifiedPlanSearchInput');
     if (!input) return;
-    const query = input.value.trim().toLowerCase();
+    const raw = input.value.trim();
+    const query = raw.toLowerCase();
     const clearBtn = document.getElementById('planSearchClearBtn');
     const searchIcon = document.getElementById('planSearchIcon');
     if (clearBtn) clearBtn.classList.toggle('hidden', query === '');
     if (searchIcon) searchIcon.classList.toggle('hidden', query !== '');
-    // ล้างช่องว่าง → กลับไปแสดงรายการทั้งหมดทันที
+
     if (query === '') {
         isModernSearchActive = false;
         renderModernCards(modernPlansData, true);
+        return;
     }
+
+    // ถ้าเป็นตัวเลขล้วน (อายุ) — รอกดส่ง/Enter
+    if (/^\d+$/.test(raw)) return;
+
+    // ค้นหาชื่อแบบประกันอัตโนมัติ
+    isModernSearchActive = true;
+    const filtered = modernPlansData.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+    renderModernCards(filtered, true);
 }
 
 // onkeydown: ค้นหาเมื่อกด Enter เท่านั้น
