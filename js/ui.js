@@ -3357,6 +3357,365 @@ window.showLVIRRPopup = function() {
     }
 };
 
+// ==================== PLAN IRR — WXN / TX / Elite / SmartPlan ====================
+let _planIrrState = null;
+let _planIrrTimer  = null;
+
+window._planIrrLongStart = function(e) {
+    if (e && e.cancelable) e.preventDefault();
+    clearTimeout(_planIrrTimer);
+    _planIrrTimer = setTimeout(() => {
+        const p = (currentAppPlan || '').toUpperCase();
+        if (p.includes('WHOLE LIFE') || p.includes('24 TX') || p.includes('ELITE') || p.includes('868') || p.includes('818') || p.includes('SMART')) {
+            showPlanIRRPopup();
+        }
+    }, 500);
+};
+window._planIrrLongEnd = function() { clearTimeout(_planIrrTimer); };
+
+function _detectPlanType(planName) {
+    const p = (planName || '').toUpperCase();
+    if (p.includes('WHOLE LIFE'))                           return 'WXN';
+    if (p.includes('24 TX') || (p.includes('TX') && !p.includes('LIFE'))) return 'TX';
+    if (p.includes('ELITE') || p.includes('868') || p.includes('818'))    return 'ELITE';
+    if (p.includes('SMART'))                                return 'SM';
+    return null;
+}
+
+function _buildPlanCashFlows(startAge, premium, sa, payYears, targetAge, planType) {
+    const maxYr = (planType === 'ELITE') ? (startAge <= 50 ? 68 - startAge : 18)
+                : planType === 'SM'     ? 21
+                : targetAge - startAge;
+    const cfs = [];
+    for (let yr = 1; yr <= targetAge - startAge; yr++) {
+        const age = startAge + yr;
+        const prem = yr <= payYears ? premium : 0;
+        let ret = 0;
+        if (planType === 'WXN') {
+            if (age <= 60)       ret = Math.round(sa * 0.0225);
+            else if (age === 61) ret = Math.round(sa * 0.10);
+            else if (age < 90)   ret = Math.round(sa * (0.10 + (age - 61) * 0.005));
+            else                 ret = Math.round(sa);
+        } else if (planType === 'TX') {
+            if (yr % 3 === 0 && yr <= 24) ret = Math.round(sa * 0.05);
+            else if (yr === 25)  ret = Math.round(sa * 0.70);
+            else if (yr >= 26 && age < 90) ret = Math.round(sa * 0.08);
+            else if (age >= 90)  ret = Math.round(sa);
+        } else if (planType === 'ELITE') {
+            if (yr < maxYr)      ret = Math.round(sa * 0.12);
+            else if (yr >= maxYr) ret = Math.round(sa * 7.20);
+        } else if (planType === 'SM') {
+            if (yr === 21)       ret = Math.round(sa * 2.12);
+            else if (yr >= 2 && yr <= 20) ret = Math.round(sa * 0.02);
+        }
+        cfs.push(ret - prem);
+        if ((planType === 'ELITE' || planType === 'SM') && yr >= maxYr) break;
+    }
+    return cfs;
+}
+
+function _planIrrPillsHTML(planType, startAge) {
+    let ages = [];
+    if      (planType === 'WXN')   ages = [61, 70, 80, 90].filter(a => a > startAge);
+    else if (planType === 'TX')    ages = [startAge+25, startAge+35, startAge+45, 90].filter(a => a > startAge && a <= 90);
+    else if (planType === 'ELITE') ages = [startAge <= 50 ? 68 : startAge + 18];
+    else if (planType === 'SM')    ages = [startAge + 21];
+    return [...new Set(ages)].map(a =>
+        `<button type="button" class="plan-irr-pill" data-age="${a}" onclick="window._pickPlanIRRAge(${a})"
+         style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
+                background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
+                transition:all 0.18s;touch-action:manipulation;">${a}</button>`
+    ).join('');
+}
+
+window._updatePlanIRR = function() {
+    if (!_planIrrState) return;
+    const { startAge, premium, sa, payYears, planType } = _planIrrState;
+    const inp = document.getElementById('planIrrAgeInput');
+    if (!inp) return;
+
+    const maxAge = planType === 'ELITE' ? (startAge <= 50 ? 68 : startAge + 18) : planType === 'SM' ? startAge + 21 : 90;
+    let targetAge = parseInt(inp.value);
+    if (!Number.isFinite(targetAge)) targetAge = maxAge;
+    targetAge = Math.max(startAge + 1, Math.min(targetAge, maxAge));
+    inp.value = targetAge;
+
+    document.querySelectorAll('.plan-irr-pill').forEach(b => {
+        const active = parseInt(b.dataset.age) === targetAge;
+        b.style.background = active ? 'linear-gradient(135deg,#7c3aed,#4f46e5)' : '#f5f3ff';
+        b.style.color = active ? '#fff' : '#7c3aed';
+        b.style.borderColor = active ? 'transparent' : '#ddd6fe';
+        b.style.fontWeight = active ? '800' : '700';
+        b.style.boxShadow = active ? '0 3px 10px rgba(124,58,237,0.3)' : 'none';
+    });
+
+    const yearsEl = document.getElementById('planIrrYears');
+    if (yearsEl) yearsEl.textContent = (targetAge - startAge) + ' ปี';
+
+    const cfs = _buildPlanCashFlows(startAge, premium, sa, payYears, targetAge, planType);
+    const irr  = _calcIRR(cfs);
+
+    // สะสมเบี้ย + รับคืน
+    const maxYr = planType === 'ELITE' ? (startAge <= 50 ? 68 - startAge : 18) : planType === 'SM' ? 21 : targetAge - startAge;
+    let totalPaid = 0, totalReturn = 0;
+    for (let yr = 1; yr <= targetAge - startAge; yr++) {
+        const age = startAge + yr;
+        if (yr <= payYears) totalPaid += premium;
+        let ret = 0;
+        if (planType === 'WXN') {
+            if (age <= 60)       ret = Math.round(sa * 0.0225);
+            else if (age === 61) ret = Math.round(sa * 0.10);
+            else if (age < 90)   ret = Math.round(sa * (0.10 + (age - 61) * 0.005));
+            else                 ret = Math.round(sa);
+        } else if (planType === 'TX') {
+            if (yr % 3 === 0 && yr <= 24) ret = Math.round(sa * 0.05);
+            else if (yr === 25)  ret = Math.round(sa * 0.70);
+            else if (yr >= 26 && age < 90) ret = Math.round(sa * 0.08);
+            else if (age >= 90)  ret = Math.round(sa);
+        } else if (planType === 'ELITE') {
+            if (yr < maxYr)       ret = Math.round(sa * 0.12);
+            else if (yr >= maxYr) ret = Math.round(sa * 7.20);
+        } else if (planType === 'SM') {
+            if (yr === 21)        ret = Math.round(sa * 2.12);
+            else if (yr >= 2 && yr <= 20) ret = Math.round(sa * 0.02);
+        }
+        totalReturn += ret;
+        if ((planType === 'ELITE' || planType === 'SM') && yr >= maxYr) break;
+    }
+    const profit = totalReturn - totalPaid;
+
+    const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    set('planIrrPaid',   Math.round(totalPaid).toLocaleString() + ' ฿');
+    set('planIrrReturn', Math.round(totalReturn).toLocaleString() + ' ฿');
+    set('planIrrProfit', (profit >= 0 ? '+' : '') + Math.round(profit).toLocaleString() + ' ฿');
+    const pr = document.getElementById('planIrrProfitRow');
+    if (pr) pr.style.color = profit >= 0 ? '#15803d' : '#dc2626';
+
+    const resultEl = document.getElementById('planIrrResult');
+    const barFill  = document.getElementById('planIrrBarFill');
+    if (irr === null || irr <= -0.95) {
+        if (resultEl) { resultEl.textContent = '—'; resultEl.style.color = '#94a3b8'; }
+        if (barFill)  barFill.style.width = '0%';
+    } else {
+        const pct = (irr * 100).toFixed(2);
+        let color, barClr;
+        if (irr < 0)         { color = '#dc2626'; barClr = 'linear-gradient(90deg,#f87171,#dc2626)'; }
+        else if (irr >= 0.04){ color = '#15803d'; barClr = 'linear-gradient(90deg,#4ade80,#16a34a)'; }
+        else if (irr >= 0.02){ color = '#0369a1'; barClr = 'linear-gradient(90deg,#60a5fa,#2563eb)'; }
+        else                  { color = '#92400e'; barClr = 'linear-gradient(90deg,#fbbf24,#d97706)'; }
+        const barW = irr < 0 ? 0 : Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
+        if (resultEl) { resultEl.textContent = (irr > 0 ? '+' : '') + pct + '%'; resultEl.style.color = color; }
+        if (barFill)  { barFill.style.width = barW + '%'; barFill.style.background = barClr; }
+    }
+};
+
+window._stepPlanIRR  = function(d) { const i = document.getElementById('planIrrAgeInput'); if (i) { i.value = (parseInt(i.value)||0)+d; window._updatePlanIRR(); } };
+window._pickPlanIRRAge = function(age) { const i = document.getElementById('planIrrAgeInput'); if (i) { i.value = age; window._updatePlanIRR(); } };
+
+window._planIrrEditField = function(field) {
+    if (!_planIrrState) return;
+    window._lvIrrCloseEdit();
+    const st = _planIrrState;
+    const inputCss = 'width:100%;height:52px;text-align:center;font-size:24px;font-weight:800;color:#312e81;border:2px solid #ddd6fe;border-radius:14px;outline:none;background:#faf5ff;box-sizing:border-box;';
+    const pillBase = 'flex:1;height:46px;border-radius:12px;border:1.5px solid;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;touch-action:manipulation;';
+    const labelCss = 'font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;';
+    const on  = 'background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:transparent;';
+    const off = 'background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;';
+    let title = '', icon = '', body = '';
+    if (field === 'genderAge') {
+        title = 'เพศ และ อายุ'; icon = 'fa-user';
+        _lvEditGenderTmp = !!st.isMale;
+        body = `<div style="${labelCss}">เพศ</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button type="button" id="lvEditGM" data-base="${pillBase}" style="${pillBase}${st.isMale?on:off}" onclick="window._lvEditSetGender(true)">♂ ชาย</button>
+            <button type="button" id="lvEditGF" data-base="${pillBase}" style="${pillBase}${st.isMale?off:on}" onclick="window._lvEditSetGender(false)">♀ หญิง</button>
+          </div>
+          <div style="${labelCss}">อายุ (ปี)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.startAge}" min="0" max="80" style="${inputCss}">`;
+    } else if (field === 'premium') {
+        title = 'เงินออมต่อปี'; icon = 'fa-piggy-bank';
+        body = `<div style="${labelCss}">จำนวนเงินออม (บาท/ปี)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.premium}" min="0" step="1000" style="${inputCss}">`;
+    } else if (field === 'sum') {
+        title = 'ทุนประกัน'; icon = 'fa-shield-heart';
+        body = `<div style="${labelCss}">จำนวนทุนประกัน (บาท)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.sa}" min="0" step="100000" style="${inputCss}">`;
+    } else return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'lvIrrEditOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(30,27,75,0.45);backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+      <div style="width:100%;max-width:320px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(30,27,75,0.4);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" onclick="event.stopPropagation()">
+        <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:16px 18px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas ${icon}" style="color:#fff;font-size:14px;"></i>
+          </div>
+          <div style="font-size:15px;font-weight:800;color:#fff;">${title}</div>
+        </div>
+        <div style="padding:18px;">
+          ${body}
+          <div style="display:flex;gap:8px;margin-top:18px;">
+            <button type="button" onclick="window._lvIrrCloseEdit()" style="flex:1;height:46px;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:14px;font-weight:700;cursor:pointer;">ยกเลิก</button>
+            <button type="button" onclick="window._planIrrSaveEdit('${field}')" style="flex:1;height:46px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.3);">ตกลง</button>
+          </div>
+        </div>
+      </div>`;
+    overlay.onclick = window._lvIrrCloseEdit;
+    document.body.appendChild(overlay);
+    setTimeout(() => { const i = document.getElementById('lvEditInput'); if (i && i.type !== 'hidden') { i.focus(); i.select && i.select(); } }, 60);
+};
+
+window._planIrrSaveEdit = function(field) {
+    const inp = document.getElementById('lvEditInput');
+    const _mode = (typeof currentMode !== 'undefined') ? currentMode : 'premium';
+    try {
+        if (field === 'genderAge') {
+            let age = parseInt(inp?.value); if (!Number.isFinite(age)||age<0) age=0; if (age>80) age=80;
+            const ageEl = document.getElementById('ageInput'); if (ageEl) ageEl.value = age;
+            if (typeof setGender === 'function') setGender(_lvEditGenderTmp ? 'male' : 'female');
+            else if (typeof calculate === 'function') calculate(_mode, true);
+        } else if (field === 'premium') {
+            let v = Math.round(parseFloat(inp?.value)||0); if (v<0) v=0;
+            if (typeof currentMode !== 'undefined') currentMode = 'premium';
+            const pEl = document.getElementById('premiumInput'); if (pEl) pEl.value = v.toLocaleString();
+            if (typeof calculate === 'function') calculate('premium', true);
+        } else if (field === 'sum') {
+            let v = Math.round(parseFloat(inp?.value)||0); if (v<0) v=0;
+            if (typeof currentMode !== 'undefined') currentMode = 'sum';
+            const sEl = document.getElementById('sumInsuredInput'); if (sEl) sEl.value = v.toLocaleString();
+            if (typeof calculate === 'function') calculate('sum', true);
+        }
+        const d = lastCalculationData;
+        if (d && _planIrrState) {
+            _planIrrState.startAge = _readAge(d);
+            _planIrrState.premium  = Math.round(parseFloat(d.premium)||0);
+            _planIrrState.sa       = Math.round(parseFloat(d.sum)||0);
+            _planIrrState.isMale   = (d.gender==='male'||d.gender==='ชาย');
+            const g = _planIrrState.isMale ? '♂' : '♀';
+            const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+            set('planHdrGenderAge', `${g} · <span style="font-size:15px;font-weight:800;">${_planIrrState.startAge}</span> ปี`);
+            set('planHdrPremium', `${Math.round(_planIrrState.premium).toLocaleString()} ฿`);
+            set('planHdrSum', `${Math.round(_planIrrState.sa).toLocaleString()} ฿`);
+            const pc = document.getElementById('planIrrPills');
+            if (pc) pc.innerHTML = _planIrrPillsHTML(_planIrrState.planType, _planIrrState.startAge);
+            const inp2 = document.getElementById('planIrrAgeInput');
+            if (inp2) { inp2.min = _planIrrState.startAge+1; if ((parseInt(inp2.value)||0) <= _planIrrState.startAge) inp2.value = _planIrrState.startAge+1; }
+            window._updatePlanIRR();
+        }
+    } catch(e) { console.error('planIrrSaveEdit error:', e); }
+    window._lvIrrCloseEdit();
+};
+
+function showPlanIRRPopup() {
+    try {
+        if (typeof calculate === 'function') { try { calculate(typeof currentMode !== 'undefined' ? currentMode : 'premium', true); } catch(e) {} }
+        const d = lastCalculationData;
+        if (!d) { alert('กรุณาคำนวณข้อมูลก่อน'); return; }
+
+        const planType  = _detectPlanType(currentAppPlan);
+        if (!planType) return;
+        const startAge  = _readAge(d);
+        const premium   = Math.round(parseFloat(d.premium)||0);
+        const sa        = Math.round(parseFloat(d.sum)||0);
+        const payYears  = planType==='WXN' ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10')
+                        : planType==='TX'    ? 24 : planType==='ELITE' ? 8 : 7;
+        const isMale    = (d.gender==='male'||d.gender==='ชาย');
+        const maxAge    = planType==='ELITE' ? (startAge<=50?68:startAge+18) : planType==='SM' ? startAge+21 : 90;
+        const planLabels = { WXN:'Whole Life Extra', TX:'24 TX', ELITE:'868/818 Elite Saving', SM:'Smart Plan 21/7' };
+
+        _planIrrState = { startAge, premium, sa, payYears, planType, isMale };
+
+        const gI = isMale ? '♂' : '♀', gT = isMale ? 'ชาย' : 'หญิง';
+        const pillsHTML = _planIrrPillsHTML(planType, startAge);
+
+        const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="background:linear-gradient(150deg,#312e81 0%,#4f46e5 45%,#7c3aed 100%);border-radius:22px 22px 0 0;padding:20px 20px 22px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-24px;right:-16px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-28px;left:20px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;position:relative;">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-chart-line" style="color:#fff;font-size:17px;"></i></div>
+      <div><div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;">IRR ผลตอบแทน</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">${planLabels[planType]} · Internal Rate of Return</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;">
+      <div onclick="window._planIrrEditField('genderAge')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">เพศ · อายุ <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="planHdrGenderAge" style="font-size:13px;font-weight:700;color:#fff;">${gI} ${gT} · <span style="font-size:15px;font-weight:800;">${startAge}</span> ปี</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ระยะชำระ</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;"><span style="font-size:15px;font-weight:800;">${payYears}</span> ปี</div>
+      </div>
+      <div onclick="window._planIrrEditField('premium')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="planHdrPremium" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${premium.toLocaleString()} ฿</div>
+      </div>
+      <div onclick="window._planIrrEditField('sum')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="planHdrSum" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sa.toLocaleString()} ฿</div>
+      </div>
+    </div>
+  </div>
+  <div style="background:#f8f7ff;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
+    <div style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">คำนวณ IRR ณ อายุ (ปี)</div>
+    <div id="planIrrPills" style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
+    <div style="display:flex;align-items:center;gap:0;background:#fff;border:2px solid #ddd6fe;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(109,40,217,0.08);">
+      <button type="button" onclick="window._stepPlanIRR(-1)" style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-right:1.5px solid #ede9fe;">−</button>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 0;">
+        <input id="planIrrAgeInput" type="number" value="${maxAge}" min="${startAge+1}" max="${maxAge}" oninput="window._updatePlanIRR()"
+               style="width:100%;text-align:center;font-size:26px;font-weight:900;color:#312e81;border:none;outline:none;background:transparent;line-height:1;">
+        <div style="font-size:10px;color:#a78bfa;font-weight:600;margin-top:1px;">ถือกรมธรรม์ <span id="planIrrYears" style="font-weight:800;color:#7c3aed;">—</span></div>
+      </div>
+      <button type="button" onclick="window._stepPlanIRR(1)" style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-left:1.5px solid #ede9fe;">+</button>
+    </div>
+    <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;box-shadow:0 4px 20px rgba(109,40,217,0.10);border:1px solid #ede9fe;">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
+        <div id="planIrrResult" style="font-size:52px;font-weight:900;color:#4f46e5;line-height:1;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
+      </div>
+      <div style="background:#ede9fe;border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
+        <div id="planIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">0%</span>
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">ดีมาก ≥ 4%</span>
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">6%+</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:#fff;border:1px solid #fee2e2;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 6px rgba(239,68,68,0.06);">
+        <div style="font-size:10px;color:#f87171;font-weight:700;margin-bottom:4px;">เบี้ยสะสม</div>
+        <div id="planIrrPaid" style="font-size:12px;font-weight:800;color:#dc2626;line-height:1.2;">—</div>
+      </div>
+      <div style="background:#fff;border:1px solid #bfdbfe;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 6px rgba(59,130,246,0.06);">
+        <div style="font-size:10px;color:#60a5fa;font-weight:700;margin-bottom:4px;">รับคืนสะสม</div>
+        <div id="planIrrReturn" style="font-size:12px;font-weight:800;color:#1d4ed8;line-height:1.2;">—</div>
+      </div>
+      <div id="planIrrProfitRow" style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 6px rgba(34,197,94,0.06);color:#15803d;">
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;color:#4ade80;">ผลตอบแทนสุทธิ</div>
+        <div id="planIrrProfit" style="font-size:12px;font-weight:800;line-height:1.2;">—</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:10px;color:#c4b5fd;font-weight:500;line-height:1.5;">คำนวณจากกระแสเงินสดรับ-จ่ายจริง · ไม่รวมภาษี</div>
+  </div>
+</div>`;
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                html, background:'transparent', showConfirmButton:false, showCloseButton:true,
+                width:'min(92vw,480px)', padding:'0px',
+                customClass:{ popup:'lv-irr-swal-popup', closeButton:'lv-irr-close-btn' },
+                didOpen: () => {
+                    const cb = document.querySelector('.lv-irr-close-btn');
+                    if (cb) Object.assign(cb.style, { position:'absolute',top:'12px',right:'14px',color:'rgba(255,255,255,0.85)',fontSize:'20px',zIndex:'10',background:'rgba(255,255,255,0.18)',borderRadius:'50%',width:'32px',height:'32px',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)' });
+                    window._updatePlanIRR();
+                }
+            });
+        }
+    } catch(err) { console.error('showPlanIRRPopup error:', err); }
+}
+
 function openUniversalModal(d) {
     if(!d) return;
 
@@ -4474,7 +4833,7 @@ function generatePolicyTableData() {
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;" onclick="window._showDepositConfig()" title="คลิกเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-plus-circle\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz}">${_lTotal}</th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;" onclick="window._showDepositConfig()" title="คลิกเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-plus-circle\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-chart-line' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};white-space:normal;line-height:1.2;">ฝากสะสม<br>ดอกเบี้ย ${(window._tableDepositRate*100).toFixed(2)}%</th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
