@@ -2816,7 +2816,6 @@ window._updateLVIRR = function() {
 
     const resultEl  = document.getElementById('lvIrrResult');
     const barFill   = document.getElementById('lvIrrBarFill');
-    const levelEl   = document.getElementById('lvIrrLevel');
     const paidEl    = document.getElementById('lvIrrPaid');
     const retEl     = document.getElementById('lvIrrReturn');
     const profitEl  = document.getElementById('lvIrrProfit');
@@ -2830,28 +2829,22 @@ window._updateLVIRR = function() {
     if (irr === null || irr <= -0.95) {
         if (resultEl) { resultEl.textContent = '—'; resultEl.style.color = '#94a3b8'; }
         if (barFill)  { barFill.style.width = '0%'; barFill.style.background = '#e2e8f0'; }
-        if (levelEl)  { levelEl.textContent = ''; levelEl.style.background = '#f1f5f9'; levelEl.style.color = '#94a3b8'; }
     } else {
         const pct = (irr * 100).toFixed(2);
-        let color, bg, level, barClr;
+        let color, barClr;
         if (irr < 0) {
-            color = '#dc2626'; bg = '#fee2e2'; level = '🔴 ขาดทุน';
-            barClr = 'linear-gradient(90deg,#f87171,#dc2626)';
+            color = '#dc2626'; barClr = 'linear-gradient(90deg,#f87171,#dc2626)';
         } else if (irr >= 0.04) {
-            color = '#15803d'; bg = '#dcfce7'; level = '🟢 ดีมาก';
-            barClr = 'linear-gradient(90deg,#4ade80,#16a34a)';
+            color = '#15803d'; barClr = 'linear-gradient(90deg,#4ade80,#16a34a)';
         } else if (irr >= 0.02) {
-            color = '#0369a1'; bg = '#dbeafe'; level = '🔵 ปานกลาง';
-            barClr = 'linear-gradient(90deg,#60a5fa,#2563eb)';
+            color = '#0369a1'; barClr = 'linear-gradient(90deg,#60a5fa,#2563eb)';
         } else {
-            color = '#92400e'; bg = '#fef3c7'; level = '🟡 ต่ำ';
-            barClr = 'linear-gradient(90deg,#fbbf24,#d97706)';
+            color = '#92400e'; barClr = 'linear-gradient(90deg,#fbbf24,#d97706)';
         }
         // bar: ติดลบ = 0%, บวก = สเกล 0–6%
         const barW = irr < 0 ? 0 : Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
         if (resultEl) { resultEl.textContent = (irr > 0 ? '+' : '') + pct + '%'; resultEl.style.color = color; }
         if (barFill)  { barFill.style.width = barW + '%'; barFill.style.background = barClr; }
-        if (levelEl)  { levelEl.textContent = level; levelEl.style.background = bg; levelEl.style.color = color; }
     }
 };
 
@@ -2865,6 +2858,164 @@ window._stepLVIRR = function(delta) {
 window._pickLVIRRAge = function(age) {
     const inp = document.getElementById('lvIrrAgeInput');
     if (inp) { inp.value = age; window._updateLVIRR(); }
+};
+
+// สร้าง HTML ปุ่ม milestone อายุ (ขึ้นกับ startAge ปัจจุบัน)
+function _lvIrrPillsHTML(startAge) {
+    return [60, 70, 80, 85, 90, 100].filter(a => a > startAge).map(a =>
+        `<button type="button" class="lv-irr-pill" data-age="${a}" onclick="window._pickLVIRRAge(${a})"
+         style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
+                background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
+                transition:all 0.18s;touch-action:manipulation;letter-spacing:-0.01em;">${a}</button>`
+    ).join('');
+}
+
+// อัปเดต 4 การ์ดหัวข้อตาม state ปัจจุบัน
+function _lvIrrRefreshHeader() {
+    if (!_lvIrrState) return;
+    const { startAge, premium, sa, payYears, isMale } = _lvIrrState;
+    const g = isMale ? '♂ ชาย' : '♀ หญิง';
+    const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    set('lvHdrGenderAge', `${g} · <span style="font-size:15px;font-weight:800;">${startAge}</span> ปี`);
+    set('lvHdrPayYears',  `<span style="font-size:15px;font-weight:800;">${payYears}</span> ปี`);
+    set('lvHdrPremium',   `${Math.round(premium).toLocaleString()} ฿`);
+    set('lvHdrSum',       `${Math.round(sa).toLocaleString()} ฿`);
+}
+
+// นำค่าที่แก้ไขมาใช้: อัปเดต state + header + pills + stepper แล้วคำนวณใหม่
+function _lvIrrApply(changes) {
+    Object.assign(_lvIrrState, changes);
+    _lvIrrRefreshHeader();
+    const pc = document.getElementById('lvIrrPills');
+    if (pc) pc.innerHTML = _lvIrrPillsHTML(_lvIrrState.startAge);
+    const inp = document.getElementById('lvIrrAgeInput');
+    if (inp) {
+        inp.min = _lvIrrState.startAge + 1;
+        if ((parseInt(inp.value) || 0) <= _lvIrrState.startAge) {
+            inp.value = Math.min(100, _lvIrrState.startAge + 1);
+        }
+    }
+    window._updateLVIRR();
+}
+
+// ปิด overlay แก้ไข
+window._lvIrrCloseEdit = function() {
+    const o = document.getElementById('lvIrrEditOverlay');
+    if (o) o.remove();
+};
+
+// เพศชั่วคราวระหว่างแก้ไข
+let _lvEditGenderTmp = true;
+window._lvEditSetGender = function(male) {
+    _lvEditGenderTmp = !!male;
+    const gm = document.getElementById('lvEditGM'), gf = document.getElementById('lvEditGF');
+    const on  = 'background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:transparent;';
+    const off = 'background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;';
+    if (gm) gm.setAttribute('style', gm.dataset.base + (male ? on : off));
+    if (gf) gf.setAttribute('style', gf.dataset.base + (male ? off : on));
+};
+
+// เปิด popup ย่อยแก้ไขแต่ละช่อง (ซ้อนบน Swal)
+window._lvIrrEditField = function(field) {
+    if (!_lvIrrState) return;
+    window._lvIrrCloseEdit();
+    const st = _lvIrrState;
+
+    const labelCss = 'font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;';
+    const inputCss = 'width:100%;height:52px;text-align:center;font-size:24px;font-weight:800;color:#312e81;border:2px solid #ddd6fe;border-radius:14px;outline:none;background:#faf5ff;box-sizing:border-box;';
+    const pillBase = 'flex:1;height:46px;border-radius:12px;border:1.5px solid;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;touch-action:manipulation;';
+
+    let title = '', icon = '', body = '';
+
+    if (field === 'genderAge') {
+        title = 'เพศ และ อายุ'; icon = 'fa-user';
+        _lvEditGenderTmp = !!st.isMale;
+        const on  = 'background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:transparent;';
+        const off = 'background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;';
+        body = `
+          <div style="${labelCss}">เพศ</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button type="button" id="lvEditGM" data-base="${pillBase}" style="${pillBase}${st.isMale?on:off}" onclick="window._lvEditSetGender(true)">♂ ชาย</button>
+            <button type="button" id="lvEditGF" data-base="${pillBase}" style="${pillBase}${st.isMale?off:on}" onclick="window._lvEditSetGender(false)">♀ หญิง</button>
+          </div>
+          <div style="${labelCss}">อายุ (ปี)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.startAge}" min="0" max="80" style="${inputCss}">`;
+    } else if (field === 'payYears') {
+        title = 'ระยะเวลาชำระเบี้ย'; icon = 'fa-calendar-check';
+        const opt = (y) => {
+            const sel = st.payYears === y;
+            const on  = 'background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:transparent;';
+            const off = 'background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;';
+            return `<button type="button" class="lv-edit-py" data-y="${y}" data-base="${pillBase}" style="${pillBase}${sel?on:off}" onclick="window._lvEditPickPY(${y})">${y} ปี</button>`;
+        };
+        body = `<div style="${labelCss}">เลือกระยะชำระ (LifeTime Value)</div>
+          <div style="display:flex;gap:8px;">${opt(10)}${opt(15)}${opt(20)}</div>
+          <input id="lvEditInput" type="hidden" value="${st.payYears}">`;
+    } else if (field === 'premium') {
+        title = 'เงินออมต่อปี'; icon = 'fa-piggy-bank';
+        body = `<div style="${labelCss}">จำนวนเงินออม (บาท/ปี)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.premium}" min="0" step="1000" style="${inputCss}">`;
+    } else if (field === 'sum') {
+        title = 'ทุนประกัน'; icon = 'fa-shield-heart';
+        body = `<div style="${labelCss}">จำนวนทุนประกัน (บาท)</div>
+          <input id="lvEditInput" type="number" inputmode="numeric" value="${st.sa}" min="0" step="100000" style="${inputCss}">`;
+    } else { return; }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'lvIrrEditOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(30,27,75,0.45);backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+      <div style="width:100%;max-width:320px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(30,27,75,0.4);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" onclick="event.stopPropagation()">
+        <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:16px 18px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas ${icon}" style="color:#fff;font-size:14px;"></i>
+          </div>
+          <div style="font-size:15px;font-weight:800;color:#fff;">${title}</div>
+        </div>
+        <div style="padding:18px;">
+          ${body}
+          <div style="display:flex;gap:8px;margin-top:18px;">
+            <button type="button" onclick="window._lvIrrCloseEdit()" style="flex:1;height:46px;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:14px;font-weight:700;cursor:pointer;">ยกเลิก</button>
+            <button type="button" onclick="window._lvIrrSaveEdit('${field}')" style="flex:1;height:46px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.3);">ตกลง</button>
+          </div>
+        </div>
+      </div>`;
+    overlay.onclick = window._lvIrrCloseEdit;
+    document.body.appendChild(overlay);
+    setTimeout(() => { const i = document.getElementById('lvEditInput'); if (i && i.type !== 'hidden') { i.focus(); i.select && i.select(); } }, 60);
+};
+
+window._lvEditPickPY = function(y) {
+    const h = document.getElementById('lvEditInput');
+    if (h) h.value = y;
+    document.querySelectorAll('.lv-edit-py').forEach(b => {
+        const sel = parseInt(b.dataset.y) === y;
+        const on  = 'background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:transparent;';
+        const off = 'background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;';
+        b.setAttribute('style', b.dataset.base + (sel ? on : off));
+    });
+};
+
+window._lvIrrSaveEdit = function(field) {
+    const inp = document.getElementById('lvEditInput');
+    if (field === 'genderAge') {
+        let age = parseInt(inp && inp.value);
+        if (!Number.isFinite(age) || age < 0) age = 0;
+        if (age > 80) age = 80;
+        _lvIrrApply({ isMale: _lvEditGenderTmp, startAge: age });
+    } else if (field === 'payYears') {
+        let y = parseInt(inp && inp.value) || _lvIrrState.payYears;
+        _lvIrrApply({ payYears: y });
+    } else if (field === 'premium') {
+        let v = Math.round(parseFloat(inp && inp.value) || 0);
+        if (v < 0) v = 0;
+        _lvIrrApply({ premium: v });
+    } else if (field === 'sum') {
+        let v = Math.round(parseFloat(inp && inp.value) || 0);
+        if (v < 0) v = 0;
+        _lvIrrApply({ sa: v });
+    }
+    window._lvIrrCloseEdit();
 };
 
 window.showLVIRRPopup = function() {
@@ -2884,15 +3035,9 @@ window.showLVIRRPopup = function() {
         const genderTxt  = isMale ? 'ชาย' : 'หญิง';
         const genderIcon = isMale ? '♂' : '♀';
 
-        _lvIrrState = { startAge, premium, sa, payYears };
+        _lvIrrState = { startAge, premium, sa, payYears, isMale };
 
-        const milestones = [60, 70, 80, 85, 90, 100].filter(a => a > startAge);
-        const pillsHTML = milestones.map(a =>
-            `<button type="button" class="lv-irr-pill" data-age="${a}" onclick="window._pickLVIRRAge(${a})"
-             style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
-                    background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
-                    transition:all 0.18s;touch-action:manipulation;letter-spacing:-0.01em;">${a}</button>`
-        ).join('');
+        const pillsHTML = _lvIrrPillsHTML(startAge);
 
         const html = `
 <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -2916,23 +3061,23 @@ window.showLVIRRPopup = function() {
       </div>
     </div>
 
-    <!-- Info grid 2×2 — ไม่มี wrap -->
+    <!-- Info grid 2×2 — กดเพื่อแก้ไข -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;">
-      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">เพศ · อายุ</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;">${genderIcon} ${genderTxt} · <span style="font-size:15px;font-weight:800;">${startAge}</span> ปี</div>
+      <div onclick="window._lvIrrEditField('genderAge')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;position:relative;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">เพศ · อายุ <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="lvHdrGenderAge" style="font-size:13px;font-weight:700;color:#fff;">${genderIcon} ${genderTxt} · <span style="font-size:15px;font-weight:800;">${startAge}</span> ปี</div>
       </div>
-      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ระยะชำระ</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;"><span style="font-size:15px;font-weight:800;">${payYears}</span> ปี</div>
+      <div onclick="window._lvIrrEditField('payYears')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;position:relative;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ระยะชำระ <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="lvHdrPayYears" style="font-size:13px;font-weight:700;color:#fff;"><span style="font-size:15px;font-weight:800;">${payYears}</span> ปี</div>
       </div>
-      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${premium.toLocaleString()} ฿</div>
+      <div onclick="window._lvIrrEditField('premium')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;position:relative;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="lvHdrPremium" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${premium.toLocaleString()} ฿</div>
       </div>
-      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sa.toLocaleString()} ฿</div>
+      <div onclick="window._lvIrrEditField('sum')" style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;cursor:pointer;position:relative;transition:background 0.15s;" onmousedown="this.style.background='rgba(255,255,255,0.25)'" onmouseup="this.style.background='rgba(255,255,255,0.13)'">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน <i class="fas fa-pen" style="font-size:8px;opacity:0.55;margin-left:2px;"></i></div>
+        <div id="lvHdrSum" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sa.toLocaleString()} ฿</div>
       </div>
     </div>
   </div>
@@ -2946,7 +3091,7 @@ window.showLVIRRPopup = function() {
     </div>
 
     <!-- Milestone quick-pick pills -->
-    <div style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
+    <div id="lvIrrPills" style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
 
     <!-- Stepper row -->
     <div style="display:flex;align-items:center;gap:0;background:#fff;border:2px solid #ddd6fe;
@@ -2974,16 +3119,11 @@ window.showLVIRRPopup = function() {
     <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;
                 box-shadow:0 4px 20px rgba(109,40,217,0.10);border:1px solid #ede9fe;">
 
-      <!-- Result row: big number + badge -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
-          <div id="lvIrrResult" style="font-size:48px;font-weight:900;color:#4f46e5;line-height:1;
-                                       letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
-        </div>
-        <span id="lvIrrLevel" style="font-size:12px;font-weight:700;padding:6px 13px;border-radius:99px;
-                                      background:#f5f3ff;color:#7c3aed;align-self:center;
-                                      border:1.5px solid #ddd6fe;white-space:nowrap;"></span>
+      <!-- Result row: big number (เหลือเฉพาะตัวเลข) -->
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
+        <div id="lvIrrResult" style="font-size:52px;font-weight:900;color:#4f46e5;line-height:1;
+                                     letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
       </div>
 
       <!-- Progress bar -->
@@ -3013,7 +3153,7 @@ window.showLVIRRPopup = function() {
       </div>
       <div id="lvIrrProfitRow" style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;
                                        box-shadow:0 2px 6px rgba(34,197,94,0.06);color:#15803d;">
-        <div style="font-size:10px;font-weight:700;margin-bottom:4px;color:#4ade80;">กำไร/ขาดทุน</div>
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;color:#4ade80;">ผลตอบแทนสุทธิ</div>
         <div id="lvIrrProfit" style="font-size:12px;font-weight:800;line-height:1.2;">—</div>
       </div>
     </div>
