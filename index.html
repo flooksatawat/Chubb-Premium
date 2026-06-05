@@ -864,8 +864,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                 <input type="text" id="modalAiCalcInput" onkeydown="handleQuickCalc(event)"
                                     class="w-full rounded-[16px] py-2.5 pl-4 pr-[46px] focus:outline-none transition-all duration-200 text-[14px] font-medium placeholder:text-white/40"
                                     style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.90);"
-                                    onfocus="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)';"
+                                    onfocus="if(typeof window.isWideLayout==='function'&&window.isWideLayout()){this.blur();window.showCalcPopup();return;}this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)';"
                                     onblur="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.14)';"
+                                    onclick="if(typeof window.isWideLayout==='function'&&window.isWideLayout()){window.showCalcPopup();}"
                                     placeholder="พิมพ์เพื่อคำนวณเบี้ยประกัน">
 
                                 <!-- Send button inside input -->

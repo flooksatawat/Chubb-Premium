@@ -246,6 +246,128 @@ function validateInputMinimum(inputElement, fieldType) {
 
 let hasShownCongratsMB = false, hasShownCongratsMYB = false, hasShownCongratsNAB = false;
 
+// ==================== Calc Popup (Tablet / Desktop) ====================
+window.showCalcPopup = function() {
+    document.getElementById('calcPopupOverlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'calcPopupOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(10,15,40,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;';
+
+    // ตัวอย่างคำสั่งที่พิมพ์บ่อย
+    const examples = [
+        { icon:'fa-user', label:'ชาย 35', hint:'เปลี่ยนเพศ/อายุ' },
+        { icon:'fa-coins', label:'ทุน 2 ล้าน', hint:'กำหนดทุนประกัน' },
+        { icon:'fa-piggy-bank', label:'ออม 3 หมื่น', hint:'กำหนดเงินออม' },
+        { icon:'fa-chart-line', label:'century life 20 ปี', hint:'เลือกแบบ+ระยะ' },
+    ];
+    const exampleHTML = examples.map(e => `
+        <button type="button" onclick="window._calcPopupPickExample('${e.label}')"
+            style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.15s;text-align:left;white-space:nowrap;"
+            onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'"
+            onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
+            <i class="fas ${e.icon}" style="font-size:13px;color:#3b82f6;width:16px;text-align:center;flex-shrink:0;"></i>
+            <div>
+                <div style="font-size:13px;font-weight:700;color:#1e3a5f;">${e.label}</div>
+                <div style="font-size:10px;color:#94a3b8;font-weight:500;">${e.hint}</div>
+            </div>
+        </button>`).join('');
+
+    overlay.innerHTML = `
+        <div id="calcPopupCard" style="width:100%;max-width:520px;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+             onclick="event.stopPropagation()">
+
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb,#3b82f6);padding:20px 20px 18px;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                    <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-calculator" style="color:#fff;font-size:16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:17px;font-weight:800;color:#fff;line-height:1.2;">คำนวณเบี้ยประกัน</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;">พิมพ์ข้อมูล เช่น เพศ อายุ แบบประกัน จำนวนเงิน</div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('calcPopupOverlay')?.remove()"
+                        style="margin-left:auto;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.18);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">&times;</button>
+                </div>
+
+                <!-- Input row -->
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;position:relative;">
+                        <input id="calcPopupInput" type="text" autocomplete="off"
+                            placeholder="เช่น  ชาย 35  century life 20 ปี  ทุน 2 ล้าน"
+                            style="width:100%;padding:13px 48px 13px 16px;border-radius:16px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;caret-color:#fff;transition:border-color 0.2s;"
+                            onfocus="this.style.borderColor='rgba(255,255,255,0.7)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
+                            onkeydown="if(event.key==='Enter'){window._calcPopupSubmit();}"
+                            oninput="window._calcPopupInputChange(this.value)">
+                        <button type="button" onclick="window._calcPopupSubmit()"
+                            style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:11px;border:none;background:rgba(255,255,255,0.9);color:#2563eb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;"
+                            onmouseenter="this.style.background='#fff';this.style.transform='translateY(-50%) scale(1.05)'"
+                            onmouseleave="this.style.background='rgba(255,255,255,0.9)';this.style.transform='translateY(-50%)'">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <button type="button" id="calcPopupVoiceBtn"
+                        onclick="if(typeof startVoiceRecognition==='function'){document.getElementById('calcPopupOverlay')?.remove();startVoiceRecognition();}"
+                        style="width:48px;height:48px;border-radius:16px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all 0.15s;"
+                        onmouseenter="this.style.background='rgba(255,255,255,0.25)'"
+                        onmouseleave="this.style.background='rgba(255,255,255,0.15)'">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body: ตัวอย่างคำสั่ง -->
+            <div style="padding:16px 20px 20px;">
+                <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">ตัวอย่างคำสั่ง</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    ${exampleHTML}
+                </div>
+                <div id="calcPopupHint" style="margin-top:14px;padding:10px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;font-size:12px;color:#0369a1;font-weight:500;display:none;"></div>
+            </div>
+        </div>`;
+
+    overlay.addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
+    setTimeout(() => document.getElementById('calcPopupInput')?.focus(), 80);
+};
+
+window._calcPopupPickExample = function(text) {
+    const inp = document.getElementById('calcPopupInput');
+    if (inp) { inp.value = text; inp.focus(); }
+};
+
+window._calcPopupInputChange = function(val) {
+    const hint = document.getElementById('calcPopupHint');
+    if (!hint) return;
+    if (!val.trim()) { hint.style.display = 'none'; return; }
+    const parsed = (typeof parseCommand === 'function') ? parseCommand(val) : null;
+    if (!parsed) { hint.style.display = 'none'; return; }
+    const parts = [];
+    if (parsed.gender) parts.push(parsed.gender === 'male' ? '♂ ชาย' : '♀ หญิง');
+    if (parsed.age)    parts.push(`อายุ ${parsed.age} ปี`);
+    if (parsed.plan)   parts.push(parsed.plan);
+    if (parsed.amount) parts.push(`${parsed.amountType === 'premium' ? 'ออม' : parsed.amountType === 'cashflow' ? 'CF' : 'ทุน'} ${parsed.amount.toLocaleString()} ฿`);
+    if (parsed.years)  parts.push(`${parsed.years} ปี`);
+    if (parts.length) {
+        hint.innerHTML = '<i class="fas fa-check-circle" style="color:#0ea5e9;margin-right:5px;"></i>' + parts.join(' · ');
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
+};
+
+window._calcPopupSubmit = function() {
+    const inp = document.getElementById('calcPopupInput');
+    if (!inp) return;
+    const val = inp.value.trim();
+    if (!val) return;
+    document.getElementById('calcPopupOverlay')?.remove();
+    if (typeof submitQuickCalc === 'function') submitQuickCalc(val);
+};
+
 // ==================== ฝากสะสม ทบต้น ====================
 window._tableDepositEnabled = false;
 window._tableDepositUntilAge = null;
