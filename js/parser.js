@@ -263,25 +263,25 @@ function detectPlan(text) {
 function extractAge(t) {
     // "อายุ 35" / "อายุสามสิบห้า"
     let m = t.match(/(?:อายุ|age)\s*(\d{1,2})/i);
-    if (m) { const v = parseInt(m[1]); if (v >= 0 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
 
     // อายุ + คำไทย
     m = t.match(/อายุ\s*((?:ยี่สิบ|สามสิบ|สี่สิบ|ห้าสิบ|หกสิบ|เจ็ดสิบ|แปดสิบ)[ก-๙]*)/);
-    if (m) { const v = parseThaiWordNumber(m[1]); if (!isNaN(v) && v >= 1 && v <= 80) return v; }
+    if (m) { const v = parseThaiWordNumber(m[1]); if (!isNaN(v) && v >= 30 && v <= 80) return v; }
 
     // เพศ + ตัวเลข
     m = t.match(/(?:ชาย|หญิง)\s+(\d{1,2})(?!\s*(?:ล้าน|แสน|หมื่น|พัน|k|m))/);
-    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
 
     // ตัวเลข + "ทุน/ออม/เบี้ย"
     m = t.match(/\b(\d{1,2})\s+(?:ปี\s+)?(?:ทุน|ออม|เบี้ย|ค่าห้อง)/);
-    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
 
-    // fallback: ตัวเลข 2 หลัก 15-80
+    // fallback: ตัวเลข 2 หลัก 30-80
     const nums = [...t.matchAll(/\b(\d{1,2})\b/g)];
     for (const n of nums) {
         const v = parseInt(n[1]);
-        if (v >= 15 && v <= 80) {
+        if (v >= 30 && v <= 80) {
             const after = t.slice(n.index + n[0].length, n.index + n[0].length + 5);
             if (!/^\s*ปี/.test(after)) return v;
         }
