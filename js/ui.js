@@ -2444,8 +2444,13 @@ window.startCompareMode = function(planName) {
         banner.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#1e3a8a,#0369a1);color:white;padding:10px 18px;border-radius:14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25);white-space:nowrap;font-family:Kanit,sans-serif;';
         document.body.appendChild(banner);
     }
-    banner.innerHTML = `<i class="fas fa-code-compare"></i> เปรียบเทียบ: <span style="color:#93c5fd">${planName}</span> &nbsp;→&nbsp; กดเลือกแบบที่ 2 &nbsp;<button onclick="window.cancelCompareMode()" style="background:rgba(255,255,255,0.15);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
+    banner.innerHTML = `<i class="fas fa-code-compare"></i> เปรียบเทียบ: <span style="color:#93c5fd">${planName}</span> &nbsp;→&nbsp; เลือกแบบที่ 2 &nbsp;<button onclick="window.cancelCompareMode()" style="background:rgba(255,255,255,0.15);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
     banner.style.display = 'flex';
+
+    // เปิดหน้าเลือกแบบอัตโนมัติเพื่อให้เลือกแบบที่ 2 ได้ทันที
+    setTimeout(() => {
+        if (typeof openPlanModal === 'function') openPlanModal();
+    }, 150);
 };
 
 window.cancelCompareMode = function() {
