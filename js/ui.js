@@ -250,112 +250,115 @@ let hasShownCongratsMB = false, hasShownCongratsMYB = false, hasShownCongratsNAB
 window.showCalcPopup = function() {
     document.getElementById('calcPopupOverlay')?.remove();
 
+    // inject keyframes ครั้งเดียว
+    if (!document.getElementById('calcPopupKeyframes')) {
+        const st = document.createElement('style');
+        st.id = 'calcPopupKeyframes';
+        st.textContent = `
+            @keyframes calcPopFadeIn { from { opacity:0; } to { opacity:1; } }
+            @keyframes calcPopCardIn { from { opacity:0; transform:translateY(16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+            @keyframes calcChipIn { from { opacity:0; transform:scale(0.8); } to { opacity:1; transform:scale(1); } }
+            #calcPopupInput::placeholder { color:#94a3b8; font-weight:500; }`;
+        document.head.appendChild(st);
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'calcPopupOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(10,15,40,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;';
-
-    // ตัวอย่างคำสั่งที่พิมพ์บ่อย
-    const examples = [
-        { icon:'fa-user', label:'ชาย 35', hint:'เปลี่ยนเพศ/อายุ' },
-        { icon:'fa-coins', label:'ทุน 2 ล้าน', hint:'กำหนดทุนประกัน' },
-        { icon:'fa-piggy-bank', label:'ออม 3 หมื่น', hint:'กำหนดเงินออม' },
-        { icon:'fa-chart-line', label:'century life 20 ปี', hint:'เลือกแบบ+ระยะ' },
-    ];
-    const exampleHTML = examples.map(e => `
-        <button type="button" onclick="window._calcPopupPickExample('${e.label}')"
-            style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.15s;text-align:left;white-space:nowrap;"
-            onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'"
-            onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
-            <i class="fas ${e.icon}" style="font-size:13px;color:#3b82f6;width:16px;text-align:center;flex-shrink:0;"></i>
-            <div>
-                <div style="font-size:13px;font-weight:700;color:#1e3a5f;">${e.label}</div>
-                <div style="font-size:10px;color:#94a3b8;font-weight:500;">${e.hint}</div>
-            </div>
-        </button>`).join('');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(15,23,42,0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;animation:calcPopFadeIn 0.22s ease;';
 
     overlay.innerHTML = `
-        <div id="calcPopupCard" style="width:100%;max-width:520px;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+        <div id="calcPopupCard" style="width:100%;max-width:480px;background:#fff;border-radius:30px;overflow:hidden;box-shadow:0 40px 90px rgba(15,23,42,0.28),0 10px 30px rgba(15,23,42,0.12);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;animation:calcPopCardIn 0.34s cubic-bezier(0.16,1,0.3,1);"
              onclick="event.stopPropagation()">
 
             <!-- Header -->
-            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb,#3b82f6);padding:20px 20px 18px;position:relative;overflow:hidden;">
-                <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                    <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-calculator" style="color:#fff;font-size:16px;"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:17px;font-weight:800;color:#fff;line-height:1.2;">คำนวณเบี้ยประกัน</div>
-                        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;">พิมพ์ข้อมูล เช่น เพศ อายุ แบบประกัน จำนวนเงิน</div>
-                    </div>
-                    <button type="button" onclick="document.getElementById('calcPopupOverlay')?.remove()"
-                        style="margin-left:auto;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.18);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">&times;</button>
+            <div style="background:linear-gradient(135deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%);padding:26px 26px 24px;position:relative;overflow:hidden;text-align:center;">
+                <div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+                <div style="position:absolute;bottom:-40px;left:-10px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+
+                <button type="button" onclick="document.getElementById('calcPopupOverlay')?.remove()"
+                    style="position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.16);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:background 0.15s;backdrop-filter:blur(4px);"
+                    onmouseenter="this.style.background='rgba(255,255,255,0.3)'"
+                    onmouseleave="this.style.background='rgba(255,255,255,0.16)'">&times;</button>
+
+                <div style="width:54px;height:54px;border-radius:18px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 6px 16px rgba(0,0,0,0.1);">
+                    <i class="fas fa-wand-magic-sparkles" style="color:#fff;font-size:22px;"></i>
                 </div>
+                <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-0.02em;">คำนวณเบี้ยประกัน</div>
+                <div style="font-size:12.5px;color:rgba(255,255,255,0.72);margin-top:4px;font-weight:500;">พิมพ์ เพศ · อายุ · แบบประกัน · จำนวนเงิน</div>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:22px 24px 24px;">
 
                 <!-- Input row -->
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
                     <div style="flex:1;position:relative;">
                         <input id="calcPopupInput" type="text" autocomplete="off"
-                            placeholder="เช่น  ชาย 35  century life 20 ปี  ทุน 2 ล้าน"
-                            style="width:100%;padding:13px 48px 13px 16px;border-radius:16px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;caret-color:#fff;transition:border-color 0.2s;"
-                            onfocus="this.style.borderColor='rgba(255,255,255,0.7)'"
-                            onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
+                            placeholder="เช่น  ชาย 35  ทุน 2 ล้าน  10 ปี"
+                            style="width:100%;padding:16px 52px 16px 18px;border-radius:18px;border:2px solid #e2e8f0;background:#f8fafc;color:#0f172a;font-size:16px;font-weight:600;outline:none;box-sizing:border-box;transition:all 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6';this.style.background='#fff';this.style.boxShadow='0 0 0 4px rgba(59,130,246,0.12)'"
+                            onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc';this.style.boxShadow='none'"
                             onkeydown="if(event.key==='Enter'){window._calcPopupSubmit();}"
                             oninput="window._calcPopupInputChange(this.value)">
-                        <button type="button" onclick="window._calcPopupSubmit()"
-                            style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:11px;border:none;background:rgba(255,255,255,0.9);color:#2563eb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;"
-                            onmouseenter="this.style.background='#fff';this.style.transform='translateY(-50%) scale(1.05)'"
-                            onmouseleave="this.style.background='rgba(255,255,255,0.9)';this.style.transform='translateY(-50%)'">
-                            <i class="fas fa-paper-plane"></i>
+                        <button type="button" id="calcPopupSendBtn" onclick="window._calcPopupSubmit()"
+                            style="position:absolute;right:7px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:13px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.15s;box-shadow:0 4px 12px rgba(37,99,235,0.35);"
+                            onmouseenter="this.style.transform='translateY(-50%) scale(1.08)'"
+                            onmouseleave="this.style.transform='translateY(-50%)'">
+                            <i class="fas fa-arrow-up"></i>
                         </button>
                     </div>
                     <button type="button" id="calcPopupVoiceBtn"
                         onclick="if(typeof startVoiceRecognition==='function'){document.getElementById('calcPopupOverlay')?.remove();startVoiceRecognition();}"
-                        style="width:48px;height:48px;border-radius:16px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all 0.15s;"
-                        onmouseenter="this.style.background='rgba(255,255,255,0.25)'"
-                        onmouseleave="this.style.background='rgba(255,255,255,0.15)'">
+                        style="width:54px;height:54px;border-radius:18px;border:none;background:#eff6ff;color:#2563eb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;transition:all 0.15s;"
+                        onmouseenter="this.style.background='#dbeafe';this.style.transform='scale(1.05)'"
+                        onmouseleave="this.style.background='#eff6ff';this.style.transform='scale(1)'">
                         <i class="fas fa-microphone"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- Body: ตัวอย่างคำสั่ง -->
-            <div style="padding:16px 20px 20px;">
-                <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">ตัวอย่างคำสั่ง</div>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                    ${exampleHTML}
+                <!-- Live preview chips -->
+                <div id="calcPopupPreview" style="margin-top:18px;min-height:34px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                    <span id="calcPopupHintEmpty" style="font-size:12.5px;color:#cbd5e1;font-weight:500;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-keyboard" style="font-size:12px;"></i> เริ่มพิมพ์เพื่อดูข้อมูลที่ระบบเข้าใจ
+                    </span>
                 </div>
-                <div id="calcPopupHint" style="margin-top:14px;padding:10px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;font-size:12px;color:#0369a1;font-weight:500;display:none;"></div>
             </div>
         </div>`;
 
     overlay.addEventListener('click', () => overlay.remove());
     document.body.appendChild(overlay);
-    setTimeout(() => document.getElementById('calcPopupInput')?.focus(), 80);
-};
-
-window._calcPopupPickExample = function(text) {
-    const inp = document.getElementById('calcPopupInput');
-    if (inp) { inp.value = text; inp.focus(); }
+    setTimeout(() => document.getElementById('calcPopupInput')?.focus(), 120);
 };
 
 window._calcPopupInputChange = function(val) {
-    const hint = document.getElementById('calcPopupHint');
-    if (!hint) return;
-    if (!val.trim()) { hint.style.display = 'none'; return; }
+    const preview = document.getElementById('calcPopupPreview');
+    if (!preview) return;
+
+    const emptyHint = `<span id="calcPopupHintEmpty" style="font-size:12.5px;color:#cbd5e1;font-weight:500;display:flex;align-items:center;gap:6px;"><i class="fas fa-keyboard" style="font-size:12px;"></i> เริ่มพิมพ์เพื่อดูข้อมูลที่ระบบเข้าใจ</span>`;
+
+    if (!val.trim()) { preview.innerHTML = emptyHint; return; }
     const parsed = (typeof parseCommand === 'function') ? parseCommand(val) : null;
-    if (!parsed) { hint.style.display = 'none'; return; }
-    const parts = [];
-    if (parsed.gender) parts.push(parsed.gender === 'male' ? '♂ ชาย' : '♀ หญิง');
-    if (parsed.age)    parts.push(`อายุ ${parsed.age} ปี`);
-    if (parsed.plan)   parts.push(parsed.plan);
-    if (parsed.amount) parts.push(`${parsed.amountType === 'premium' ? 'ออม' : parsed.amountType === 'cashflow' ? 'CF' : 'ทุน'} ${parsed.amount.toLocaleString()} ฿`);
-    if (parsed.years)  parts.push(`${parsed.years} ปี`);
-    if (parts.length) {
-        hint.innerHTML = '<i class="fas fa-check-circle" style="color:#0ea5e9;margin-right:5px;"></i>' + parts.join(' · ');
-        hint.style.display = 'block';
+    if (!parsed) { preview.innerHTML = emptyHint; return; }
+
+    const chip = (icon, text, bg, fg) =>
+        `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:${bg};color:${fg};border-radius:11px;font-size:13px;font-weight:700;animation:calcChipIn 0.2s ease;">
+            <i class="fas ${icon}" style="font-size:11px;opacity:0.85;"></i>${text}</span>`;
+
+    const chips = [];
+    if (parsed.gender) chips.push(chip(parsed.gender === 'male' ? 'fa-mars' : 'fa-venus', parsed.gender === 'male' ? 'ชาย' : 'หญิง', parsed.gender === 'male' ? '#eff6ff' : '#fdf2f8', parsed.gender === 'male' ? '#2563eb' : '#db2777'));
+    if (parsed.age)    chips.push(chip('fa-cake-candles', `อายุ ${parsed.age} ปี`, '#f5f3ff', '#7c3aed'));
+    if (parsed.plan)   chips.push(chip('fa-shield-heart', parsed.plan, '#f0fdfa', '#0d9488'));
+    if (parsed.amount) {
+        const lbl = parsed.amountType === 'premium' ? 'ออม' : parsed.amountType === 'cashflow' ? 'กระแสเงินสด' : 'ทุน';
+        const ico = parsed.amountType === 'premium' ? 'fa-piggy-bank' : parsed.amountType === 'cashflow' ? 'fa-money-bill-trend-up' : 'fa-coins';
+        chips.push(chip(ico, `${lbl} ${parsed.amount.toLocaleString()} ฿`, '#f0fdf4', '#16a34a'));
+    }
+    if (parsed.years)  chips.push(chip('fa-calendar-check', `${parsed.years} ปี`, '#fffbeb', '#d97706'));
+
+    if (chips.length) {
+        preview.innerHTML = chips.join('');
     } else {
-        hint.style.display = 'none';
+        preview.innerHTML = `<span style="font-size:12.5px;color:#94a3b8;font-weight:500;display:flex;align-items:center;gap:6px;"><i class="fas fa-circle-info" style="font-size:12px;"></i> พิมพ์ต่อ เช่น "ชาย 35" หรือ "ทุน 2 ล้าน"</span>`;
     }
 };
 
@@ -363,7 +366,7 @@ window._calcPopupSubmit = function() {
     const inp = document.getElementById('calcPopupInput');
     if (!inp) return;
     const val = inp.value.trim();
-    if (!val) return;
+    if (!val) { inp.focus(); return; }
     document.getElementById('calcPopupOverlay')?.remove();
     if (typeof submitQuickCalc === 'function') submitQuickCalc(val);
 };
