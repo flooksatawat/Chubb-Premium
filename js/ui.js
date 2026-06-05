@@ -2684,6 +2684,137 @@ const _MODAL_ACTION_HTML = `
     <button onclick="openEsubModal()" class="${_PILL_BTN}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
 </div>`;
 
+// ==================== LV IRR CALCULATION ====================
+function _lvCashPctGlobal(age) {
+    if (age <= 59) return 1;
+    if (age === 60) return 11;
+    if (age <= 69) return 1;
+    if (age === 70) return 22;
+    if (age <= 79) return 2;
+    if (age === 80) return 33;
+    if (age <= 89) return 3;
+    if (age === 90) return 44;
+    if (age <= 99) return 4;
+    if (age === 100) return 150;
+    return 0;
+}
+
+function _calcIRR(cashFlows) {
+    if (!cashFlows || cashFlows.length === 0) return null;
+    const allNeg = cashFlows.every(c => c <= 0);
+    const allPos = cashFlows.every(c => c >= 0);
+    if (allNeg || allPos) return null;
+    let rate = 0.05;
+    for (let iter = 0; iter < 300; iter++) {
+        let npv = 0, dnpv = 0;
+        for (let t = 0; t < cashFlows.length; t++) {
+            const d = Math.pow(1 + rate, t + 1);
+            npv += cashFlows[t] / d;
+            dnpv -= (t + 1) * cashFlows[t] / (d * (1 + rate));
+        }
+        if (Math.abs(dnpv) < 1e-15) break;
+        const nr = rate - npv / dnpv;
+        if (!isFinite(nr) || nr < -0.9999) break;
+        if (Math.abs(nr - rate) < 1e-10) return nr;
+        rate = nr;
+    }
+    return isFinite(rate) && rate > -0.9999 ? rate : null;
+}
+
+window.showLVIRRPopup = function() {
+    const d = window.lastCalculationData;
+    if (!d || currentAppPlan !== 'LifeTime Value') return;
+
+    const startAge = parseInt(d.age) || 20;
+    const premium  = parseFloat(d.premium) || 0;
+    const sa       = parseFloat(d.sum) || 0;
+    const payYears = parseInt((currentPlan.match(/\d+/) || ['10'])[0]);
+
+    // อายุที่จะแสดง IRR: ทุก 5 ปี ตั้งแต่อายุ 55 ขึ้นไป และ 100
+    const targetAges = [];
+    const firstCheck = Math.max(startAge + payYears + 1, 50);
+    const firstRounded = Math.ceil(firstCheck / 5) * 5;
+    for (let a = firstRounded; a <= 100; a += 5) targetAges.push(a);
+    if (!targetAges.includes(100)) targetAges.push(100);
+
+    const irrRows = targetAges
+        .filter(ta => ta > startAge)
+        .map(targetAge => {
+            const cfs = [];
+            for (let yr = 1; yr <= targetAge - startAge; yr++) {
+                const age  = startAge + yr;
+                const prem = yr <= payYears ? premium : 0;
+                const ret  = Math.round(sa * _lvCashPctGlobal(age) / 100);
+                cfs.push(ret - prem);
+            }
+            const irr = _calcIRR(cfs);
+            return { age: targetAge, irr };
+        })
+        .filter(r => r.irr !== null);
+
+    if (irrRows.length === 0) {
+        Swal.fire({ icon: 'info', title: 'IRR', text: 'ไม่สามารถคำนวณ IRR ได้สำหรับข้อมูลนี้', confirmButtonText: 'ตกลง' });
+        return;
+    }
+
+    const lvYears = payYears + 'LV';
+    const genderTxt = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
+
+    let tableRows = '';
+    irrRows.forEach(r => {
+        const pct = (r.irr * 100).toFixed(2);
+        const isBig = r.irr >= 0.04;
+        const color = r.irr >= 0.04 ? '#15803d' : r.irr >= 0.02 ? '#0369a1' : '#64748b';
+        tableRows += `<tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px 14px;font-size:13px;color:#475569;font-weight:600;">อายุ ${r.age} ปี</td>
+            <td style="padding:10px 14px;font-size:14px;font-weight:800;color:${color};text-align:right;">${pct}%</td>
+            <td style="padding:10px 14px;text-align:center;">${r.irr >= 0.04 ? '<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;font-weight:700;">ดี</span>' : r.irr >= 0.02 ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:99px;font-weight:700;">ปานกลาง</span>' : '<span style="font-size:10px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:99px;font-weight:700;">ต่ำ</span>'}</td>
+        </tr>`;
+    });
+
+    const html = `
+    <div style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-chart-line" style="color:#fff;font-size:14px;"></i>
+            </div>
+            <div>
+                <div style="font-size:15px;font-weight:800;color:#1e1b4b;">IRR ผลตอบแทนต่อปี</div>
+                <div style="font-size:11px;color:#94a3b8;font-weight:500;">Internal Rate of Return</div>
+            </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+            <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:99px;font-weight:600;">เพศ: ${genderTxt}</span>
+            <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:99px;font-weight:600;">อายุ: ${startAge} ปี</span>
+            <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 10px;border-radius:99px;font-weight:600;">${lvYears} (ชำระ ${payYears} ปี)</span>
+            <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:3px 10px;border-radius:99px;font-weight:600;">ออมปีละ ${Math.round(premium).toLocaleString()} ฿</span>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;">
+                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:left;">อายุ</th>
+                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:right;">IRR (%/ปี)</th>
+                        <th style="padding:10px 14px;font-size:12px;font-weight:700;text-align:center;">ระดับ</th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+        <p style="margin-top:10px;font-size:10px;color:#94a3b8;line-height:1.5;">* คำนวณจากกระแสเงินสดรับ-จ่ายจริง (ไม่รวมภาษี) · ผลตอบแทนที่ดี ≥ 4%</p>
+    </div>`;
+
+    Swal.fire({
+        html,
+        background: '#f8fafc',
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '360px',
+        padding: '20px',
+        customClass: { popup: 'rounded-[24px]' }
+    });
+};
+
 function openUniversalModal(d) {
     if(!d) return;
 
@@ -2746,7 +2877,17 @@ function openUniversalModal(d) {
         }
 
         const actionContainerLV = document.getElementById('modalActionBtnsContainer');
-        if (actionContainerLV) actionContainerLV.innerHTML = _MODAL_ACTION_HTML;
+        if (actionContainerLV) actionContainerLV.innerHTML = `
+<div class="flex flex-col gap-3 mt-4">
+    <div class="grid grid-cols-2 gap-3">
+        <button onclick="openTableFromModal()" class="${_PILL_BTN} justify-center"><i class="fas fa-table text-lg text-blue-500"></i><span class="text-slate-700 font-medium">ตาราง</span></button>
+        <button onclick="window.showLVIRRPopup()" class="flex items-center justify-center gap-2 p-4 bg-violet-50 border border-violet-200 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] active:scale-[0.98] transition-all"><i class="fas fa-chart-line text-lg text-violet-600"></i><span class="text-violet-700 font-bold">IRR</span></button>
+    </div>
+    <button onclick="openGenericShareModal('summary')" class="${_PILL_BTN}"><i class="fas fa-share-nodes text-lg text-[#00A651]"></i><span class="text-slate-700 font-medium">แชร์ให้ลูกค้า</span></button>
+    <button onclick="openInstallmentModal()" class="${_PILL_BTN}"><i class="fas fa-credit-card text-lg text-purple-500"></i><span class="text-slate-700 font-medium">ตัวเลือกชำระ</span></button>
+    <button onclick="openBankModal()" class="${_PILL_BTN}"><i class="fas fa-money-bill-transfer text-lg text-orange-500"></i><span class="text-slate-700 font-medium">บัญชีโอนเงิน</span></button>
+    <button onclick="openEsubModal()" class="${_PILL_BTN}"><i class="fas fa-laptop-medical text-lg text-teal-500"></i><span class="text-slate-700 font-medium">E-Submission</span></button>
+</div>`;
         openPopup('resultModal');
     }
     else if (currentAppPlan === '868 / 818 Elite Saving') {
