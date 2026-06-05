@@ -3353,6 +3353,14 @@ window.showLVIRRPopup = function() {
 // ==================== PLAN IRR — WXN / TX / Elite / SmartPlan ====================
 let _planIrrState = null;
 let _planIrrTimer  = null;
+let _depositLongTimer = null;
+
+window._depositLongStart = function(e) {
+    if (e && e.cancelable) e.preventDefault();
+    clearTimeout(_depositLongTimer);
+    _depositLongTimer = setTimeout(() => window._showDepositConfig(), 500);
+};
+window._depositLongEnd = function() { clearTimeout(_depositLongTimer); };
 
 window._planIrrLongStart = function(e) {
     if (e && e.cancelable) e.preventDefault();
@@ -4828,7 +4836,7 @@ function generatePolicyTableData() {
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;" onclick="window._showDepositConfig()" title="คลิกเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-plus-circle\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-chart-line' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.35;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-chart-line' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};white-space:normal;line-height:1.2;">ฝากสะสม<br>ดอกเบี้ย ${(window._tableDepositRate*100).toFixed(2)}%</th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
