@@ -2857,123 +2857,175 @@ window.showLVIRRPopup = function() {
         const d = lastCalculationData;
         if (!d) { alert('กรุณาคำนวณข้อมูลก่อน'); return; }
 
-        const startAge  = _readAge(d);
-        const premium   = Math.round(parseFloat(d.premium) || 0);
-        const sa        = Math.round(parseFloat(d.sum) || 0);
-        const matchPY   = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
-        const payYears  = matchPY ? parseInt(matchPY[1]) : 10;
-        const genderTxt = (d.gender === 'male' || d.gender === 'ชาย') ? 'ชาย' : 'หญิง';
-        const genderIcon = (d.gender === 'male' || d.gender === 'ชาย') ? '👨' : '👩';
+        const startAge   = _readAge(d);
+        const premium    = Math.round(parseFloat(d.premium) || 0);
+        const sa         = Math.round(parseFloat(d.sum) || 0);
+        const matchPY    = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
+        const payYears   = matchPY ? parseInt(matchPY[1]) : 10;
+        const isMale     = (d.gender === 'male' || d.gender === 'ชาย');
+        const genderTxt  = isMale ? 'ชาย' : 'หญิง';
+        const genderIcon = isMale ? '♂' : '♀';
 
         _lvIrrState = { startAge, premium, sa, payYears };
 
-        // milestone ages ที่ LV มีเงินคืนพิเศษ
         const milestones = [60, 70, 80, 85, 90, 100].filter(a => a > startAge);
         const pillsHTML = milestones.map(a =>
             `<button type="button" class="lv-irr-pill" data-age="${a}" onclick="window._pickLVIRRAge(${a})"
-             style="flex:1;min-width:0;padding:6px 2px;border-radius:10px;border:1px solid #ddd6fe;
-                    background:#f1f5f9;color:#7c3aed;font-size:12px;font-weight:600;cursor:pointer;
-                    transition:all 0.15s;touch-action:manipulation;">${a}</button>`
+             style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
+                    background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
+                    transition:all 0.18s;touch-action:manipulation;letter-spacing:-0.01em;">${a}</button>`
         ).join('');
 
         const html = `
-<div style="margin:-4px;">
-  <!-- Header gradient -->
-  <div style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:20px 20px 0 0;padding:18px 18px 20px;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
-    <div style="position:absolute;bottom:-30px;left:30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
-    <div style="position:relative;z-index:1;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;backdrop-filter:blur(8px);">
-          <i class="fas fa-chart-line" style="color:#fff;font-size:14px;"></i>
-        </div>
-        <div>
-          <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.1;">IRR ผลตอบแทน</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:500;letter-spacing:0.04em;">LIFETIME VALUE · INTERNAL RATE OF RETURN</div>
-        </div>
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+
+  <!-- ═══ HEADER ═══ -->
+  <div style="background:linear-gradient(150deg,#312e81 0%,#4f46e5 45%,#7c3aed 100%);
+              border-radius:22px 22px 0 0;padding:20px 20px 22px;position:relative;overflow:hidden;">
+    <!-- Decorative circles -->
+    <div style="position:absolute;top:-24px;right:-16px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-28px;left:20px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+
+    <!-- Title row -->
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;position:relative;">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,0.18);
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-chart-line" style="color:#fff;font-size:17px;"></i>
       </div>
-      <!-- Info pills row -->
-      <div style="display:flex;flex-wrap:wrap;gap:5px;">
-        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;backdrop-filter:blur(4px);">${genderIcon} ${genderTxt} · ${startAge} ปี</span>
-        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ชำระ ${payYears} ปี</span>
-        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ออม ${premium.toLocaleString()} ฿/ปี</span>
-        <span style="font-size:10px;background:rgba(255,255,255,0.18);color:#fff;padding:3px 8px;border-radius:99px;font-weight:600;">ทุน ${sa.toLocaleString()} ฿</span>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-0.02em;">IRR ผลตอบแทน</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">LifeTime Value · Internal Rate of Return</div>
+      </div>
+    </div>
+
+    <!-- Info grid 2×2 — ไม่มี wrap -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;">
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">เพศ · อายุ</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">${genderIcon} ${genderTxt} · <span style="font-size:15px;font-weight:800;">${startAge}</span> ปี</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ระยะชำระ</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;"><span style="font-size:15px;font-weight:800;">${payYears}</span> ปี</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${premium.toLocaleString()} ฿</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sa.toLocaleString()} ฿</div>
       </div>
     </div>
   </div>
 
-  <!-- Body -->
-  <div style="background:#fff;border-radius:0 0 20px 20px;padding:16px 16px 14px;">
+  <!-- ═══ BODY ═══ -->
+  <div style="background:#f8f7ff;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
 
-    <!-- Milestone age pills -->
-    <div style="margin-bottom:10px;">
-      <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">คำนวณ ณ อายุ (ปี)</div>
-      <div style="display:flex;gap:5px;">${pillsHTML}</div>
+    <!-- Section label -->
+    <div style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">
+      คำนวณ IRR ณ อายุ (ปี)
     </div>
 
-    <!-- Custom age stepper -->
-    <div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #ede9fe;border-radius:14px;padding:8px 10px;margin-bottom:14px;">
+    <!-- Milestone quick-pick pills -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
+
+    <!-- Stepper row -->
+    <div style="display:flex;align-items:center;gap:0;background:#fff;border:2px solid #ddd6fe;
+                border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(109,40,217,0.08);">
       <button type="button" onclick="window._stepLVIRR(-1)"
-              style="width:32px;height:32px;border-radius:9px;border:1px solid #ddd6fe;background:#fff;color:#7c3aed;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">−</button>
-      <input id="lvIrrAgeInput" type="number" value="100" min="${startAge+1}" max="100"
-             oninput="window._updateLVIRR()"
-             style="flex:1;text-align:center;font-size:22px;font-weight:800;color:#4f46e5;border:none;outline:none;background:transparent;min-width:0;">
-      <span style="font-size:11px;color:#94a3b8;font-weight:600;flex-shrink:0;">ปี · <span id="lvIrrYears" style="color:#7c3aed;font-weight:700;">—</span></span>
-      <button type="button" onclick="window._stepLVIRR(1)"
-              style="width:32px;height:32px;border-radius:9px;border:1px solid #ddd6fe;background:#fff;color:#7c3aed;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">+</button>
-    </div>
-
-    <!-- IRR Result big display -->
-    <div style="background:linear-gradient(135deg,#faf5ff,#f5f3ff);border:1px solid #ede9fe;border-radius:16px;padding:16px 14px 12px;margin-bottom:12px;">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;">
-        <div>
-          <div style="font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2px;">IRR ต่อปี</div>
-          <div id="lvIrrResult" style="font-size:42px;font-weight:900;color:#7c3aed;line-height:1;letter-spacing:-0.03em;">—</div>
+              style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;
+                     font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;
+                     touch-action:manipulation;border-right:1.5px solid #ede9fe;">−</button>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 0;">
+        <input id="lvIrrAgeInput" type="number" value="100" min="${startAge+1}" max="100"
+               oninput="window._updateLVIRR()"
+               style="width:100%;text-align:center;font-size:26px;font-weight:900;color:#312e81;
+                      border:none;outline:none;background:transparent;line-height:1;">
+        <div style="font-size:10px;color:#a78bfa;font-weight:600;margin-top:1px;">
+          ถือกรมธรรม์ <span id="lvIrrYears" style="font-weight:800;color:#7c3aed;">—</span>
         </div>
-        <span id="lvIrrLevel" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:#f1f5f9;color:#94a3b8;align-self:center;"></span>
       </div>
+      <button type="button" onclick="window._stepLVIRR(1)"
+              style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;
+                     font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;
+                     touch-action:manipulation;border-left:1.5px solid #ede9fe;">+</button>
+    </div>
+
+    <!-- ═══ IRR RESULT CARD ═══ -->
+    <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;
+                box-shadow:0 4px 20px rgba(109,40,217,0.10);border:1px solid #ede9fe;">
+
+      <!-- Result row: big number + badge -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
+          <div id="lvIrrResult" style="font-size:48px;font-weight:900;color:#4f46e5;line-height:1;
+                                       letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
+        </div>
+        <span id="lvIrrLevel" style="font-size:12px;font-weight:700;padding:6px 13px;border-radius:99px;
+                                      background:#f5f3ff;color:#7c3aed;align-self:center;
+                                      border:1.5px solid #ddd6fe;white-space:nowrap;"></span>
+      </div>
+
       <!-- Progress bar -->
-      <div style="background:#e8e0fe;border-radius:99px;height:6px;overflow:hidden;">
-        <div id="lvIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.35s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
+      <div style="background:#ede9fe;border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
+        <div id="lvIrrBarFill" style="height:100%;width:0%;border-radius:99px;
+                                       transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+                                       background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;margin-top:3px;">
-        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">0%</span>
-        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">ดี ≥ 4%</span>
-        <span style="font-size:9px;color:#c4b5fd;font-weight:600;">6%+</span>
-      </div>
-    </div>
-
-    <!-- Stats grid -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-      <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#94a3b8;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;">เบี้ยสะสม</div>
-        <div id="lvIrrPaid" style="font-size:11px;font-weight:800;color:#ef4444;">—</div>
-      </div>
-      <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#94a3b8;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;">รับคืนสะสม</div>
-        <div id="lvIrrReturn" style="font-size:11px;font-weight:800;color:#0369a1;">—</div>
-      </div>
-      <div id="lvIrrProfitRow" style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:8px;text-align:center;color:#15803d;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:0.04em;margin-bottom:3px;color:#94a3b8;">กำไร/ขาดทุน</div>
-        <div id="lvIrrProfit" style="font-size:11px;font-weight:800;">—</div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">0%</span>
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">ดีมาก ≥ 4%</span>
+        <span style="font-size:10px;color:#c4b5fd;font-weight:600;">6%+</span>
       </div>
     </div>
 
-    <p style="margin-top:10px;margin-bottom:0;font-size:9.5px;color:#c4b5fd;line-height:1.5;text-align:center;">คำนวณจากกระแสเงินสดรับ-จ่ายจริง · ไม่รวมภาษี</p>
+    <!-- ═══ STATS ROW ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:#fff;border:1px solid #fee2e2;border-radius:14px;padding:10px 8px;text-align:center;
+                  box-shadow:0 2px 6px rgba(239,68,68,0.06);">
+        <div style="font-size:10px;color:#f87171;font-weight:700;margin-bottom:4px;">เบี้ยสะสม</div>
+        <div id="lvIrrPaid" style="font-size:12px;font-weight:800;color:#dc2626;line-height:1.2;">—</div>
+      </div>
+      <div style="background:#fff;border:1px solid #bfdbfe;border-radius:14px;padding:10px 8px;text-align:center;
+                  box-shadow:0 2px 6px rgba(59,130,246,0.06);">
+        <div style="font-size:10px;color:#60a5fa;font-weight:700;margin-bottom:4px;">รับคืนสะสม</div>
+        <div id="lvIrrReturn" style="font-size:12px;font-weight:800;color:#1d4ed8;line-height:1.2;">—</div>
+      </div>
+      <div id="lvIrrProfitRow" style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;
+                                       box-shadow:0 2px 6px rgba(34,197,94,0.06);color:#15803d;">
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;color:#4ade80;">กำไร/ขาดทุน</div>
+        <div id="lvIrrProfit" style="font-size:12px;font-weight:800;line-height:1.2;">—</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:10px;color:#c4b5fd;font-weight:500;line-height:1.5;">
+      คำนวณจากกระแสเงินสดรับ-จ่ายจริง · ไม่รวมภาษี
+    </div>
   </div>
 </div>`;
 
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                html, background: 'transparent',
-                showConfirmButton: false, showCloseButton: true,
-                width: '340px', padding: '0px',
+                html,
+                background: 'transparent',
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 'min(92vw, 480px)',
+                padding: '0px',
                 customClass: { popup: 'lv-irr-swal-popup', closeButton: 'lv-irr-close-btn' },
                 didOpen: () => {
-                    // style close button
                     const closeBtn = document.querySelector('.lv-irr-close-btn');
                     if (closeBtn) {
-                        closeBtn.style.cssText = 'position:absolute;top:10px;right:12px;color:rgba(255,255,255,0.8);font-size:22px;z-index:10;background:rgba(255,255,255,0.15);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;';
+                        Object.assign(closeBtn.style, {
+                            position:'absolute', top:'12px', right:'14px',
+                            color:'rgba(255,255,255,0.85)', fontSize:'20px', zIndex:'10',
+                            background:'rgba(255,255,255,0.18)', borderRadius:'50%',
+                            width:'32px', height:'32px', display:'flex',
+                            alignItems:'center', justifyContent:'center',
+                            backdropFilter:'blur(8px)'
+                        });
                     }
                     window._updateLVIRR();
                 }
