@@ -444,6 +444,263 @@ window._clearDepositConfig = function() {
     document.getElementById('depositConfigBackdrop')?.remove();
     if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
 };
+
+// ==================== Deposit IRR ====================
+let _depositIrrTimer = null;
+window._depositIrrLongStart = function(e) {
+    if (e && e.cancelable) e.preventDefault();
+    clearTimeout(_depositIrrTimer);
+    _depositIrrTimer = setTimeout(() => showDepositIRRPopup(), 500);
+};
+window._depositIrrLongEnd = function() { clearTimeout(_depositIrrTimer); };
+
+// สร้าง cash flows สำหรับ IRR ของ deposit column:
+// outflow = premium (ช่วงชำระ), inflow = depositPool ก้อนเดียวที่ receiveAge
+function _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, receiveAge, depositUntilAge, depositRate) {
+    const totalYrs = receiveAge - startAge;
+    if (totalYrs <= 0) return null;
+
+    // คำนวณ deposit pool ที่ receiveAge
+    let pool = 0;
+    for (let yr = 1; yr <= receiveAge - startAge; yr++) {
+        const age = startAge + yr;
+        // คำนวณ cashFlowAmt ตามแผน (ลอกจาก generatePolicyTableData)
+        let cf = 0;
+        if (planType === 'WXN') {
+            if (age <= 60)       cf = Math.round(sa * 0.0225);
+            else if (age === 61) cf = Math.round(sa * 0.10);
+            else if (age < 90)   cf = Math.round(sa * (0.10 + (age - 61) * 0.005));
+            else                 cf = Math.round(sa);
+        } else if (planType === 'TX') {
+            if (yr % 3 === 0 && yr <= 24) cf = Math.round(sa * 0.05);
+            else if (yr === 25)  cf = Math.round(sa * 0.70);
+            else if (yr >= 26 && age < 90) cf = Math.round(sa * 0.08);
+            else if (age >= 90)  cf = Math.round(sa);
+        } else if (planType === 'ELITE') {
+            const maxYr = startAge <= 50 ? 68 - startAge : 18;
+            if (yr < maxYr)       cf = Math.round(sa * 0.12);
+            else if (yr >= maxYr) cf = Math.round(sa * 7.20);
+        } else if (planType === 'SM') {
+            if (yr === 21)             cf = Math.round(sa * 2.12);
+            else if (yr >= 2 && yr <= 20) cf = Math.round(sa * 0.02);
+        } else if (planType === 'LV') {
+            cf = Math.round(sa * _lvCashPctGlobal(age) / 100);
+        }
+        // สะสม: grow แล้วบวก cash flow ของปีนี้
+        if (age <= depositUntilAge) {
+            pool = Math.round(pool * (1 + depositRate) + cf);
+        } else {
+            pool = Math.round(pool * (1 + depositRate)); // หลังอายุสะสม: ทบต้นแต่ไม่รับเพิ่ม
+        }
+    }
+
+    // สร้าง cash flows: outflow = premium, inflow = pool ที่ receiveAge
+    const cfs = [];
+    for (let yr = 1; yr <= totalYrs; yr++) {
+        const prem = yr <= payYears ? premium : 0;
+        cfs.push(-prem); // ไม่รับ cash flow ระหว่างทาง (ไปสะสมทั้งหมด)
+    }
+    cfs[totalYrs - 1] += pool; // รับก้อนเดียวที่ receiveAge
+    return { cfs, pool };
+}
+
+function showDepositIRRPopup() {
+    const d = lastCalculationData;
+    if (!d) { alert('กรุณาคำนวณข้อมูลก่อน'); return; }
+    if (!window._tableDepositEnabled || !window._tableDepositUntilAge) {
+        alert('กรุณาตั้งค่าฝากสะสมก่อน (กดค้างที่ "กระแสเงินสด")');
+        return;
+    }
+
+    const startAge     = _readAge(d);
+    const premium      = Math.round(parseFloat(d.premium) || 0);
+    const sa           = Math.round(parseFloat(d.sum) || 0);
+    const depositUntilAge = window._tableDepositUntilAge;
+    const depositRate  = window._tableDepositRate || 0.02;
+    const isMale       = (d.gender === 'male' || d.gender === 'ชาย');
+
+    // ตรวจ planType (รองรับทั้ง LV)
+    let planType = _detectPlanType(currentAppPlan);
+    if (!planType && (currentAppPlan || '').toUpperCase().includes('LIFETIME')) planType = 'LV';
+    const payYears = planType === 'WXN' ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10')
+                   : planType === 'TX'    ? 24 : planType === 'ELITE' ? 8
+                   : planType === 'SM'    ? 7  : planType === 'LV'
+                   ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10') : 10;
+    const maxAge   = planType === 'ELITE' ? (startAge <= 50 ? 68 : startAge + 18)
+                   : planType === 'SM'    ? startAge + 21 : 100;
+    const defaultReceive = Math.min(maxAge, Math.max(depositUntilAge, startAge + 1));
+
+    // compute initial
+    const res0 = _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, defaultReceive, depositUntilAge, depositRate);
+    const irr0 = res0 ? _calcIRR(res0.cfs) : null;
+
+    // สร้าง pills รอบ depositUntilAge
+    const pillAges = [...new Set([depositUntilAge, depositUntilAge + 5, depositUntilAge + 10].filter(a => a > startAge && a <= maxAge))];
+    const pillsHTML = pillAges.map(a =>
+        `<button type="button" class="dep-irr-pill" data-age="${a}" onclick="window._updateDepositIRR(${a})"
+         style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #bbf7d0;
+                background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;
+                transition:all 0.18s;touch-action:manipulation;">${a}</button>`
+    ).join('');
+
+    const pct0 = irr0 !== null ? ((irr0 * 100).toFixed(2) + '%') : '—';
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="background:linear-gradient(150deg,#064e3b,#065f46,#059669);border-radius:22px 22px 0 0;padding:20px 20px 22px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative;">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-piggy-bank" style="color:#fff;font-size:17px;"></i>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;">IRR สะสม รับ ${(depositRate*100).toFixed(0)}%</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">ฝากสะสมทบต้น ${(depositRate*100).toFixed(2)}% · คิด IRR เมื่อรับก้อนที่อายุ</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">สะสมถึงอายุ</div>
+        <div style="font-size:15px;font-weight:800;color:#fff;">${depositUntilAge} ปี</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ดอกเบี้ยสะสม</div>
+        <div style="font-size:15px;font-weight:800;color:#fff;">${(depositRate*100).toFixed(2)}% ทบต้น</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">${premium.toLocaleString()} ฿</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">${sa.toLocaleString()} ฿</div>
+      </div>
+    </div>
+  </div>
+  <div style="background:#f0fdf4;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
+    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">รับก้อนที่อายุ (ปี)</div>
+    <div id="depIrrPills" style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
+    <div style="display:flex;align-items:center;background:#fff;border:2px solid #bbf7d0;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(5,150,105,0.08);">
+      <button type="button" onclick="window._stepDepositIRR(-1)" style="width:48px;height:48px;border:none;background:transparent;color:#15803d;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-right:1.5px solid #bbf7d0;">−</button>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 0;">
+        <input id="depIrrAgeInput" type="number" value="${defaultReceive}" min="${startAge+1}" max="${maxAge}" oninput="window._updateDepositIRR(parseInt(this.value))"
+               style="width:100%;text-align:center;font-size:26px;font-weight:900;color:#14532d;border:none;outline:none;background:transparent;line-height:1;">
+        <div style="font-size:10px;color:#86efac;font-weight:600;margin-top:1px;">ถือ <span id="depIrrYears" style="font-weight:800;color:#16a34a;">—</span></div>
+      </div>
+      <button type="button" onclick="window._stepDepositIRR(1)" style="width:48px;height:48px;border:none;background:transparent;color:#15803d;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-left:1.5px solid #bbf7d0;">+</button>
+    </div>
+    <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;box-shadow:0 4px 20px rgba(5,150,105,0.10);border:1px solid #bbf7d0;">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
+        <div id="depIrrResult" style="font-size:52px;font-weight:900;color:#15803d;line-height:1;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
+      </div>
+      <div style="background:#dcfce7;border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
+        <div id="depIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#4ade80,#16a34a);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:10px;color:#86efac;font-weight:600;">0%</span>
+        <span style="font-size:10px;color:#86efac;font-weight:600;">ดีมาก ≥ 4%</span>
+        <span style="font-size:10px;color:#86efac;font-weight:600;">6%+</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:#fff;border:1px solid #fee2e2;border-radius:14px;padding:10px 8px;text-align:center;">
+        <div style="font-size:10px;color:#f87171;font-weight:700;margin-bottom:4px;">เบี้ยสะสม</div>
+        <div id="depIrrPaid" style="font-size:12px;font-weight:800;color:#dc2626;line-height:1.2;">—</div>
+      </div>
+      <div style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;">
+        <div style="font-size:10px;color:#4ade80;font-weight:700;margin-bottom:4px;">รับก้อนสะสม</div>
+        <div id="depIrrPool" style="font-size:12px;font-weight:800;color:#15803d;line-height:1.2;">—</div>
+      </div>
+      <div id="depIrrProfitRow" style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;color:#15803d;">
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;">ผลตอบแทนสุทธิ</div>
+        <div id="depIrrProfit" style="font-size:12px;font-weight:800;line-height:1.2;">—</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:10px;color:#86efac;font-weight:500;">คำนวณจาก: เบี้ยออก − รับก้อนสะสม ที่อายุที่เลือก</div>
+  </div>
+</div>`,
+            background: 'transparent',
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 'min(92vw, 480px)',
+            padding: '0px',
+            customClass: { popup: 'lv-irr-swal-popup', closeButton: 'lv-irr-close-btn' },
+            didOpen: () => {
+                // state สำหรับ update
+                window._depIrrState = { startAge, premium, sa, payYears, planType, depositUntilAge, depositRate, maxAge };
+                const cb = document.querySelector('.lv-irr-close-btn');
+                if (cb) Object.assign(cb.style, { position:'absolute',top:'12px',right:'14px',color:'rgba(255,255,255,0.85)',fontSize:'20px',zIndex:'10',background:'rgba(255,255,255,0.18)',borderRadius:'50%',width:'32px',height:'32px',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)' });
+                window._updateDepositIRR(defaultReceive);
+            }
+        });
+    }
+}
+
+window._depIrrState = null;
+
+window._updateDepositIRR = function(age) {
+    if (!window._depIrrState) return;
+    const { startAge, premium, sa, payYears, planType, depositUntilAge, depositRate, maxAge } = window._depIrrState;
+    const inp = document.getElementById('depIrrAgeInput');
+    let receiveAge = age !== undefined ? age : parseInt(inp?.value);
+    if (!Number.isFinite(receiveAge)) receiveAge = depositUntilAge;
+    receiveAge = Math.max(startAge + 1, Math.min(receiveAge, maxAge));
+    if (inp) inp.value = receiveAge;
+
+    document.querySelectorAll('.dep-irr-pill').forEach(b => {
+        const active = parseInt(b.dataset.age) === receiveAge;
+        b.style.background  = active ? 'linear-gradient(135deg,#059669,#16a34a)' : '#f0fdf4';
+        b.style.color       = active ? '#fff' : '#15803d';
+        b.style.borderColor = active ? 'transparent' : '#bbf7d0';
+        b.style.fontWeight  = active ? '800' : '700';
+        b.style.boxShadow   = active ? '0 3px 10px rgba(5,150,105,0.3)' : 'none';
+    });
+
+    const yearsEl = document.getElementById('depIrrYears');
+    if (yearsEl) yearsEl.textContent = (receiveAge - startAge) + ' ปี';
+
+    const res = _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, receiveAge, depositUntilAge, depositRate);
+    if (!res) return;
+    const { cfs, pool } = res;
+    const irr = _calcIRR(cfs);
+
+    let totalPaid = 0;
+    for (let yr = 1; yr <= receiveAge - startAge; yr++) { if (yr <= payYears) totalPaid += premium; }
+    const profit = pool - totalPaid;
+
+    const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    set('depIrrPaid',   Math.round(totalPaid).toLocaleString() + ' ฿');
+    set('depIrrPool',   Math.round(pool).toLocaleString() + ' ฿');
+    set('depIrrProfit', (profit >= 0 ? '+' : '') + Math.round(profit).toLocaleString() + ' ฿');
+    const pr = document.getElementById('depIrrProfitRow');
+    if (pr) pr.style.color = profit >= 0 ? '#15803d' : '#dc2626';
+
+    const resultEl = document.getElementById('depIrrResult');
+    const barFill  = document.getElementById('depIrrBarFill');
+    if (irr === null || irr <= -0.95) {
+        if (resultEl) { resultEl.textContent = '—'; resultEl.style.color = '#94a3b8'; }
+        if (barFill)  barFill.style.width = '0%';
+    } else {
+        const pct = (irr * 100).toFixed(2);
+        let color, barClr;
+        if (irr < 0)          { color = '#dc2626'; barClr = 'linear-gradient(90deg,#f87171,#dc2626)'; }
+        else if (irr >= 0.04) { color = '#15803d'; barClr = 'linear-gradient(90deg,#4ade80,#16a34a)'; }
+        else if (irr >= 0.02) { color = '#0369a1'; barClr = 'linear-gradient(90deg,#60a5fa,#2563eb)'; }
+        else                   { color = '#92400e'; barClr = 'linear-gradient(90deg,#fbbf24,#d97706)'; }
+        const barW = irr < 0 ? 0 : Math.min(Math.max(irr / 0.06 * 100, 4), 100).toFixed(1);
+        if (resultEl) { resultEl.textContent = (irr > 0 ? '+' : '') + pct + '%'; resultEl.style.color = color; }
+        if (barFill)  { barFill.style.width = barW + '%'; barFill.style.background = barClr; }
+    }
+};
+
+window._stepDepositIRR = function(d) {
+    const inp = document.getElementById('depIrrAgeInput');
+    if (!inp) return;
+    inp.value = (parseInt(inp.value) || 0) + d;
+    window._updateDepositIRR(parseInt(inp.value));
+};
 function showCongratsToast(msg) {
     const cashView = document.getElementById('cashView'); if (!cashView || cashView.classList.contains('hidden') || cashView.style.display === 'none') return;
     const toast = document.createElement('div'); toast.className = "fixed top-16 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-4 rounded-[24px] z-[9999] shadow-[0_10px_30px_rgba(16,185,129,0.4)] text-center transition-all duration-500 flex items-center gap-3.5 transform -translate-y-10 opacity-0 scale-90 w-[90%] max-w-[340px]"; 
@@ -4959,7 +5216,7 @@ function generatePolicyTableData() {
         <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-piggy-bank\' style=\'font-size:9px;opacity:0.35;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-chart-line' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
-        ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};white-space:normal;line-height:1.2;">ฝากสะสม<br>ดอกเบี้ย ${(window._tableDepositRate*100).toFixed(2)}%</th>` : ''}
+        ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-chart-line' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th>` : ''}
         ${showCVColumn ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
