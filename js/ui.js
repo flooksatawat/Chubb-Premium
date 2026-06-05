@@ -2882,9 +2882,17 @@ function _lvIrrRefreshHeader() {
     set('lvHdrSum',       `${Math.round(sa).toLocaleString()} ฿`);
 }
 
-// นำค่าที่แก้ไขมาใช้: อัปเดต state + header + pills + stepper แล้วคำนวณใหม่
-function _lvIrrApply(changes) {
-    Object.assign(_lvIrrState, changes);
+// ดึงค่าล่าสุดจากหน้าคำนวณหลัก (หลัง calculate) มา sync เข้า popup
+function _lvIrrResyncFromMain() {
+    const d = lastCalculationData;
+    if (!d || !_lvIrrState) return;
+    const matchPY = (typeof currentPlan === 'string') ? currentPlan.match(/(\d+)/) : null;
+    _lvIrrState.startAge = _readAge(d);
+    _lvIrrState.premium  = Math.round(parseFloat(d.premium) || 0);
+    _lvIrrState.sa       = Math.round(parseFloat(d.sum) || 0);
+    _lvIrrState.payYears = matchPY ? parseInt(matchPY[1]) : _lvIrrState.payYears;
+    _lvIrrState.isMale   = (d.gender === 'male' || d.gender === 'ชาย');
+
     _lvIrrRefreshHeader();
     const pc = document.getElementById('lvIrrPills');
     if (pc) pc.innerHTML = _lvIrrPillsHTML(_lvIrrState.startAge);
@@ -2998,23 +3006,39 @@ window._lvEditPickPY = function(y) {
 
 window._lvIrrSaveEdit = function(field) {
     const inp = document.getElementById('lvEditInput');
+    const _mode = (typeof currentMode !== 'undefined') ? currentMode : 'premium';
+    try {
     if (field === 'genderAge') {
         let age = parseInt(inp && inp.value);
         if (!Number.isFinite(age) || age < 0) age = 0;
         if (age > 80) age = 80;
-        _lvIrrApply({ isMale: _lvEditGenderTmp, startAge: age });
+        // เขียนกลับหน้าคำนวณหลัก
+        const ageEl = document.getElementById('ageInput');
+        if (ageEl) ageEl.value = age;
+        if (typeof setGender === 'function') setGender(_lvEditGenderTmp ? 'male' : 'female');
+        else if (typeof calculate === 'function') calculate(_mode, true);
     } else if (field === 'payYears') {
         let y = parseInt(inp && inp.value) || _lvIrrState.payYears;
-        _lvIrrApply({ payYears: y });
+        if (typeof setPlan === 'function') setPlan(y + 'LV');
+        else if (typeof calculate === 'function') calculate(_mode, true);
     } else if (field === 'premium') {
         let v = Math.round(parseFloat(inp && inp.value) || 0);
         if (v < 0) v = 0;
-        _lvIrrApply({ premium: v });
+        if (typeof currentMode !== 'undefined') currentMode = 'premium';
+        const pEl = document.getElementById('premiumInput');
+        if (pEl) pEl.value = v.toLocaleString();
+        if (typeof calculate === 'function') calculate('premium', true);
     } else if (field === 'sum') {
         let v = Math.round(parseFloat(inp && inp.value) || 0);
         if (v < 0) v = 0;
-        _lvIrrApply({ sa: v });
+        if (typeof currentMode !== 'undefined') currentMode = 'sum';
+        const sEl = document.getElementById('sumInsuredInput');
+        if (sEl) sEl.value = v.toLocaleString();
+        if (typeof calculate === 'function') calculate('sum', true);
     }
+    // sync ค่าล่าสุดจากหน้าคำนวณกลับเข้า popup
+    _lvIrrResyncFromMain();
+    } catch(e) { console.error('lvIrrSaveEdit error:', e); }
     window._lvIrrCloseEdit();
 };
 
