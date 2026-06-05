@@ -923,6 +923,31 @@ function initModernScrollInteractions() {
 }
 
 // 🌟 ระบบค้นหา
+// oninput: สลับไอคอน/ปุ่มล้างเท่านั้น — ไม่ค้นหาอัตโนมัติ (รอ Enter)
+function handleUnifiedPlanSearchInput() {
+    const input = document.getElementById('unifiedPlanSearchInput');
+    if (!input) return;
+    const query = input.value.trim().toLowerCase();
+    const clearBtn = document.getElementById('planSearchClearBtn');
+    const searchIcon = document.getElementById('planSearchIcon');
+    if (clearBtn) clearBtn.classList.toggle('hidden', query === '');
+    if (searchIcon) searchIcon.classList.toggle('hidden', query !== '');
+    // ล้างช่องว่าง → กลับไปแสดงรายการทั้งหมดทันที
+    if (query === '') {
+        isModernSearchActive = false;
+        renderModernCards(modernPlansData, true);
+    }
+}
+
+// onkeydown: ค้นหาเมื่อกด Enter เท่านั้น
+function handleUnifiedPlanSearchKey(event) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        handleUnifiedPlanSearch();
+        if (event.target && typeof event.target.blur === 'function') event.target.blur();
+    }
+}
+
 function handleUnifiedPlanSearch() {
     const input = document.getElementById('unifiedPlanSearchInput');
     if(!input) return;

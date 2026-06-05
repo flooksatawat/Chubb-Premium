@@ -785,8 +785,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <div class="relative flex items-center">
                         <input id="unifiedPlanSearchInput"
                                type="text"
-                               oninput="handleUnifiedPlanSearch()"
-                               placeholder="ค้นหาแบบประกัน..."
+                               enterkeyhint="search"
+                               oninput="handleUnifiedPlanSearchInput()"
+                               onkeydown="handleUnifiedPlanSearchKey(event)"
+                               placeholder="ค้นหาแบบประกัน แล้วกด Enter"
                                class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all text-center"
                                style="background:rgba(255,255,255,0.72);border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 10px rgba(37,99,235,0.08);">
                         <i id="planSearchIcon" class="fas fa-magnifying-glass absolute right-4 text-slate-400 text-[14px] pointer-events-none"></i>
@@ -1919,7 +1921,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
     <script src="js/calculator.js?v=8"></script>
     <script src="js/parser.js?v=4"></script>
-    <script src="js/ui.js?v=82"></script>
+    <script src="js/ui.js?v=83"></script>
     <script src="js/compare.js?v=5"></script>
     <script src="js/share.js?v=8"></script>
     <script src="js/mf.js?v=24"></script>
