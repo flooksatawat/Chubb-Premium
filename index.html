@@ -782,18 +782,26 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                 <!-- Frosted-glass top search header -->
                 <div class="absolute top-0 left-0 right-0 z-20 px-4 pb-3" style="padding-top:calc(env(safe-area-inset-top,0px) + 14px);background:rgba(245,247,255,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.6);">
-                    <div class="relative flex items-center">
-                        <input id="unifiedPlanSearchInput"
-                               type="text"
-                               enterkeyhint="search"
-                               oninput="handleUnifiedPlanSearchInput()"
-                               onkeydown="handleUnifiedPlanSearchKey(event)"
-                               placeholder="ค้นหาแบบประกัน แล้วกด Enter"
-                               class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all text-center"
-                               style="background:rgba(255,255,255,0.72);border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 10px rgba(37,99,235,0.08);">
-                        <i id="planSearchIcon" class="fas fa-magnifying-glass absolute right-4 text-slate-400 text-[14px] pointer-events-none"></i>
-                        <button id="planSearchClearBtn" onclick="clearPlanSearch()" class="absolute right-3 w-7 h-7 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 transition-colors hidden">
-                            <i class="fas fa-xmark text-[12px]"></i>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input id="unifiedPlanSearchInput"
+                                   type="text"
+                                   enterkeyhint="search"
+                                   oninput="handleUnifiedPlanSearchInput()"
+                                   onkeydown="handleUnifiedPlanSearchKey(event)"
+                                   placeholder="ค้นหาแบบประกัน แล้วกด Enter"
+                                   class="w-full h-[46px] pl-4 pr-11 rounded-[14px] text-[14px] font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all text-center"
+                                   style="background:rgba(255,255,255,0.72);border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 10px rgba(37,99,235,0.08);">
+                            <i id="planSearchIcon" class="fas fa-magnifying-glass absolute right-4 text-slate-400 text-[14px] pointer-events-none" style="top:50%;transform:translateY(-50%);"></i>
+                            <button id="planSearchClearBtn" onclick="clearPlanSearch()" class="absolute right-3 w-7 h-7 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 transition-colors hidden" style="top:50%;transform:translateY(-50%);">
+                                <i class="fas fa-xmark text-[12px]"></i>
+                            </button>
+                        </div>
+                        <button onclick="handleUnifiedPlanSearch();document.getElementById('unifiedPlanSearchInput').blur();"
+                                class="h-[46px] px-4 rounded-[14px] text-[14px] font-semibold text-white shrink-0 flex items-center gap-1.5 active:scale-95 transition-all duration-150"
+                                style="background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 2px 10px rgba(37,99,235,0.35);">
+                            <i class="fas fa-paper-plane text-[13px]"></i>
+                            <span>ส่ง</span>
                         </button>
                     </div>
                 </div>
@@ -831,6 +839,15 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                 class="w-[48px] h-[48px] shrink-0 rounded-[16px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150">
                                 <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
                                 <i class="fas fa-microphone text-[19px] relative z-10"></i>
+                            </button>
+
+                            <!-- Send button -->
+                            <button id="modalSendBtn"
+                                onclick="window.submitModalAiCalc()"
+                                class="w-[48px] h-[48px] shrink-0 rounded-[16px] relative overflow-hidden flex items-center justify-center text-white active:scale-90 transition-all duration-150"
+                                style="background:linear-gradient(135deg,#3b82f6,#6366f1);box-shadow:0 4px 12px rgba(59,130,246,0.35);">
+                                <div class="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent pointer-events-none"></div>
+                                <i class="fas fa-paper-plane text-[17px] relative z-10"></i>
                             </button>
                         </div>
                     </div>
