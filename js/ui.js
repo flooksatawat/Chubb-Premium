@@ -317,11 +317,7 @@ window.showCalcPopup = function() {
                 </div>
 
                 <!-- Live preview chips -->
-                <div id="calcPopupPreview" style="margin-top:18px;min-height:34px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                    <span id="calcPopupHintEmpty" style="font-size:12.5px;color:#cbd5e1;font-weight:500;display:flex;align-items:center;gap:6px;">
-                        <i class="fas fa-keyboard" style="font-size:12px;"></i> เริ่มพิมพ์เพื่อดูข้อมูลที่ระบบเข้าใจ
-                    </span>
-                </div>
+                <div id="calcPopupPreview" style="margin-top:18px;min-height:34px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;"></div>
             </div>
         </div>`;
 
@@ -334,11 +330,9 @@ window._calcPopupInputChange = function(val) {
     const preview = document.getElementById('calcPopupPreview');
     if (!preview) return;
 
-    const emptyHint = `<span id="calcPopupHintEmpty" style="font-size:12.5px;color:#cbd5e1;font-weight:500;display:flex;align-items:center;gap:6px;"><i class="fas fa-keyboard" style="font-size:12px;"></i> เริ่มพิมพ์เพื่อดูข้อมูลที่ระบบเข้าใจ</span>`;
-
-    if (!val.trim()) { preview.innerHTML = emptyHint; return; }
+    if (!val.trim()) { preview.innerHTML = ''; return; }
     const parsed = (typeof parseCommand === 'function') ? parseCommand(val) : null;
-    if (!parsed) { preview.innerHTML = emptyHint; return; }
+    if (!parsed) { preview.innerHTML = ''; return; }
 
     const chip = (icon, text, bg, fg) =>
         `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:${bg};color:${fg};border-radius:11px;font-size:13px;font-weight:700;animation:calcChipIn 0.2s ease;">
