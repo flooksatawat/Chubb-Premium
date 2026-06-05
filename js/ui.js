@@ -2485,15 +2485,15 @@ window._cmpStartReplace = function(slot, curA, curB) {
     banner.innerHTML = `<i class="fas fa-pen"></i> เปลี่ยน <span style="color:#fef9c3">${slotLabel}</span> → เลือกแบบใหม่ &nbsp;<button onclick="window._cmpCancelReplace()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
     banner.style.display = 'flex';
 
-    // บนมือถือ: ซ่อน sheet ให้เห็น plan list
+    // ซ่อน sheet (ถ้ามี) แล้วเปิดเมนูเลือกแบบอัตโนมัติ
     const sheet = document.getElementById('_cmpMobileSheet');
     if (sheet && sheet.style.display !== 'none') {
         sheet.style.transform = 'translateY(100%)';
-    } else {
-        // desktop: เปิดแถบซ้าย
-        const layout = document.querySelector('.command-center-layout');
-        if (layout && layout.classList.contains('left-pane-hidden')) window.toggleLeftPane?.();
     }
+    // เปิด plan modal ทันทีเพื่อให้เลือกแบบใหม่โดยไม่ต้องกดเพิ่ม
+    setTimeout(() => {
+        if (typeof openPlanModal === 'function') openPlanModal();
+    }, 150);
 };
 
 window._cmpCancelReplace = function() {
