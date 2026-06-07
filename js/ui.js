@@ -1271,9 +1271,30 @@ function openPlanModal() {
     const _activePlanSnapshot = window.__cmpHighlightPlan || currentAppPlan;
 
     renderModernCards(modernPlansData, true);
+
+    // Apply highlight synchronously right after DOM is set — no setTimeout race
+    _applyActiveCardHighlight(_activePlanSnapshot);
+
     initSwipeToDismiss();
     initModernScrollInteractions();
     setTimeout(() => _animateModalCards(_activePlanSnapshot), 90);
+}
+
+function _applyActiveCardHighlight(activePlan) {
+    const container = document.getElementById('planListContainer');
+    if (!container) return;
+    container.querySelectorAll('button[data-plan]').forEach(btn => {
+        const isActive = btn.getAttribute('data-plan') === activePlan;
+        if (isActive) {
+            btn.style.background = 'linear-gradient(135deg,#eff6ff,#dbeafe)';
+            btn.style.border = '1.5px solid #3b82f6';
+            btn.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15), 0 2px 10px rgba(0,0,0,0.06)';
+        } else {
+            btn.style.background = '#fff';
+            btn.style.border = '1px solid rgba(226,232,240,0.8)';
+            btn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
+        }
+    });
 }
 
 function _animateModalCards(activePlanOverride) {
@@ -1281,7 +1302,7 @@ function _animateModalCards(activePlanOverride) {
     if (!container) return;
     const cards = Array.from(container.querySelectorAll('.card-3d-container'));
     if (!cards.length) return;
-    const n = modernPlansData.length; // 11
+    const n = modernPlansData.length;
     // Loop mode: second copy (index n..2n-1) is the visible one after scrollTop jump
     // Search mode: first n cards visible
     const startIdx = isModernSearchActive ? 0 : n;
@@ -1297,17 +1318,6 @@ function _animateModalCards(activePlanOverride) {
             : `cardIn 280ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`;
         card.style.animation = anim;
         card.addEventListener('animationend', () => { card.style.animation = ''; }, { once: true });
-        if (btn) {
-            if (isActive) {
-                btn.style.background = 'linear-gradient(135deg,#eff6ff,#dbeafe)';
-                btn.style.border = '1.5px solid #3b82f6';
-                btn.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15), 0 2px 10px rgba(0,0,0,0.06)';
-            } else {
-                btn.style.background = '#fff';
-                btn.style.border = '1px solid rgba(226,232,240,0.8)';
-                btn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
-            }
-        }
     }
 }
 
