@@ -2588,10 +2588,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .dob-field input:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
 .dob-field input.filled { border-color:var(--dob-accent,#3b82f6); }
 .dob-sep { font-size:22px;font-weight:700;color:#cbd5e1;align-self:center;padding-top:18px; }
-.dob-cards-grid { display:grid;grid-template-columns:1fr;gap:10px; }
-@media (min-width:860px) { .dob-cards-grid { grid-template-columns:1fr 1fr; } }
-#dobAstroDetail { overflow:hidden;transition:max-height 0.38s cubic-bezier(0.16,1,0.3,1);max-height:0; }
-#dobAstroDetail.open { max-height:4000px; }
+.dob-cards-grid { display:flex;flex-direction:column;gap:14px; }
+#dobAstroDetail { overflow:hidden;transition:max-height 0.6s cubic-bezier(0.16,1,0.3,1);max-height:0; }
+#dobAstroDetail.open { max-height:9999px; }
 #dobPhoneInput { width:100%;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;background:white;outline:none;padding:10px 14px;transition:border-color 0.2s,box-shadow 0.2s;-moz-appearance:textfield;letter-spacing:0.08em; }
 #dobPhoneInput::-webkit-outer-spin-button,#dobPhoneInput::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 #dobPhoneInput:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
@@ -3208,9 +3207,7 @@ function toggleDobAstro() {
     chev.style.transform = open ? 'rotate(180deg)' : '';
     if (open) {
         _renderDobDetail();
-        requestAnimationFrame(() => {
-            detail.style.maxHeight = detail.scrollHeight + 'px';
-        });
+        detail.style.maxHeight = '9999px';
     } else {
         detail.style.maxHeight = '0';
     }
