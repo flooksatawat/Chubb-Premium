@@ -2886,14 +2886,16 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
 window._cmpApply = function() {
     const pA = window.__cmpViewPlanA, pB = window.__cmpViewPlanB;
     if (!pA || !pB) return;
-    const ageA = parseInt(document.getElementById('cmpAgeA')?.value) || 0;
-    const ageB = parseInt(document.getElementById('cmpAgeB')?.value) || 0;
-    if (ageA < 1 || ageA > 99 || ageB < 1 || ageB > 99) return; // ยังกรอกไม่ครบ
+    const _sA = window.__cmpSettingsA || {}, _sB = window.__cmpSettingsB || {};
+    const ageA = parseInt(document.getElementById('cmpAgeA')?.value) || _sA.age || 0;
+    const ageB = parseInt(document.getElementById('cmpAgeB')?.value) || _sB.age || 0;
+    if (ageA < 1 || ageA > 99) return; // ต้องมีอายุแบบที่ 1 อย่างน้อย
     const genA = document.getElementById('cmpGenA')?.value || 'male';
     const genB = document.getElementById('cmpGenB')?.value || 'male';
+    const finalAgeB = (ageB >= 1 && ageB <= 99) ? ageB : ageA; // fallback = อายุแบบที่ 1
     window.renderCompareView(pA, pB,
         { age: ageA, gender: genA },
-        { age: ageB, gender: genB }
+        { age: finalAgeB, gender: genB }
     );
 };
 
