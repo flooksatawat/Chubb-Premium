@@ -5636,6 +5636,11 @@ function generatePolicyTableData() {
                             cfI.classList.add('cf-panel-enter');
                             cfI.addEventListener('animationend', () => cfI.classList.remove('cf-panel-enter'), { once: true });
                         }
+                        // switch to tableView เพื่อแสดงคอลัมน์ ออมสะสม + เงินสดพร้อมใช้
+                        const _tv = document.getElementById('tableView');
+                        const _cv = document.getElementById('calcView');
+                        if (_tv) _tv.style.display = '';
+                        if (_cv) _cv.style.display = 'none';
                     } else {
                         if (cfI) cfI.classList.add('hidden');
                         document.querySelectorAll('.cf-highlight-row').forEach(el =>
