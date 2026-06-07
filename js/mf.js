@@ -639,6 +639,21 @@ window.mfPremForAge = function(map, age) {
     return prem;
 };
 
+// ── ยอดรวมเบี้ยประกันสุขภาพตลอดชีวิต (จาก startAge ถึงอายุสูงสุดในตารางเบี้ย) ──
+window.mfLifetimeTotal = function(map, startAge) {
+    if (!map) return 0;
+    const ages = Object.keys(map).map(Number).sort((a, b) => a - b);
+    if (ages.length === 0) return 0;
+    const maxAge = ages[ages.length - 1];
+    const begin = Math.max(startAge, ages[0]);
+    let total = 0;
+    for (let age = begin; age <= maxAge; age++) {
+        const prem = window.mfPremForAge(map, age);
+        if (prem != null) total += prem;
+    }
+    return total;
+};
+
 window.mfPickerClear = function() {
     window._mfPicker = { company: null, plan: null, roomRate: null };
     window.currentMF = 'ไม่เลือก';
@@ -1188,12 +1203,59 @@ function mfScheduleTotalPopup(delay = 1500) {
 
 window.mfSelectMainPlan = function(planName, btn) {
     document.querySelectorAll('.mf-total-popup').forEach(el => el.remove());
+    const cfg = (typeof PLAN_CONFIG !== 'undefined') ? PLAN_CONFIG[planName] : null;
+    const opts = (cfg && cfg.options) || [];
+    // Elite (S868/S818) เลือกตามอายุอัตโนมัติ ไม่ต้องถามระยะชำระ
+    const ageBased = planName === '868 / 818 Elite Saving';
+    if (opts.length > 1 && !ageBased) {
+        mfShowTermPicker(planName, opts);
+        return;
+    }
+    mfApplyMainPlan(planName, null);
+};
+
+// นำแบบประกันออมทรัพย์ + ระยะชำระมาใช้ และแสดงผลในตารางทันที
+function mfApplyMainPlan(planName, term) {
     if (typeof selectAppPlan === 'function') {
         selectAppPlan(planName);
+        if (term && typeof setPlan === 'function') setPlan(term);
     } else {
         window.currentAppPlan = planName;
         if (typeof calculate === 'function') calculate('sum', true);
     }
+    if (typeof switchView === 'function') setTimeout(() => switchView('table'), 100);
+}
+
+// ป็อปอัพเลือกระยะเวลาชำระ (สำหรับแบบประกันที่มีหลายระยะ เช่น WXN, LV)
+function mfShowTermPicker(planName, opts) {
+    document.querySelectorAll('.mf-total-popup, .mf-term-popup').forEach(el => el.remove());
+    const termYears = (code) => { const m = String(code).match(/\d+/); return m ? m[0] : code; };
+    const overlay = document.createElement('div');
+    overlay.className = 'mf-term-popup';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+        <div style="max-width:340px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:26px 22px 20px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;">
+            <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                <i class="fas fa-calendar-check" style="font-size:24px;color:#fff;"></i>
+            </div>
+            <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:2px;">เลือกระยะเวลาชำระเบี้ย</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:18px;">${planName}</div>
+            <div style="display:grid;grid-template-columns:repeat(${Math.min(opts.length,3)},1fr);gap:8px;margin-bottom:14px;">
+                ${opts.map(code => `
+                <button onclick="mfPickTerm('${planName}','${code}')" style="background:#fff;border:none;border-radius:12px;padding:14px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.1s;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="font-size:22px;font-weight:900;color:#0369a1;line-height:1;">${termYears(code)}</span>
+                    <span style="font-size:11px;font-weight:700;color:#64748b;">ปี</span>
+                </button>`).join('')}
+            </div>
+            <button onclick="this.closest('.mf-term-popup').remove()" style="background:rgba(255,255,255,0.18);color:#fff;border:2px solid rgba(255,255,255,0.35);padding:9px 32px;border-radius:9999px;font-weight:700;font-size:13px;cursor:pointer;width:100%;">ยกเลิก</button>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+}
+
+window.mfPickTerm = function(planName, term) {
+    document.querySelectorAll('.mf-term-popup').forEach(el => el.remove());
+    mfApplyMainPlan(planName, term);
 };
 
 // ==================== MF Total Premium Popup ====================
@@ -1454,13 +1516,12 @@ window.mfSelect3DInto = function(planName) {
         window.currentMF = '_3D_HEALTH';
         window._mfCurrentLabel = window._mf3DSource.label;
     }
-    if (typeof selectAppPlan === 'function') {
-        selectAppPlan(planName);
-    } else {
-        window.currentAppPlan = planName;
-        if (typeof calculate === 'function') calculate('sum', true);
+    const cfg = (typeof PLAN_CONFIG !== 'undefined') ? PLAN_CONFIG[planName] : null;
+    const opts = (cfg && cfg.options) || [];
+    const ageBased = planName === '868 / 818 Elite Saving';
+    if (opts.length > 1 && !ageBased) {
+        mfShowTermPicker(planName, opts);
+        return;
     }
-    setTimeout(() => {
-        if (typeof switchView === 'function') switchView('table');
-    }, 120);
+    mfApplyMainPlan(planName, null);
 };

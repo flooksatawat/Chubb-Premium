@@ -5430,19 +5430,23 @@ function generatePolicyTableData() {
             : currentSA;
 
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
+        // เมื่อเลือก MF: เงินออม/ปี = เบี้ยประกันสุขภาพตลอดชีวิต ÷ จำนวนปีที่ชำระ
+        const _mfAnnualSav = hasMFCol && _mfMap
+            ? Math.round((window.mfLifetimeTotal(_mfMap, d.age) || 0) / payYears)
+            : 0;
         let annualSaving = 0;
         if (isElitePlan) {
             if (y <= 8) {
-                annualSaving = d.premium;
+                annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
                 totalSaving += annualSaving;
             }
         } else if (isLV || isSM) {
             if (y <= payYears) {
-                annualSaving = d.premium;
+                annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
                 totalSaving += annualSaving;
             }
         } else if (y <= payYears && currentSA > 0) {
-            annualSaving = Math.round((currentSA / initialSA) * initialPrem);
+            annualSaving = hasMFCol ? _mfAnnualSav : Math.round((currentSA / initialSA) * initialPrem);
             totalSaving += annualSaving;
         }
 
