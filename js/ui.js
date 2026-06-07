@@ -709,28 +709,29 @@ function showCongratsToast(msg) {
 let isLongPressActive = false;
 
 // Long-press on main header → show insurance conditions popup
-(function() {
+window._setupHeaderLongPress = function() {
+    const hdr = document.getElementById('mainHeaderBtn');
+    if (!hdr || hdr._longPressReady) return;
+    hdr._longPressReady = true;
     const HOLD_MS = 500;
-    let _t = null;
+    let _t = null, _sx = 0, _sy = 0;
     function _cancel() { clearTimeout(_t); _t = null; }
-    document.addEventListener('DOMContentLoaded', () => {
-        const hdr = document.getElementById('mainHeaderBtn');
-        if (!hdr) return;
-        hdr.addEventListener('pointerdown', () => {
-            _cancel();
-            _t = setTimeout(() => {
-                _t = null;
-                isLongPressActive = true;
-                if (navigator.vibrate) navigator.vibrate(40);
-                updateConditionsModal(currentAppPlan);
-                openPopup('insuranceConditionsModal');
-            }, HOLD_MS);
-        });
-        hdr.addEventListener('pointerup', _cancel);
-        hdr.addEventListener('pointercancel', _cancel);
-        hdr.addEventListener('pointermove', _cancel);
+    hdr.addEventListener('pointerdown', e => {
+        _cancel(); _sx = e.clientX; _sy = e.clientY;
+        _t = setTimeout(() => {
+            _t = null;
+            isLongPressActive = true;
+            if (navigator.vibrate) navigator.vibrate(40);
+            updateConditionsModal(currentAppPlan);
+            openPopup('insuranceConditionsModal');
+        }, HOLD_MS);
     });
-})();
+    hdr.addEventListener('pointerup', _cancel);
+    hdr.addEventListener('pointercancel', _cancel);
+    hdr.addEventListener('pointermove', e => {
+        if (Math.hypot(e.clientX - _sx, e.clientY - _sy) > 10) _cancel();
+    });
+};
 
 /**
  * 🌟 Smart Quick Calc (เพิ่มฟังก์ชันใหม่)
@@ -7724,6 +7725,8 @@ window.navShareAction = async function() {
 // ============================================================================
 window.onload = async () => {
     // watch swal2-shown บน body เพื่อซ่อน/แสดง profile bar
+
+    window._setupHeaderLongPress();
 
     // แสดงเมนู 11 แผนก่อนเลย ไม่รอโหลด
     if (typeof openPlanModal === 'function') openPlanModal();
