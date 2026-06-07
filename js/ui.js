@@ -531,8 +531,8 @@ function showDepositIRRPopup() {
     const res0 = _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, defaultReceive, depositUntilAge, depositRate);
     const irr0 = res0 ? _calcIRR(res0.cfs) : null;
 
-    // สร้าง pills milestone (เหมือน LV IRR)
-    const pillAges = [...new Set([60, 65, 70, 75, 80, 85, 90].filter(a => a > startAge && a <= maxAge))];
+    // สร้าง pills milestone เหมือน LV IRR (60, 70, 80, 85, 90, maxAge)
+    const pillAges = [...new Set([60, 70, 80, 85, 90, maxAge].filter(a => a > startAge && a <= maxAge))];
     const pillsHTML = pillAges.map(a =>
         `<button type="button" class="dep-irr-pill" data-age="${a}" onclick="window._updateDepositIRR(${a})"
          style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
@@ -575,7 +575,7 @@ function showDepositIRRPopup() {
     </div>
   </div>
   <div style="background:#f8f7ff;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
-    <div style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">คำนวณ IRR ณ อายุที่รับ (ปี)</div>
+    <div style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">คำนวณ IRR ณ อายุ (ปี)</div>
     <div id="depIrrPills" style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
     <div style="display:flex;align-items:center;gap:0;background:#fff;border:2px solid #ddd6fe;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(109,40,217,0.08);">
       <button type="button" onclick="window._stepDepositIRR(-1)" style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-right:1.5px solid #ede9fe;">−</button>
