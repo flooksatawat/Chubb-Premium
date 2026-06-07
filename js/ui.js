@@ -2154,6 +2154,17 @@ function selectAppPlan(planName) {
     if(mainActionsGroup) mainActionsGroup.style.order = '';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
     if(premiumSubLabel) premiumSubLabel.className = 'text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200';
+    // reset MF column: ล้าง currentMF เมื่อเปลี่ยนไปแบบที่ไม่มีปุ่ม MF
+    const _mfSupportedPlans = ['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence'];
+    if (!_mfSupportedPlans.includes(planName)) {
+        window.currentMF = 'ไม่เลือก';
+        window._mfCurrentLabel = null;
+    }
+    // ล้าง STA MF data เมื่อเปลี่ยนออกจาก Step Annuity
+    if (planName !== 'Step Annuity') {
+        window._mfAfterSixtyByAge = {};
+    }
+
     // reset cashFlowContainer กลับสีเขียว (emerald) เมื่อ switch plan ออกจาก STA
     if(cashFlowContainer) {
         cashFlowContainer.style.order = '';

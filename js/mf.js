@@ -583,6 +583,11 @@ window.mfPickerConfirm = async function() {
     // Ensure rate data is loaded before recalculating
     if (p.company) await mfLoadRates(p.company);
     closePopup('mfPlanModal');
+    // STA mode: populate _mfAfterSixtyByAge ผ่าน mfGenerateTable แล้ว render ตาราง STA
+    if (window._mfSTAMode) {
+        if (typeof mfGenerateTable === 'function') mfGenerateTable();
+        return;
+    }
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
     mfScheduleTotalPopup();
 };
@@ -902,32 +907,15 @@ window.mfGenerateTable = function() {
     window._mfAfterSixtyByAge = {};
     afterRows.forEach(r => { window._mfAfterSixtyByAge[r.age] = r.prem; });
 
-    // ===== STA Mode: แสดงเฉพาะหลังอายุ 60 =====
+    // ===== STA Mode: แทรกคอลัมน์ MF ในตาราง STA (ไม่แสดง popup) =====
     if (window._mfSTAMode) {
-        window._mfSTAMode = false; // reset
-        if (titleEl) titleEl.innerHTML = `<span class="text-[13px] font-bold text-orange-700"><i class="fas fa-stairs mr-1"></i>MF หลังอายุ 60 — ${planFullName}${roomLabel}</span>`;
-        if (head) head.innerHTML = `<tr style="background:linear-gradient(135deg,#ea580c,#c2410c);">
-            <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">หลังอายุ 60 ปี <i class="fas fa-stairs" style="font-size:9px;opacity:0.8;"></i></th>
-        </tr>
-        <tr style="background:rgba(234,88,12,0.08);">
-            <th style="padding:4px 8px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #fed7aa;">อายุ</th>
-            <th style="padding:4px 8px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี (บาท)</th>
-        </tr>`;
-        let staBody = '';
-        aRows.forEach((a, i) => {
-            const bg = i % 2 === 0 ? '#fff' : '#fff7ed';
-            staBody += `<tr style="background:${bg};border-bottom:1px solid #fed7aa;">
-                <td style="padding:${_pd};text-align:center;font-size:${_fs}px;color:#334155;border-right:1px solid #fed7aa;">${a.age}</td>
-                <td style="padding:${_pd};text-align:right;font-size:${_fs}px;font-weight:600;color:#c2410c;">${a.prem.toLocaleString('en-US')}</td>
-            </tr>`;
-        });
-        if (!aRows.length) staBody = `<tr><td colspan="2" style="padding:16px;text-align:center;font-size:12px;color:#94a3b8;">ไม่มีข้อมูลหลังอายุ 60</td></tr>`;
-        staBody += `<tr style="background:linear-gradient(135deg,#ea580c,#c2410c);">
-            <td style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,0.3);">รวม</td>
-            <td style="padding:${_pdH};text-align:right;font-size:${_fs}px;font-weight:900;color:#fff;">${totalAfter > 0 ? totalAfter.toLocaleString('en-US') : '—'}</td>
-        </tr>`;
-        if (body) body.innerHTML = staBody;
-        // Re-generate STA table ถ้ายังอยู่หน้า STA
+        window._mfSTAMode = false;
+        // _mfAfterSixtyByAge ถูก populate แล้ว ด้านบน
+        // สลับไป tableView แล้ว re-render ตาราง STA
+        const _tv = document.getElementById('tableView');
+        const _cv = document.getElementById('calcView');
+        if (_tv) _tv.style.display = '';
+        if (_cv) _cv.style.display = 'none';
         if (typeof _generateSTATable === 'function') setTimeout(_generateSTATable, 50);
         return;
     }
