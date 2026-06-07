@@ -2169,19 +2169,27 @@ function selectAppPlan(planName) {
         document.getElementById('sumInsuredInput').value = "500,000";
         document.getElementById('premiumInput').value = "12,000";
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
-        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.add('hidden'); // ซ่อนเบี้ยใต้วงเงิน
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
     } else if (planName === 'Convertable Term') {
         currentMode = 'sum';
         document.getElementById('sumInsuredInput').value = "1,000,000";
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
-        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.add('hidden'); // ซ่อนเบี้ยใต้วงเงิน
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
     } else {
         const defaultSum = (planName === 'CI Extra Plus') ? 200000 : (config.minSum || 100000);
         document.getElementById('sumInsuredInput').value = defaultSum.toLocaleString();
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
-        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if (planName === 'Signature Legacy') {
+            // mode='premium': แสดง premiumContainer เหนือ sumInsured
+            if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '1'; }
+            if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+            if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        } else {
+            // mode='sum' (CI, CX ฯลฯ): ซ่อน premiumContainer ใต้วงเงิน
+            if(premiumContainer) premiumContainer.classList.add('hidden');
+        }
         if(cashFlowContainer) {
             if (config.hasCashFlow) {
                 cashFlowContainer.classList.remove('hidden');
@@ -2203,6 +2211,8 @@ function selectAppPlan(planName) {
         if(pPills) pPills.classList.add('hidden');
         premiumInput.readOnly = true;
         if(pLabel) pLabel.innerText = "เบี้ยประกัน (บาท)";
+        // 3D เท่านั้น: แสดง premiumContainer ใต้ threeDOptionsContainer
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
     } else {
         if(extraOptions) { extraOptions.classList.remove('flex'); extraOptions.classList.add('hidden'); }
         const _d3b = document.getElementById('threeDDetailsBtnWrap'); if(_d3b) _d3b.classList.add('hidden');
