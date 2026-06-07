@@ -2456,7 +2456,7 @@ function selectAppPlan(planName) {
         if (planName === 'Medical Fund') {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ดูตารางเบี้ย`;
             mainActionBtn.onclick = function() { switchView('table'); };
-        } else if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra"].includes(planName)) {
+        } else if (["Life Protector 20", "Supreme Life Protector", "24 TX", "Whole Life Extra", "Step Annuity"].includes(planName)) {
             mainActionBtn.innerHTML = `<i class="fas fa-table text-lg"></i> ตาราง`;
             mainActionBtn.onclick = function() { switchView('table'); };
         } else if (planName === "3D Health Excellence") {
@@ -5637,10 +5637,7 @@ function generatePolicyTableData() {
                             cfI.addEventListener('animationend', () => cfI.classList.remove('cf-panel-enter'), { once: true });
                         }
                         // switch to tableView เพื่อแสดงคอลัมน์ ออมสะสม + เงินสดพร้อมใช้
-                        const _tv = document.getElementById('tableView');
-                        const _cv = document.getElementById('calcView');
-                        if (_tv) _tv.style.display = '';
-                        if (_cv) _cv.style.display = 'none';
+                        if (typeof switchView === 'function') switchView('table');
                     } else {
                         if (cfI) cfI.classList.add('hidden');
                         document.querySelectorAll('.cf-highlight-row').forEach(el =>

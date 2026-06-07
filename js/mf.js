@@ -912,10 +912,13 @@ window.mfGenerateTable = function() {
         window._mfSTAMode = false;
         // _mfAfterSixtyByAge ถูก populate แล้ว ด้านบน
         // สลับไป tableView แล้ว re-render ตาราง STA
-        const _tv = document.getElementById('tableView');
-        const _cv = document.getElementById('calcView');
-        if (_tv) _tv.style.display = '';
-        if (_cv) _cv.style.display = 'none';
+        if (typeof switchView === 'function') switchView('table');
+        else {
+            const _tv = document.getElementById('tableView');
+            const _cv = document.getElementById('calcView');
+            if (_tv) _tv.style.display = '';
+            if (_cv) _cv.style.display = 'none';
+        }
         if (typeof _generateSTATable === 'function') setTimeout(_generateSTATable, 50);
         return;
     }
