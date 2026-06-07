@@ -5561,15 +5561,15 @@ function generatePolicyTableData() {
             const _mfChg = _mfP !== _mfPrevPrem;
             _mfPrevPrem = _mfP;
             const _mfStyle = _mfChg
-                ? `${_mfFontSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
-                : `${_mfFontSz}color:#94a3b8;`;
-            html += `<td class="${_mfTdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
+                ? `${_fSz}font-weight:700;color:#ea580c;border-top:2px solid #fed7aa;`
+                : `${_fSz}color:#94a3b8;`;
+            html += `<td class="${_tdBase} text-right" style="${_mfStyle}">${_mfP != null ? _mfP.toLocaleString('en-US') : ''}</td>`;
             _accMfPrem += (_mfP || 0);
             const _rem = accCashFlow - _accMfPrem;
             const _remColor = _rem >= 0 ? '#059669' : '#dc2626';
-            html += `<td class="${_mfTdBase} text-right" style="${_mfFontSz}color:${_remColor};font-weight:600;">${_rem.toLocaleString('en-US')}</td>`;
+            html += `<td class="${_tdBase} text-right" style="${_fSz}color:${_remColor};font-weight:600;">${_rem.toLocaleString('en-US')}</td>`;
         } else if (_mfLabel) {
-            html += `<td class="${_mfTdBase}"></td><td class="${_mfTdBase}"></td>`;
+            html += `<td class="${_tdBase}"></td><td class="${_tdBase}"></td>`;
         }
         html += `${isBreakevenActive ? `<td class="${_tdBase} ${y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
         html += `${isBreakevenActive ? `<td class="${_tdBase} ${y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
