@@ -5706,9 +5706,14 @@ function generatePolicyTableData() {
             const _lvFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
         } else if (isSM && currentSA > 0) {
-            // 7SM: ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175% ของทุนเริ่มต้น
-            const _smPct = y <= 5 ? 1.00 : 1.75;
-            deathBenefit = Math.round(currentSA * _smPct);
+            // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)
+            //   1) %ทุนประกัน (ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175%)
+            //   2) มูลค่าเวนคืนเงินสด (cvTotal)
+            //   3) เบี้ยที่ชำระมาแล้วทั้งหมด หักด้วยเงินจ่ายคืนที่ได้รับไปแล้ว (totalSaving − accCashFlow ปีก่อนหน้า)
+            const _smPct  = y <= 5 ? 1.00 : 1.75;
+            const _smTier = Math.round(currentSA * _smPct);
+            const _smPremNet = totalSaving - accCashFlow;
+            deathBenefit = Math.max(_smTier, cvTotal, _smPremNet);
         }
 
         accCashFlow += cashFlowAmt;
