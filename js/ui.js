@@ -5307,7 +5307,7 @@ function generatePolicyTableData() {
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
-        <th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>
+        ${isBreakevenActive ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
@@ -5538,14 +5538,17 @@ function generatePolicyTableData() {
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
         const rowId = (isBreakevenActive && y === beYear) ? 'breakevenRow' : `policyRow_${currentAge}`;
+        const _beOnClick = (!isBreakevenActive && y === beYear)
+            ? ` style="cursor:pointer;" onclick="window._showBreakevenDetail(${totalSaving},${Math.round(cvTotal)},${currentAge})"`
+            : '';
         if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
         const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
-        html += `<tr id="${rowId}" class="${trClass}">
-            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
+        html += `<tr id="${rowId}" class="${trClass}"${_beOnClick}>
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${!isBreakevenActive && y === beYear ? '★ ' : ''}${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
-            <td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>
+            ${isBreakevenActive ? `<td class="${_tdBase} text-slate-800 font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
             ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
             ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
@@ -5626,6 +5629,37 @@ function toggleBreakevenDisplay(smoothScroll = true) {
         tableBody.classList.remove('show-breakeven');
     }
 }
+
+// ==================== BREAKEVEN DETAIL POPUP ====================
+window._showBreakevenDetail = function(totalSaving, cvTotal, age) {
+    const fmt = n => Math.round(n).toLocaleString('th-TH');
+    const diff = cvTotal - totalSaving;
+    const diffTxt = diff >= 0
+        ? `<span style="color:#059669;font-weight:700;">+${fmt(diff)} ฿ กำไร</span>`
+        : `<span style="color:#dc2626;font-weight:700;">${fmt(diff)} ฿</span>`;
+
+    Swal.fire({
+        title: `<span style="font-family:'Kanit',sans-serif;font-size:17px;">★ จุดคุ้มทุน — อายุ ${age} ปี</span>`,
+        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:left;padding:4px 0;">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:12px;margin-bottom:8px;border:1px solid #bbf7d0;">
+                <span style="color:#475569;">💰 เงินออมสะสมทั้งหมด</span>
+                <span style="color:#1e293b;font-weight:800;">${fmt(totalSaving)} ฿</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:12px;margin-bottom:8px;border:1px solid #bfdbfe;">
+                <span style="color:#475569;">💵 เงินสดพร้อมใช้</span>
+                <span style="color:#1d4ed8;font-weight:800;">${fmt(cvTotal)} ฿</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fafafa;border-radius:12px;border:1px solid #e2e8f0;">
+                <span style="color:#475569;">📊 ส่วนต่าง</span>
+                <span>${diffTxt}</span>
+            </div>
+        </div>`,
+        icon: 'success',
+        confirmButtonText: 'ปิด',
+        confirmButtonColor: '#059669',
+        customClass: { popup: 'swal2-popup-kanit' },
+    });
+};
 
 // ==================== CASH FLOW PLAN UI (LPB / SLPA) ====================
 
