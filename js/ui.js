@@ -5279,34 +5279,18 @@ function _generateSTATable() {
             deathBenefit = Math.max(0, totalPrem - totalAnnuity + annuityAmt);
         }
 
-        // จุดคุ้มทุน: CV >= เบี้ยสะสม (ก่อนรับบำนาญ) หรือ บำนาญสะสม+CV >= เบี้ยสะสม
-        const beValue = currentAge >= 60 ? totalAnnuity : cvTotal;
-        if (!foundBreakeven && totalPrem > 0 && beValue >= totalPrem) {
-            foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = beValue;
-        }
-
-        let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
-        if (foundBreakeven && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400";
+        const trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
 
         html += `<tr class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             <td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${y <= payYears ? annualPrem.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-slate-600 text-right" style="${_fSz}">${y <= payYears ? totalPrem.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-orange-600 font-bold text-right" style="${_fSz}">${annuityAmt > 0 ? annuityAmt.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-orange-700 font-bold text-right" style="${_fSz}">${totalAnnuity > 0 ? totalAnnuity.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${deathBenefit > 0 ? deathBenefit.toLocaleString() : '—'}</td>
         </tr>`;
     }
-
-    const totalPremPaid = annualPrem * payYears;
-    html += `<tr class="border-t-2 border-slate-400 bg-slate-100 font-bold">
-        <td class="${_tdBase} text-slate-800 text-center" style="${_fSz}">รวม</td>
-        <td class="${_tdBase} text-slate-800 text-right" style="${_fSz}">${totalPremPaid.toLocaleString()}</td>
-        <td class="${_tdBase} text-orange-700 text-right" style="${_fSz}">—</td>
-        <td class="${_tdBase} text-orange-700 text-right" style="${_fSz}">${totalAnnuity.toLocaleString()}</td>
-        <td class="${_tdBase} text-slate-400 text-right" style="${_fSz}">—</td>
-        <td class="${_tdBase} text-slate-400 text-right" style="${_fSz}">—</td>
-    </tr>`;
 
     document.getElementById('policyTableBody').innerHTML = html;
 
@@ -5319,6 +5303,7 @@ function _generateSTATable() {
         thead.innerHTML = `<tr>
             <th class="px-2 py-2 text-center text-slate-600 font-bold">อายุ</th>
             <th class="px-2 py-2 text-right text-slate-600 font-bold">ออม (บ.)</th>
+            <th class="px-2 py-2 text-right text-slate-600 font-bold">ออมสะสม</th>
             <th class="px-2 py-2 text-right text-orange-600 font-bold">บำนาญ/ปี</th>
             <th class="px-2 py-2 text-right text-orange-700 font-bold">บำนาญสะสม</th>
             <th class="px-2 py-2 text-right text-blue-600 font-bold">เงินสดพร้อมใช้</th>
