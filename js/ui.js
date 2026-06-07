@@ -5189,7 +5189,10 @@ function generatePolicyTableData() {
     const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
     
     const hasSurrenderMenu = isLPB || isSLPA;
-    
+
+    // ฝากสะสมทบต้น: LifeTime Value รับ 1% / แบบอื่นรับ 2%
+    window._tableDepositRate = isLV ? 0.01 : 0.02;
+
     // --- 1. UI Control Menu ---
     const surrenderContainer = document.getElementById('surrenderContainer');
     const oldToggle = document.getElementById('toggleBreakeven');
