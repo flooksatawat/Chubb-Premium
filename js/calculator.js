@@ -823,8 +823,17 @@ function calculate(source, enforceMin = false) {
                 return Math.round((prem * 1000) / staRate);
             };
 
-            if (source === 'sum') {
-                fSum = Math.round(getSafeValue('sumInsuredInput'));
+            // บำนาญ/ปี ที่อายุ 60 = 15% ของทุน
+            const getSTAnnuity = (sa) => Math.round(sa * 0.15);
+            const getSTASAFromAnnuity = (ann) => Math.round(ann / 0.15);
+
+            if (source === 'cashflow') {
+                const annuity = getSafeValue('cashFlowInput') || 0;
+                fSum = getSTASAFromAnnuity(annuity);
+                fPrem = getSTAPrem(fSum);
+            } else if (source === 'premium') {
+                fPrem = getSafeValue('premiumInput') || 0;
+                fSum = getSTASA(fPrem);
                 fPrem = getSTAPrem(fSum);
             } else {
                 fPrem = getSafeValue('premiumInput') || 0;
@@ -834,8 +843,9 @@ function calculate(source, enforceMin = false) {
             if (enforceMin && fSum < config.minSum) { fSum = config.minSum; fPrem = getSTAPrem(fSum); }
             if (fSum > config.getMaxSum(age)) { fSum = config.getMaxSum(age); fPrem = getSTAPrem(fSum); }
 
-            document.getElementById('sumInsuredInput').value = formatNum(fSum);
             document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+            const _cfEl = document.getElementById('cashFlowInput');
+            if (_cfEl) _cfEl.value = getSTAnnuity(fSum).toLocaleString();
         }
 
         // ---------------- 4. 3D Health Excellence ----------------

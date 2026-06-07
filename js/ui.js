@@ -1580,8 +1580,17 @@ function updateQuickPills(planName) {
         sumPillWrapper.innerHTML = '';
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
     } else if (planName === 'Step Annuity') {
-        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill2" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill3" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
+        sumPillWrapper.innerHTML = '';
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(50000)" class="${inactiveClass}">5 หมื่น</button><button id="premPill2" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button><button id="premPill3" onclick="setQuickPremium(200000)" class="${inactiveClass}">2 แสน</button><button id="premPill4" onclick="setQuickPremium(500000)" class="${inactiveClass}">5 แสน</button><button id="premPill5" onclick="setQuickPremium(1000000)" class="${inactiveClass}">1 ล้าน</button>`;
+        // cashPills สำหรับบำนาญ/ปี ที่อายุ 60
+        const _staCashPills = [
+            { label: '5 หมื่น', val: 50000 }, { label: '1 แสน', val: 100000 },
+            { label: '2 แสน', val: 200000 }, { label: '3 แสน', val: 300000 }, { label: '5 แสน', val: 500000 }
+        ];
+        _staCashPills.forEach((opt, i) => {
+            const btn = document.getElementById('cashPill' + (i + 1));
+            if (btn) { btn.textContent = opt.label; btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`); }
+        });
     } else if (planName === 'Smart Plan 21/7') {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(20000)" class="${inactiveClass}">2 หมื่น</button><button id="premPill2" onclick="setQuickPremium(40000)" class="${inactiveClass}">4 หมื่น</button><button id="premPill3" onclick="setQuickPremium(60000)" class="${inactiveClass}">6 หมื่น</button><button id="premPill4" onclick="setQuickPremium(80000)" class="${inactiveClass}">8 หมื่น</button><button id="premPill5" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button>`;
@@ -2158,19 +2167,26 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.remove('flex');
         }
     } else if (planName === 'Step Annuity') {
-        currentMode = 'sum';
+        currentMode = 'premium';
         document.getElementById('sumInsuredInput').value = "1,000,000";
         document.getElementById('premiumInput').value = "0";
-        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(sumInsuredContainer) sumInsuredContainer.classList.add('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
-        if(sumInsuredContainer) sumInsuredContainer.style.order = '1';
-        if(premiumContainer) premiumContainer.style.order = '2';
+        if(premiumContainer) premiumContainer.style.order = '1';
         if(mainActionsGroup) mainActionsGroup.style.order = '3';
-        if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
+        if(cashFlowContainer) {
+            cashFlowContainer.classList.remove('hidden');
+            cashFlowContainer.style.order = '2';
+            document.getElementById('singleCashFlowBox').classList.remove('hidden');
+            document.getElementById('dualCashFlowBox').classList.add('hidden');
+            document.getElementById('dualCashFlowBox').classList.remove('flex');
+            const _cfLbl = cashFlowContainer.querySelector('p');
+            if (_cfLbl) _cfLbl.innerHTML = '<i class="fas fa-coins text-orange-500"></i> <span class="text-orange-700">บำนาญ/ปี (อายุ 60)</span>';
+        }
         const _staLbl = document.getElementById('premiumLabel');
         if(_staLbl) _staLbl.innerHTML = '<i class="fas fa-wallet text-orange-500"></i> เบี้ยประกัน (บาท/ปี)';
         const _staSub = document.getElementById('premiumSubLabel');
-        if(_staSub) { _staSub.textContent = 'คำนวณจากทุนประกัน'; _staSub.className = 'text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold border border-orange-200'; }
+        if(_staSub) { _staSub.textContent = 'คำนวณจากบำนาญ'; _staSub.className = 'text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold border border-orange-200'; }
     } else if (planName === '24 TX') {
         currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
