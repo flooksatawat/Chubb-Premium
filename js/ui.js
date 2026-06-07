@@ -2506,15 +2506,22 @@ window._cmpCancelReplace = function() {
     if (sheet && window.__cmpViewPlanA) sheet.style.transform = 'translateY(0)';
 };
 
-window.renderCompareView = function(planA, planB) {
+window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
     if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
 
+    // บันทึก settings ไว้เพื่อ refresh
+    window.__cmpSettingsA = settingsA || null;
+    window.__cmpSettingsB = settingsB || null;
+
     const savedPlan = currentPlan;
-    const dA = planA === currentAppPlan ? Object.assign({}, lastCalculationData, { _planName: planA }) : window.computeForPlan(planA);
-    const optA = planA === currentAppPlan ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
-    const dB = window.computeForPlan(planB);
+    const hasOverrideA = settingsA && (settingsA.age || settingsA.gender);
+    const dA = (planA === currentAppPlan && !hasOverrideA)
+        ? Object.assign({}, lastCalculationData, { _planName: planA })
+        : window.computeForPlan(planA, settingsA);
+    const optA = (planA === currentAppPlan && !hasOverrideA) ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
+    const dB = window.computeForPlan(planB, settingsB);
     const optB = (PLAN_CONFIG[planB]?.options || [])[0] || '';
     if (!dA || !dB) { showCustomError('ไม่สามารถคำนวณข้อมูลเปรียบเทียบได้'); return; }
 
@@ -2670,12 +2677,49 @@ window.renderCompareView = function(planA, planB) {
     }
 
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
-    const html = `<style>.cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}</style>
+    const _sA = settingsA || {}, _sB = settingsB || {};
+    const _ageA = _sA.age || dA.age, _ageB = _sB.age || dB.age;
+    const _genA = _sA.gender || (genderA === 'ชาย' ? 'male' : 'female');
+    const _genB = _sB.gender || (genderB === 'ชาย' ? 'male' : 'female');
+    const _inp = 'style="width:52px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#f8fafc;color:#1e293b;outline:none;"';
+    const _sel = 'style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;"';
+    const _lbl = 'style="font-size:10px;font-weight:700;color:#94a3b8;white-space:nowrap;"';
+    const html = `<style>
+        .cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}
+        #cmpAgeA:focus,#cmpAgeB:focus,#cmpGenA:focus,#cmpGenB:focus{border-color:#0d9488;background:#fff;}
+    </style>
     <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
-        <div style="padding:12px 14px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <i class="fas fa-code-compare" style="color:#2563eb;"></i>
-            <span style="font-weight:700;color:#334155;font-size:14px;">เปรียบเทียบแบบประกัน</span>
+        <div style="padding:10px 14px 6px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <i class="fas fa-code-compare" style="color:#2563eb;font-size:13px;"></i>
+            <span style="font-weight:700;color:#334155;font-size:13px;">เปรียบเทียบแบบประกัน</span>
             <button onclick="window.resetRightPaneToPlaceholder()" style="margin-left:auto;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="fas fa-xmark"></i> ปิด</button>
+        </div>
+        <!-- Settings bar: ปรับอายุ/เพศ แต่ละฝั่งได้ -->
+        <div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
+                <span style="font-size:11px;font-weight:700;color:#0f766e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planA}</span>
+                <span ${_lbl}>อายุ</span>
+                <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} onkeydown="if(event.key==='Enter')window._cmpApply()">
+                <span ${_lbl}>ปี</span>
+                <select id="cmpGenA" ${_sel}>
+                    <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
+                    <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
+                </select>
+            </div>
+            <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;">vs</span>
+            <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
+                <span style="font-size:11px;font-weight:700;color:#6d28d9;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planB}</span>
+                <span ${_lbl}>อายุ</span>
+                <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} onkeydown="if(event.key==='Enter')window._cmpApply()">
+                <span ${_lbl}>ปี</span>
+                <select id="cmpGenB" ${_sel}>
+                    <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
+                    <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
+                </select>
+            </div>
+            <button onclick="window._cmpApply()" style="flex-shrink:0;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;"><i class="fas fa-rotate"></i> อัปเดต</button>
         </div>
         <div style="overflow-x:auto;overflow-y:auto;flex:1;">
         <table style="width:100%;border-collapse:collapse;min-width:480px;">
@@ -2722,6 +2766,20 @@ window.renderCompareView = function(planA, planB) {
     // บันทึก state หลัง inject เสมอ (ป้องกัน state ถูกล้างก่อน render เสร็จ)
     window.__cmpViewPlanA = planA;
     window.__cmpViewPlanB = planB;
+};
+
+// อัปเดตตาราง compare ด้วย age/gender ใหม่จาก settings bar
+window._cmpApply = function() {
+    const pA = window.__cmpViewPlanA, pB = window.__cmpViewPlanB;
+    if (!pA || !pB) return;
+    const ageA = parseInt(document.getElementById('cmpAgeA')?.value) || 0;
+    const ageB = parseInt(document.getElementById('cmpAgeB')?.value) || 0;
+    const genA = document.getElementById('cmpGenA')?.value || 'male';
+    const genB = document.getElementById('cmpGenB')?.value || 'male';
+    window.renderCompareView(pA, pB,
+        ageA > 0 ? { age: ageA, gender: genA } : { gender: genA },
+        ageB > 0 ? { age: ageB, gender: genB } : { gender: genB }
+    );
 };
 
 // Long-press delegation — เริ่ม compare mode (ทุกอุปกรณ์: touch / mouse / stylus)
@@ -2776,18 +2834,25 @@ window.renderCompareView = function(planA, planB) {
     document.addEventListener('pointercancel', () => { _longPressFired = false; cancel(); });
 })();
 
-window.computeForPlan = function (planName) {
+// overrides: { age, gender } — ตั้งค่าชั่วคราวก่อน calculate แล้วคืนค่าเดิม
+window.computeForPlan = function (planName, overrides) {
     if (!planName || typeof PLAN_CONFIG === 'undefined' || !PLAN_CONFIG[planName]) return null;
-    if (planName === currentAppPlan) return lastCalculationData;
+    if (planName === currentAppPlan && !overrides) return lastCalculationData;
 
     const cfg = PLAN_CONFIG[planName];
+    const ageInp = document.getElementById('ageInput');
     const saved = {
         appPlan: currentAppPlan,
         plan: currentPlan,
         data: lastCalculationData,
         mode: typeof currentMode !== 'undefined' ? currentMode : 'premium',
-        suppress: window.__suppressLive
+        suppress: window.__suppressLive,
+        ageVal: ageInp ? ageInp.value : null,
+        gender: typeof currentGender !== 'undefined' ? currentGender : null,
     };
+    // Apply overrides temporarily
+    if (overrides?.age && ageInp) ageInp.value = overrides.age;
+    if (overrides?.gender && typeof currentGender !== 'undefined') currentGender = overrides.gender;
     window.__suppressLive = true;
     let result = null;
     try {
@@ -2804,6 +2869,8 @@ window.computeForPlan = function (planName) {
         currentPlan = saved.plan;
         lastCalculationData = saved.data;
         window.__suppressLive = saved.suppress;
+        if (saved.ageVal !== null && ageInp) ageInp.value = saved.ageVal;
+        if (saved.gender !== null && typeof currentGender !== 'undefined') currentGender = saved.gender;
     }
     return result;
 };
@@ -4806,7 +4873,7 @@ function refreshAllDisplays() {
     // Re-render compare yearly table ถ้ากำลังแสดงอยู่ (guard ป้องกัน recursive loop)
     if (window.__cmpViewPlanA && window.__cmpViewPlanB && !window.__cmpRefreshing) {
         window.__cmpRefreshing = true;
-        window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB);
+        window.renderCompareView(window.__cmpViewPlanA, window.__cmpViewPlanB, window.__cmpSettingsA, window.__cmpSettingsB);
         window.__cmpRefreshing = false;
         return;
     }
