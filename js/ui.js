@@ -5841,7 +5841,7 @@ function generatePolicyTableData() {
     // --- บรรทัดสุดท้าย: รวมตัวเลข (เฉพาะ 7SM ที่เลือกภาษี) ---
     if (showTaxColumn) {
         const _totFsz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';font-weight:800;';
-        const _boxStyle = `${_totFsz}border:2px solid #2563eb;color:#1e3a8a;background:#eff6ff;`;
+        const _boxStyle = `${_totFsz}color:#1e3a8a;background:#eff6ff;`;
         const _boxTd = v => `<td class="${_tdBase} text-right" style="${_boxStyle}">${v.toLocaleString()}</td>`;
         const _blankTd = `<td class="${_tdBase}"></td>`;
         let trow = `<tr class="border-t-2 border-slate-300">`;
