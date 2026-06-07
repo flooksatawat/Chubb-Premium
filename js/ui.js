@@ -5300,7 +5300,7 @@ function _generateSTATable() {
         html += `<tr class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             <td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${y <= payYears ? annualPrem.toLocaleString() : '—'}</td>
-            <td class="${_tdBase} text-slate-600 text-right" style="${_fSz}">${y <= payYears ? totalPrem.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-slate-600 text-right" style="${_fSz}">${totalPrem.toLocaleString()}</td>
             <td class="${_tdBase} text-orange-600 font-bold text-right" style="${_fSz}">${annuityAmt > 0 ? annuityAmt.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-orange-700 font-bold text-right" style="${_fSz}">${totalAnnuity > 0 ? totalAnnuity.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : '—'}</td>
