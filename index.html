@@ -2589,7 +2589,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .dob-field input.filled { border-color:var(--dob-accent,#3b82f6); }
 .dob-sep { font-size:22px;font-weight:700;color:#cbd5e1;align-self:center;padding-top:18px; }
 .dob-cards-grid { display:grid;grid-template-columns:1fr;gap:10px; }
-@media (min-width:560px) { .dob-cards-grid { grid-template-columns:1fr 1fr; } }
+@media (min-width:860px) { .dob-cards-grid { grid-template-columns:1fr 1fr; } }
 #dobAstroDetail { overflow:hidden;transition:max-height 0.38s cubic-bezier(0.16,1,0.3,1);max-height:0; }
 #dobAstroDetail.open { max-height:4000px; }
 #dobPhoneInput { width:100%;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;background:white;outline:none;padding:10px 14px;transition:border-color 0.2s,box-shadow 0.2s;-moz-appearance:textfield;letter-spacing:0.08em; }
@@ -2647,7 +2647,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     <label style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:6px;">📱 เบอร์โทรศัพท์ (ไม่บังคับ — เพิ่มพยากรณ์เลขมือถือ)</label>
                     <input type="tel" id="dobPhoneInput" placeholder="0XX-XXX-XXXX" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);_onDobPhoneChange()" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:'Kanit',sans-serif;outline:none;box-sizing:border-box;">
                 </div>
-                <div id="dobAstroDetailInner" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px 16px;"></div>
+                <div id="dobAstroDetailInner" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;padding:18px 20px 22px;"></div>
             </div>
         </div>
         <!-- Confirm -->
@@ -3111,95 +3111,79 @@ function _renderDobDetail() {
     const phoneData = phoneNum ? _DOB_PHONE_NUM[phoneNum] : null;
 
     const card = (title, emoji, content, border) => `
-        <div style="background:white;border-radius:12px;padding:12px 14px;border:1.5px solid ${border||'#e2e8f0'};margin-bottom:10px;">
-            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:7px;">${emoji} ${title}</div>
+        <div style="background:white;border-radius:16px;padding:18px 20px;border:1.5px solid ${border||'#e2e8f0'};margin-bottom:0;">
+            <div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">${emoji} ${title}</div>
             ${content}
         </div>`;
 
-    const tag = (txt, accent) => `<span style="display:inline-block;background:${accent}18;color:${accent};font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin:2px 2px 0 0;">${txt}</span>`;
+    const commBox = (items, theme) => `
+        <div style="background:${theme.bg};border:1.5px solid ${theme.border};border-radius:12px;padding:12px 16px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:800;color:${theme.accent};margin-bottom:8px;">💬 วิธีสื่อสารที่ได้ผล</div>
+            <div style="font-size:13px;color:#334155;line-height:1.8;">${items.split('·').map(s=>`<div style="margin-bottom:2px;">· ${s.trim()}</div>`).join('')}</div>
+        </div>`;
+
+    const closeBox = (text) => `
+        <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:12px;padding:12px 16px;">
+            <div style="font-size:12px;font-weight:800;color:#a16207;margin-bottom:6px;">🎯 เคล็ดปิดการขาย</div>
+            <div style="font-size:13px;color:#92400e;line-height:1.7;font-weight:500;">${text}</div>
+        </div>`;
 
     let html = '';
 
-    // 1. เลขชีวิต (Life Path) — ที่แม่นยำที่สุด
+    // 1. เลขชีวิต
     html += card('เลขชีวิต (Life Path Numerology)', '🔢',
-        `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="font-size:36px;font-weight:900;color:${theme.accent};line-height:1;">${lp}</div>
-            <div><div style="font-size:13px;font-weight:800;color:#1e293b;">${lpData.label.split('—')[1]?.trim()}</div>
-            <div style="font-size:11px;color:#64748b;">${lpData.label.split('—')[0]?.trim()}</div></div>
+        `<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+            <div style="font-size:48px;font-weight:900;color:${theme.accent};line-height:1;min-width:52px;text-align:center;">${lp}</div>
+            <div>
+                <div style="font-size:17px;font-weight:800;color:#1e293b;line-height:1.2;">${lpData.label.split('—')[1]?.trim()}</div>
+                <div style="font-size:13px;color:#64748b;margin-top:2px;">${lpData.label.split('—')[0]?.trim()}</div>
+            </div>
         </div>
-        <div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:8px;">${lpData.core}</div>
-        <div style="font-size:12px;color:#475569;line-height:1.6;margin-bottom:10px;"><span style="font-weight:700;color:${theme.accent};">ความสัมพันธ์ · </span>${lpData.relate}</div>
-        <div style="background:${theme.bg};border:1px solid ${theme.border};border-radius:10px;padding:10px 12px;margin-bottom:8px;">
-            <div style="font-size:10px;font-weight:700;color:${theme.accent};margin-bottom:5px;">💬 วิธีสื่อสารที่ได้ผล</div>
-            <div style="font-size:11px;color:#334155;line-height:1.7;">${lpData.comm.split('·').map(s=>`<div>· ${s.trim()}</div>`).join('')}</div>
-        </div>
-        <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:#a16207;margin-bottom:5px;">🎯 เคล็ดปิดการขาย</div>
-            <div style="font-size:11px;color:#92400e;line-height:1.6;">${lpData.close}</div>
-        </div>`,
+        <div style="font-size:14px;color:#334155;line-height:1.8;margin-bottom:10px;">${lpData.core}</div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;margin-bottom:14px;"><span style="font-weight:700;color:${theme.accent};">ความสัมพันธ์ · </span>${lpData.relate}</div>
+        ${commBox(lpData.comm, theme)}
+        ${closeBox(lpData.close)}`,
         theme.border);
 
-    // 2. ราศีตะวันตก — บุคลิกภาพ
+    // 2. ราศีตะวันตก
     html += card(`ราศี ${zodiac.name} — บุคลิกภาพ`, zodiac.sym,
-        `<div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:10px;">${zodiac.personality}</div>
-        <div style="background:${theme.bg};border:1px solid ${theme.border};border-radius:10px;padding:10px 12px;margin-bottom:8px;">
-            <div style="font-size:10px;font-weight:700;color:${theme.accent};margin-bottom:5px;">💬 วิธีสื่อสารที่ได้ผล</div>
-            <div style="font-size:11px;color:#334155;line-height:1.7;">${zodiac.comm.split('·').map(s=>`<div>· ${s.trim()}</div>`).join('')}</div>
-        </div>
-        <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:#a16207;margin-bottom:5px;">🎯 เคล็ดปิดการขาย</div>
-            <div style="font-size:11px;color:#92400e;line-height:1.6;">${zodiac.close}</div>
-        </div>`);
+        `<div style="font-size:14px;color:#334155;line-height:1.8;margin-bottom:14px;">${zodiac.personality}</div>
+        ${commBox(zodiac.comm, theme)}
+        ${closeBox(zodiac.close)}`);
 
     // 3. ปีนักษัตรจีน
     html += card(`ปีนักษัตร${cz.name} (${cz.en}) — ธาตุ${cz.element.name}`, cz.emoji,
-        `<div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:10px;">${cz.core}</div>
-        <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;margin-bottom:8px;">
-            <div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:4px;">🔥 ธาตุ${cz.element.name} — อิทธิพลต่อบุคลิก</div>
-            <div style="font-size:12px;color:#475569;line-height:1.6;">${cz.element.desc}</div>
+        `<div style="font-size:14px;color:#334155;line-height:1.8;margin-bottom:12px;">${cz.core}</div>
+        <div style="background:#f5f3ff;border-radius:12px;padding:12px 16px;border:1.5px solid #e9d5ff;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px;">🔥 ธาตุ${cz.element.name} — อิทธิพลต่อบุคลิก</div>
+            <div style="font-size:13px;color:#475569;line-height:1.7;">${cz.element.desc}</div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-            ${cz.strength.split('·').map(s=>`<span style="background:#f0fdf4;color:#059669;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #bbf7d0;">${s.trim()}</span>`).join('')}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+            ${cz.strength.split('·').map(s=>`<span style="background:#f0fdf4;color:#059669;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:1.5px solid #bbf7d0;">${s.trim()}</span>`).join('')}
         </div>
-        <div style="background:${theme.bg};border:1px solid ${theme.border};border-radius:10px;padding:10px 12px;margin-bottom:8px;">
-            <div style="font-size:10px;font-weight:700;color:${theme.accent};margin-bottom:5px;">💬 วิธีสื่อสารที่ได้ผล</div>
-            <div style="font-size:11px;color:#334155;line-height:1.7;">${cz.comm.split('·').map(s=>`<div>· ${s.trim()}</div>`).join('')}</div>
-        </div>
-        <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:#a16207;margin-bottom:5px;">🎯 เคล็ดปิดการขาย</div>
-            <div style="font-size:11px;color:#92400e;line-height:1.6;">${cz.close}</div>
-        </div>`);
+        ${commBox(cz.comm, theme)}
+        ${closeBox(cz.close)}`);
 
-    // 4. เบอร์โทรศัพท์ (ถ้ากรอก)
+    // 4. เบอร์โทรศัพท์
     if (phoneData) {
         html += card(`พยากรณ์เบอร์ ${phone.slice(0,3)}-${phone.slice(3,6)}-${phone.slice(6)}`, phoneData.emoji,
-            `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                <div style="font-size:32px;font-weight:900;color:${theme.accent};line-height:1;min-width:36px;text-align:center;">${phoneNum}</div>
-                <div style="font-size:13px;font-weight:800;color:#1e293b;line-height:1.3;">${phoneData.label}</div>
+            `<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                <div style="font-size:44px;font-weight:900;color:${theme.accent};line-height:1;min-width:48px;text-align:center;">${phoneNum}</div>
+                <div style="font-size:16px;font-weight:800;color:#1e293b;line-height:1.3;">${phoneData.label}</div>
             </div>
-            <div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:10px;">${phoneData.personality}</div>
-            <div style="background:${theme.bg};border:1px solid ${theme.border};border-radius:10px;padding:10px 12px;margin-bottom:8px;">
-                <div style="font-size:10px;font-weight:700;color:${theme.accent};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;">💬 วิธีสื่อสารที่ได้ผล</div>
-                <div style="font-size:11.5px;color:#475569;line-height:1.8;">${phoneData.comm.split('·').map(s=>`<div style="margin-bottom:1px;">· ${s.trim()}</div>`).join('')}</div>
-            </div>
-            <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:9px 12px;">
-                <div style="font-size:10px;font-weight:700;color:#a16207;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">🎯 เคล็ดปิดการขาย</div>
-                <div style="font-size:12px;color:#92400e;line-height:1.6;font-weight:500;">${phoneData.close}</div>
-            </div>`,
+            <div style="font-size:14px;color:#334155;line-height:1.8;margin-bottom:14px;">${phoneData.personality}</div>
+            ${commBox(phoneData.comm, theme)}
+            ${closeBox(phoneData.close)}`,
             theme.border);
     } else {
-        html += `<div style="background:${theme.bg};border:1.5px dashed ${theme.border};border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:10px;">
-            <div style="font-size:13px;color:${theme.accent};font-weight:700;margin-bottom:3px;">📱 กรอกเบอร์โทรเพื่อดูพยากรณ์เลขมือถือ</div>
-            <div style="font-size:11px;color:#94a3b8;">วิเคราะห์พลังงานตัวเลขในเบอร์ของคุณ</div>
+        html += `<div style="background:${theme.bg};border:2px dashed ${theme.border};border-radius:16px;padding:20px;text-align:center;margin-bottom:0;">
+            <div style="font-size:22px;margin-bottom:6px;">📱</div>
+            <div style="font-size:15px;color:${theme.accent};font-weight:700;margin-bottom:4px;">กรอกเบอร์โทรเพื่อดูพยากรณ์เลขมือถือ</div>
+            <div style="font-size:13px;color:#94a3b8;">วิเคราะห์พลังงานตัวเลขในเบอร์ของคุณ</div>
         </div>`;
     }
 
     document.getElementById('dobAstroDetailInner').innerHTML = '<div class="dob-cards-grid">' + html + '</div>';
-    // update max-height if panel open
-    const detail = document.getElementById('dobAstroDetail');
-    if (detail.classList.contains('open')) {
-        detail.style.maxHeight = document.getElementById('dobAstroDetailInner').scrollHeight + 20 + 'px';
-    }
 }
 
 function _applyDobTheme(theme) {
