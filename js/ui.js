@@ -2157,11 +2157,12 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
         if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
-        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLblLV = document.getElementById('premiumSubLabel');
         if(premSubLblLV) premSubLblLV.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
+            cashFlowContainer.style.order = '3';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
@@ -2174,11 +2175,12 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
         if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
-        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLblSM = document.getElementById('premiumSubLabel');
         if(premSubLblSM) premSubLblSM.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
+            cashFlowContainer.style.order = '3';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
@@ -2226,11 +2228,12 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
         if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
-        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLbl24 = document.getElementById('premiumSubLabel');
         if(premSubLbl24) premSubLbl24.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
+            cashFlowContainer.style.order = '3';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
@@ -2251,8 +2254,9 @@ function selectAppPlan(planName) {
         currentMode = 'sum';
         document.getElementById('sumInsuredInput').value = "500,000";
         document.getElementById('premiumInput').value = "12,000";
-        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
-        if(premiumContainer) premiumContainer.classList.add('hidden'); // ซ่อนเบี้ยใต้วงเงิน
+        if(sumInsuredContainer) { sumInsuredContainer.classList.remove('hidden'); sumInsuredContainer.style.order = '1'; }
+        if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '2'; }
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
     } else if (planName === 'Convertable Term') {
         currentMode = 'sum';
@@ -2265,9 +2269,9 @@ function selectAppPlan(planName) {
         document.getElementById('sumInsuredInput').value = defaultSum.toLocaleString();
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if (planName === 'Signature Legacy') {
-            // mode='premium': แสดง premiumContainer เหนือ sumInsured
-            if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '1'; }
-            if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+            // mode='sum': วงเงินคุ้มครอง (sum) บน, เบี้ยประกัน (prem) ล่าง
+            if(sumInsuredContainer) sumInsuredContainer.style.order = '1';
+            if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '2'; }
             if(mainActionsGroup) mainActionsGroup.style.order = '3';
         } else if (planName === 'CI Extra Plus') {
             // CX: แสดง premiumContainer เป็นช่อง ออมเงิน ด้านล่าง
@@ -5061,7 +5065,7 @@ function _updateTPDUI() {
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
-    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity'];
+    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity', 'Signature Legacy', 'Century Life'];
     if (noDisplay.includes(currentAppPlan) || !lastCalculationData) {
         el.textContent = '';
         el.classList.add('hidden');
