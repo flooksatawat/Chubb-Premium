@@ -356,7 +356,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             </div>
                             <div class="premium-card !p-1.5 !rounded-[14px] flex items-center justify-between h-[54px]">
                                 <button onclick="adjustAge(-1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-minus text-[14px]"></i></button>
-                                <input type="number" id="ageInput" value="0" min="0" max="75" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)">
+                                <input type="number" id="ageInput" value="0" min="0" max="75" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)" ondblclick="openDobPicker()" title="ดับเบิ้ลคลิกเพื่อกรอกวันเกิด">
                                 <button onclick="adjustAge(1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-plus text-[14px]"></i></button>
                             </div>
                         </div>
@@ -2572,5 +2572,119 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
     </div>
 </div>
+<!-- DOB Picker Modal -->
+<div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);"></div>
+<div id="dobPickerSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10001;background:white;border-radius:24px 24px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,0.2);padding:20px 20px 36px;font-family:'Kanit',sans-serif;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.16,1,0.3,1);">
+    <div style="display:flex;justify-content:center;margin-bottom:16px;"><div style="width:40px;height:4px;border-radius:2px;background:#e2e8f0;"></div></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-birthday-cake" style="color:white;font-size:15px;"></i>
+        </div>
+        <div>
+            <div style="font-size:16px;font-weight:800;color:#1e293b;">กรอกวันเกิด</div>
+            <div style="font-size:11px;color:#94a3b8;font-weight:500;">ระบบจะคำนวณอายุให้อัตโนมัติ</div>
+        </div>
+        <button onclick="closeDobPicker()" style="margin-left:auto;width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;font-size:14px;color:#64748b;">✕</button>
+    </div>
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:16px 18px;margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:#64748b;display:block;margin-bottom:8px;"><i class="fas fa-calendar-alt" style="color:#3b82f6;margin-right:6px;"></i>วัน/เดือน/ปีเกิด (ค.ศ.)</label>
+        <input type="date" id="dobInput" style="width:100%;border:none;background:transparent;font-size:20px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;outline:none;" oninput="previewDobAge()">
+    </div>
+    <div id="dobAgePreview" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <i class="fas fa-user" style="color:#3b82f6;font-size:18px;"></i>
+        <div>
+            <div style="font-size:11px;color:#60a5fa;font-weight:600;">อายุที่คำนวณได้</div>
+            <div id="dobAgeText" style="font-size:22px;font-weight:800;color:#1d4ed8;"></div>
+        </div>
+    </div>
+    <button onclick="confirmDobAge()" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:16px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.4);">
+        <i class="fas fa-check mr-2"></i>ยืนยัน
+    </button>
+</div>
+
+<script>
+(function() {
+    // Long press on age input
+    let _dobLongPressTimer = null;
+    const ageEl = document.getElementById('ageInput');
+    if (ageEl) {
+        ageEl.addEventListener('touchstart', function(e) {
+            _dobLongPressTimer = setTimeout(() => openDobPicker(), 500);
+        }, { passive: true });
+        ageEl.addEventListener('touchend', function() {
+            clearTimeout(_dobLongPressTimer);
+        });
+        ageEl.addEventListener('touchmove', function() {
+            clearTimeout(_dobLongPressTimer);
+        });
+        ageEl.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            openDobPicker();
+        });
+    }
+})();
+
+function openDobPicker() {
+    const overlay = document.getElementById('dobPickerOverlay');
+    const sheet = document.getElementById('dobPickerSheet');
+    overlay.style.display = 'block';
+    sheet.style.display = 'flex';
+    sheet.style.flexDirection = 'column';
+    requestAnimationFrame(() => sheet.style.transform = 'translateY(0)');
+    // ตั้งค่า default date จากอายุปัจจุบัน
+    const age = parseInt(document.getElementById('ageInput')?.value) || 0;
+    if (age > 0) {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() - age);
+        document.getElementById('dobInput').value = d.toISOString().split('T')[0];
+        previewDobAge();
+    } else {
+        document.getElementById('dobInput').value = '';
+        document.getElementById('dobAgePreview').style.display = 'none';
+    }
+}
+
+function closeDobPicker() {
+    const sheet = document.getElementById('dobPickerSheet');
+    sheet.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+        document.getElementById('dobPickerOverlay').style.display = 'none';
+        sheet.style.display = 'none';
+    }, 320);
+}
+
+function previewDobAge() {
+    const val = document.getElementById('dobInput').value;
+    const preview = document.getElementById('dobAgePreview');
+    const text = document.getElementById('dobAgeText');
+    if (!val) { preview.style.display = 'none'; return; }
+    const dob = new Date(val);
+    const today = new Date();
+    let years = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
+    if (years < 0) years = 0;
+    text.textContent = `${years} ปี`;
+    preview.style.display = 'flex';
+    preview.style.alignItems = 'center';
+    preview.style.gap = '12px';
+}
+
+function confirmDobAge() {
+    const val = document.getElementById('dobInput').value;
+    if (!val) { closeDobPicker(); return; }
+    const dob = new Date(val);
+    const today = new Date();
+    let years = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
+    if (years < 0) years = 0;
+    const inp = document.getElementById('ageInput');
+    inp.value = years;
+    inp.dispatchEvent(new Event('input'));
+    closeDobPicker();
+}
+</script>
+
 </body>
 </html>
