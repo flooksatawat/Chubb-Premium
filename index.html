@@ -356,7 +356,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             </div>
                             <div class="premium-card !p-1.5 !rounded-[14px] flex items-center justify-between h-[54px]">
                                 <button onclick="adjustAge(-1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-minus text-[14px]"></i></button>
-                                <input type="number" id="ageInput" value="0" min="0" max="75" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)" ondblclick="openDobPicker()" title="ดับเบิ้ลคลิกเพื่อกรอกวันเกิด">
+                                <input type="number" id="ageInput" value="0" min="0" max="75" class="w-14 bg-transparent border-none text-center font-normal text-[22px] text-slate-800 outline-none p-0" oninput="calculate(currentMode)" onmousedown="_dobHoldStart(event)" onmouseup="_dobHoldEnd()" onmouseleave="_dobHoldEnd()" ontouchstart="_dobHoldStart(event)" ontouchend="_dobHoldEnd()" ontouchcancel="_dobHoldEnd()" title="กดค้างเพื่อกรอกวันเกิด">
                                 <button onclick="adjustAge(1)" class="w-12 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-[14px] hover:bg-slate-50 transition-colors"><i class="fas fa-plus text-[14px]"></i></button>
                             </div>
                         </div>
@@ -2657,6 +2657,20 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 </div>
 
 <script>
+// Long-press to open DOB picker (500ms hold)
+let _dobHoldTimer = null;
+function _dobHoldStart(e) {
+    _dobHoldEnd();
+    _dobHoldTimer = setTimeout(() => {
+        _dobHoldTimer = null;
+        if (e.cancelable) e.preventDefault();
+        openDobPicker();
+    }, 500);
+}
+function _dobHoldEnd() {
+    if (_dobHoldTimer) { clearTimeout(_dobHoldTimer); _dobHoldTimer = null; }
+}
+
 // --------------------------------------------------------------------
 //  DOB PICKER — DATA
 // --------------------------------------------------------------------
