@@ -1563,7 +1563,10 @@ function updateQuickPills(planName) {
     } else if (planName === 'Whole Life Extra') {
         sumPillWrapper.innerHTML = '';
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
-    } else if (['868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7'].includes(planName)) {
+    } else if (planName === 'Smart Plan 21/7') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(20000)" class="${inactiveClass}">2 หมื่น</button><button id="premPill2" onclick="setQuickPremium(40000)" class="${inactiveClass}">4 หมื่น</button><button id="premPill3" onclick="setQuickPremium(60000)" class="${inactiveClass}">6 หมื่น</button><button id="premPill4" onclick="setQuickPremium(80000)" class="${inactiveClass}">8 หมื่น</button><button id="premPill5" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button>`;
+    } else if (['868 / 818 Elite Saving', '24 TX', 'LifeTime Value'].includes(planName)) {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
     } else if (['Life Protector 20', 'Supreme Life Protector'].includes(planName)) {
@@ -2120,7 +2123,7 @@ function selectAppPlan(planName) {
         }
     } else if (planName === 'Smart Plan 21/7') {
         currentMode = 'premium';
-        document.getElementById('premiumInput').value = "120,000";
+        document.getElementById('premiumInput').value = "100,000";
         document.getElementById('sumInsuredInput').value = "1,000,000";
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
