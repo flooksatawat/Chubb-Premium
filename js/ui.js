@@ -5359,7 +5359,7 @@ function generatePolicyTableData() {
     const forceShowCashFlow = showCashFlowBase;
     const showDepositColumn = forceShowCashFlow && window._tableDepositEnabled && window._tableDepositUntilAge > 0;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV) && isShowSAActive);
+    const showSAColumn = isLPB || isSLB || isSM || ((isWXN || isElite || isTX || isLV) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
     const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : isLV ? isBreakevenActive : true;
@@ -5705,6 +5705,10 @@ function generatePolicyTableData() {
             const _lvTier  = Math.round(currentSA * lvDeathMultiplier(y, currentAge));
             const _lvFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
+        } else if (isSM && currentSA > 0) {
+            // 7SM: ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175% ของทุนเริ่มต้น
+            const _smPct = y <= 5 ? 1.00 : 1.75;
+            deathBenefit = Math.round(currentSA * _smPct);
         }
 
         accCashFlow += cashFlowAmt;
@@ -5719,7 +5723,7 @@ function generatePolicyTableData() {
         }
 
         // 6. สร้างแถวตาราง
-        const saCompact = (isLPB || isSLPA || isLV) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
+        const saCompact = (isLPB || isSLPA || isLV || isSM) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
         const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
