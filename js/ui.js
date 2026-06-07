@@ -5925,8 +5925,8 @@ function generatePolicyTableData() {
 
     if (isSurrenderActive && hasSurrenderMenu) {
         const planKeyW = currentAppPlan === 'Supreme Life Protector' ? '20SLPA'
-                       : currentAppPlan === 'Century Life'          ? '10CL'
-                       : currentAppPlan === 'Signature Legacy'      ? 'SLB'
+                       : currentAppPlan === 'Century Life'          ? (currentPlan || '10CL')
+                       : currentAppPlan === 'Signature Legacy'      ? (currentPlan || '5SLB')
                        : '20LPB';
         const cfModeW = document.querySelector('input[name="cfMainMode"]:checked')?.value || 'continuous';
         cfMainMode = cfModeW;
