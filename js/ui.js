@@ -5421,7 +5421,13 @@ function _generateSTATable() {
     // Table header columns
     const thead = document.getElementById('policyTableHead');
     if (thead) {
-        const _mfTh = _hasMF ? `<th class="px-2 py-2 text-right text-sky-700 font-bold" style="white-space:nowrap;">MF เบี้ย/ปี <button onclick="window._mfAfterSixtyByAge={}; _generateSTATable();" style="font-size:9px;color:#94a3b8;background:#f1f5f9;border:none;border-radius:4px;padding:1px 4px;cursor:pointer;vertical-align:middle;" title="ปิด MF">✕</button></th>` : '';
+        const _mfLabelRaw = window._mfCurrentLabel || (window.currentMF && window.currentMF !== 'ไม่เลือก' ? window.currentMF.split('|').join(' ') : null);
+        const _mfLabelPts = _mfLabelRaw ? _mfLabelRaw.split(' · ') : [];
+        const _mfColLabel = _mfLabelPts.length >= 3 ? _mfLabelPts[0] + ' · ' + _mfLabelPts[2]
+                          : _mfLabelPts.length === 2 ? _mfLabelPts[0] + ' · ' + _mfLabelPts[1]
+                          : (_mfLabelRaw || 'MF เบี้ย/ปี');
+        const _mfCloseBtnStyle = 'font-size:10px;color:#ef4444;background:#fee2e2;border:none;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;vertical-align:middle;margin-left:3px;flex-shrink:0;';
+        const _mfTh = _hasMF ? `<th class="px-2 py-2 text-right text-sky-700 font-bold" style="white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:3px;justify-content:flex-end;">${_mfColLabel}<button onclick="window._mfAfterSixtyByAge={}; window.currentMF='ไม่เลือก'; window._mfCurrentLabel=null; _generateSTATable();" style="${_mfCloseBtnStyle}" title="ปิด MF">✕</button></span></th>` : '';
         thead.innerHTML = `<tr>
             <th class="px-2 py-2 text-center text-slate-600 font-bold">อายุ</th>
             <th class="px-2 py-2 text-right text-slate-600 font-bold">ออม (บ.)</th>
