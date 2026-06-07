@@ -1257,7 +1257,7 @@ function initSwipeToDismiss() {
     });
 }
 
-function openPlanModal() {
+function openPlanModal(activePlanArg) {
     const modal = document.getElementById('planSelectModal');
     if (modal) modal.classList.remove('hidden');
 
@@ -1267,17 +1267,17 @@ function openPlanModal() {
         cardWrapper.classList.add('translate-y-0', 'opacity-100');
     }
 
-    // Capture active plan NOW — before any timeout can race with __cmpHighlightPlan
-    const _activePlanSnapshot = window.__cmpHighlightPlan || currentAppPlan;
+    // activePlanArg passed directly from _cmpStartReplace — no global race possible
+    const _activePlan = activePlanArg || window.__cmpHighlightPlan || currentAppPlan;
 
     renderModernCards(modernPlansData, true);
 
-    // Apply highlight synchronously right after DOM is set — no setTimeout race
-    _applyActiveCardHighlight(_activePlanSnapshot);
+    // Apply highlight synchronously right after DOM is set
+    _applyActiveCardHighlight(_activePlan);
 
     initSwipeToDismiss();
     initModernScrollInteractions();
-    setTimeout(() => _animateModalCards(_activePlanSnapshot), 90);
+    setTimeout(() => _animateModalCards(_activePlan), 90);
 }
 
 function _applyActiveCardHighlight(activePlan) {
@@ -2541,9 +2541,9 @@ window._cmpStartReplace = function(slot, curA, curB) {
     if (sheet && sheet.style.display !== 'none') {
         sheet.style.transform = 'translateY(100%)';
     }
-    // เปิด plan modal ทันทีเพื่อให้เลือกแบบใหม่โดยไม่ต้องกดเพิ่ม
+    // ส่ง slotLabel โดยตรงเข้า openPlanModal — ไม่พึ่ง __cmpHighlightPlan global
     setTimeout(() => {
-        if (typeof openPlanModal === 'function') openPlanModal();
+        if (typeof openPlanModal === 'function') openPlanModal(slotLabel);
     }, 150);
 };
 
