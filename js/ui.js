@@ -1257,17 +1257,29 @@ function _animateModalCards() {
     // Loop mode: second copy (index n..2n-1) is the visible one after scrollTop jump
     // Search mode: first n cards visible
     const startIdx = isModernSearchActive ? 0 : n;
+    const _activePlan = window.__cmpHighlightPlan || currentAppPlan;
     for (let i = 0; i < n; i++) {
         const card = cards[startIdx + i];
         if (!card) continue;
-        const _activePlan = window.__cmpHighlightPlan || currentAppPlan;
-        const isActive = card.querySelector('button[data-plan]')?.getAttribute('data-plan') === _activePlan;
+        const btn = card.querySelector('button[data-plan]');
+        const isActive = btn?.getAttribute('data-plan') === _activePlan;
         const delay = i * 32;
         const anim = isActive
             ? `cardInActive 340ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`
             : `cardIn 280ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`;
         card.style.animation = anim;
         card.addEventListener('animationend', () => { card.style.animation = ''; }, { once: true });
+        if (btn) {
+            if (isActive) {
+                btn.style.background = 'linear-gradient(135deg,#eff6ff,#dbeafe)';
+                btn.style.border = '1.5px solid #3b82f6';
+                btn.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15), 0 2px 10px rgba(0,0,0,0.06)';
+            } else {
+                btn.style.background = '#fff';
+                btn.style.border = '1px solid rgba(226,232,240,0.8)';
+                btn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
+            }
+        }
     }
 }
 
