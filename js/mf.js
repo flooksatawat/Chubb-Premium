@@ -1365,7 +1365,7 @@ window.mfShowTotalPopup = async function() {
 };
 
 // ==================== Medical Fund button dispatcher ====================
-// 24TX / Elite / WXN / 7SM → open the MF rider picker (เลือกแบบประกันบริษัทอื่น)
+// 24TX / Elite / WXN / LV → open the MF rider picker (เลือกแบบประกันบริษัทอื่น)
 // 3D Health Excellence    → project the plan's own renewable health premium ตลอดชีพ
 window.mfBtnClick = function() {
     const plan = (typeof currentAppPlan !== 'undefined' && currentAppPlan)

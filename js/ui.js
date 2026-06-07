@@ -2141,7 +2141,7 @@ function selectAppPlan(planName) {
 
     }
 
-    if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', '3D Health Excellence'].includes(planName)) {
+    if (['Whole Life Extra', '24 TX', '868 / 818 Elite Saving', 'LifeTime Value', '3D Health Excellence'].includes(planName)) {
         if (globalMFContainer) globalMFContainer.classList.remove('hidden');
     } else {
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
@@ -5019,7 +5019,7 @@ function generatePolicyTableData() {
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
                     </label>
                 `;
-            } else if (isWXN || isElite || isTX || isLV || isSM) {
+            } else if (isWXN || isElite || isTX || isLV) {
                 rightMenuHTML = `
                     <div class="flex items-center gap-1.5 min-w-0">
                         <i class="fas fa-shield-alt text-rose-500 text-[14px] w-4 text-center shrink-0"></i>
@@ -5174,11 +5174,11 @@ function generatePolicyTableData() {
         if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
     }
 
-    const showCashFlowBase = isWXN || isElite || isTX || isLV || isSM;
+    const showCashFlowBase = isWXN || isElite || isTX || isLV;
     const forceShowCashFlow = showCashFlowBase;
     const showDepositColumn = forceShowCashFlow && window._tableDepositEnabled && window._tableDepositUntilAge > 0;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV || isSM) && isShowSAActive);
+    const showSAColumn = isLPB || isSLB || ((isWXN || isElite || isTX || isLV) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
     const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : isLV ? isBreakevenActive : true;
@@ -5239,7 +5239,7 @@ function generatePolicyTableData() {
         </div>`;
 
     // compact: เฉพาะจอแคบ (<400px) เท่านั้น — desktop ไม่ compact แม้มี SA column
-    const _isCompact  = (isWXN || isElite || isTX || isLV || isSM) && _isNarrow;
+    const _isCompact  = (isWXN || isElite || isTX || isLV) && _isNarrow;
     // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
     const _isSuperCompact = _isCompact && _vw < 380;
 
@@ -5440,7 +5440,7 @@ function generatePolicyTableData() {
                 annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
                 totalSaving += annualSaving;
             }
-        } else if (isLV || isSM) {
+        } else if (isLV) {
             if (y <= payYears) {
                 annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
                 totalSaving += annualSaving;
@@ -5504,7 +5504,7 @@ function generatePolicyTableData() {
         
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
-            let breakevenValue = (isElitePlan || isTX || isWXN || isLV || isSM) ? surrenderTotal
+            let breakevenValue = (isElitePlan || isTX || isWXN || isLV) ? surrenderTotal
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
