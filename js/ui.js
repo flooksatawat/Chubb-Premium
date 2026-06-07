@@ -5804,7 +5804,7 @@ function generatePolicyTableData() {
 
     // ชื่อหัวตาราง: compact/super-compact/medium ใช้ label สั้น
     const _lSaving   = (_isCompact || _isMedium) ? 'ออม'  : 'ออมเงิน';
-    const _lAccum    = (_isCompact || _isMedium) ? 'สะสม' : 'ออมสะสม';
+    const _lAccum    = 'ออมสะสม';
     const _lCF       = 'กระแสเงินสด';
     const _lTotal    = _isSuperCompact ? 'รวม' : ((_isCompact || _isMedium) ? 'รวมรับ' : 'รวมรับเงิน');
     const _lCV       = 'เงินสดพร้อมใช้';
