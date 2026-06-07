@@ -2572,113 +2572,141 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         </div>
     </div>
 </div>
-<!-- DOB Picker Modal -->
-<div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);"></div>
-<div id="dobPickerSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10001;background:white;border-radius:24px 24px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,0.2);padding:20px 20px 36px;font-family:'Kanit',sans-serif;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.16,1,0.3,1);">
-    <div style="display:flex;justify-content:center;margin-bottom:16px;"><div style="width:40px;height:4px;border-radius:2px;background:#e2e8f0;"></div></div>
+<!-- DOB Picker Popup -->
+<div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);opacity:0;transition:opacity 0.22s;"></div>
+<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22),0 4px 16px rgba(0,0,0,0.1);padding:24px 24px 20px;font-family:'Kanit',sans-serif;width:min(92vw,360px);opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);">
+    <!-- Header -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-birthday-cake" style="color:white;font-size:15px;"></i>
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.35);">
+            <i class="fas fa-birthday-cake" style="color:white;font-size:16px;"></i>
         </div>
-        <div>
-            <div style="font-size:16px;font-weight:800;color:#1e293b;">กรอกวันเกิด</div>
-            <div style="font-size:11px;color:#94a3b8;font-weight:500;">ระบบจะคำนวณอายุให้อัตโนมัติ</div>
+        <div style="flex:1;">
+            <div style="font-size:16px;font-weight:800;color:#1e293b;line-height:1.2;">กรอกวันเกิด</div>
+            <div style="font-size:11px;color:#94a3b8;font-weight:500;margin-top:1px;">ดับเบิ้ลคลิกที่ช่องอายุเพื่อเปิด</div>
         </div>
-        <button onclick="closeDobPicker()" style="margin-left:auto;width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;font-size:14px;color:#64748b;">✕</button>
+        <button onclick="closeDobPicker()" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:15px;flex-shrink:0;transition:background 0.15s;" onmousedown="this.style.background='#e2e8f0'" onmouseup="this.style.background='#f1f5f9'">✕</button>
     </div>
-    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:16px 18px;margin-bottom:16px;">
-        <label style="font-size:12px;font-weight:700;color:#64748b;display:block;margin-bottom:8px;"><i class="fas fa-calendar-alt" style="color:#3b82f6;margin-right:6px;"></i>วัน/เดือน/ปีเกิด (ค.ศ.)</label>
-        <input type="date" id="dobInput" style="width:100%;border:none;background:transparent;font-size:20px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;outline:none;" oninput="previewDobAge()">
+    <!-- Date input -->
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:14px 16px;margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:#64748b;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;"><i class="fas fa-calendar-alt" style="color:#3b82f6;margin-right:5px;"></i>วัน / เดือน / ปีเกิด (ค.ศ.)</label>
+        <input type="date" id="dobInput" style="width:100%;border:none;background:transparent;font-size:22px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;outline:none;cursor:pointer;" oninput="previewDobAge()">
     </div>
-    <div id="dobAgePreview" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
-        <i class="fas fa-user" style="color:#3b82f6;font-size:18px;"></i>
-        <div>
-            <div style="font-size:11px;color:#60a5fa;font-weight:600;">อายุที่คำนวณได้</div>
-            <div id="dobAgeText" style="font-size:22px;font-weight:800;color:#1d4ed8;"></div>
+    <!-- Age preview -->
+    <div id="dobAgePreview" style="display:none;background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:1.5px solid #bfdbfe;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+        <div style="font-size:11px;color:#60a5fa;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;"><i class="fas fa-calculator" style="margin-right:4px;"></i>อายุที่คำนวณได้ (ณ วันนี้)</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+            <span id="dobAgeText" style="font-size:32px;font-weight:900;color:#1d4ed8;line-height:1;"></span>
+            <span style="font-size:14px;font-weight:600;color:#3b82f6;">ปี</span>
         </div>
+        <div id="dobAgeNote" style="font-size:10.5px;color:#64748b;font-weight:500;margin-top:4px;"></div>
     </div>
-    <button onclick="confirmDobAge()" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:16px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.4);">
-        <i class="fas fa-check mr-2"></i>ยืนยัน
+    <!-- Confirm button -->
+    <button onclick="confirmDobAge()" id="dobConfirmBtn" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.4);transition:opacity 0.15s;" disabled>
+        <i class="fas fa-check" style="margin-right:6px;"></i>ยืนยันอายุ
     </button>
 </div>
 
 <script>
+// Attach double-click (desktop) and double-tap (mobile) — same trigger for both
 (function() {
-    // Long press on age input
-    let _dobLongPressTimer = null;
     const ageEl = document.getElementById('ageInput');
-    if (ageEl) {
-        ageEl.addEventListener('touchstart', function(e) {
-            _dobLongPressTimer = setTimeout(() => openDobPicker(), 500);
-        }, { passive: true });
-        ageEl.addEventListener('touchend', function() {
-            clearTimeout(_dobLongPressTimer);
-        });
-        ageEl.addEventListener('touchmove', function() {
-            clearTimeout(_dobLongPressTimer);
-        });
-        ageEl.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            openDobPicker();
-        });
-    }
+    if (!ageEl) return;
+    // dblclick covers desktop double-click AND mobile double-tap
+    ageEl.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+        openDobPicker();
+    });
 })();
+
+function _calcInsuranceAge(dobVal) {
+    // นับอายุตั้งแต่วันเกิดครบรอบปีที่ผ่านมา — ไม่ปัดเศษขึ้น ยกเว้นครบปีบริบูรณ์
+    if (!dobVal) return null;
+    const dob = new Date(dobVal);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dob.setHours(0, 0, 0, 0);
+    let years = today.getFullYear() - dob.getFullYear();
+    // ตรวจว่าถึงวันเกิดในปีนี้แล้วหรือยัง
+    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+    if (today < birthdayThisYear) years--;
+    return Math.max(0, years);
+}
+
+function _dobNoteText(dobVal) {
+    if (!dobVal) return '';
+    const dob = new Date(dobVal);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dob.setHours(0, 0, 0, 0);
+    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+    const nextBirthday = today >= birthdayThisYear
+        ? new Date(today.getFullYear() + 1, dob.getMonth(), dob.getDate())
+        : birthdayThisYear;
+    const diffMs = nextBirthday - today;
+    const diffDays = Math.round(diffMs / 86400000);
+    if (diffDays === 0) return 'วันเกิดครบรอบวันนี้พอดี 🎂';
+    return `อีก ${diffDays} วัน จะครบปีถัดไป`;
+}
 
 function openDobPicker() {
     const overlay = document.getElementById('dobPickerOverlay');
-    const sheet = document.getElementById('dobPickerSheet');
+    const popup = document.getElementById('dobPickerPopup');
     overlay.style.display = 'block';
-    sheet.style.display = 'flex';
-    sheet.style.flexDirection = 'column';
-    requestAnimationFrame(() => sheet.style.transform = 'translateY(0)');
-    // ตั้งค่า default date จากอายุปัจจุบัน
+    popup.style.display = 'block';
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        popup.style.opacity = '1';
+        popup.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+    // default date จากอายุปัจจุบัน
     const age = parseInt(document.getElementById('ageInput')?.value) || 0;
+    const dobInput = document.getElementById('dobInput');
     if (age > 0) {
         const d = new Date();
         d.setFullYear(d.getFullYear() - age);
-        document.getElementById('dobInput').value = d.toISOString().split('T')[0];
+        dobInput.value = d.toISOString().split('T')[0];
         previewDobAge();
     } else {
-        document.getElementById('dobInput').value = '';
+        dobInput.value = '';
         document.getElementById('dobAgePreview').style.display = 'none';
+        document.getElementById('dobConfirmBtn').disabled = true;
     }
 }
 
 function closeDobPicker() {
-    const sheet = document.getElementById('dobPickerSheet');
-    sheet.style.transform = 'translateY(100%)';
+    const overlay = document.getElementById('dobPickerOverlay');
+    const popup = document.getElementById('dobPickerPopup');
+    overlay.style.opacity = '0';
+    popup.style.opacity = '0';
+    popup.style.transform = 'translate(-50%,-52%) scale(0.92)';
     setTimeout(() => {
-        document.getElementById('dobPickerOverlay').style.display = 'none';
-        sheet.style.display = 'none';
-    }, 320);
+        overlay.style.display = 'none';
+        popup.style.display = 'none';
+    }, 240);
 }
 
 function previewDobAge() {
     const val = document.getElementById('dobInput').value;
     const preview = document.getElementById('dobAgePreview');
     const text = document.getElementById('dobAgeText');
-    if (!val) { preview.style.display = 'none'; return; }
-    const dob = new Date(val);
-    const today = new Date();
-    let years = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
-    if (years < 0) years = 0;
-    text.textContent = `${years} ปี`;
-    preview.style.display = 'flex';
-    preview.style.alignItems = 'center';
-    preview.style.gap = '12px';
+    const note = document.getElementById('dobAgeNote');
+    const btn = document.getElementById('dobConfirmBtn');
+    if (!val) {
+        preview.style.display = 'none';
+        btn.disabled = true;
+        return;
+    }
+    const years = _calcInsuranceAge(val);
+    text.textContent = years;
+    note.textContent = _dobNoteText(val);
+    preview.style.display = 'block';
+    btn.disabled = false;
 }
 
 function confirmDobAge() {
     const val = document.getElementById('dobInput').value;
     if (!val) { closeDobPicker(); return; }
-    const dob = new Date(val);
-    const today = new Date();
-    let years = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
-    if (years < 0) years = 0;
+    const years = _calcInsuranceAge(val);
     const inp = document.getElementById('ageInput');
     inp.value = years;
     inp.dispatchEvent(new Event('input'));
