@@ -2335,7 +2335,6 @@ window.__comparePlan = null;
         { name: '24 TX',                  abbr: 'TX',    icon: 'fa-coins',      color: '#0284c7', bg: '#eff6ff' },
         { name: '868 / 818 Elite Saving', abbr: 'Elite', icon: 'fa-crown',      color: '#9333ea', bg: '#faf5ff' },
         { name: 'LifeTime Value',         abbr: 'LV',    icon: 'fa-chart-line', color: '#7c3aed', bg: '#f5f3ff' },
-        { name: 'Smart Plan 21/7',        abbr: '7SM',   icon: 'fa-piggy-bank', color: '#0d9488', bg: '#f0fdfa' },
     ];
 
     // ซิงค์ส่วน "ประกันสุขภาพที่เลือก" จาก mfInlineContainer
