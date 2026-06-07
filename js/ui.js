@@ -2843,6 +2843,10 @@ function _injectToPearLCanvas(d) {
     } else {
         rows += R(premLabel, fmtP(d.premium) + ' ฿ / ปี', hasCF ? 'cg' : 'rose');
     }
+    if (hasCF && d.sum > 0 && parseInt(d.years) > 0) {
+        const _savPerYear = Math.round(d.sum / parseInt(d.years));
+        rows += R(`เงินออมเฉลี่ยต่อปี (${fmtN(d.sum)} ÷ ${parseInt(d.years)} ปี)`, fmtP(_savPerYear) + ' ฿ / ปี', 'cg');
+    }
     rows += R('ทุนประกันชีวิต', fmtN(d.sum) + ' ฿', '');
 
     if (hasCF && d.cashFlow > 0) rows += R('กระแสเงินสด / ปี', fmtP(d.cashFlow) + ' ฿', 'cg');
