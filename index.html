@@ -193,7 +193,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .cf-panel-enter {
     animation: cfSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-/* ── Plan card entrance (GPU-safe: transform+opacity only) ── */
+/* -- Plan card entrance (GPU-safe: transform+opacity only) -- */
 @keyframes cardIn {
     from { opacity: 0; transform: translateY(22px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -247,9 +247,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 }
 </style>
 
-<!-- ══════════════════════════════════════════ -->
+<!-- ------------------------------------------ -->
 <!-- LINE LOGIN OVERLAY                         -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ------------------------------------------ -->
 <div id="lineLoginOverlay">
     <!-- Title -->
     <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:32px;">
@@ -2002,7 +2002,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
         }
-        // ── ตั้งค่า --real-vh + แก้ two-pane layout ด้วย inline style (ชนะ Tailwind CDN) ──
+        // -- ตั้งค่า --real-vh + แก้ two-pane layout ด้วย inline style (ชนะ Tailwind CDN) --
         function setRealVH() {
             var vh = window.innerHeight;
             var vw = window.innerWidth;
@@ -2175,9 +2175,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         })();
     </script>
 
-<!-- ══════════════════════════════════════════ -->
+<!-- ------------------------------------------ -->
 <!-- LINE LOGIN LOGIC                           -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ------------------------------------------ -->
 <script>
 (function () {
     const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
@@ -2186,7 +2186,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     const EXT_SHOWN_KEY    = 'chubb_ext_shown';
     const SHEET_CSV_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/export?format=csv&gid=568338827';
 
-    /* ── ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง (fail-closed) ── */
+    /* -- ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง (fail-closed) -- */
     async function checkSheet(displayName) {
         try {
             // ใช้ apiFetch เพื่อหลีกเลี่ยง CORS ใน LIFF browser
@@ -2209,7 +2209,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     const overlay     = document.getElementById('lineLoginOverlay');
     const loginBtn    = document.getElementById('lineLoginBtn');
 
-    /* ── helpers ── */
+    /* -- helpers -- */
     const getLS  = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
     const setLS  = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
     const clearLS = () => { try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTH_CACHE_KEY); } catch {} };
@@ -2222,7 +2222,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             : text;
     }
 
-    /* ── State helpers ── */
+    /* -- State helpers -- */
     const $ = id => document.getElementById(id);
 
     /* ตรวจ LINE Desktop — มี Line/ ใน UA แต่ไม่ใช่ Android/iPhone */
@@ -2274,7 +2274,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
     function showProfile(p) { /* profile bar removed */ }
 
-    /* ── API calls — ใช้ liff.fetch เมื่ออยู่ใน LINE เพื่อหลีกเลี่ยง CORS ── */
+    /* -- API calls — ใช้ liff.fetch เมื่ออยู่ใน LINE เพื่อหลีกเลี่ยง CORS -- */
     async function apiFetch(url) {
         if (window.IS_IN_LIFF && typeof liff !== 'undefined' && liff.fetch) {
             return liff.fetch(url);
@@ -2300,7 +2300,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    /* ── เปิด Chrome พร้อม auth params ── */
+    /* -- เปิด Chrome พร้อม auth params -- */
     function openInChrome() {
         const p = getLS(CACHE_KEY);
         const a = getLS(AUTH_CACHE_KEY);
@@ -2314,7 +2314,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    /* ── Pending polling (ทุก 10 วิ) ── */
+    /* -- Pending polling (ทุก 10 วิ) -- */
     let _pollTimer;
 
     function startPendingPolling() {
@@ -2340,7 +2340,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     };
 
-    /* ── Request access ── */
+    /* -- Request access -- */
     window.requestAccess = async function () {
         const btn = $('authRequestBtn');
         const msg = $('authRequestMsg');
@@ -2362,7 +2362,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         startPendingPolling();
     };
 
-    /* ── สร้าง Chrome URL พร้อม auth params ── */
+    /* -- สร้าง Chrome URL พร้อม auth params -- */
     function chromeUrl() {
         const p = getLS(CACHE_KEY);
         const a = getLS(AUTH_CACHE_KEY);
@@ -2377,7 +2377,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
     }
 
-    /* ── Open External Browser ── */
+    /* -- Open External Browser -- */
     window.doOpenExternal = function () {
         setLS(EXT_SHOWN_KEY, true);
         $('openExternalPrompt').style.display = 'none';
@@ -2390,7 +2390,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         $('openExternalPrompt').style.display = 'none';
     };
 
-    /* ── Logout ── */
+    /* -- Logout -- */
 
     window.lineLogout = function () {
         clearLS();
@@ -2400,7 +2400,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         location.reload();
     };
 
-    /* ── Main flow ── */
+    /* -- Main flow -- */
     async function run() {
         /* 0. รับ auth จาก URL params (กรณี redirect จาก LINE in-app browser) */
         const urlParams = new URLSearchParams(location.search);
@@ -2656,9 +2656,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------
 //  DOB PICKER — DATA
-// ════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------
 
 // สีประจำวัน (โหราศาสตร์ไทย) — gradient + UI theme เท่านั้น
 const _DOB_THEMES = {
@@ -2803,7 +2803,7 @@ const _DOB_PHONE_NUM = {
         close:'"ถ้าคุณมีหลักประกันนี้ คนที่คุณห่วงจะไม่ต้องกังวล" — เชื่อมโยงการตัดสินใจกับการดูแลผู้อื่น' },
 };
 
-// ─── Helper functions ─────────────────────────────────────────────
+// --- Helper functions ---------------------------------------------
 function _getZodiac(m, d) {
     for (const z of _DOB_ZODIAC) {
         const [sm, sd] = z.start, [em, ed] = z.end;
@@ -2899,14 +2899,14 @@ function _chineseZodiac(year) {
     return { ..._CZ_DATA[animalIdx], element: _CZ_ELEMENTS[elementIdx] };
 }
 
-// ─── Trigger ─────────────────────────────────────────────────────────────────
+// --- Trigger -----------------------------------------------------------------
 (function() {
     const ageEl = document.getElementById('ageInput');
     if (!ageEl) return;
     ageEl.addEventListener('dblclick', function(e) { e.preventDefault(); openDobPicker(); });
 })();
 
-// ─── Open / Close ─────────────────────────────────────────────────────────────
+// --- Open / Close -------------------------------------------------------------
 function openDobPicker() {
     document.getElementById('dobPickerOverlay').style.display = 'block';
     const popup = document.getElementById('dobPickerPopup');
@@ -2950,7 +2950,7 @@ function closeDobPicker() {
     setTimeout(() => { overlay.style.display = 'none'; popup.style.display = 'none'; }, 240);
 }
 
-// ─── Input handling ───────────────────────────────────────────────────────────
+// --- Input handling -----------------------------------------------------------
 ['dobDay','dobMonth','dobYear'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -3084,7 +3084,7 @@ function _renderDobDetail() {
 
     // 2. ราศีตะวันตก — บุคลิกภาพ
     html += card(`ราศี ${zodiac.name} — บุคลิกภาพ`, zodiac.sym,
-        `<div style="font-size:12px;color:#334155;line-height:1.7;">${zodiac.personality}</div>
+        `<div style="font-size:12px;color:#334155;line-height:1.7;">${zodiac.personality}</div>`);
 
     // 3. ปีนักษัตรจีน
     html += card(`ปีนักษัตร${cz.name} (${cz.en}) — ธาตุ${cz.element.name}`, cz.emoji,
