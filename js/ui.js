@@ -1260,7 +1260,8 @@ function _animateModalCards() {
     for (let i = 0; i < n; i++) {
         const card = cards[startIdx + i];
         if (!card) continue;
-        const isActive = card.querySelector('button[data-plan]')?.getAttribute('data-plan') === currentAppPlan;
+        const _activePlan = window.__cmpHighlightPlan || currentAppPlan;
+        const isActive = card.querySelector('button[data-plan]')?.getAttribute('data-plan') === _activePlan;
         const delay = i * 32;
         const anim = isActive
             ? `cardInActive 340ms cubic-bezier(0.16,1,0.3,1) ${delay}ms both`
@@ -1935,7 +1936,8 @@ function selectAppPlan(planName) {
         if (banner) banner.style.display = 'none';
         const newA = slot === 'A' ? planName : curA;
         const newB = slot === 'B' ? planName : curB;
-        if (newA !== newB) window.renderCompareView(newA, newB);
+        window.__cmpHighlightPlan = null;
+        window.renderCompareView(newA, newB);
         return;
     }
 
@@ -2485,6 +2487,9 @@ window._cmpStartReplace = function(slot, curA, curB) {
     banner.innerHTML = `<i class="fas fa-pen"></i> เปลี่ยน <span style="color:#fef9c3">${slotLabel}</span> → เลือกแบบใหม่ &nbsp;<button onclick="window._cmpCancelReplace()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-weight:700;font-size:13px;padding:2px 10px;border-radius:8px;cursor:pointer;">✕</button>`;
     banner.style.display = 'flex';
 
+    // ไฮไลต์แผนที่กำลัง replace (ไม่ใช่ currentAppPlan)
+    window.__cmpHighlightPlan = slotLabel;
+
     // ซ่อน sheet (ถ้ามี) แล้วเปิดเมนูเลือกแบบอัตโนมัติ
     const sheet = document.getElementById('_cmpMobileSheet');
     if (sheet && sheet.style.display !== 'none') {
@@ -2500,6 +2505,7 @@ window._cmpCancelReplace = function() {
     window.__cmpReplaceSlot = null;
     window.__cmpSlotPlanA  = null;
     window.__cmpSlotPlanB  = null;
+    window.__cmpHighlightPlan = null;
     const banner = document.getElementById('_cmpReplaceBanner');
     if (banner) banner.style.display = 'none';
     // คืน sheet บนมือถือ
