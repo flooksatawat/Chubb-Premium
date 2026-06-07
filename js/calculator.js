@@ -91,7 +91,7 @@ async function loadAllRates() {
         
         // โหลดค่าคอมมิชชัน
         try {
-            const r = await fetch('data/com/com_rates.json');
+            const r = await fetch('data/com/com_rates.json?v=' + Date.now());
             if (r.ok) { 
                 COM_RATES = await r.json(); 
                 window.COM_RATES = COM_RATES; 
