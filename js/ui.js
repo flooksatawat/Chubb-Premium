@@ -5577,7 +5577,7 @@ function generatePolicyTableData() {
                 <div id="cfInlineControls" class="hidden bg-white border-t border-slate-100">
                     <div class="flex items-center justify-between px-4 pt-2 pb-1 border-b border-slate-100">
                         <span class="text-[10px] font-bold text-slate-500">ตั้งค่าทยอยเวนคืน</span>
-                        <button onclick="document.getElementById('cfInlineControls').classList.add('hidden')" class="text-[10px] text-blue-500 font-bold px-2 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 active:scale-95 transition-all">ย่อ ▲</button>
+                        <button onclick="(function(){ document.getElementById('cfInlineControls').classList.add('hidden'); var t=document.getElementById('toggleSurrender'); if(t&&t.checked){t.checked=false; t.dispatchEvent(new Event('change'));} })()" class="text-[10px] text-blue-500 font-bold px-2 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 active:scale-95 transition-all">ย่อ ▲</button>
                     </div>
                     <div class="px-4 pt-3 pb-4 space-y-3">
                         <input type="radio" name="cfMainMode" value="continuous" checked class="sr-only" id="cfMainModeCont">
