@@ -374,11 +374,8 @@ function getDiscount(sum, plan) {
         if (sum >= 600000) return 3.0;
         if (sum >= 300000) return 1.0;
     }
-    // Step Annuity (AS10, AS60)
+    // Step Annuity (AS10, AS60) — ไม่มีส่วนลดตามทุน (เบี้ย = ทุน/1000 × เรท)
     if (plan === 'AS10' || plan === 'AS60') {
-        if (sum >= 2000000) return 5;
-        if (sum >= 1000000) return 4;
-        if (sum >= 600000)  return 2;
         return 0;
     }
 
