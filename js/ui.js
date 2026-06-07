@@ -5709,10 +5709,12 @@ function generatePolicyTableData() {
             // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)
             //   1) %ทุนประกัน (ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175%)
             //   2) มูลค่าเวนคืนเงินสด (cvTotal)
-            //   3) เบี้ยที่ชำระมาแล้วทั้งหมด หักด้วยเงินจ่ายคืนที่ได้รับไปแล้ว (totalSaving − accCashFlow ปีก่อนหน้า)
+            //   3) เบี้ยที่ชำระมาแล้วทั้งหมด หักด้วยเงินจ่ายคืนที่ได้รับไปแล้ว
+            //      ใช้ค่า 2% แบบไม่ปัดเศษรายงวด (ปัดเศษครั้งเดียวตอนท้าย) เพื่อให้ตรงตาราง Rate Book
             const _smPct  = y <= 5 ? 1.00 : 1.75;
             const _smTier = Math.round(currentSA * _smPct);
-            const _smPremNet = totalSaving - accCashFlow;
+            const _smCashbacksReceived = Math.max(0, Math.min(y - 1, 20) - 1); // งวดเงินคืนที่รับแล้ว (ปี 2-20)
+            const _smPremNet = Math.round(totalSaving - currentSA * 0.02 * _smCashbacksReceived);
             deathBenefit = Math.max(_smTier, cvTotal, _smPremNet);
         }
 
