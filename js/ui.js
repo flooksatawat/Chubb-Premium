@@ -2109,6 +2109,23 @@ function selectAppPlan(planName) {
     if(mainActionsGroup) mainActionsGroup.style.order = '';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
     if(premiumSubLabel) premiumSubLabel.className = 'text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200';
+    // reset cashFlowContainer กลับสีเขียว (emerald) เมื่อ switch plan ออกจาก STA
+    if(cashFlowContainer) {
+        cashFlowContainer.style.order = '';
+        cashFlowContainer.className = cashFlowContainer.className
+            .replace('border-orange-200','border-emerald-200').replace('bg-orange-50/30','bg-emerald-50/30');
+        const _cfLblP = cashFlowContainer.querySelector('p');
+        if(_cfLblP) _cfLblP.innerHTML = '<i class="fas fa-money-bill-trend-up"></i> กระแสเงินสด (รับเงินคืน)';
+        _cfLblP && (_cfLblP.className = 'text-emerald-700 text-[11px] font-bold flex items-center gap-1.5');
+        const _cfBadge = cashFlowContainer.querySelector('span');
+        if(_cfBadge) { _cfBadge.textContent = 'ย้อนกลับได้'; _cfBadge.className = 'text-[8px] bg-white text-emerald-600 px-1.5 py-0.5 rounded-full font-bold shadow-sm border border-emerald-100'; }
+        const _pillTrack = cashFlowContainer.querySelector('#singleCashFlowBox > div:first-child');
+        if(_pillTrack) _pillTrack.className = _pillTrack.className
+            .replace('bg-orange-100/60','bg-emerald-100/60').replace('border-orange-200/50','border-emerald-200/50');
+        const _cfInput = document.getElementById('cashFlowInput');
+        if(_cfInput) _cfInput.className = _cfInput.className
+            .replace('text-orange-700','text-emerald-700').replace('focus:border-orange-400','focus:border-emerald-400');
+    }
 
     if (planName === 'Whole Life Extra') {
         currentMode = 'premium'; 
@@ -2177,11 +2194,25 @@ function selectAppPlan(planName) {
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
             cashFlowContainer.style.order = '2';
+            cashFlowContainer.className = cashFlowContainer.className
+                .replace('border-emerald-200','border-orange-200').replace('bg-emerald-50/30','bg-orange-50/30');
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
+            // label
             const _cfLbl = cashFlowContainer.querySelector('p');
-            if (_cfLbl) _cfLbl.innerHTML = '<i class="fas fa-coins text-orange-500"></i> <span class="text-orange-700">บำนาญ/ปี (อายุ 60)</span>';
+            if(_cfLbl) { _cfLbl.innerHTML = '<i class="fas fa-coins text-orange-500"></i> บำนาญ/ปี (อายุ 60)'; _cfLbl.className = 'text-orange-700 text-[11px] font-bold flex items-center gap-1.5'; }
+            // badge
+            const _cfBadge = cashFlowContainer.querySelector('span');
+            if(_cfBadge) { _cfBadge.textContent = 'บำนาญ/ปี'; _cfBadge.className = 'text-[8px] bg-white text-orange-600 px-1.5 py-0.5 rounded-full font-bold shadow-sm border border-orange-100'; }
+            // pill track
+            const _pillTrack = cashFlowContainer.querySelector('#singleCashFlowBox > div:first-child');
+            if(_pillTrack) _pillTrack.className = _pillTrack.className
+                .replace('bg-emerald-100/60','bg-orange-100/60').replace('border-emerald-200/50','border-orange-200/50');
+            // input
+            const _cfInput = document.getElementById('cashFlowInput');
+            if(_cfInput) _cfInput.className = _cfInput.className
+                .replace('text-emerald-700','text-orange-700').replace('focus:border-emerald-400','focus:border-orange-400');
         }
         const _staLbl = document.getElementById('premiumLabel');
         if(_staLbl) _staLbl.innerHTML = '<i class="fas fa-wallet text-orange-500"></i> เบี้ยประกัน (บาท/ปี)';
