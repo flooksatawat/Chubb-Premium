@@ -1984,6 +1984,26 @@ function selectAppPlan(planName) {
         const newB = slot === 'B' ? planName : curB;
         window.__cmpHighlightPlan = null;
         window.renderCompareView(newA, newB);
+        // สลับ main plan ด้วย (ไม่ reset right pane เพราะ compare view อยู่แล้ว)
+        _cachedForPlan = null;
+        currentAppPlan = planName;
+        currentMode = 'sum';
+        const _cfg = PLAN_CONFIG[planName] || PLAN_CONFIG['CI Extra Plus'];
+        const _inpAge = document.getElementById('ageInput');
+        const _curAge = parseInt(_inpAge?.value) || 0;
+        if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg.minAge || 1;
+        currentPlanOptions = _cfg.options || [];
+        const _ageVal = parseInt(_inpAge?.value) || 0;
+        currentPlan = (planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || '');
+        const _titleEl = document.getElementById('headerTitleText');
+        if (_titleEl) { _titleEl.innerText = planName; if (typeof fitHeaderTitle === 'function') fitHeaderTitle(); }
+        const _planInfo = allInsurancePlans.find(p => p.name === planName);
+        if (_planInfo && typeof setText === 'function') setText('headerDescText', _planInfo.desc);
+        updateConditionsModal(planName);
+        if (typeof setPlan === 'function') setPlan(currentPlan);
+        if (typeof updateQuickPills === 'function') updateQuickPills(planName);
+        if (typeof window._updateMFPlanSelectorVisibility === 'function') window._updateMFPlanSelectorVisibility(planName);
+        closePlanModal();
         return;
     }
 
