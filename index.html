@@ -1518,8 +1518,8 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
     <!-- Medical Fund Picker Modal (rider selection for 24TX/Elite/WXN) -->
     <div id="mfPlanModal" class="modal-overlay hidden">
-        <div class="modal-content-card !max-w-[95vw] !w-[420px] !p-0 border-none overflow-hidden rounded-[24px]">
-            <div class="bg-gradient-to-br from-sky-500 to-cyan-600 px-5 py-4 text-white relative">
+        <div class="modal-content-card !max-w-[95vw] !w-[420px] !p-0 border-none overflow-hidden rounded-[24px]" style="max-height:88vh;display:flex;flex-direction:column;">
+            <div class="bg-gradient-to-br from-sky-500 to-cyan-600 px-5 py-4 text-white relative shrink-0">
                 <button onclick="closePopup('mfPlanModal')" class="absolute top-3 right-4 text-sky-200 hover:text-white text-3xl w-10 h-10 flex justify-center items-center rounded-full bg-white/10">&times;</button>
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
@@ -1531,7 +1531,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     </div>
                 </div>
             </div>
-            <div class="p-4 space-y-3 bg-white">
+            <div class="p-4 space-y-3 bg-white overflow-y-auto flex-1 min-h-0">
                 <!-- Search bar -->
                 <div id="mfPickerSearchWrapper" class="relative">
                     <div class="relative">
