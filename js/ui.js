@@ -5465,7 +5465,7 @@ function generatePolicyTableData() {
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
     
-    const hasSurrenderMenu = isLPB || isSLPA;
+    const hasSurrenderMenu = isLPB || isSLPA || isCL || isSLB;
 
     // ฝากสะสมทบต้น: LifeTime Value รับ 1% / แบบอื่นรับ 2%
     window._tableDepositRate = isLV ? 0.01 : 0.02;
@@ -5523,17 +5523,6 @@ function generatePolicyTableData() {
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleShowDD50Col" class="sr-only peer" onchange="generatePolicyTableData();">
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
-                    </label>
-                `;
-            } else if (isCL || isSLB) {
-                rightMenuHTML = `
-                    <div class="flex items-center gap-2 min-w-0">
-                        <i class="fas fa-wallet text-sky-500 text-[16px] w-5 text-center shrink-0"></i>
-                        <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">ออมสะสม / เงินสดพร้อมใช้</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="toggleShowCV" class="sr-only peer" onchange="generatePolicyTableData();">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500 shadow-inner"></div>
                     </label>
                 `;
             }
@@ -5802,14 +5791,43 @@ function generatePolicyTableData() {
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">คงเหลือ</th>` : ''}
-        ${(isBreakevenActive || isShowCVActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
-        ${(isBreakevenActive || isShowCVActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive || isCL || isSLB) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive || isCL || isSLB) ? `<th class="${_thCls} text-right" style="${_thSz}${(isCL || isSLB) ? 'cursor:pointer;user-select:none;' : ''}" id="cvThHeader" title="${(isCL || isSLB) ? 'กดค้างเพื่อตั้งค่าทยอยเวนคืน' : ''}">${_lCV}${(isCL || isSLB) ? ' <i class=\'fas fa-hand-holding-usd\' style=\'font-size:8px;opacity:0.6;vertical-align:middle;\'></i>' : ''}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
         ${showAccidentColumn ? `<th class="${_thCls} text-right" style="${_thSz}">อุบัติเหตุ</th>` : ''}
     </tr>`;
     
+    // Long-press บน "เงินสดพร้อมใช้" header → เปิด cfInlineControls (CL/SLB เท่านั้น)
+    if (isCL || isSLB) {
+        setTimeout(() => {
+            const cvTh = document.getElementById('cvThHeader');
+            if (!cvTh || cvTh._lpCvReady) return;
+            cvTh._lpCvReady = true;
+            let _lpt = null;
+            const _cancelLp = () => { if (_lpt) { clearTimeout(_lpt); _lpt = null; } };
+            cvTh.addEventListener('pointerdown', () => {
+                _lpt = setTimeout(() => {
+                    _lpt = null;
+                    if (navigator.vibrate) navigator.vibrate(40);
+                    const toggle = document.getElementById('toggleSurrender');
+                    const cfI = document.getElementById('cfInlineControls');
+                    if (!cfI) return;
+                    if (toggle && !toggle.checked) {
+                        toggle.checked = true;
+                        toggle.dispatchEvent(new Event('change'));
+                    }
+                    cfI.classList.remove('hidden');
+                    cfI.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 600);
+            });
+            cvTh.addEventListener('pointerup', _cancelLp);
+            cvTh.addEventListener('pointercancel', _cancelLp);
+            cvTh.addEventListener('pointermove', _cancelLp);
+        }, 0);
+    }
+
     // --- 4. Main Loop ---
     // เปลี่ยนจาก const เป็น let เพื่อให้แก้ไขค่าตามแผนประกันได้
     let payYears = parseInt(d.years) || 20; 
@@ -5878,7 +5896,10 @@ function generatePolicyTableData() {
     let depositPool = 0;
 
     if (isSurrenderActive && hasSurrenderMenu) {
-        const planKeyW = (currentAppPlan === 'Supreme Life Protector') ? '20SLPA' : '20LPB';
+        const planKeyW = currentAppPlan === 'Supreme Life Protector' ? '20SLPA'
+                       : currentAppPlan === 'Century Life'          ? '10CL'
+                       : currentAppPlan === 'Signature Legacy'      ? 'SLB'
+                       : '20LPB';
         const cfModeW = document.querySelector('input[name="cfMainMode"]:checked')?.value || 'continuous';
         cfMainMode = cfModeW;
         if (cfModeW === 'continuous') {
@@ -6079,8 +6100,8 @@ function generatePolicyTableData() {
         } else if (_mfLabel) {
             html += `<td class="${_tdBase}"></td><td class="${_tdBase}"></td>`;
         }
-        html += `${(isBreakevenActive || isShowCVActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
-        html += `${(isBreakevenActive || isShowCVActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isCL || isSLB) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isCL || isSLB) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         let _dd50SARow = 0, _dd50RowPrem = 0;
         if (showDD50Column) {
             const _dd50SA = parseInt(window.currentDD50SA) || 0;
@@ -6114,7 +6135,7 @@ function generatePolicyTableData() {
         trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _blankTd) : '';
         trow += showDepositColumn ? _blankTd : '';
         if (_mfLabel) trow += _blankTd + _blankTd;
-        trow += (isBreakevenActive || isShowCVActive) ? (_blankTd + _blankTd) : '';
+        trow += (isBreakevenActive || isShowCVActive || isCL || isSLB) ? (_blankTd + _blankTd) : '';
         trow += showDD50Column ? _blankTd : '';
         trow += showCoverageColumn ? _blankTd : '';
         trow += showSAColumn ? _blankTd : '';
