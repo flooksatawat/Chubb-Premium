@@ -5298,6 +5298,16 @@ function _generateSTATable() {
         </tr>`;
     }
 
+    const totalPremPaid = annualPrem * payYears;
+    html += `<tr class="border-t-2 border-slate-400 bg-slate-100 font-bold">
+        <td class="${_tdBase} text-slate-800 text-center" style="${_fSz}">รวม</td>
+        <td class="${_tdBase} text-slate-800 text-right" style="${_fSz}">${totalPremPaid.toLocaleString()}</td>
+        <td class="${_tdBase} text-orange-700 text-right" style="${_fSz}">—</td>
+        <td class="${_tdBase} text-orange-700 text-right" style="${_fSz}">${totalAnnuity.toLocaleString()}</td>
+        <td class="${_tdBase} text-slate-400 text-right" style="${_fSz}">—</td>
+        <td class="${_tdBase} text-slate-400 text-right" style="${_fSz}">—</td>
+    </tr>`;
+
     document.getElementById('policyTableBody').innerHTML = html;
 
     const summary = document.getElementById('breakevenSummary');
