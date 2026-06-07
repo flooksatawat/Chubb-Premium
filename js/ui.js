@@ -781,20 +781,16 @@ window._setupDD50LongPress = function() {
     const row = document.getElementById('dd50HeaderRow');
     if (!row || row._lpReady) return;
     row._lpReady = true;
-    const HOLD_MS = 600;
-    let _t = null;
-    function _cancel() { clearTimeout(_t); _t = null; }
+    // Double-tap / double-click
+    let _lastTap = 0;
     row.addEventListener('pointerdown', () => {
-        _cancel();
-        _t = setTimeout(() => {
-            _t = null;
-            if (navigator.vibrate) navigator.vibrate(40);
+        const now = Date.now();
+        if (now - _lastTap < 350) {
+            if (navigator.vibrate) navigator.vibrate(30);
             _showDD50Info();
-        }, HOLD_MS);
+        }
+        _lastTap = now;
     });
-    row.addEventListener('pointerup', _cancel);
-    row.addEventListener('pointercancel', _cancel);
-    row.addEventListener('pointermove', _cancel);
 };
 
 /**
