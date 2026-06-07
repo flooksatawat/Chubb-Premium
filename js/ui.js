@@ -5355,7 +5355,7 @@ function generatePolicyTableData() {
         if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
     }
 
-    const showCashFlowBase = isWXN || isElite || isTX || isLV;
+    const showCashFlowBase = isWXN || isElite || isTX || isLV || isSM;
     const forceShowCashFlow = showCashFlowBase;
     const showDepositColumn = forceShowCashFlow && window._tableDepositEnabled && window._tableDepositUntilAge > 0;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
