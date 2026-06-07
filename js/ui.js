@@ -5606,6 +5606,7 @@ function generatePolicyTableData() {
     let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
     let currentSA = initialSA;
     let accCashFlow = 0;
+    let accTax = 0;
     let cfMainMode = 'continuous';
     let cfWithdrawalSchedule = {};
     let cfFirstWithdrawalYear = null;
@@ -5726,8 +5727,12 @@ function generatePolicyTableData() {
         let cvTotal = Math.round((currentSA * cvRate) / 1000);
         if (currentSA <= 0) cvTotal = 0;
 
-        let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt;
-        
+        // ภาษี: สะสมเงินลดหย่อนภาษีของปีนี้ (7SM) — นำไปรวมในจุดคุ้มทุนด้วย
+        const _taxThisYear = (showTaxColumn && y <= payYears && annualSaving > 0) ? _taxAmt : 0;
+        accTax += _taxThisYear;
+
+        let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt + accTax;
+
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
             let breakevenValue = (isElitePlan || isTX || isWXN || isLV || isSM) ? surrenderTotal
@@ -5792,7 +5797,7 @@ function generatePolicyTableData() {
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
-            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
+            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${(accCashFlow + accTax) > 0 ? (accCashFlow + accTax).toLocaleString() : "-"}</td>` : ''}
             ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
         if (_mfLabel && _mfMap) {
             const _mfP = window.mfPremForAge(_mfMap, currentAge);
@@ -5829,6 +5834,30 @@ function generatePolicyTableData() {
 
         if (y >= cfLoopEnd) break;
     }
+
+    // --- บรรทัดสุดท้าย: รวมตัวเลข (เฉพาะ 7SM ที่เลือกภาษี) ---
+    if (showTaxColumn) {
+        const _totFsz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';font-weight:800;';
+        const _boxStyle = `${_totFsz}border:2px solid #2563eb;color:#1e3a8a;background:#eff6ff;`;
+        const _boxTd = v => `<td class="${_tdBase} text-right" style="${_boxStyle}">${v.toLocaleString()}</td>`;
+        const _blankTd = `<td class="${_tdBase}"></td>`;
+        let trow = `<tr class="border-t-2 border-slate-300">`;
+        trow += `<td class="${_tdBase} text-center" style="${_totFsz}color:#1e3a8a;">รวม</td>`;
+        trow += hideAnnualSaving ? '' : _boxTd(totalSaving);
+        trow += showTaxColumn ? _boxTd(accTax) : '';
+        trow += hideAnnualSaving ? _blankTd : '';
+        trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _blankTd) : '';
+        trow += showDepositColumn ? _blankTd : '';
+        if (_mfLabel) trow += _blankTd + _blankTd;
+        trow += (isBreakevenActive || isShowCVActive) ? (_blankTd + _blankTd) : '';
+        trow += showDD50Column ? _blankTd : '';
+        trow += showCoverageColumn ? _blankTd : '';
+        trow += showSAColumn ? _blankTd : '';
+        trow += showAccidentColumn ? _blankTd : '';
+        trow += `</tr>`;
+        html += trow;
+    }
+
     document.getElementById('policyTableBody').innerHTML = html;
 
     // --- 5. Summary Text ---
