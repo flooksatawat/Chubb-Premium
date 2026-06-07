@@ -2588,15 +2588,17 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .dob-field input:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
 .dob-field input.filled { border-color:var(--dob-accent,#3b82f6); }
 .dob-sep { font-size:22px;font-weight:700;color:#cbd5e1;align-self:center;padding-top:18px; }
+.dob-cards-grid { display:grid;grid-template-columns:1fr;gap:10px; }
+@media (min-width:560px) { .dob-cards-grid { grid-template-columns:1fr 1fr; } }
 #dobAstroDetail { overflow:hidden;transition:max-height 0.38s cubic-bezier(0.16,1,0.3,1);max-height:0; }
-#dobAstroDetail.open { max-height:900px; }
+#dobAstroDetail.open { max-height:4000px; }
 #dobPhoneInput { width:100%;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;background:white;outline:none;padding:10px 14px;transition:border-color 0.2s,box-shadow 0.2s;-moz-appearance:textfield;letter-spacing:0.08em; }
 #dobPhoneInput::-webkit-outer-spin-button,#dobPhoneInput::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 #dobPhoneInput:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
 #dobPhoneInput.filled { border-color:var(--dob-accent,#3b82f6); }
 </style>
 <div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);opacity:0;transition:opacity 0.22s;"></div>
-<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22);padding:0;width:min(94vw,400px);max-height:92vh;overflow-y:auto;opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);">
+<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22);padding:0;width:min(94vw,720px);max-height:92vh;overflow-y:auto;opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);">
     <!-- Colored header band -->
     <div id="dobHeaderBand" style="padding:18px 20px 16px;background:linear-gradient(135deg,#3b82f6,#6366f1);transition:background 0.5s ease;position:sticky;top:0;z-index:2;">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -2629,11 +2631,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="dob-sep">/</div>
             <div class="dob-field" style="flex:1.6;"><label>ปี พ.ศ. / ค.ศ.</label><input type="number" id="dobYear" placeholder="YYYY" inputmode="numeric"></div>
         </div>
-        <!-- Phone input -->
-        <div style="margin-bottom:14px;">
-            <label style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:6px;">📱 เบอร์โทรศัพท์ (ไม่บังคับ — พยากรณ์เลขมือถือ)</label>
-            <input type="tel" id="dobPhoneInput" placeholder="0XX-XXX-XXXX" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);_onDobPhoneChange()">
-        </div>
+
         <!-- Prediction button row — shown after date complete -->
         <div id="dobAstroRow" style="display:none;margin-bottom:14px;">
             <button id="dobAstroBtn" onclick="toggleDobAstro()" style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Kanit',sans-serif;transition:all 0.2s;text-align:left;">
@@ -2645,6 +2643,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 <span id="dobAstroChevron" style="font-size:11px;color:#94a3b8;transition:transform 0.25s;">▼</span>
             </button>
             <div id="dobAstroDetail">
+                <div id="dobPhoneSection" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;padding:12px 16px 10px;">
+                    <label style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:6px;">📱 เบอร์โทรศัพท์ (ไม่บังคับ — เพิ่มพยากรณ์เลขมือถือ)</label>
+                    <input type="tel" id="dobPhoneInput" placeholder="0XX-XXX-XXXX" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);_onDobPhoneChange()" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:'Kanit',sans-serif;outline:none;box-sizing:border-box;">
+                </div>
                 <div id="dobAstroDetailInner" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px 16px;"></div>
             </div>
         </div>
@@ -3192,7 +3194,7 @@ function _renderDobDetail() {
         </div>`;
     }
 
-    document.getElementById('dobAstroDetailInner').innerHTML = html;
+    document.getElementById('dobAstroDetailInner').innerHTML = '<div class="dob-cards-grid">' + html + '</div>';
     // update max-height if panel open
     const detail = document.getElementById('dobAstroDetail');
     if (detail.classList.contains('open')) {
@@ -3223,9 +3225,14 @@ function toggleDobAstro() {
     const chev = document.getElementById('dobAstroChevron');
     const open = detail.classList.toggle('open');
     chev.style.transform = open ? 'rotate(180deg)' : '';
-    detail.style.maxHeight = open
-        ? document.getElementById('dobAstroDetailInner').scrollHeight + 20 + 'px'
-        : '0';
+    if (open) {
+        _renderDobDetail();
+        requestAnimationFrame(() => {
+            detail.style.maxHeight = detail.scrollHeight + 'px';
+        });
+    } else {
+        detail.style.maxHeight = '0';
+    }
 }
 
 function confirmDobAge() {
