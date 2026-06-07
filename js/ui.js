@@ -5430,21 +5430,20 @@ function generatePolicyTableData() {
             : currentSA;
 
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
-        const _mfAnnualSav = hasMFCol && d.sum > 0 ? Math.round(d.sum / payYears) : 0;
         let annualSaving = 0;
         if (isElitePlan) {
             if (y <= 8) {
-                annualSaving = hasMFCol ? Math.round(d.sum / 8) : d.premium;
+                annualSaving = d.premium;
                 totalSaving += annualSaving;
             }
         } else if (isLV || isSM) {
             if (y <= payYears) {
-                annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
+                annualSaving = d.premium;
                 totalSaving += annualSaving;
             }
         } else if (y <= payYears && currentSA > 0) {
-            annualSaving = hasMFCol ? _mfAnnualSav : Math.round((currentSA / initialSA) * initialPrem); 
-            totalSaving += annualSaving; 
+            annualSaving = Math.round((currentSA / initialSA) * initialPrem);
+            totalSaving += annualSaving;
         }
 
         // 2. ดึงค่า CV Rate
