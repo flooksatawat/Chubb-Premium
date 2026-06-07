@@ -3158,9 +3158,6 @@ function _renderDobDetail() {
             <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px;">🔥 ธาตุ${cz.element.name} — อิทธิพลต่อบุคลิก</div>
             <div style="font-size:13px;color:#475569;line-height:1.7;">${cz.element.desc}</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-            ${cz.strength.split('·').map(s=>`<span style="background:#f0fdf4;color:#059669;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:1.5px solid #bbf7d0;">${s.trim()}</span>`).join('')}
-        </div>
         ${commBox(cz.comm, theme)}
         ${closeBox(cz.close)}`);
 
