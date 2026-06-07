@@ -2399,7 +2399,7 @@ function selectAppPlan(planName) {
     
     const medFundBtnContainer = document.getElementById('medicalFundBtnContainer');
     if (medFundBtnContainer) {
-        if (['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence'].includes(planName)) {
+        if (['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence', 'Step Annuity'].includes(planName)) {
             medFundBtnContainer.classList.remove('hidden');
         } else {
             medFundBtnContainer.classList.add('hidden');

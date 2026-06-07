@@ -898,9 +898,39 @@ window.mfGenerateTable = function() {
     const _pd = _isMobile ? '5px 6px' : '6px 10px';
     const _pdH = _isMobile ? '6px 6px' : '7px 10px';
 
-    // เก็บข้อมูล after-60 ไว้สำหรับ Step Annuity (ถ้ามีการ long-press)
+    // เก็บข้อมูล after-60 ไว้สำหรับ Step Annuity
     window._mfAfterSixtyByAge = {};
     afterRows.forEach(r => { window._mfAfterSixtyByAge[r.age] = r.prem; });
+
+    // ===== STA Mode: แสดงเฉพาะหลังอายุ 60 =====
+    if (window._mfSTAMode) {
+        window._mfSTAMode = false; // reset
+        if (titleEl) titleEl.innerHTML = `<span class="text-[13px] font-bold text-orange-700"><i class="fas fa-stairs mr-1"></i>MF หลังอายุ 60 — ${planFullName}${roomLabel}</span>`;
+        if (head) head.innerHTML = `<tr style="background:linear-gradient(135deg,#ea580c,#c2410c);">
+            <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">หลังอายุ 60 ปี <i class="fas fa-stairs" style="font-size:9px;opacity:0.8;"></i></th>
+        </tr>
+        <tr style="background:rgba(234,88,12,0.08);">
+            <th style="padding:4px 8px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #fed7aa;">อายุ</th>
+            <th style="padding:4px 8px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี (บาท)</th>
+        </tr>`;
+        let staBody = '';
+        aRows.forEach((a, i) => {
+            const bg = i % 2 === 0 ? '#fff' : '#fff7ed';
+            staBody += `<tr style="background:${bg};border-bottom:1px solid #fed7aa;">
+                <td style="padding:${_pd};text-align:center;font-size:${_fs}px;color:#334155;border-right:1px solid #fed7aa;">${a.age}</td>
+                <td style="padding:${_pd};text-align:right;font-size:${_fs}px;font-weight:600;color:#c2410c;">${a.prem.toLocaleString('en-US')}</td>
+            </tr>`;
+        });
+        if (!aRows.length) staBody = `<tr><td colspan="2" style="padding:16px;text-align:center;font-size:12px;color:#94a3b8;">ไม่มีข้อมูลหลังอายุ 60</td></tr>`;
+        staBody += `<tr style="background:linear-gradient(135deg,#ea580c,#c2410c);">
+            <td style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,0.3);">รวม</td>
+            <td style="padding:${_pdH};text-align:right;font-size:${_fs}px;font-weight:900;color:#fff;">${totalAfter > 0 ? totalAfter.toLocaleString('en-US') : '—'}</td>
+        </tr>`;
+        if (body) body.innerHTML = staBody;
+        // Re-generate STA table ถ้ายังอยู่หน้า STA
+        if (typeof _generateSTATable === 'function') setTimeout(_generateSTATable, 50);
+        return;
+    }
 
     // Header
     let _longPressTimer = null;
@@ -1395,8 +1425,12 @@ window.mfBtnClick = function() {
         : (window.currentAppPlan || '');
     if (plan === '3D Health Excellence') {
         window.mfShow3DProjectionPopup();
-    } else if (typeof window.openMFPicker === 'function') {
-        window.openMFPicker();
+    } else if (plan === 'Step Annuity') {
+        window._mfSTAMode = true;
+        if (typeof window.openMFPicker === 'function') window.openMFPicker();
+    } else {
+        window._mfSTAMode = false;
+        if (typeof window.openMFPicker === 'function') window.openMFPicker();
     }
 };
 
