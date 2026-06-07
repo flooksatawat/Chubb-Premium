@@ -2766,9 +2766,7 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
         const ageBg   = (isBeA || isBeB) ? '#d1fae5' : bg;
         const ageBdr  = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : bdBot;
 
-        const ageBCell = isSamePlan
-            ? `<td style="font-size:12px;padding:6px 6px;text-align:center;color:#7c3aed;background:${(isBeB)?'#d1fae5':bg};${(isBeB)?'border-top:2px solid #34d399;border-bottom:2px solid #34d399;':bdBot}">${ageB}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>`
-            : '';
+        const ageBCell = `<td style="font-size:12px;padding:6px 6px;text-align:center;color:#7c3aed;background:${(isBeB)?'#d1fae5':bg};${(isBeB)?'border-top:2px solid #34d399;border-bottom:2px solid #34d399;':bdBot}">${ageB}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>`;
 
         bodyRows += `<tr class="cmp-row">
             <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBdr}">${ageA}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
@@ -2835,13 +2833,13 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
                     <th id="cmpHdrA" colspan="3" onclick="window._cmpStartReplace('A','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
-                    <th id="cmpHdrB" colspan="${isSamePlan ? 4 : 3}" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrB" colspan="4" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
                     <th ${thS}>${cfHdrA}</th>
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;border-right:2px solid rgba(255,255,255,0.3);">เงินสดพร้อมใช้</th>
-                    ${isSamePlan ? `<th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;background:rgba(255,255,255,0.1);">อายุ</th>` : ''}
+                    <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;background:rgba(255,255,255,0.1);">อายุ</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">ออมเงิน</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">${cfHdrB}</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">เงินสดพร้อมใช้</th>
