@@ -2266,6 +2266,18 @@ function selectAppPlan(planName) {
             medFundBtnContainer.classList.add('hidden');
         }
     }
+    // เมนูภาษี: แสดงเฉพาะแบบ 7SM (Smart Plan 21/7)
+    const taxBtn = document.getElementById('taxBtn');
+    if (taxBtn) {
+        if (planName === 'Smart Plan 21/7') {
+            taxBtn.classList.remove('hidden');
+        } else {
+            taxBtn.classList.add('hidden');
+            window.currentTaxRate = 0;
+            const _tl = document.getElementById('taxBtnLabel');
+            if (_tl) _tl.innerText = 'ภาษี';
+        }
+    }
     const lvIRRBtn = document.getElementById('lvIRRBtn');
     if (lvIRRBtn) lvIRRBtn.classList.add('hidden');
     const mfMainBtn = document.getElementById('mfMainBtn');
@@ -5393,7 +5405,7 @@ function generatePolicyTableData() {
 
     // ภาษี: คอลัมน์ลดหย่อนภาษี = 100,000 × ฐานภาษีที่เลือก
     const _taxRate = parseInt(window.currentTaxRate) || 0;
-    const showTaxColumn = _taxRate > 0;
+    const showTaxColumn = isSM && _taxRate > 0;
     const _taxAmt = Math.round(100000 * _taxRate / 100);
 
     // MF premium column
