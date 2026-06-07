@@ -3015,9 +3015,7 @@ function _renderDobDetail() {
 
     // 2. ราศีตะวันตก — บุคลิกภาพ
     html += card(`ราศี ${zodiac.name} — บุคลิกภาพ`, zodiac.sym,
-        `<div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:8px;">${zodiac.personality}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${zodiac.strength.split('·').map(s=>`${tag(s.trim(),'#059669')}`).join('')}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">${zodiac.weakness.split('·').map(s=>`${tag(s.trim(),'#dc2626')}`).join('')}</div>`);
+        `<div style="font-size:12px;color:#334155;line-height:1.7;">${zodiac.personality}</div>
 
     // 3. วันเกิด (โหราศาสตร์ไทย) + ปีนักษัตรจีน
     html += card(`วัน${_DOB_THEMES[date.getDay()].day} · ปีนักษัตร${cz.animal}`, _DOB_THEMES[date.getDay()].emoji,
