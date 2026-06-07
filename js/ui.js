@@ -5800,7 +5800,7 @@ function generatePolicyTableData() {
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
-            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${(accCashFlow + accTax) > 0 ? (accCashFlow + accTax).toLocaleString() : "-"}</td>` : ''}
+            ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
             ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
         if (_mfLabel && _mfMap) {
             const _mfP = window.mfPremForAge(_mfMap, currentAge);
