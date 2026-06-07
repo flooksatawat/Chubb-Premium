@@ -2269,8 +2269,13 @@ function selectAppPlan(planName) {
             if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '1'; }
             if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
             if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        } else if (planName === 'CI Extra Plus') {
+            // CX: แสดง premiumContainer เป็นช่อง ออมเงิน ด้านล่าง
+            if(sumInsuredContainer) sumInsuredContainer.style.order = '1';
+            if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '2'; }
+            if(mainActionsGroup) mainActionsGroup.style.order = '3';
         } else {
-            // mode='sum' (CI, CX ฯลฯ): ซ่อน premiumContainer ใต้วงเงิน
+            // mode='sum' (ฯลฯ): ซ่อน premiumContainer
             if(premiumContainer) premiumContainer.classList.add('hidden');
         }
         if(cashFlowContainer) {
