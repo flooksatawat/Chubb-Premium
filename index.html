@@ -1531,9 +1531,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                     </div>
                 </div>
             </div>
-            <div class="p-4 space-y-3 bg-white overflow-y-auto flex-1 min-h-0">
+            <div class="bg-white flex-1 min-h-0 flex flex-col overflow-hidden">
                 <!-- Search bar -->
-                <div id="mfPickerSearchWrapper" class="relative">
+                <div class="px-4 pt-4 pb-2 shrink-0">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sky-400 text-[12px] pointer-events-none"></i>
                         <input id="mfPickerSearch" type="text" placeholder="ค้นหาแผนประกัน เช่น AIA, Generali, Smart..."
@@ -1546,40 +1546,44 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             <i class="fas fa-times text-[11px]"></i>
                         </button>
                     </div>
-                    <div id="mfPickerSearchDropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-sky-200 rounded-[14px] shadow-xl z-50 max-h-72 overflow-y-auto"></div>
                 </div>
-                <!-- Company -->
-                <div>
-                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-building text-sky-500 mr-1"></i>บริษัท</p>
-                    <select id="mfPickerCompany" onchange="mfPickerSelectCompany(this.value)"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
-                        <option value="">— เลือกบริษัท —</option>
-                    </select>
-                </div>
-                <!-- Plan -->
-                <div id="mfPickerPlanRow" class="hidden">
-                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-file-medical text-sky-500 mr-1"></i>แผนประกัน</p>
-                    <select id="mfPickerPlan" onchange="mfPickerSelectPlan(this.value)"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
-                        <option value="">— เลือกแผน —</option>
-                    </select>
-                </div>
-                <!-- Room Rate -->
-                <div id="mfPickerRoomRow" class="hidden">
-                    <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-shield-alt text-teal-500 mr-1"></i>วงเงินเหมาจ่าย</p>
-                    <select id="mfPickerRoom" onchange="mfPickerSelectRoom(this.value)"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
-                        <option value="">— เลือกแผน —</option>
-                    </select>
-                </div>
-                <!-- Buttons -->
-                <div class="flex gap-2 pt-1">
-                    <button onclick="mfPickerClear()" class="flex-1 py-2.5 rounded-[12px] bg-slate-100 text-slate-600 font-bold text-[13px] active:scale-95 transition-all">
-                        ไม่เลือก
-                    </button>
-                    <button id="mfPickerConfirmBtn" onclick="mfPickerConfirm()" class="flex-[2] py-2.5 rounded-[12px] bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-[13px] active:scale-95 transition-all opacity-50 pointer-events-none">
-                        <i class="fas fa-check mr-1"></i>ยืนยัน
-                    </button>
+                <!-- Search results — inline, expands modal -->
+                <div id="mfPickerSearchDropdown" class="hidden mx-4 mb-2 bg-white border border-sky-200 rounded-[14px] overflow-y-auto flex-1 min-h-0"></div>
+                <!-- Selects + buttons — shown when not searching -->
+                <div id="mfPickerSelectArea" class="px-4 pb-4 space-y-3 overflow-y-auto flex-1 min-h-0">
+                    <!-- Company -->
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-building text-sky-500 mr-1"></i>บริษัท</p>
+                        <select id="mfPickerCompany" onchange="mfPickerSelectCompany(this.value)"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                            <option value="">— เลือกบริษัท —</option>
+                        </select>
+                    </div>
+                    <!-- Plan -->
+                    <div id="mfPickerPlanRow" class="hidden">
+                        <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-file-medical text-sky-500 mr-1"></i>แผนประกัน</p>
+                        <select id="mfPickerPlan" onchange="mfPickerSelectPlan(this.value)"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                            <option value="">— เลือกแผน —</option>
+                        </select>
+                    </div>
+                    <!-- Room Rate -->
+                    <div id="mfPickerRoomRow" class="hidden">
+                        <p class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fas fa-shield-alt text-teal-500 mr-1"></i>วงเงินเหมาจ่าย</p>
+                        <select id="mfPickerRoom" onchange="mfPickerSelectRoom(this.value)"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-[12px] px-3 py-2.5 text-[13px] font-bold text-slate-700 outline-none focus:border-sky-400 transition-colors">
+                            <option value="">— เลือกแผน —</option>
+                        </select>
+                    </div>
+                    <!-- Buttons -->
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="mfPickerClear()" class="flex-1 py-2.5 rounded-[12px] bg-slate-100 text-slate-600 font-bold text-[13px] active:scale-95 transition-all">
+                            ไม่เลือก
+                        </button>
+                        <button id="mfPickerConfirmBtn" onclick="mfPickerConfirm()" class="flex-[2] py-2.5 rounded-[12px] bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-[13px] active:scale-95 transition-all opacity-50 pointer-events-none">
+                            <i class="fas fa-check mr-1"></i>ยืนยัน
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

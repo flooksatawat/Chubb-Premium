@@ -1148,6 +1148,8 @@ window.mfPickerSearchFocus = function() {
 window.mfPickerSearchHide = function() {
     const dd = document.getElementById('mfPickerSearchDropdown');
     if (dd) dd.classList.add('hidden');
+    const sa = document.getElementById('mfPickerSelectArea');
+    if (sa) sa.classList.remove('hidden');
 };
 
 window.mfPickerSearchClear = function() {
@@ -1191,6 +1193,8 @@ function mfPickerSearchShow(query) {
             </div>
         </div>`).join('');
     dd.classList.remove('hidden');
+    const sa = document.getElementById('mfPickerSelectArea');
+    if (sa) sa.classList.add('hidden');
 }
 
 window.mfPickerSearchSelect = async function(item) {
