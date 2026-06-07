@@ -36,6 +36,7 @@ const PLAN_CONFIG = {
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
     "Smart Plan 21/7": { abbr: "7SM", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['7SM'], hasCashFlow: true },
+    "Step Annuity": { abbr: "STA", minAge: 20, maxAge: 50, minSum: 100000, minPrem: 0, getMaxSum: (age) => 30000000, options: ['AS10', 'AS60'], hasCashFlow: false },
     "Medical Fund": { abbr: "MF", minAge: 0, maxAge: 99, minSum: 0, minPrem: 0, getMaxSum: (age) => Infinity, options: [], hasCashFlow: false }
 };
 
@@ -52,6 +53,7 @@ const allInsurancePlans = [
     { name: "868 / 818 Elite Saving", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "LifeTime Value", desc: "ออมยาว รับเงินคืนทุกปี ถึงอายุ 100", icon: "fas fa-hourglass-half", color: "text-violet-500", bg: "bg-violet-100" },
     { name: "Smart Plan 21/7", desc: "ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%", icon: "fas fa-seedling", color: "text-teal-500", bg: "bg-teal-100" },
+    { name: "Step Annuity", desc: "บำนาญรายปี เพิ่มขึ้นทุก 5 ปี ถึงอายุ 90", icon: "fas fa-stairs", color: "text-orange-500", bg: "bg-orange-100" },
     { name: "Medical Fund", desc: "ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง", icon: "fas fa-hospital", color: "text-sky-500", bg: "bg-sky-100" }
 ];
 
@@ -96,8 +98,16 @@ async function loadAllRates() {
             }
         } catch(e) {}
 
+        // โหลด Step Annuity rates + CV
+        try {
+            const r1 = await fetch('data/rates/sta_rates.json');
+            if (r1.ok) window.STA_RATES = await r1.json();
+            const r2 = await fetch('data/cv/sta_cv.json');
+            if (r2.ok) window.STA_CV = await r2.json();
+        } catch(e) { console.warn('STA data load failed', e); }
+
         // --- เพิ่มการโหลดข้อมูล CV ทันทีที่โหลดเรทเสร็จ ---
-        await getCVData(); 
+        await getCVData();
 
     } catch (error) { 
         console.error('loadAllRates failed:', error); 
@@ -364,7 +374,15 @@ function getDiscount(sum, plan) {
         if (sum >= 600000) return 3.0;
         if (sum >= 300000) return 1.0;
     }
-    return 0; 
+    // Step Annuity (AS10, AS60)
+    if (plan === 'AS10' || plan === 'AS60') {
+        if (sum >= 2000000) return 5;
+        if (sum >= 1000000) return 4;
+        if (sum >= 600000)  return 2;
+        return 0;
+    }
+
+    return 0;
 }
 
 let _realtimeValidateTimer = null;
@@ -786,6 +804,41 @@ function calculate(source, enforceMin = false) {
             document.getElementById('sumInsuredInput').value = formatNum(fSum);
             document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
             if (document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.02).toLocaleString();
+        }
+
+        // ---------------- 3d. Step Annuity (AS10 / AS60) ----------------
+        else if (currentAppPlan === 'Step Annuity') {
+            const staRates = window.STA_RATES;
+            const staKey = currentPlan === 'AS10' ? 'AS10' : 'AS60';
+            const gKey = currentGender === 'male' ? 'male' : 'female';
+            const staRate = staRates?.[staKey]?.[gKey]?.[String(age)] || 0;
+
+            const getSTAPrem = (sa) => {
+                if (!staRate) return 0;
+                return Math.round((sa / 1000) * (staRate - getDiscount(sa, currentPlan)));
+            };
+            const getSTASA = (prem) => {
+                if (!staRate) return 0;
+                for (const d of [5, 4, 2, 0]) {
+                    const s = (prem * 1000) / (staRate - d);
+                    if (getDiscount(s, currentPlan) === d) return Math.round(s);
+                }
+                return Math.round((prem * 1000) / staRate);
+            };
+
+            if (source === 'sum') {
+                fSum = Math.round(getSafeValue('sumInsuredInput'));
+                fPrem = getSTAPrem(fSum);
+            } else {
+                fPrem = getSafeValue('premiumInput') || 0;
+                fSum = getSTASA(fPrem);
+                fPrem = getSTAPrem(fSum);
+            }
+            if (enforceMin && fSum < config.minSum) { fSum = config.minSum; fPrem = getSTAPrem(fSum); }
+            if (fSum > config.getMaxSum(age)) { fSum = config.getMaxSum(age); fPrem = getSTAPrem(fSum); }
+
+            document.getElementById('sumInsuredInput').value = formatNum(fSum);
+            document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
         }
 
         // ---------------- 4. 3D Health Excellence ----------------

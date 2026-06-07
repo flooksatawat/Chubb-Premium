@@ -1563,6 +1563,9 @@ function updateQuickPills(planName) {
     } else if (planName === 'Whole Life Extra') {
         sumPillWrapper.innerHTML = '';
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
+    } else if (planName === 'Step Annuity') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill2" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill3" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(50000)" class="${inactiveClass}">5 หมื่น</button><button id="premPill2" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button><button id="premPill3" onclick="setQuickPremium(200000)" class="${inactiveClass}">2 แสน</button><button id="premPill4" onclick="setQuickPremium(500000)" class="${inactiveClass}">5 แสน</button><button id="premPill5" onclick="setQuickPremium(1000000)" class="${inactiveClass}">1 ล้าน</button>`;
     } else if (planName === 'Smart Plan 21/7') {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(20000)" class="${inactiveClass}">2 หมื่น</button><button id="premPill2" onclick="setQuickPremium(40000)" class="${inactiveClass}">4 หมื่น</button><button id="premPill3" onclick="setQuickPremium(60000)" class="${inactiveClass}">6 หมื่น</button><button id="premPill4" onclick="setQuickPremium(80000)" class="${inactiveClass}">8 หมื่น</button><button id="premPill5" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button>`;
@@ -2138,6 +2141,20 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
         }
+    } else if (planName === 'Step Annuity') {
+        currentMode = 'sum';
+        document.getElementById('sumInsuredInput').value = "1,000,000";
+        document.getElementById('premiumInput').value = "0";
+        if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
+        if(premiumContainer) premiumContainer.classList.remove('hidden');
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '1';
+        if(premiumContainer) premiumContainer.style.order = '2';
+        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
+        const _staLbl = document.getElementById('premiumLabel');
+        if(_staLbl) _staLbl.innerHTML = '<i class="fas fa-wallet text-orange-500"></i> เบี้ยประกัน (บาท/ปี)';
+        const _staSub = document.getElementById('premiumSubLabel');
+        if(_staSub) { _staSub.textContent = 'คำนวณจากทุนประกัน'; _staSub.className = 'text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold border border-orange-200'; }
     } else if (planName === '24 TX') {
         currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
@@ -2367,6 +2384,9 @@ function _updatePlanPills(activePlan) {
             let displayLabel = currentPlanOptions[idx];
             if (currentAppPlan === 'Century Life' || currentAppPlan === '3D Health Excellence') {
                 displayLabel = displayLabel.replace('CL', '');
+            }
+            if (currentAppPlan === 'Step Annuity') {
+                displayLabel = displayLabel === 'AS10' ? 'ชำระ 10 ปี' : 'ชำระถึง 60';
             }
             btn.innerText = displayLabel;
             btn.classList.remove('hidden');
@@ -4973,7 +4993,7 @@ function _updateTPDUI() {
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
-    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector'];
+    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity'];
     if (noDisplay.includes(currentAppPlan) || !lastCalculationData) {
         el.textContent = '';
         el.classList.add('hidden');
@@ -5180,9 +5200,127 @@ window.taxBtnClick = function() {
     });
 };
 
+function _generateSTATable() {
+    if (!lastCalculationData) return;
+    const d = lastCalculationData;
+    const _sc = document.getElementById('surrenderContainer');
+    if (_sc) _sc.innerHTML = '';
+    const staKey = currentPlan === 'AS10' ? 'AS10' : 'AS60';
+    const gKey = currentGender === 'male' ? 'male' : 'female';
+    const age = d.age;
+    const sa = d.sum;
+    const annualPrem = d.premium;
+    const payYears = staKey === 'AS10' ? 10 : Math.max(1, 60 - age);
+    const endAge = 90;
+    const maxYear = endAge - age;
+    const cvData = (window.STA_CV || {})[staKey]?.[gKey]?.[String(age)] || {};
+
+    // บำนาญรายปี ตามช่วงอายุ (% ของทุนประกัน)
+    function annuityPct(a) {
+        if (a >= 86) return 0.40;
+        if (a >= 81) return 0.35;
+        if (a >= 76) return 0.30;
+        if (a >= 71) return 0.25;
+        if (a >= 66) return 0.20;
+        if (a >= 60) return 0.15;
+        return 0;
+    }
+
+    let html = '';
+    let totalPrem = 0, totalAnnuity = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
+    const _isCompact = window._isCompact || false;
+    const _isMedium = window._isMedium || false;
+    const _tdBase = 'px-2 py-2';
+    const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
+
+    // ทุนประกัน: ก่อนอายุ 60 = MAX(105%เบี้ยสะสม, CV)
+    //           ระหว่างรับบำนาญ 15 ครั้งแรก (อายุ 60-74) = MAX(PV บำนาญที่เหลือ, เบี้ยสะสม - บำนาญรับแล้ว)
+    //           หลังจากนั้น = เบี้ยสะสม - บำนาญรับแล้ว (ถ้าลบแล้วติดลบ ใช้ 0)
+
+    for (let y = 1; y <= maxYear; y++) {
+        const currentAge = age + y;
+        if (y <= payYears) { totalPrem += annualPrem; }
+
+        const annuityAmt = currentAge >= 60 ? Math.round(sa * annuityPct(currentAge)) : 0;
+        totalAnnuity += annuityAmt;
+        const cvRate = cvData[String(y)] || 0;
+        const cvTotal = Math.round((sa / 1000) * cvRate);
+
+        // ทุนประกัน
+        let deathBenefit = 0;
+        const annuityPaymentNo = currentAge >= 60 ? (currentAge - 59) : 0; // ลำดับที่รับบำนาญ (1..31)
+        if (currentAge < 60) {
+            deathBenefit = Math.max(Math.round(totalPrem * 1.05), cvTotal);
+        } else if (annuityPaymentNo <= 15) {
+            // PV ของบำนาญที่เหลือใน 15 ครั้งแรก (ไม่คิด discount)
+            const remainingGuaranteed = Math.max(0, 15 - annuityPaymentNo + 1);
+            const pvRemaining = remainingGuaranteed > 0
+                ? Math.round(sa * annuityPct(currentAge) * remainingGuaranteed)
+                : 0;
+            const floor2 = Math.max(0, totalPrem - totalAnnuity + annuityAmt);
+            deathBenefit = Math.max(pvRemaining, floor2);
+        } else {
+            deathBenefit = Math.max(0, totalPrem - totalAnnuity + annuityAmt);
+        }
+
+        // จุดคุ้มทุน: CV >= เบี้ยสะสม (ก่อนรับบำนาญ) หรือ บำนาญสะสม+CV >= เบี้ยสะสม
+        const beValue = currentAge >= 60 ? totalAnnuity : cvTotal;
+        if (!foundBreakeven && totalPrem > 0 && beValue >= totalPrem) {
+            foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = beValue;
+        }
+
+        let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
+        if (foundBreakeven && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400";
+
+        html += `<tr class="${trClass}">
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
+            <td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${y <= payYears ? annualPrem.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-orange-600 font-bold text-right" style="${_fSz}">${annuityAmt > 0 ? annuityAmt.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-orange-700 font-bold text-right" style="${_fSz}">${totalAnnuity > 0 ? totalAnnuity.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : '—'}</td>
+            <td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${deathBenefit > 0 ? deathBenefit.toLocaleString() : '—'}</td>
+        </tr>`;
+    }
+
+    document.getElementById('policyTableBody').innerHTML = html;
+
+    const summary = document.getElementById('breakevenSummary');
+    if (summary) summary.classList.add('hidden');
+
+    // Table header columns
+    const thead = document.querySelector('#policyTable thead tr');
+    if (thead) {
+        thead.innerHTML = `
+            <th class="px-2 py-2 text-center text-slate-600 font-bold">อายุ</th>
+            <th class="px-2 py-2 text-right text-slate-600 font-bold">ออม (บ.)</th>
+            <th class="px-2 py-2 text-right text-orange-600 font-bold">บำนาญ/ปี</th>
+            <th class="px-2 py-2 text-right text-orange-700 font-bold">บำนาญสะสม</th>
+            <th class="px-2 py-2 text-right text-blue-600 font-bold">เงินสดพร้อมใช้</th>
+            <th class="px-2 py-2 text-right text-rose-600 font-bold">ทุนประกัน</th>`;
+    }
+
+    // Table header title badges
+    const _gThai = currentGender === 'male' ? 'ชาย' : 'หญิง';
+    const _bdg = 'flex-1 py-1.5 px-3 rounded-lg text-[14px] font-bold text-center whitespace-nowrap leading-tight';
+    const _hdrEl = document.getElementById('tableHeaderTitle');
+    if (_hdrEl) {
+        _hdrEl.innerHTML = `<div class="flex gap-1.5 items-center py-0.5 w-full">
+            <span class="${_bdg} bg-orange-500 text-white shadow-sm">${staKey}</span>
+            <span class="${_bdg} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
+            <span class="${_bdg} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${age}</span>
+            <span class="${_bdg} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${annualPrem.toLocaleString()} ฿</span>
+            <span class="${_bdg} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุน: ${sa.toLocaleString()} ฿</span>
+        </div>`;
+    }
+}
+
 function generatePolicyTableData() {
     if (currentAppPlan === 'Medical Fund') {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
+        return;
+    }
+    if (currentAppPlan === 'Step Annuity') {
+        _generateSTATable();
         return;
     }
     if (!lastCalculationData) return;
