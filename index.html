@@ -676,6 +676,11 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                                     <i class="fas fa-chart-line text-[16px] relative z-10"></i>
                                     <span class="relative z-10 tracking-wide">IRR</span>
                                 </button>
+                                <button id="taxBtn" onclick="window.taxBtnClick()" class="h-[48px] px-4 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-[16px] font-bold flex items-center justify-center gap-2 text-[14px] shadow-[0_6px_15px_rgba(245,158,11,0.3)] border border-amber-300/50 active:scale-[0.97] transition-all relative overflow-hidden whitespace-nowrap">
+                                    <div class="absolute top-0 left-0 w-full h-[45%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none rounded-t-[16px]"></div>
+                                    <i class="fas fa-percent text-[16px] relative z-10"></i>
+                                    <span id="taxBtnLabel" class="relative z-10 tracking-wide">ภาษี</span>
+                                </button>
                             </div>
                         </div>
                         <!-- เลือกแบบประกัน (แสดงเฉพาะ Medical Fund) -->

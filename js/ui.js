@@ -5142,6 +5142,29 @@ function formatThaiMillion(num) {
     return num.toLocaleString(); // ต่ำกว่าล้านแสดงเลขปกติ
 }
 
+// ==================== ภาษี (TAX) ====================
+window.currentTaxRate = window.currentTaxRate || 0;
+window.taxBtnClick = function() {
+    const rates = [0, 5, 10, 15, 20, 25, 30, 35];
+    const opts = rates.map(r => `<option value="${r}" ${window.currentTaxRate === r ? 'selected' : ''}>${r}%</option>`).join('');
+    Swal.fire({
+        title: '<span style="font-family:\'Kanit\',sans-serif;font-size:17px;">เลือกฐานภาษี</span>',
+        html: `<div style="font-family:'Kanit',sans-serif;font-size:14px;color:#64748b;margin-bottom:10px;">ลดหย่อนภาษี = 100,000 × ฐานภาษี</div>
+               <select id="taxRateSelect" class="swal2-select" style="font-family:'Kanit',sans-serif;font-size:16px;padding:8px 14px;border-radius:10px;width:140px;text-align:center;">${opts}</select>`,
+        showCancelButton: true,
+        confirmButtonText: 'ตกลง',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#f59e0b',
+        preConfirm: () => parseInt(document.getElementById('taxRateSelect').value) || 0
+    }).then(res => {
+        if (!res.isConfirmed) return;
+        window.currentTaxRate = res.value;
+        const lbl = document.getElementById('taxBtnLabel');
+        if (lbl) lbl.innerText = res.value > 0 ? `ภาษี ${res.value}%` : 'ภาษี';
+        if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+    });
+};
+
 function generatePolicyTableData() {
     if (currentAppPlan === 'Medical Fund') {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
@@ -5365,6 +5388,11 @@ function generatePolicyTableData() {
     const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : isLV ? isBreakevenActive : true;
     const showDD50Column = isCX && isShowDD50ColActive && window.currentDD50Enabled && window.DD50_RATES;
 
+    // ภาษี: คอลัมน์ลดหย่อนภาษี = 100,000 × ฐานภาษีที่เลือก
+    const _taxRate = parseInt(window.currentTaxRate) || 0;
+    const showTaxColumn = _taxRate > 0;
+    const _taxAmt = Math.round(100000 * _taxRate / 100);
+
     // MF premium column
     const hasMFCol = typeof window.currentMF === 'string' && window.currentMF && window.currentMF !== 'ไม่เลือก' && typeof window.mfBuildPremiumMap === 'function';
     const _mfGender = (typeof currentGender !== 'undefined' && currentGender) || (d.gender || 'male');
@@ -5427,6 +5455,7 @@ function generatePolicyTableData() {
     // นับจำนวน column จริงๆ เพื่อปรับขนาด font บน desktop
     const _colCount = 1
         + (!hideAnnualSaving ? 1 : 0)
+        + (showTaxColumn ? 1 : 0)
         + 1
         + (hideAnnualSaving ? 1 : 0)
         + (forceShowCashFlow ? 2 : 0)
@@ -5488,6 +5517,7 @@ function generatePolicyTableData() {
     document.getElementById('policyTableHead').innerHTML = `<tr class="text-white" style="background:linear-gradient(135deg,#0d9488,#0369a1);${_isCompact ? 'font-size:9px;' : (_isMobile ? 'font-size:10px;' : 'font-size:13px;')}">
         <th class="${_thCls} text-center" style="${_thSz}">อายุ</th>
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
+        ${showTaxColumn ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">ภาษี ${_taxRate}%</th>` : ''}
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">รับเงินก้อน</th>` : ''}
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
@@ -5745,6 +5775,7 @@ function generatePolicyTableData() {
         html += `<tr id="${rowId}" class="${trClass}"${_beOnClick}>
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${!isBreakevenActive && y === beYear ? '★ ' : ''}${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
+            ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
             ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
             ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
