@@ -5743,7 +5743,7 @@ function generatePolicyTableData() {
             </div>
         </div>` : `
         <div class="flex gap-1.5 items-center py-0.5 w-full">
-            <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
+            <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan === 'AS10' ? 'STA10' : currentPlan === 'AS60' ? 'STA60' : currentPlan}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
             <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
