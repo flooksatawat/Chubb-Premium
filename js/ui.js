@@ -1947,8 +1947,9 @@ function selectAppPlan(planName) {
             window.renderCompareView(planA, planName);
             return;
         } else {
-            // แตะแบบเดิมหลัง long-press — ยกเลิก compare แต่ไม่ select
+            // แตะแบบเดิมหลัง long-press — เปรียบเทียบแบบเดียวกัน (ต่างอายุ)
             window.cancelCompareMode();
+            window.renderCompareView(planA, planName);
             return;
         }
     }
