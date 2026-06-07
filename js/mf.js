@@ -1074,6 +1074,112 @@ window.mfInlineSearchSelect = async function(item) {
     mfScheduleTotalPopup();
 };
 
+// ==================== MF Picker Search (popup modal) ====================
+
+window.mfPickerSearchInput = function(val) {
+    const clearBtn = document.getElementById('mfPickerSearchClear');
+    if (clearBtn) clearBtn.classList.toggle('hidden', !val.trim());
+    mfPickerSearchShow(val);
+};
+
+window.mfPickerSearchFocus = function() {
+    const input = document.getElementById('mfPickerSearch');
+    mfPickerSearchShow(input?.value || '');
+};
+
+window.mfPickerSearchHide = function() {
+    const dd = document.getElementById('mfPickerSearchDropdown');
+    if (dd) dd.classList.add('hidden');
+};
+
+window.mfPickerSearchClear = function() {
+    const input = document.getElementById('mfPickerSearch');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('mfPickerSearchClear');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    mfPickerSearchHide();
+    input?.focus();
+};
+
+function mfPickerSearchShow(query) {
+    const dd = document.getElementById('mfPickerSearchDropdown');
+    if (!dd) return;
+    const index = mfBuildSearchIndex();
+    const q = query.trim().toLowerCase();
+    const matches = q
+        ? index.filter(item =>
+            item.label.toLowerCase().includes(q) ||
+            item.companyName.toLowerCase().includes(q) ||
+            item.planName.toLowerCase().includes(q) ||
+            (item.roomRate && item.roomRate.toLowerCase().includes(q))
+          )
+        : index;
+
+    if (matches.length === 0) {
+        dd.innerHTML = `<div class="px-4 py-3 text-[12px] text-slate-400 text-center">ไม่พบแผนที่ตรงกัน</div>`;
+        dd.classList.remove('hidden');
+        return;
+    }
+
+    dd.innerHTML = matches.slice(0, 40).map(item => `
+        <div class="mf-search-item px-3 py-2.5 cursor-pointer hover:bg-sky-50 border-b border-slate-100 last:border-0 flex items-center gap-2.5"
+            onmousedown="mfPickerSearchSelect(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+            <div class="w-7 h-7 rounded-[8px] bg-sky-100 flex items-center justify-center shrink-0">
+                <i class="fas fa-shield-alt text-sky-500 text-[11px]"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="text-[12px] font-bold text-slate-700 truncate">${item.companyName} · ${item.planName}</div>
+                ${item.roomRate ? `<div class="text-[11px] text-sky-600 font-semibold">${item.roomRate}</div>` : ''}
+            </div>
+        </div>`).join('');
+    dd.classList.remove('hidden');
+}
+
+window.mfPickerSearchSelect = async function(item) {
+    const input = document.getElementById('mfPickerSearch');
+    if (input) input.value = item.label;
+    const clearBtn = document.getElementById('mfPickerSearchClear');
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    mfPickerSearchHide();
+
+    await mfLoadRates(item.company);
+
+    window._mfPicker = { company: item.company, plan: item.plan, roomRate: item.roomRate || null };
+
+    // Sync company dropdown
+    const coSel = document.getElementById('mfPickerCompany');
+    if (coSel) coSel.value = item.company;
+
+    // Sync plan dropdown
+    const companies = window._mfData?.companies?.companies || [];
+    const co = companies.find(c => c.id === item.company);
+    const planRow = document.getElementById('mfPickerPlanRow');
+    const planSel = document.getElementById('mfPickerPlan');
+    if (planRow && planSel && co?.plans?.length) {
+        planSel.innerHTML = `<option value="">— เลือกแผน —</option>` +
+            co.plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        planSel.value = item.plan;
+        planRow.classList.remove('hidden');
+    }
+
+    // Sync room rate dropdown
+    const plan = co?.plans?.find(p => p.id === item.plan);
+    const rrRow = document.getElementById('mfPickerRoomRow');
+    const rrSel = document.getElementById('mfPickerRoom');
+    if (rrRow && rrSel) {
+        if (plan?.hasRoomRate && plan.roomRates?.length) {
+            rrSel.innerHTML = `<option value="">— เลือกวงเงิน —</option>` +
+                plan.roomRates.map(r => `<option value="${r}">${r}</option>`).join('');
+            rrSel.value = item.roomRate || '';
+            rrRow.classList.remove('hidden');
+        } else {
+            rrRow.classList.add('hidden');
+        }
+    }
+
+    mfPickerUpdateConfirm();
+};
+
 let _mfTotalPopupTimer = null;
 function mfScheduleTotalPopup(delay = 1500) {
     clearTimeout(_mfTotalPopupTimer);
