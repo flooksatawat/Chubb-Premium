@@ -2573,104 +2573,198 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     </div>
 </div>
 <!-- DOB Picker Popup -->
+<style>
+#dobPickerPopup { font-family:'Kanit',sans-serif; }
+.dob-field { display:flex;flex-direction:column;align-items:center;flex:1; }
+.dob-field label { font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px; }
+.dob-field input {
+    width:100%;text-align:center;border:2px solid #e2e8f0;border-radius:12px;
+    font-size:24px;font-weight:800;color:#1e293b;font-family:'Kanit',sans-serif;
+    background:white;outline:none;padding:10px 0;transition:border-color 0.2s,box-shadow 0.2s;
+    -moz-appearance:textfield;
+}
+.dob-field input::-webkit-outer-spin-button,
+.dob-field input::-webkit-inner-spin-button { -webkit-appearance:none;margin:0; }
+.dob-field input:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
+.dob-field input.filled { border-color:var(--dob-accent,#3b82f6); }
+.dob-sep { font-size:22px;font-weight:700;color:#cbd5e1;align-self:center;padding-top:18px; }
+#dobAstroDetail { display:none;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1); max-height:0; }
+#dobAstroDetail.open { display:block;max-height:400px; }
+</style>
 <div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);opacity:0;transition:opacity 0.22s;"></div>
-<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22),0 4px 16px rgba(0,0,0,0.1);padding:24px 24px 20px;font-family:'Kanit',sans-serif;width:min(92vw,360px);opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);">
-    <!-- Header -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.35);">
-            <i class="fas fa-birthday-cake" style="color:white;font-size:16px;"></i>
+<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22);padding:0;width:min(92vw,380px);opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden;">
+    <!-- Colored header band -->
+    <div id="dobHeaderBand" style="padding:18px 20px 16px;background:linear-gradient(135deg,#3b82f6,#6366f1);transition:background 0.5s ease;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div id="dobHeaderIcon" style="width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎂</div>
+            <div style="flex:1;">
+                <div style="font-size:15px;font-weight:800;color:white;line-height:1.2;" id="dobHeaderTitle">กรอกวันเกิด</div>
+                <div style="font-size:10.5px;color:rgba(255,255,255,0.75);font-weight:500;margin-top:2px;" id="dobHeaderSub">ดับเบิ้ลคลิกที่ช่องอายุเพื่อเปิด</div>
+            </div>
+            <button onclick="closeDobPicker()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;cursor:pointer;color:white;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
         </div>
-        <div style="flex:1;">
-            <div style="font-size:16px;font-weight:800;color:#1e293b;line-height:1.2;">กรอกวันเกิด</div>
-            <div style="font-size:11px;color:#94a3b8;font-weight:500;margin-top:1px;">ดับเบิ้ลคลิกที่ช่องอายุเพื่อเปิด</div>
+        <!-- Age display — centered, big -->
+        <div id="dobAgeBand" style="display:none;margin-top:14px;text-align:center;">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">อายุปัจจุบัน (นับปีบริบูรณ์)</div>
+            <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+                <span id="dobAgeBig" style="font-size:52px;font-weight:900;color:white;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,0.18);"></span>
+                <span style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.85);">ปี</span>
+            </div>
+            <div id="dobAgeNote" style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;margin-top:4px;"></div>
         </div>
-        <button onclick="closeDobPicker()" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:15px;flex-shrink:0;transition:background 0.15s;" onmousedown="this.style.background='#e2e8f0'" onmouseup="this.style.background='#f1f5f9'">✕</button>
     </div>
-    <!-- Date input -->
-    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:14px 16px;margin-bottom:14px;">
-        <label style="font-size:11px;font-weight:700;color:#64748b;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;"><i class="fas fa-calendar-alt" style="color:#3b82f6;margin-right:5px;"></i>วัน / เดือน / ปีเกิด (ค.ศ.)</label>
-        <input type="date" id="dobInput" style="width:100%;border:none;background:transparent;font-size:22px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;outline:none;cursor:pointer;" oninput="previewDobAge()">
-    </div>
-    <!-- Age preview -->
-    <div id="dobAgePreview" style="display:none;background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:1.5px solid #bfdbfe;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
-        <div style="font-size:11px;color:#60a5fa;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;"><i class="fas fa-calculator" style="margin-right:4px;"></i>อายุที่คำนวณได้ (ณ วันนี้)</div>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-            <span id="dobAgeText" style="font-size:32px;font-weight:900;color:#1d4ed8;line-height:1;"></span>
-            <span style="font-size:14px;font-weight:600;color:#3b82f6;">ปี</span>
+    <!-- Body -->
+    <div style="padding:18px 20px 20px;">
+        <!-- 3 inputs -->
+        <div id="dobEraHint" style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:10px;text-align:center;min-height:16px;"></div>
+        <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;">
+            <div class="dob-field">
+                <label>วัน</label>
+                <input type="number" id="dobDay" placeholder="DD" min="1" max="31" inputmode="numeric">
+            </div>
+            <div class="dob-sep">/</div>
+            <div class="dob-field">
+                <label>เดือน</label>
+                <input type="number" id="dobMonth" placeholder="MM" min="1" max="12" inputmode="numeric">
+            </div>
+            <div class="dob-sep">/</div>
+            <div class="dob-field" style="flex:1.6;">
+                <label>ปี (พ.ศ. หรือ ค.ศ.)</label>
+                <input type="number" id="dobYear" placeholder="YYYY" min="1900" max="9999" inputmode="numeric">
+            </div>
         </div>
-        <div id="dobAgeNote" style="font-size:10.5px;color:#64748b;font-weight:500;margin-top:4px;"></div>
+        <!-- Astrology row — shown after date complete -->
+        <div id="dobAstroRow" style="display:none;margin-bottom:14px;">
+            <button id="dobAstroBtn" onclick="toggleDobAstro()" style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Kanit',sans-serif;transition:all 0.2s;text-align:left;">
+                <span id="dobAstroPlanetSym" style="font-size:26px;line-height:1;"></span>
+                <div style="flex:1;">
+                    <div id="dobAstroPlanetLabel" style="font-size:13px;font-weight:700;color:#1e293b;"></div>
+                    <div id="dobAstroZodiacLabel" style="font-size:11px;color:#64748b;font-weight:500;margin-top:1px;"></div>
+                </div>
+                <span id="dobAstroChevron" style="font-size:11px;color:#94a3b8;transition:transform 0.25s;">▼</span>
+            </button>
+            <!-- Expanded astrology details -->
+            <div id="dobAstroDetail">
+                <div id="dobAstroDetailInner" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px 16px;"></div>
+            </div>
+        </div>
+        <!-- Confirm -->
+        <button onclick="confirmDobAge()" id="dobConfirmBtn" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.35);transition:background 0.5s,box-shadow 0.5s,opacity 0.15s;opacity:0.45;pointer-events:none;" id="dobConfirmBtn">
+            <i class="fas fa-check" style="margin-right:6px;"></i>ยืนยันอายุ
+        </button>
     </div>
-    <!-- Confirm button -->
-    <button onclick="confirmDobAge()" id="dobConfirmBtn" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.4);transition:opacity 0.15s;" disabled>
-        <i class="fas fa-check" style="margin-right:6px;"></i>ยืนยันอายุ
-    </button>
 </div>
 
 <script>
-// Attach double-click (desktop) and double-tap (mobile) — same trigger for both
+// ─── Data ────────────────────────────────────────────────────────────────────
+const _DOB_THEMES = {
+    0:{ day:'อาทิตย์', planet:'พระอาทิตย์', sym:'☉', emoji:'🌞', color:'แดง',
+        grad:'linear-gradient(135deg,#ef4444,#b91c1c)', shadow:'rgba(239,68,68,0.35)',
+        bg:'#fff1f1', border:'#fecaca', accent:'#dc2626', textLight:'#fca5a5',
+        luck:'ทิศตะวันออก', stone:'ทับทิม', num:'1',
+        traits:'มีพลังงานสูง มีความเป็นผู้นำ ใจกล้า กว้างขวาง เป็นที่รักของคนรอบข้าง',
+        fortune:'ชะตาชีวิตสดใส มีโอกาสก้าวหน้าในหน้าที่การงาน ด้านการเงินมีรายได้หลายทาง' },
+    1:{ day:'จันทร์', planet:'พระจันทร์', sym:'☽', emoji:'🌙', color:'เหลือง/ครีม',
+        grad:'linear-gradient(135deg,#f59e0b,#b45309)', shadow:'rgba(245,158,11,0.35)',
+        bg:'#fffbeb', border:'#fde68a', accent:'#d97706', textLight:'#fcd34d',
+        luck:'ทิศตะวันตกเฉียงเหนือ', stone:'มุก', num:'2',
+        traits:'อ่อนโยน มีเสน่ห์ จิตใจละเอียดอ่อน รักสันติ มีศิลปะในจิตใจ',
+        fortune:'มีความสุขในชีวิตครอบครัว ด้านความรักโชคดี การงานราบรื่น' },
+    2:{ day:'อังคาร', planet:'พระอังคาร', sym:'♂', emoji:'⭐', color:'ชมพู/แดง',
+        grad:'linear-gradient(135deg,#ec4899,#9d174d)', shadow:'rgba(236,72,153,0.35)',
+        bg:'#fdf2f8', border:'#fbcfe8', accent:'#db2777', textLight:'#f9a8d4',
+        luck:'ทิศใต้', stone:'ปะการังแดง', num:'9',
+        traits:'กล้าหาญ มุ่งมั่น มีความเด็ดเดี่ยว ชอบการแข่งขัน มีความอดทนสูง',
+        fortune:'เส้นทางชีวิตมีอุปสรรคบ้าง แต่ผ่านได้ด้วยความมุ่งมั่น การงานโดดเด่น' },
+    3:{ day:'พุธ', planet:'พระพุธ', sym:'☿', emoji:'💚', color:'เขียว',
+        grad:'linear-gradient(135deg,#10b981,#065f46)', shadow:'rgba(16,185,129,0.35)',
+        bg:'#f0fdf4', border:'#bbf7d0', accent:'#059669', textLight:'#6ee7b7',
+        luck:'ทิศเหนือ', stone:'มรกต', num:'5',
+        traits:'ฉลาด เจ้าเล่ห์ ปรับตัวเก่ง มีไหวพริบ พูดเก่ง เจรจาต่อรองได้ดี',
+        fortune:'ดีเด่นด้านการศึกษาและการสื่อสาร ธุรกิจการค้ารุ่งเรือง' },
+    4:{ day:'พฤหัสบดี', planet:'พระพฤหัสบดี', sym:'♃', emoji:'🟠', color:'ส้ม/เหลืองทอง',
+        grad:'linear-gradient(135deg,#f97316,#c2410c)', shadow:'rgba(249,115,22,0.35)',
+        bg:'#fff7ed', border:'#fed7aa', accent:'#ea580c', textLight:'#fdba74',
+        luck:'ทิศตะวันออกเฉียงเหนือ', stone:'บุษราคัม', num:'3',
+        traits:'เมตตากรุณา ใจบุญ มีปัญญา โชคดี ชอบช่วยเหลือผู้อื่น เป็นที่เคารพ',
+        fortune:'มีบุญมาก ชีวิตมักพบผู้ใหญ่ช่วยเหลือ การงานและการเงินเจริญก้าวหน้า' },
+    5:{ day:'ศุกร์', planet:'พระศุกร์', sym:'♀', emoji:'💙', color:'ฟ้า/ครีม',
+        grad:'linear-gradient(135deg,#06b6d4,#0e7490)', shadow:'rgba(6,182,212,0.35)',
+        bg:'#f0f9ff', border:'#bae6fd', accent:'#0891b2', textLight:'#67e8f9',
+        luck:'ทิศตะวันออกเฉียงใต้', stone:'โอปอล / เพชร', num:'6',
+        traits:'มีเสน่ห์ รักความสวยงาม มีรสนิยม โรแมนติก รักศิลปะดนตรีและการบันเทิง',
+        fortune:'ด้านความรักและมิตรภาพโชคดีเป็นพิเศษ มีชื่อเสียงในวงสังคม' },
+    6:{ day:'เสาร์', planet:'พระเสาร์', sym:'♄', emoji:'💜', color:'ม่วง/ดำ',
+        grad:'linear-gradient(135deg,#8b5cf6,#4c1d95)', shadow:'rgba(139,92,246,0.35)',
+        bg:'#f5f3ff', border:'#ddd6fe', accent:'#7c3aed', textLight:'#c4b5fd',
+        luck:'ทิศตะวันตก', stone:'นิลสปิเนล', num:'8',
+        traits:'ขยัน อดทน มีระเบียบวินัย มุ่งมั่นต่อเป้าหมาย รอบคอบ น่าเชื่อถือ',
+        fortune:'ชีวิตสร้างความสำเร็จได้จากความพยายาม ไม่ใช้โชค การงานมั่นคงระยะยาว' },
+};
+const _DOB_ZODIAC = [
+    { name:'มกร (Capricorn)', sym:'♑', start:[12,22], end:[1,19], traits:'มีระเบียบ ทะเยอทะยาน อดทน' },
+    { name:'กุมภ์ (Aquarius)', sym:'♒', start:[1,20], end:[2,18], traits:'คิดนอกกรอบ เป็นตัวของตัวเอง มีอุดมการณ์' },
+    { name:'มีน (Pisces)', sym:'♓', start:[2,19], end:[3,20], traits:'จินตนาการสูง อ่อนโยน เห็นอกเห็นใจ' },
+    { name:'เมษ (Aries)', sym:'♈', start:[3,21], end:[4,19], traits:'กล้าหาญ กระตือรือร้น เป็นผู้นำ' },
+    { name:'พฤษภ (Taurus)', sym:'♉', start:[4,20], end:[5,20], traits:'มั่นคง ใจเย็น รักความสุขสบาย' },
+    { name:'เมถุน (Gemini)', sym:'♊', start:[5,21], end:[6,20], traits:'ปรับตัวเก่ง พูดเก่ง มีสองบุคลิก' },
+    { name:'กรกฎ (Cancer)', sym:'♋', start:[6,21], end:[7,22], traits:'รักครอบครัว อ่อนไหว มีสัญชาตญาณดี' },
+    { name:'สิงห์ (Leo)', sym:'♌', start:[7,23], end:[8,22], traits:'เชื่อมั่นในตัวเอง มีเสน่ห์ ใจกว้าง' },
+    { name:'กันย์ (Virgo)', sym:'♍', start:[8,23], end:[9,22], traits:'ละเอียดรอบคอบ วิเคราะห์เก่ง เป็นระเบียบ' },
+    { name:'ตุลย์ (Libra)', sym:'♎', start:[9,23], end:[10,22], traits:'รักความยุติธรรม มีเสน่ห์ ชอบความสงบ' },
+    { name:'พิจิก (Scorpio)', sym:'♏', start:[10,23], end:[11,21], traits:'เข้มแข็ง ลึกซึ้ง มีพลังงานสูง' },
+    { name:'ธนู (Sagittarius)', sym:'♐', start:[11,22], end:[12,21], traits:'รักอิสระ มองโลกกว้าง ชอบผจญภัย' },
+];
+
+function _getZodiac(m, d) {
+    for (const z of _DOB_ZODIAC) {
+        const [sm, sd] = z.start, [em, ed] = z.end;
+        if ((m === sm && d >= sd) || (m === em && d <= ed)) return z;
+    }
+    return _DOB_ZODIAC[0]; // มกร fallback (ธ.ค. 22–ม.ค. 19)
+}
+
+// ─── Trigger ─────────────────────────────────────────────────────────────────
 (function() {
     const ageEl = document.getElementById('ageInput');
     if (!ageEl) return;
-    // dblclick covers desktop double-click AND mobile double-tap
-    ageEl.addEventListener('dblclick', function(e) {
-        e.preventDefault();
-        openDobPicker();
-    });
+    ageEl.addEventListener('dblclick', function(e) { e.preventDefault(); openDobPicker(); });
 })();
 
-function _calcInsuranceAge(dobVal) {
-    // นับอายุตั้งแต่วันเกิดครบรอบปีที่ผ่านมา — ไม่ปัดเศษขึ้น ยกเว้นครบปีบริบูรณ์
-    if (!dobVal) return null;
-    const dob = new Date(dobVal);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dob.setHours(0, 0, 0, 0);
-    let years = today.getFullYear() - dob.getFullYear();
-    // ตรวจว่าถึงวันเกิดในปีนี้แล้วหรือยัง
-    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
-    if (today < birthdayThisYear) years--;
-    return Math.max(0, years);
-}
-
-function _dobNoteText(dobVal) {
-    if (!dobVal) return '';
-    const dob = new Date(dobVal);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dob.setHours(0, 0, 0, 0);
-    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
-    const nextBirthday = today >= birthdayThisYear
-        ? new Date(today.getFullYear() + 1, dob.getMonth(), dob.getDate())
-        : birthdayThisYear;
-    const diffMs = nextBirthday - today;
-    const diffDays = Math.round(diffMs / 86400000);
-    if (diffDays === 0) return 'วันเกิดครบรอบวันนี้พอดี 🎂';
-    return `อีก ${diffDays} วัน จะครบปีถัดไป`;
-}
-
+// ─── Open / Close ─────────────────────────────────────────────────────────────
 function openDobPicker() {
-    const overlay = document.getElementById('dobPickerOverlay');
+    document.getElementById('dobPickerOverlay').style.display = 'block';
     const popup = document.getElementById('dobPickerPopup');
-    overlay.style.display = 'block';
     popup.style.display = 'block';
+    // reset theme to default blue
+    _applyDobTheme(null);
+    // reset fields
+    ['dobDay','dobMonth','dobYear'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('filled');
+    });
+    document.getElementById('dobAgeBand').style.display = 'none';
+    document.getElementById('dobAstroRow').style.display = 'none';
+    document.getElementById('dobEraHint').textContent = '';
+    const btn = document.getElementById('dobConfirmBtn');
+    btn.style.opacity = '0.45'; btn.style.pointerEvents = 'none';
+    // pre-fill from current age
+    const age = parseInt(document.getElementById('ageInput')?.value) || 0;
+    if (age > 0) {
+        const d = new Date(); d.setFullYear(d.getFullYear() - age);
+        document.getElementById('dobDay').value = d.getDate();
+        document.getElementById('dobMonth').value = d.getMonth() + 1;
+        document.getElementById('dobYear').value = d.getFullYear() + 543; // แสดงเป็น พ.ศ.
+        ['dobDay','dobMonth','dobYear'].forEach(id => document.getElementById(id).classList.add('filled'));
+        _onDobFieldChange();
+    }
     requestAnimationFrame(() => {
-        overlay.style.opacity = '1';
+        document.getElementById('dobPickerOverlay').style.opacity = '1';
         popup.style.opacity = '1';
         popup.style.transform = 'translate(-50%,-50%) scale(1)';
     });
-    // default date จากอายุปัจจุบัน
-    const age = parseInt(document.getElementById('ageInput')?.value) || 0;
-    const dobInput = document.getElementById('dobInput');
-    if (age > 0) {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() - age);
-        dobInput.value = d.toISOString().split('T')[0];
-        previewDobAge();
-    } else {
-        dobInput.value = '';
-        document.getElementById('dobAgePreview').style.display = 'none';
-        document.getElementById('dobConfirmBtn').disabled = true;
-    }
+    setTimeout(() => document.getElementById('dobDay').focus(), 250);
 }
 
 function closeDobPicker() {
@@ -2679,34 +2773,181 @@ function closeDobPicker() {
     overlay.style.opacity = '0';
     popup.style.opacity = '0';
     popup.style.transform = 'translate(-50%,-52%) scale(0.92)';
-    setTimeout(() => {
-        overlay.style.display = 'none';
-        popup.style.display = 'none';
-    }, 240);
+    setTimeout(() => { overlay.style.display = 'none'; popup.style.display = 'none'; }, 240);
 }
 
-function previewDobAge() {
-    const val = document.getElementById('dobInput').value;
-    const preview = document.getElementById('dobAgePreview');
-    const text = document.getElementById('dobAgeText');
-    const note = document.getElementById('dobAgeNote');
-    const btn = document.getElementById('dobConfirmBtn');
-    if (!val) {
-        preview.style.display = 'none';
-        btn.disabled = true;
+// ─── Input handling ───────────────────────────────────────────────────────────
+['dobDay','dobMonth','dobYear'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+        const maxLen = id === 'dobYear' ? 4 : 2;
+        if (this.value.length > maxLen) this.value = this.value.slice(0, maxLen);
+        this.classList.toggle('filled', this.value.length === maxLen);
+        // auto-advance
+        if (this.value.length === maxLen) {
+            const next = { dobDay:'dobMonth', dobMonth:'dobYear' }[id];
+            if (next) document.getElementById(next).focus();
+        }
+        _onDobFieldChange();
+    });
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value === '') {
+            const prev = { dobMonth:'dobDay', dobYear:'dobMonth' }[id];
+            if (prev) document.getElementById(prev).focus();
+        }
+    });
+});
+
+function _parseDob() {
+    const d = parseInt(document.getElementById('dobDay').value);
+    const m = parseInt(document.getElementById('dobMonth').value);
+    let y = parseInt(document.getElementById('dobYear').value);
+    if (!d || !m || !y) return null;
+    if (d < 1 || d > 31 || m < 1 || m > 12) return null;
+    // auto-detect พ.ศ. vs ค.ศ.
+    if (y > 2500) y -= 543; // พ.ศ. → ค.ศ.
+    if (y < 1900 || y > 2100) return null;
+    const date = new Date(y, m - 1, d);
+    if (date.getFullYear() !== y || date.getMonth() !== m-1 || date.getDate() !== d) return null;
+    return date;
+}
+
+function _calcInsuranceAge(date) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dob = new Date(date); dob.setHours(0,0,0,0);
+    let years = today.getFullYear() - dob.getFullYear();
+    const bday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+    if (today < bday) years--;
+    return Math.max(0, years);
+}
+
+function _onDobFieldChange() {
+    const date = _parseDob();
+    const y = parseInt(document.getElementById('dobYear').value);
+    // era hint
+    const hint = document.getElementById('dobEraHint');
+    if (y > 2500) hint.textContent = `🇹🇭 รับปี พ.ศ. ${y} → ค.ศ. ${y-543}`;
+    else if (y >= 1900 && y <= 2500) hint.textContent = `🌐 รับปี ค.ศ. ${y} → พ.ศ. ${y+543}`;
+    else hint.textContent = '';
+
+    if (!date) {
+        document.getElementById('dobAgeBand').style.display = 'none';
+        document.getElementById('dobAstroRow').style.display = 'none';
+        const btn = document.getElementById('dobConfirmBtn');
+        btn.style.opacity = '0.45'; btn.style.pointerEvents = 'none';
+        _applyDobTheme(null);
         return;
     }
-    const years = _calcInsuranceAge(val);
-    text.textContent = years;
-    note.textContent = _dobNoteText(val);
-    preview.style.display = 'block';
-    btn.disabled = false;
+
+    const age = _calcInsuranceAge(date);
+    const dow = date.getDay();
+    const theme = _DOB_THEMES[dow];
+
+    // age display
+    document.getElementById('dobAgeBig').textContent = age;
+    // next birthday note
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const bdayThis = new Date(today2.getFullYear(), date.getMonth(), date.getDate());
+    const next = today2 >= bdayThis ? new Date(today2.getFullYear()+1, date.getMonth(), date.getDate()) : bdayThis;
+    const days = Math.round((next - today2) / 86400000);
+    document.getElementById('dobAgeNote').textContent = days === 0 ? '🎂 วันเกิดครบรอบวันนี้พอดี!' : `อีก ${days} วัน จะครบปีถัดไป`;
+    document.getElementById('dobAgeBand').style.display = 'block';
+
+    // apply color theme
+    _applyDobTheme(theme);
+
+    // astrology
+    const zodiac = _getZodiac(date.getMonth()+1, date.getDate());
+    document.getElementById('dobAstroPlanetSym').textContent = theme.emoji;
+    document.getElementById('dobAstroPlanetLabel').textContent = `วันเกิด: วัน${theme.day} · ดาว${theme.planet} · สีมงคล: ${theme.color}`;
+    document.getElementById('dobAstroZodiacLabel').textContent = `ราศี ${zodiac.sym} ${zodiac.name} · แตะเพื่อดูพยากรณ์`;
+    document.getElementById('dobAstroRow').style.display = 'block';
+
+    // astrology detail content
+    document.getElementById('dobAstroDetailInner').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">โหราศาสตร์ไทย</div>
+                <div style="font-size:22px;margin-bottom:2px;">${theme.emoji} ${theme.sym}</div>
+                <div style="font-size:12px;font-weight:700;color:${theme.accent};">วัน${theme.day}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">ดาว${theme.planet}</div>
+            </div>
+            <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">ราศีตะวันตก</div>
+                <div style="font-size:22px;margin-bottom:2px;">${zodiac.sym}</div>
+                <div style="font-size:12px;font-weight:700;color:#1e293b;">${zodiac.name}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">${zodiac.traits}</div>
+            </div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;">🌟 ลักษณะนิสัย</div>
+            <div style="font-size:12px;color:#334155;font-weight:500;line-height:1.6;">${theme.traits}</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;">🔮 ดวงชะตา</div>
+            <div style="font-size:12px;color:#334155;font-weight:500;line-height:1.6;">${theme.fortune}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
+                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">💎 พลอยมงคล</div>
+                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.stone}</div>
+            </div>
+            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
+                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">🧭 ทิศมงคล</div>
+                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.luck}</div>
+            </div>
+            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
+                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">🔢 เลขมงคล</div>
+                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.num}</div>
+            </div>
+        </div>`;
+
+    // confirm button
+    const btn = document.getElementById('dobConfirmBtn');
+    btn.style.background = theme.grad;
+    btn.style.boxShadow = `0 4px 14px ${theme.shadow}`;
+    btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+}
+
+function _applyDobTheme(theme) {
+    const band = document.getElementById('dobHeaderBand');
+    const btn = document.getElementById('dobConfirmBtn');
+    const astroBtn = document.getElementById('dobAstroBtn');
+    if (!theme) {
+        band.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
+        btn.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
+        btn.style.boxShadow = '0 4px 14px rgba(59,130,246,0.35)';
+        if (astroBtn) { astroBtn.style.borderColor = '#e2e8f0'; }
+        return;
+    }
+    band.style.background = theme.grad;
+    if (astroBtn) {
+        astroBtn.style.borderColor = theme.border;
+        astroBtn.style.background = theme.bg;
+    }
+    document.querySelectorAll('.dob-field input.filled').forEach(el => {
+        el.style.setProperty('--dob-accent', theme.accent);
+        el.style.borderColor = theme.accent;
+    });
+}
+
+function toggleDobAstro() {
+    const detail = document.getElementById('dobAstroDetail');
+    const chev = document.getElementById('dobAstroChevron');
+    const open = detail.classList.toggle('open');
+    chev.style.transform = open ? 'rotate(180deg)' : '';
+    if (open) {
+        detail.style.maxHeight = detail.querySelector('#dobAstroDetailInner').scrollHeight + 20 + 'px';
+    } else {
+        detail.style.maxHeight = '0';
+    }
 }
 
 function confirmDobAge() {
-    const val = document.getElementById('dobInput').value;
-    if (!val) { closeDobPicker(); return; }
-    const years = _calcInsuranceAge(val);
+    const date = _parseDob();
+    if (!date) { closeDobPicker(); return; }
+    const years = _calcInsuranceAge(date);
     const inp = document.getElementById('ageInput');
     inp.value = years;
     inp.dispatchEvent(new Event('input'));
