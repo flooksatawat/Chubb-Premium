@@ -5176,7 +5176,7 @@ function refreshAllDisplays() {
         document.getElementById('caseIncomeComm').innerText = fyc.toLocaleString() + " ฿"; 
     }
     
-    const _yearMatch = rateKey && (rateKey.match(/^(\d+)/) || rateKey.match(/(\d+)$/));
+    const _yearMatch = rateKey && !rateKey.match(/^\d/) && rateKey.match(/(\d+)$/);
     const _comTitle = currentAppPlan ? `${currentAppPlan}${_yearMatch ? ' ' + _yearMatch[1] + ' ปี' : ''}` : 'คอมมิชชัน';
     let comH = `<h4 class="text-[13px] font-black text-slate-800 text-center mb-4">${_comTitle}</h4>`;
     let totalComAmt = 0; let totalComPct = 0;
@@ -5232,13 +5232,18 @@ function refreshAllDisplays() {
         const tpdRatesTLA = _tpdPremForCom > 0 ? getComRateArray('TPD') : [];
         const maxYearsTLA = Math.max(rateArr.length, tpdRatesTLA.length);
         window.lastTotalComYears = maxYearsTLA;
+        let visibleRowCount = 0;
+        let lastVisibleYear = 0;
         for (let i = 0; i < maxYearsTLA; i++) {
             const r = i < rateArr.length ? rateArr[i] : 0;
             const annualAmt = Math.round(p * r) || 0;
             const tpdAmt = i < tpdRatesTLA.length ? Math.round(_tpdPremForCom * tpdRatesTLA[i]) : 0;
             const yearTotal = annualAmt + tpdAmt;
+            if (yearTotal === 0 && tpdAmt === 0 && r === 0) continue;
             totalComAmt += yearTotal; totalComPct += r;
-            const hiddenClass = i >= 5 ? 'com-tier-hidden hidden' : '';
+            visibleRowCount++;
+            lastVisibleYear = i + 1;
+            const hiddenClass = visibleRowCount > 5 ? 'com-tier-hidden hidden' : '';
             comH += `<div class="${hiddenClass} flex justify-between items-center bg-white border border-amber-200 rounded-[14px] p-3 mb-2.5 shadow-sm">
                 <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
                 <span class="text-[13px] font-black text-slate-500 text-center flex-1 text-left pl-2 leading-tight">${[
@@ -5249,8 +5254,8 @@ function refreshAllDisplays() {
             </div>`;
         }
 
-        if (rateArr.length > 5) {
-            comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${rateArr.length} <i class="fas fa-chevron-down ml-1"></i></button>`;
+        if (visibleRowCount > 5) {
+            comH += `<button id="comToggleBtn" onclick="toggleComTiers()" class="w-full text-center text-[11px] font-bold text-amber-600 bg-amber-50 py-2 rounded-xl mt-1 hover:bg-amber-100 transition-colors">ดูปีที่ 6-${lastVisibleYear} <i class="fas fa-chevron-down ml-1"></i></button>`;
         }
 
         comH += `<div class="mt-4 pt-3.5 border-t border-slate-100 flex justify-between items-end">
