@@ -5251,7 +5251,7 @@ function generatePolicyTableData() {
         + (forceShowCashFlow ? 2 : 0)
         + (showDepositColumn ? 1 : 0)
         + ((_mfLabel && _mfMap) ? 1 : 0)
-        + (showCVColumn ? 1 : 0)
+        + (isBreakevenActive ? 2 : 0)
         + (showDD50Column ? 1 : 0)
         + (showCoverageColumn ? 1 : 0)
         + (showSAColumn ? 1 : 0)
