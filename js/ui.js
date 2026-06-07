@@ -2305,7 +2305,9 @@ function selectAppPlan(planName) {
         document.getElementById('premiumInput').value = "12,000";
         if(sumInsuredContainer) { sumInsuredContainer.classList.remove('hidden'); sumInsuredContainer.style.order = '1'; }
         if(premiumContainer) { premiumContainer.classList.remove('hidden'); premiumContainer.style.order = '2'; }
-        if(mainActionsGroup) mainActionsGroup.style.order = '3';
+        const _clTPD = document.getElementById('globalTPDContainer');
+        if(_clTPD) _clTPD.style.order = '3';
+        if(mainActionsGroup) mainActionsGroup.style.order = '4';
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
     } else if (planName === 'Convertable Term') {
         currentMode = 'sum';

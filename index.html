@@ -538,6 +538,29 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                     </div>
 
+                    <!-- TPD Rider container: visible for 3D and CL only -->
+                    <div id="globalTPDContainer" class="hidden p-3 bg-orange-50 border border-orange-200 rounded-2xl">
+                        <div class="flex items-center justify-between min-h-[28px]">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-person-cane text-orange-500 text-[15px]"></i>
+                                <span class="text-[12px] font-bold text-orange-800 leading-none">สัญญาเพิ่มเติม TPD</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="tpdToggle" class="sr-only peer" onchange="window.currentTPDEnabled=this.checked; if(this.checked){ const s=parseInt((document.getElementById('sumInsuredInput')?.value||'').replace(/,/g,''))||0; const v=s*2; window.currentTPDSA=String(v); const inp=document.getElementById('tpdSAInput'); if(inp){inp.value=v.toLocaleString('en-US');} window.refreshTPDPills&&window.refreshTPDPills(); } if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
+                            </label>
+                        </div>
+                        <div id="tpdSAInputArea" class="hidden mt-2">
+                            <div id="tpdPillRow" class="bg-orange-50 p-1 rounded-2xl border border-orange-100 shadow-inner grid grid-cols-4 gap-1 mb-2"></div>
+                            <div class="flex items-center gap-1.5">
+                                <button onmousedown="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" onmouseup="clearInterval(window._tI)" ontouchstart="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" ontouchend="clearInterval(window._tI)" onclick="window.adjustTPD(-100000)" class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-orange-200 transition-all select-none touch-manipulation">−</button>
+                                <input type="text" id="tpdSAInput" value="" class="flex-1 text-center bg-orange-50 border border-orange-200 rounded-xl h-9 text-[13px] font-bold text-orange-800 outline-none focus:border-orange-400 focus:bg-white transition-colors" oninput="this.value=this.value.replace(/[^0-9,]/g,''); var _v=parseInt(this.value.replace(/,/g,''))||0; var _mx=typeof _getTPDMax==='function'?_getTPDMax():0; if(_mx>0&&_v>_mx){_v=_mx; this.value=_mx.toLocaleString('en-US'); showCustomError&&showCustomError('ซื้อ TPD ได้สูงสุด '+_mx.toLocaleString()+' บาท (2×ทุนหลัก)');} window.currentTPDSA=String(_v); window.refreshTPDPills&&window.refreshTPDPills(); if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
+                                <button onmousedown="window._tI=setInterval(()=>window.adjustTPD(100000),150)" onmouseup="clearInterval(window._tI)" ontouchstart="window._tI=setInterval(()=>window.adjustTPD(100000),150)" ontouchend="clearInterval(window._tI)" onclick="window.adjustTPD(100000)" class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-orange-200 transition-all select-none touch-manipulation">+</button>
+                            </div>
+                            <div id="tpdPremDisplay" class="mt-1.5 text-center text-[11px] font-bold text-orange-700"></div>
+                        </div>
+                    </div>
+
                     <!-- Cash Flow Container -->
                     <div class="premium-card shrink-0 hidden border-emerald-200 bg-emerald-50/30" id="cashFlowContainer">
                         <div class="flex justify-between items-center mb-2.5">
@@ -597,30 +620,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                             </div>
                         </div>
                      </div>                            
-
-                    <!-- TPD Rider container: visible for TL and 3D -->
-                    <div id="globalTPDContainer" class="hidden mb-2 p-3 bg-orange-50 border border-orange-200 rounded-2xl">
-                        <div class="flex items-center justify-between min-h-[28px]">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-person-cane text-orange-500 text-[15px]"></i>
-                                <span class="text-[12px] font-bold text-orange-800 leading-none">สัญญาเพิ่มเติม TPD</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="tpdToggle" class="sr-only peer" onchange="window.currentTPDEnabled=this.checked; if(this.checked){ const s=parseInt((document.getElementById('sumInsuredInput')?.value||'').replace(/,/g,''))||0; const v=s*2; window.currentTPDSA=String(v); const inp=document.getElementById('tpdSAInput'); if(inp){inp.value=v.toLocaleString('en-US');} window.refreshTPDPills&&window.refreshTPDPills(); } if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
-                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
-                            </label>
-                        </div>
-                        <div id="tpdSAInputArea" class="hidden mt-2">
-                            <div id="tpdPillRow" class="bg-orange-50 p-1 rounded-2xl border border-orange-100 shadow-inner grid grid-cols-4 gap-1 mb-2"></div>
-                            <div class="flex items-center gap-1.5">
-                                <button onmousedown="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" onmouseup="clearInterval(window._tI)" ontouchstart="window._tI=setInterval(()=>window.adjustTPD(-100000),150)" ontouchend="clearInterval(window._tI)" onclick="window.adjustTPD(-100000)" class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-orange-200 transition-all select-none touch-manipulation">−</button>
-                                <input type="text" id="tpdSAInput" value="" class="flex-1 text-center bg-orange-50 border border-orange-200 rounded-xl h-9 text-[13px] font-bold text-orange-800 outline-none focus:border-orange-400 focus:bg-white transition-colors" oninput="this.value=this.value.replace(/[^0-9,]/g,''); var _v=parseInt(this.value.replace(/,/g,''))||0; var _mx=typeof _getTPDMax==='function'?_getTPDMax():0; if(_mx>0&&_v>_mx){_v=_mx; this.value=_mx.toLocaleString('en-US'); showCustomError&&showCustomError('ซื้อ TPD ได้สูงสุด '+_mx.toLocaleString()+' บาท (2×ทุนหลัก)');} window.currentTPDSA=String(_v); window.refreshTPDPills&&window.refreshTPDPills(); if(typeof calculate==='function') calculate(typeof currentMode!=='undefined'?currentMode:'sum',true);">
-                                <button onmousedown="window._tI=setInterval(()=>window.adjustTPD(100000),150)" onmouseup="clearInterval(window._tI)" ontouchstart="window._tI=setInterval(()=>window.adjustTPD(100000),150)" ontouchend="clearInterval(window._tI)" onclick="window.adjustTPD(100000)" class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-lg flex items-center justify-center active:scale-90 active:bg-orange-200 transition-all select-none touch-manipulation">+</button>
-                            </div>
-                            <div id="tpdPremDisplay" class="mt-1.5 text-center text-[11px] font-bold text-orange-700"></div>
-                        </div>
-                    </div>
-
 
 
 
