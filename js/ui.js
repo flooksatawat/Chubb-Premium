@@ -2833,6 +2833,8 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
 
     if (window.isWideLayout()) {
         window.injectToWorkspace(html);
+        const mainView = document.getElementById('mainView');
+        if (mainView) mainView.style.display = 'none';
     } else {
         // Mobile: bottom sheet แบ่งบน-ล่าง
         let sheet = document.getElementById('_cmpMobileSheet');
@@ -2845,6 +2847,8 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
         sheet.innerHTML = html;
         sheet.style.display = 'flex';
         requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+        const mainView = document.getElementById('mainView');
+        if (mainView) mainView.style.display = 'none';
     }
 
     // บันทึก state หลัง inject เสมอ (ป้องกัน state ถูกล้างก่อน render เสร็จ)
@@ -3390,6 +3394,8 @@ window.resetRightPaneToPlaceholder = function() {
     if (placeholder) placeholder.style.display = '';
     const resultDiv = document.getElementById('canvasResult');
     if (resultDiv) resultDiv.innerHTML = '';
+    const mainView = document.getElementById('mainView');
+    if (mainView) mainView.style.display = '';
 };
 
 // ==================== GLOBAL DISPLAY HUB ====================
