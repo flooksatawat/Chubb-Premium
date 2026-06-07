@@ -532,7 +532,7 @@ function showDepositIRRPopup() {
     const irr0 = res0 ? _calcIRR(res0.cfs) : null;
 
     // สร้าง pills milestone เหมือน LV IRR (60, 70, 80, 85, 90, maxAge)
-    const pillAges = [...new Set([60, 70, 80, 85, 90, maxAge].filter(a => a > startAge && a <= maxAge))];
+    const pillAges = [...new Set([60, 70, 80, 90, 100].filter(a => a > startAge && a <= maxAge))];
     const pillsHTML = pillAges.map(a =>
         `<button type="button" class="dep-irr-pill" data-age="${a}" onclick="window._updateDepositIRR(${a})"
          style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
@@ -3681,7 +3681,7 @@ window._pickLVIRRAge = function(age) {
 
 // สร้าง HTML ปุ่ม milestone อายุ (ขึ้นกับ startAge ปัจจุบัน)
 function _lvIrrPillsHTML(startAge) {
-    return [60, 70, 80, 85, 90, 100].filter(a => a > startAge).map(a =>
+    return [60, 70, 80, 90, 100].filter(a => a > startAge).map(a =>
         `<button type="button" class="lv-irr-pill" data-age="${a}" onclick="window._pickLVIRRAge(${a})"
          style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
                 background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
