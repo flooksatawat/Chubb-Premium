@@ -2588,52 +2588,53 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 .dob-field input:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
 .dob-field input.filled { border-color:var(--dob-accent,#3b82f6); }
 .dob-sep { font-size:22px;font-weight:700;color:#cbd5e1;align-self:center;padding-top:18px; }
-#dobAstroDetail { display:none;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1); max-height:0; }
-#dobAstroDetail.open { display:block;max-height:400px; }
+#dobAstroDetail { overflow:hidden;transition:max-height 0.38s cubic-bezier(0.16,1,0.3,1);max-height:0; }
+#dobAstroDetail.open { max-height:900px; }
+#dobPhoneInput { width:100%;border:2px solid #e2e8f0;border-radius:12px;font-size:18px;font-weight:700;color:#1e293b;font-family:'Kanit',sans-serif;background:white;outline:none;padding:10px 14px;transition:border-color 0.2s,box-shadow 0.2s;-moz-appearance:textfield;letter-spacing:0.08em; }
+#dobPhoneInput::-webkit-outer-spin-button,#dobPhoneInput::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+#dobPhoneInput:focus { border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
+#dobPhoneInput.filled { border-color:var(--dob-accent,#3b82f6); }
 </style>
 <div id="dobPickerOverlay" onclick="closeDobPicker()" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);opacity:0;transition:opacity 0.22s;"></div>
-<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22);padding:0;width:min(92vw,380px);opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden;">
+<div id="dobPickerPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.92);z-index:10001;background:white;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.22);padding:0;width:min(94vw,400px);max-height:92vh;overflow-y:auto;opacity:0;transition:opacity 0.22s,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);">
     <!-- Colored header band -->
-    <div id="dobHeaderBand" style="padding:18px 20px 16px;background:linear-gradient(135deg,#3b82f6,#6366f1);transition:background 0.5s ease;">
+    <div id="dobHeaderBand" style="padding:18px 20px 16px;background:linear-gradient(135deg,#3b82f6,#6366f1);transition:background 0.5s ease;position:sticky;top:0;z-index:2;">
         <div style="display:flex;align-items:center;gap:10px;">
             <div id="dobHeaderIcon" style="width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎂</div>
             <div style="flex:1;">
-                <div style="font-size:15px;font-weight:800;color:white;line-height:1.2;" id="dobHeaderTitle">กรอกวันเกิด</div>
-                <div style="font-size:10.5px;color:rgba(255,255,255,0.75);font-weight:500;margin-top:2px;" id="dobHeaderSub">ดับเบิ้ลคลิกที่ช่องอายุเพื่อเปิด</div>
+                <div style="font-size:15px;font-weight:800;color:white;line-height:1.2;">กรอกวันเกิด</div>
+                <div style="font-size:10.5px;color:rgba(255,255,255,0.75);font-weight:500;margin-top:2px;">ดับเบิ้ลคลิกที่ช่องอายุเพื่อเปิด</div>
             </div>
             <button onclick="closeDobPicker()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;cursor:pointer;color:white;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
         </div>
-        <!-- Age display — centered, big -->
+        <!-- Age — centered big -->
         <div id="dobAgeBand" style="display:none;margin-top:14px;text-align:center;">
-            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">อายุปัจจุบัน (นับปีบริบูรณ์)</div>
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">อายุปัจจุบัน (ปีบริบูรณ์)</div>
             <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
-                <span id="dobAgeBig" style="font-size:52px;font-weight:900;color:white;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,0.18);"></span>
-                <span style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.85);">ปี</span>
+                <span id="dobAgeBig" style="font-size:56px;font-weight:900;color:white;line-height:1;text-shadow:0 2px 16px rgba(0,0,0,0.2);"></span>
+                <span style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.85);">ปี</span>
             </div>
-            <div id="dobAgeNote" style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;margin-top:4px;"></div>
+            <div id="dobAgeNote" style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;margin-top:5px;"></div>
         </div>
     </div>
     <!-- Body -->
-    <div style="padding:18px 20px 20px;">
-        <!-- 3 inputs -->
+    <div style="padding:18px 20px 22px;">
+        <!-- Era hint -->
         <div id="dobEraHint" style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:10px;text-align:center;min-height:16px;"></div>
-        <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;">
-            <div class="dob-field">
-                <label>วัน</label>
-                <input type="number" id="dobDay" placeholder="DD" min="1" max="31" inputmode="numeric">
-            </div>
+        <!-- Date inputs -->
+        <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px;">
+            <div class="dob-field"><label>วัน</label><input type="number" id="dobDay" placeholder="DD" min="1" max="31" inputmode="numeric"></div>
             <div class="dob-sep">/</div>
-            <div class="dob-field">
-                <label>เดือน</label>
-                <input type="number" id="dobMonth" placeholder="MM" min="1" max="12" inputmode="numeric">
-            </div>
+            <div class="dob-field"><label>เดือน</label><input type="number" id="dobMonth" placeholder="MM" min="1" max="12" inputmode="numeric"></div>
             <div class="dob-sep">/</div>
-            <div class="dob-field" style="flex:1.6;">
-                <label>ปี (พ.ศ. หรือ ค.ศ.)</label>
-                <input type="number" id="dobYear" placeholder="YYYY" min="1900" max="9999" inputmode="numeric">
-            </div>
+            <div class="dob-field" style="flex:1.6;"><label>ปี พ.ศ. / ค.ศ.</label><input type="number" id="dobYear" placeholder="YYYY" inputmode="numeric"></div>
         </div>
-        <!-- Astrology row — shown after date complete -->
+        <!-- Phone input -->
+        <div style="margin-bottom:14px;">
+            <label style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:6px;">📱 เบอร์โทรศัพท์ (ไม่บังคับ — พยากรณ์เลขมือถือ)</label>
+            <input type="tel" id="dobPhoneInput" placeholder="0XX-XXX-XXXX" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);_onDobPhoneChange()">
+        </div>
+        <!-- Prediction button row — shown after date complete -->
         <div id="dobAstroRow" style="display:none;margin-bottom:14px;">
             <button id="dobAstroBtn" onclick="toggleDobAstro()" style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Kanit',sans-serif;transition:all 0.2s;text-align:left;">
                 <span id="dobAstroPlanetSym" style="font-size:26px;line-height:1;"></span>
@@ -2643,85 +2644,190 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                 </div>
                 <span id="dobAstroChevron" style="font-size:11px;color:#94a3b8;transition:transform 0.25s;">▼</span>
             </button>
-            <!-- Expanded astrology details -->
             <div id="dobAstroDetail">
                 <div id="dobAstroDetailInner" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px 16px;"></div>
             </div>
         </div>
         <!-- Confirm -->
-        <button onclick="confirmDobAge()" id="dobConfirmBtn" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.35);transition:background 0.5s,box-shadow 0.5s,opacity 0.15s;opacity:0.45;pointer-events:none;" id="dobConfirmBtn">
+        <button onclick="confirmDobAge()" id="dobConfirmBtn" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:white;font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.35);transition:background 0.5s,box-shadow 0.5s,opacity 0.2s;opacity:0.45;pointer-events:none;">
             <i class="fas fa-check" style="margin-right:6px;"></i>ยืนยันอายุ
         </button>
     </div>
 </div>
 
 <script>
-// ─── Data ────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+//  DOB PICKER — DATA
+// ════════════════════════════════════════════════════════════════════
+
+// สีประจำวัน (โหราศาสตร์ไทย) — gradient + UI theme เท่านั้น
 const _DOB_THEMES = {
-    0:{ day:'อาทิตย์', planet:'พระอาทิตย์', sym:'☉', emoji:'🌞', color:'แดง',
-        grad:'linear-gradient(135deg,#ef4444,#b91c1c)', shadow:'rgba(239,68,68,0.35)',
-        bg:'#fff1f1', border:'#fecaca', accent:'#dc2626', textLight:'#fca5a5',
-        luck:'ทิศตะวันออก', stone:'ทับทิม', num:'1',
-        traits:'มีพลังงานสูง มีความเป็นผู้นำ ใจกล้า กว้างขวาง เป็นที่รักของคนรอบข้าง',
-        fortune:'ชะตาชีวิตสดใส มีโอกาสก้าวหน้าในหน้าที่การงาน ด้านการเงินมีรายได้หลายทาง' },
-    1:{ day:'จันทร์', planet:'พระจันทร์', sym:'☽', emoji:'🌙', color:'เหลือง/ครีม',
-        grad:'linear-gradient(135deg,#f59e0b,#b45309)', shadow:'rgba(245,158,11,0.35)',
-        bg:'#fffbeb', border:'#fde68a', accent:'#d97706', textLight:'#fcd34d',
-        luck:'ทิศตะวันตกเฉียงเหนือ', stone:'มุก', num:'2',
-        traits:'อ่อนโยน มีเสน่ห์ จิตใจละเอียดอ่อน รักสันติ มีศิลปะในจิตใจ',
-        fortune:'มีความสุขในชีวิตครอบครัว ด้านความรักโชคดี การงานราบรื่น' },
-    2:{ day:'อังคาร', planet:'พระอังคาร', sym:'♂', emoji:'⭐', color:'ชมพู/แดง',
-        grad:'linear-gradient(135deg,#ec4899,#9d174d)', shadow:'rgba(236,72,153,0.35)',
-        bg:'#fdf2f8', border:'#fbcfe8', accent:'#db2777', textLight:'#f9a8d4',
-        luck:'ทิศใต้', stone:'ปะการังแดง', num:'9',
-        traits:'กล้าหาญ มุ่งมั่น มีความเด็ดเดี่ยว ชอบการแข่งขัน มีความอดทนสูง',
-        fortune:'เส้นทางชีวิตมีอุปสรรคบ้าง แต่ผ่านได้ด้วยความมุ่งมั่น การงานโดดเด่น' },
-    3:{ day:'พุธ', planet:'พระพุธ', sym:'☿', emoji:'💚', color:'เขียว',
-        grad:'linear-gradient(135deg,#10b981,#065f46)', shadow:'rgba(16,185,129,0.35)',
-        bg:'#f0fdf4', border:'#bbf7d0', accent:'#059669', textLight:'#6ee7b7',
-        luck:'ทิศเหนือ', stone:'มรกต', num:'5',
-        traits:'ฉลาด เจ้าเล่ห์ ปรับตัวเก่ง มีไหวพริบ พูดเก่ง เจรจาต่อรองได้ดี',
-        fortune:'ดีเด่นด้านการศึกษาและการสื่อสาร ธุรกิจการค้ารุ่งเรือง' },
-    4:{ day:'พฤหัสบดี', planet:'พระพฤหัสบดี', sym:'♃', emoji:'🟠', color:'ส้ม/เหลืองทอง',
-        grad:'linear-gradient(135deg,#f97316,#c2410c)', shadow:'rgba(249,115,22,0.35)',
-        bg:'#fff7ed', border:'#fed7aa', accent:'#ea580c', textLight:'#fdba74',
-        luck:'ทิศตะวันออกเฉียงเหนือ', stone:'บุษราคัม', num:'3',
-        traits:'เมตตากรุณา ใจบุญ มีปัญญา โชคดี ชอบช่วยเหลือผู้อื่น เป็นที่เคารพ',
-        fortune:'มีบุญมาก ชีวิตมักพบผู้ใหญ่ช่วยเหลือ การงานและการเงินเจริญก้าวหน้า' },
-    5:{ day:'ศุกร์', planet:'พระศุกร์', sym:'♀', emoji:'💙', color:'ฟ้า/ครีม',
-        grad:'linear-gradient(135deg,#06b6d4,#0e7490)', shadow:'rgba(6,182,212,0.35)',
-        bg:'#f0f9ff', border:'#bae6fd', accent:'#0891b2', textLight:'#67e8f9',
-        luck:'ทิศตะวันออกเฉียงใต้', stone:'โอปอล / เพชร', num:'6',
-        traits:'มีเสน่ห์ รักความสวยงาม มีรสนิยม โรแมนติก รักศิลปะดนตรีและการบันเทิง',
-        fortune:'ด้านความรักและมิตรภาพโชคดีเป็นพิเศษ มีชื่อเสียงในวงสังคม' },
-    6:{ day:'เสาร์', planet:'พระเสาร์', sym:'♄', emoji:'💜', color:'ม่วง/ดำ',
-        grad:'linear-gradient(135deg,#8b5cf6,#4c1d95)', shadow:'rgba(139,92,246,0.35)',
-        bg:'#f5f3ff', border:'#ddd6fe', accent:'#7c3aed', textLight:'#c4b5fd',
-        luck:'ทิศตะวันตก', stone:'นิลสปิเนล', num:'8',
-        traits:'ขยัน อดทน มีระเบียบวินัย มุ่งมั่นต่อเป้าหมาย รอบคอบ น่าเชื่อถือ',
-        fortune:'ชีวิตสร้างความสำเร็จได้จากความพยายาม ไม่ใช้โชค การงานมั่นคงระยะยาว' },
+    0:{ day:'อาทิตย์', emoji:'🌞', grad:'linear-gradient(135deg,#ef4444,#b91c1c)', shadow:'rgba(239,68,68,0.35)', bg:'#fff1f1', border:'#fecaca', accent:'#dc2626' },
+    1:{ day:'จันทร์',  emoji:'🌙', grad:'linear-gradient(135deg,#f59e0b,#b45309)', shadow:'rgba(245,158,11,0.35)', bg:'#fffbeb', border:'#fde68a', accent:'#d97706' },
+    2:{ day:'อังคาร', emoji:'⭐', grad:'linear-gradient(135deg,#ec4899,#9d174d)', shadow:'rgba(236,72,153,0.35)', bg:'#fdf2f8', border:'#fbcfe8', accent:'#db2777' },
+    3:{ day:'พุธ',    emoji:'💚', grad:'linear-gradient(135deg,#10b981,#065f46)', shadow:'rgba(16,185,129,0.35)', bg:'#f0fdf4', border:'#bbf7d0', accent:'#059669' },
+    4:{ day:'พฤหัส', emoji:'🟠', grad:'linear-gradient(135deg,#f97316,#c2410c)', shadow:'rgba(249,115,22,0.35)', bg:'#fff7ed', border:'#fed7aa', accent:'#ea580c' },
+    5:{ day:'ศุกร์',  emoji:'💙', grad:'linear-gradient(135deg,#06b6d4,#0e7490)', shadow:'rgba(6,182,212,0.35)',  bg:'#f0f9ff', border:'#bae6fd', accent:'#0891b2' },
+    6:{ day:'เสาร์',  emoji:'💜', grad:'linear-gradient(135deg,#8b5cf6,#4c1d95)', shadow:'rgba(139,92,246,0.35)', bg:'#f5f3ff', border:'#ddd6fe', accent:'#7c3aed' },
 };
+
+// ราศีตะวันตก — บุคลิกภาพแบบละเอียด (Big Five adjacent)
 const _DOB_ZODIAC = [
-    { name:'มกร (Capricorn)', sym:'♑', start:[12,22], end:[1,19], traits:'มีระเบียบ ทะเยอทะยาน อดทน' },
-    { name:'กุมภ์ (Aquarius)', sym:'♒', start:[1,20], end:[2,18], traits:'คิดนอกกรอบ เป็นตัวของตัวเอง มีอุดมการณ์' },
-    { name:'มีน (Pisces)', sym:'♓', start:[2,19], end:[3,20], traits:'จินตนาการสูง อ่อนโยน เห็นอกเห็นใจ' },
-    { name:'เมษ (Aries)', sym:'♈', start:[3,21], end:[4,19], traits:'กล้าหาญ กระตือรือร้น เป็นผู้นำ' },
-    { name:'พฤษภ (Taurus)', sym:'♉', start:[4,20], end:[5,20], traits:'มั่นคง ใจเย็น รักความสุขสบาย' },
-    { name:'เมถุน (Gemini)', sym:'♊', start:[5,21], end:[6,20], traits:'ปรับตัวเก่ง พูดเก่ง มีสองบุคลิก' },
-    { name:'กรกฎ (Cancer)', sym:'♋', start:[6,21], end:[7,22], traits:'รักครอบครัว อ่อนไหว มีสัญชาตญาณดี' },
-    { name:'สิงห์ (Leo)', sym:'♌', start:[7,23], end:[8,22], traits:'เชื่อมั่นในตัวเอง มีเสน่ห์ ใจกว้าง' },
-    { name:'กันย์ (Virgo)', sym:'♍', start:[8,23], end:[9,22], traits:'ละเอียดรอบคอบ วิเคราะห์เก่ง เป็นระเบียบ' },
-    { name:'ตุลย์ (Libra)', sym:'♎', start:[9,23], end:[10,22], traits:'รักความยุติธรรม มีเสน่ห์ ชอบความสงบ' },
-    { name:'พิจิก (Scorpio)', sym:'♏', start:[10,23], end:[11,21], traits:'เข้มแข็ง ลึกซึ้ง มีพลังงานสูง' },
-    { name:'ธนู (Sagittarius)', sym:'♐', start:[11,22], end:[12,21], traits:'รักอิสระ มองโลกกว้าง ชอบผจญภัย' },
+    { name:'มกร ♑', sym:'♑', start:[12,22], end:[1,19],
+      personality:'มีวินัยและความรับผิดชอบสูงมาก วางแผนชีวิตอย่างรอบคอบ ไม่ชอบความเสี่ยงที่ไม่จำเป็น มีความอดทนและมุ่งมั่นต่อเป้าหมายระยะยาว บางครั้งดูเย็นชาแต่ภายในอ่อนไหวกว่าที่แสดงออก เก่งด้านการบริหารจัดการและการสร้างความมั่นคง',
+      strength:'วินัยสูง · รอบคอบ · เชื่อถือได้', weakness:'ยืดหยุ่นน้อย · เครียดง่าย · ขาดความเป็นธรรมชาติ' },
+    { name:'กุมภ์ ♒', sym:'♒', start:[1,20], end:[2,18],
+      personality:'คิดนอกกรอบและมีความคิดสร้างสรรค์สูง มองเห็นภาพรวมของสังคมได้ดี มีอุดมการณ์ชัดเจนและไม่ยอมประนีประนอมกับสิ่งที่ขัดกับค่านิยม ชอบเป็นตัวของตัวเอง บางครั้งดูห่างเหิน แต่แท้จริงแล้วมีความเอาใจใส่อย่างลึกซึ้ง',
+      strength:'สร้างสรรค์ · มีอุดมการณ์ · เป็นตัวเอง', weakness:'ดื้อรั้น · ห่างเหิน · ไม่ยืดหยุ่น' },
+    { name:'มีน ♓', sym:'♓', start:[2,19], end:[3,20],
+      personality:'มีความเห็นอกเห็นใจและสัมผัสอารมณ์ผู้อื่นได้ลึกมาก จิตใจอ่อนโยนและมีศิลปะสูง สัญชาตญาณดีเยี่ยม บางครั้งหลงโลกแห่งจินตนาการจนตัดสินใจช้า มีพรสวรรค์ด้านดนตรี ศิลปะ และการบำบัดจิตใจ',
+      strength:'เห็นอกเห็นใจ · สัญชาตญาณดี · มีศิลปะ', weakness:'อ่อนไหวเกินไป · ตัดสินใจช้า · หลีกเลี่ยงความจริง' },
+    { name:'เมษ ♈', sym:'♈', start:[3,21], end:[4,19],
+      personality:'กล้าหาญ กระตือรือร้น และมีพลังงานชีวิตสูงมาก เป็นผู้นำโดยธรรมชาติที่ลงมือทำทันที ชอบความท้าทายและการแข่งขัน อารมณ์ร้อนแต่หายเร็ว มีความตรงไปตรงมาจนบางครั้งดูห้าวหาญเกินไป',
+      strength:'กล้า · มีพลังงาน · เด็ดขาด', weakness:'หุนหันพลันแล่น · ใจร้อน · ขาดความอดทน' },
+    { name:'พฤษภ ♉', sym:'♉', start:[4,20], end:[5,20],
+      personality:'มีความมั่นคงทางอารมณ์สูง รักความสบายและความงดงาม มีสุนทรียะและรสนิยมดี ใจเย็นและอดทนยกเว้นเมื่อถูกกดดันมากเกิน ซื่อสัตย์และน่าเชื่อถือ มักเป็นหลักให้คนรอบข้างในยามวิกฤต',
+      strength:'มั่นคง · น่าเชื่อถือ · รสนิยมดี', weakness:'ดื้อรั้น · ยึดติด · เปลี่ยนแปลงยาก' },
+    { name:'เมถุน ♊', sym:'♊', start:[5,21], end:[6,20],
+      personality:'ปรับตัวเก่งที่สุดในบรรดาทุกราศี มีไหวพริบและเรียนรู้เร็ว พูดเก่งและสื่อสารชัดเจน ชอบความหลากหลาย สมองทำงานเร็วจนบางครั้งดูสับสน มีสองบุคลิกที่ปรับตัวตามสถานการณ์ได้ดีเยี่ยม',
+      strength:'ปรับตัวเก่ง · สื่อสารเก่ง · เรียนรู้เร็ว', weakness:'ไม่ต่อเนื่อง · ไม่มุ่งมั่น · พูดมากเกิน' },
+    { name:'กรกฎ ♋', sym:'♋', start:[6,21], end:[7,22],
+      personality:'รักครอบครัวและคนใกล้ชิดอย่างลึกซึ้ง มีสัญชาตญาณในการดูแลผู้อื่นสูงมาก จำเรื่องราวและความรู้สึกได้ดี อารมณ์แปรปรวนตามดวงจันทร์แต่ฟื้นตัวเร็ว เก็บความรู้สึกลึกๆ และเปิดใจยากกับคนแปลกหน้า',
+      strength:'ดูแลผู้อื่น · จงรักภักดี · สัญชาตญาณดี', weakness:'อารมณ์แปรปรวน · เก็บกด · ยึดอดีต' },
+    { name:'สิงห์ ♌', sym:'♌', start:[7,23], end:[8,22],
+      personality:'มีเสน่ห์ดึงดูดและความมั่นใจสูงเป็นธรรมชาติ ชอบเป็นศูนย์กลางและรับการยอมรับ มีน้ำใจและความเอื้ออาทรที่แท้จริง เมื่อถูกยกย่องจะทำงานได้ดีมาก มีความเป็นผู้นำที่สร้างแรงบันดาลใจได้จริง',
+      strength:'มีเสน่ห์ · น้ำใจดี · เป็นผู้นำ', weakness:'หยิ่ง · ต้องการคำชม · ตื้นเขินบางครั้ง' },
+    { name:'กันย์ ♍', sym:'♍', start:[8,23], end:[9,22],
+      personality:'วิเคราะห์ละเอียดที่สุดในบรรดาทุกราศี มีมาตรฐานสูงทั้งกับตัวเองและผู้อื่น ช่างสังเกตและจำรายละเอียดเล็กน้อยได้ดี ทำงานด้วยความรับผิดชอบสูง บางครั้งวิจารณ์ตัวเองหนักเกินไปจนเครียด',
+      strength:'ละเอียด · วิเคราะห์เก่ง · รับผิดชอบ', weakness:'ขี้กังวล · วิจารณ์มาก · สมบูรณ์แบบนิยม' },
+    { name:'ตุลย์ ♎', sym:'♎', start:[9,23], end:[10,22],
+      personality:'รักความยุติธรรมและความสมดุลอย่างแท้จริง มีทักษะการเจรจาและการประนีประนอมสูงมาก มองทุกมุมก่อนตัดสินใจ มีรสนิยมดีและรักความงาม บางครั้งตัดสินใจช้าเพราะเห็นทุกด้าน',
+      strength:'ยุติธรรม · เจรจาเก่ง · รสนิยมดี', weakness:'ลังเล · พึ่งพาผู้อื่น · หลีกเลี่ยงความขัดแย้ง' },
+    { name:'พิจิก ♏', sym:'♏', start:[10,23], end:[11,21],
+      personality:'มีความลึกทางอารมณ์และสัญชาตญาณที่แม่นยำที่สุด อ่านคนออกตั้งแต่แรกพบ มีพลังจิตใจเข้มแข็งมากและฟื้นตัวจากวิกฤตได้ดี จงรักภักดีกับคนที่รัก แต่จะไม่ยกโทษให้ง่ายๆ เมื่อถูกทรยศ',
+      strength:'ลึกซึ้ง · เข้มแข็ง · สัญชาตญาณดี', weakness:'แค้นนาน · เข้าถึงยาก · ควบคุมมากเกิน' },
+    { name:'ธนู ♐', sym:'♐', start:[11,22], end:[12,21],
+      personality:'มองโลกในแง่ดีและรักอิสระมากที่สุด มีปรัชญาชีวิตและชอบแสวงหาความรู้ใหม่ ตรงไปตรงมาจนบางครั้งพูดโดยไม่ระวังความรู้สึกคนอื่น ชอบผจญภัยและเปิดรับวัฒนธรรมที่แตกต่าง',
+      strength:'มองโลกบวก · รักอิสระ · ซื่อตรง', weakness:'ขาดความรับผิดชอบ · พูดไม่ระวัง · ไม่อยู่นิ่ง' },
 ];
 
+// Life Path Number (เลขศาสตร์ Pythagorean — แม่นยำที่สุดสำหรับบุคลิกภาพ)
+const _DOB_LIFEPATH = {
+    1:{ label:'เลขชีวิต 1 — ผู้นำ', emoji:'👑',
+        core:'มีความเป็นผู้นำฝังอยู่ในดีเอ็นเอ ชอบริเริ่มสิ่งใหม่ ไม่ชอบถูกสั่ง มีความคิดสร้างสรรค์และแนวทางเป็นของตัวเอง มั่นใจในตัวเองสูง แต่บางครั้งดูเอาแต่ใจ ต้องการพื้นที่อิสระในการแสดงออก',
+        relate:'มักเป็นคนสร้างมาตรฐานและเป็นแรงบันดาลใจให้คนอื่น แต่ต้องฝึกรับฟังผู้อื่นมากขึ้น',
+        career:'เหมาะกับการเป็นผู้ประกอบการ ผู้บริหาร นักคิดค้นสิ่งใหม่' },
+    2:{ label:'เลขชีวิต 2 — ผู้ประสาน', emoji:'🤝',
+        core:'มีความเห็นอกเห็นใจและสัมผัสอารมณ์ผู้อื่นได้ดีมาก ทำงานเป็นทีมได้เยี่ยม เป็นคนกลางที่ดีในทุกความขัดแย้ง มีสัญชาตญาณดีแต่อาจไม่เชื่อตัวเอง ต้องการความรักและการยอมรับเป็นแรงขับ',
+        relate:'เก่งด้านการดูแลความสัมพันธ์ มักเป็นกาวใจของกลุ่ม แต่ต้องระวังการยอมแพ้ง่ายเกิน',
+        career:'เหมาะกับนักจิตวิทยา นักการทูต ที่ปรึกษา งานด้านการดูแลผู้อื่น' },
+    3:{ label:'เลขชีวิต 3 — นักสร้างสรรค์', emoji:'🎨',
+        core:'มีพรสวรรค์ด้านการสื่อสารและการแสดงออก มองโลกในแง่ดีและมีพลังงานบวกส่งต่อให้คนรอบข้าง ชอบเข้าสังคมและมีอารมณ์ขันตามธรรมชาติ บางครั้งขาดความต่อเนื่องเพราะมีความสนใจหลายด้าน',
+        relate:'เป็นคนที่ทำให้บรรยากาศสดใส แต่ต้องฝึกความลึกในความสัมพันธ์',
+        career:'เหมาะกับนักเขียน นักแสดง นักการตลาด ครู นักสื่อสาร' },
+    4:{ label:'เลขชีวิต 4 — สถาปนิกชีวิต', emoji:'🏗️',
+        core:'มีวินัยและความรับผิดชอบสูงมาก สร้างทุกอย่างบนรากฐานที่มั่นคง วางแผนอย่างรอบคอบ น่าเชื่อถือและซื่อสัตย์ บางครั้งดูแข็งกระด้างและปรับตัวช้า แต่เป็นคนที่พึ่งพาได้จริงในทุกสถานการณ์',
+        relate:'คนรอบข้างรู้สึกปลอดภัยเมื่ออยู่ด้วย แต่ต้องเปิดรับความยืดหยุ่นมากขึ้น',
+        career:'เหมาะกับวิศวกร นักบัญชี ผู้จัดการโครงการ สถาปนิก' },
+    5:{ label:'เลขชีวิต 5 — นักผจญภัย', emoji:'🌍',
+        core:'รักอิสระและความหลากหลายมากที่สุด ปรับตัวได้ดีในทุกสถานการณ์ มีเสน่ห์ดึงดูดและพูดเก่ง ต้องการการเปลี่ยนแปลงสม่ำเสมอ บางครั้งขาดความมั่นคงระยะยาวเพราะชอบสิ่งใหม่เสมอ',
+        relate:'ทำให้ความสัมพันธ์ไม่น่าเบื่อ แต่ต้องฝึกความมุ่งมั่นและความต่อเนื่อง',
+        career:'เหมาะกับนักท่องเที่ยว นักข่าว นักขาย พนักงานสายการบิน' },
+    6:{ label:'เลขชีวิต 6 — ผู้ดูแล', emoji:'💝',
+        core:'มีหัวใจที่อบอุ่นและรักการดูแลผู้อื่นเป็นที่สุด รับผิดชอบและเชื่อถือได้ มีรสนิยมด้านความงามและความกลมกลืน บางครั้งแบกรับมากเกินจนเหนื่อย และอาจควบคุมผู้อื่นโดยไม่รู้ตัว',
+        relate:'เป็นหลักให้ครอบครัวและคนใกล้ชิด ต้องฝึกให้ตัวเองรับการดูแลบ้างเช่นกัน',
+        career:'เหมาะกับแพทย์ พยาบาล นักสังคมสงเคราะห์ ครู นักออกแบบ' },
+    7:{ label:'เลขชีวิต 7 — นักค้นหาความจริง', emoji:'🔍',
+        core:'มีสติปัญญาลึกซึ้งและชอบค้นหาความจริงที่ซ่อนอยู่ มีจิตวิญญาณและความเชื่อที่แน่วแน่ ต้องการพื้นที่คิดคนเดียว บางครั้งดูลึกลับและห่างเหิน แต่แท้จริงมีความลึกทางอารมณ์ที่น้อยคนจะเข้าถึงได้',
+        relate:'ความสัมพันธ์ต้องการเวลาสร้างความไว้ใจ แต่เมื่อไว้ใจแล้วจะจงรักภักดีมาก',
+        career:'เหมาะกับนักวิจัย นักปรัชญา นักวิทยาศาสตร์ นักจิตวิทยา' },
+    8:{ label:'เลขชีวิต 8 — ผู้สร้างอาณาจักร', emoji:'💼',
+        core:'มีพลังงานด้านธุรกิจและการสร้างความสำเร็จสูงมาก มีวิสัยทัศน์กว้างและชอบอำนาจที่ใช้ทำสิ่งดี มุ่งมั่นต่อเป้าหมายจนสำเร็จ บางครั้งดูเย็นชาด้านอารมณ์เพราะโฟกัสที่ผลลัพธ์มากเกิน',
+        relate:'เป็นผู้ให้ทรัพยากรและความมั่นคง แต่ต้องแสดงออกทางอารมณ์มากขึ้น',
+        career:'เหมาะกับนักธุรกิจ ผู้บริหารระดับสูง นักการเมือง นักกฎหมาย' },
+    9:{ label:'เลขชีวิต 9 — ผู้ให้แก่โลก', emoji:'🌏',
+        core:'มีจิตใจกว้างขวางและต้องการมีส่วนทำให้โลกดีขึ้น มีความเห็นอกเห็นใจในระดับลึก มีสัญชาตญาณดีและสติปัญญารอบด้าน บางครั้งให้มากเกินจนหมดแรง และต้องการเรียนรู้ที่จะปล่อยวาง',
+        relate:'มักเป็นคนที่ผู้อื่นวางใจและขอคำปรึกษา ต้องระวังการเสียสละมากเกินขอบเขต',
+        career:'เหมาะกับนักมนุษยธรรม ศิลปิน นักบวช นักจิตวิทยา ผู้นำทางจิตวิญญาณ' },
+    11:{ label:'เลขชีวิต 11 — ผู้ส่องแสง (Master)', emoji:'✨',
+        core:'มาสเตอร์นัมเบอร์ — มีสัญชาตญาณระดับสูงและพลังจิตที่แม่นยำ เป็นแรงบันดาลใจให้ผู้อื่นโดยธรรมชาติ มีความอ่อนไหวสูงมากจนรับพลังงานรอบข้างได้ บางครั้งรู้สึกว่าตัวเองแตกต่างจากคนอื่น',
+        relate:'มีอิทธิพลต่อคนรอบข้างในทางบวกโดยไม่ตั้งใจ ต้องดูแลพลังงานของตัวเองให้ดี',
+        career:'เหมาะกับนักจิตวิญญาณ ศิลปิน ผู้นำทางความคิด นักบำบัด' },
+    22:{ label:'เลขชีวิต 22 — สถาปนิกแห่งความฝัน (Master)', emoji:'🏛️',
+        core:'มาสเตอร์นัมเบอร์ — มีศักยภาพสร้างสิ่งยิ่งใหญ่ได้มากที่สุดในบรรดาทุกเลข ผสมผสานวิสัยทัศน์กับความสามารถปฏิบัติจริง มีพลังที่จะเปลี่ยนแปลงสังคมได้ แต่ต้องพัฒนาตัวเองอย่างต่อเนื่อง',
+        relate:'ความสัมพันธ์ต้องการคู่ที่เข้าใจความฝันใหญ่ของตัวเอง',
+        career:'เหมาะกับผู้นำระดับโลก สถาปนิก วิศวกรสังคม ผู้สร้างองค์กร' },
+    33:{ label:'เลขชีวิต 33 — ครูแห่งความรัก (Master)', emoji:'💫',
+        core:'มาสเตอร์นัมเบอร์สูงสุด — มีความรักบริสุทธิ์และต้องการยกระดับจิตใจมวลมนุษย์ มีพลังการสอนและการบำบัดที่ยิ่งใหญ่ ต้องฝึกตัวเองให้ครบก่อนจะสอนผู้อื่น',
+        relate:'ทุกความสัมพันธ์มีบทเรียนลึกซึ้ง เป็นครูของคนรอบข้างโดยไม่รู้ตัว',
+        career:'เหมาะกับครู นักบำบัด ผู้นำทางจิตวิญญาณ นักมนุษยธรรม' },
+};
+
+// เลขมงคลเบอร์โทรศัพท์ (Numerology — เลขรวม 1-9)
+const _DOB_PHONE_NUM = {
+    1:{ label:'เลขพลัง 1 — พลังผู้นำ', emoji:'🔥',
+        reading:'เบอร์นี้ดึงดูดพลังงานของความเป็นผู้นำและการริเริ่ม การสื่อสารผ่านเบอร์นี้มักได้รับการตอบรับที่ดีในด้านธุรกิจและการเจรจา เหมาะสำหรับคนที่ต้องการสร้างภาพลักษณ์ที่เข้มแข็งและน่าเชื่อถือ',
+        vibe:'มั่นใจ · เด็ดขาด · ดึงดูดโอกาส' },
+    2:{ label:'เลขพลัง 2 — พลังความสัมพันธ์', emoji:'🤲',
+        reading:'เบอร์นี้ส่งเสริมความสัมพันธ์และความร่วมมือ การติดต่อผ่านเบอร์นี้มักนำมาซึ่งความไว้วางใจและมิตรภาพ เหมาะสำหรับงานที่ต้องการการประสานงานและการสร้างความสัมพันธ์ระยะยาว',
+        vibe:'อบอุ่น · ไว้วางใจได้ · ดึงดูดมิตร' },
+    3:{ label:'เลขพลัง 3 — พลังสร้างสรรค์', emoji:'✨',
+        reading:'เบอร์นี้เปี่ยมด้วยพลังงานสร้างสรรค์และการแสดงออก เหมาะสำหรับคนในวงการสื่อสาร การตลาด ศิลปะ หรือใครก็ตามที่ต้องการให้ตัวเองโดดเด่นและน่าจดจำ',
+        vibe:'สดใส · สร้างสรรค์ · น่าจดจำ' },
+    4:{ label:'เลขพลัง 4 — พลังความมั่นคง', emoji:'🏛️',
+        reading:'เบอร์นี้ให้พลังงานของความมั่นคงและความน่าเชื่อถือ เหมาะสำหรับธุรกิจที่ต้องการสร้างความไว้วางใจ การเงิน อสังหาริมทรัพย์ หรืองานที่ต้องการความรับผิดชอบสูง',
+        vibe:'มั่นคง · น่าเชื่อถือ · จริงจัง' },
+    5:{ label:'เลขพลัง 5 — พลังโอกาส', emoji:'🎲',
+        reading:'เบอร์นี้ดึงดูดการเปลี่ยนแปลงและโอกาสใหม่ๆ เหมาะสำหรับนักขาย นักการตลาด หรือคนที่ต้องการเครือข่ายที่กว้างขวางและหลากหลาย พลังงานนี้ส่งเสริมการเติบโตและการขยายตัว',
+        vibe:'ดึงดูดโอกาส · หลากหลาย · กว้างขวาง' },
+    6:{ label:'เลขพลัง 6 — พลังความรักและความไว้ใจ', emoji:'💖',
+        reading:'เบอร์นี้แผ่พลังงานแห่งความรักและความดูแลเอาใจใส่ ผู้คนรู้สึกสบายใจเมื่อโทรหาหรือรับสายจากเบอร์นี้ เหมาะสำหรับงานด้านบริการ สุขภาพ การศึกษา และธุรกิจที่ต้องการความไว้วางใจ',
+        vibe:'อบอุ่น · น่าไว้วางใจ · ดูแลดี' },
+    7:{ label:'เลขพลัง 7 — พลังปัญญาและลึกลับ', emoji:'🔮',
+        reading:'เบอร์นี้มีพลังงานลึกลับและน่าสนใจ เหมาะสำหรับคนที่ต้องการภาพลักษณ์ที่ลึกซึ้งและน่าค้นหา เหมาะกับงานวิจัย กฎหมาย การแพทย์ หรือสาขาที่ต้องการความน่าเชื่อถือด้านความรู้',
+        vibe:'ลึกซึ้ง · น่าเชื่อถือ · น่าค้นหา' },
+    8:{ label:'เลขพลัง 8 — พลังความร่ำรวย', emoji:'💰',
+        reading:'เลข 8 เป็นเลขมงคลที่สุดในเลขศาสตร์จีน เบอร์นี้ดึงดูดพลังงานแห่งความมั่งคั่งและความสำเร็จด้านธุรกิจ เหมาะสำหรับผู้ประกอบการและนักธุรกิจที่ต้องการดึงดูดโชคลาภ',
+        vibe:'มั่งคั่ง · ทรงพลัง · ดึงดูดธุรกิจ' },
+    9:{ label:'เลขพลัง 9 — พลังสมบูรณ์', emoji:'🌟',
+        reading:'เลข 9 เป็นเลขแห่งความสมบูรณ์และการให้ เบอร์นี้แผ่พลังงานแห่งความเมตตาและปัญญา เหมาะสำหรับคนที่ต้องการเป็นที่รักและเคารพในวงกว้าง และสำหรับงานที่ต้องการความน่าเชื่อถือระดับสูง',
+        vibe:'สมบูรณ์ · น่าเคารพ · มีบารมี' },
+};
+
+// ─── Helper functions ─────────────────────────────────────────────
 function _getZodiac(m, d) {
     for (const z of _DOB_ZODIAC) {
         const [sm, sd] = z.start, [em, ed] = z.end;
         if ((m === sm && d >= sd) || (m === em && d <= ed)) return z;
     }
-    return _DOB_ZODIAC[0]; // มกร fallback (ธ.ค. 22–ม.ค. 19)
+    return _DOB_ZODIAC[0];
+}
+
+function _calcLifePath(date) {
+    const d = date.getDate(), m = date.getMonth() + 1, y = date.getFullYear();
+    const digits = String(d).padStart(2,'0') + String(m).padStart(2,'0') + String(y);
+    let sum = digits.split('').reduce((a, c) => a + parseInt(c), 0);
+    // reduce — preserve master numbers 11, 22, 33
+    while (sum > 33 || (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33)) {
+        sum = String(sum).split('').reduce((a, c) => a + parseInt(c), 0);
+    }
+    return sum;
+}
+
+function _calcPhoneNum(phone) {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 9) return null;
+    let sum = digits.split('').reduce((a, c) => a + parseInt(c), 0);
+    while (sum > 9) sum = String(sum).split('').reduce((a, c) => a + parseInt(c), 0);
+    return sum;
+}
+
+function _chineseZodiac(year) {
+    const animals = ['ลิง🐒','ไก่🐓','หมา🐕','หมู🐖','หนู🐭','วัว🐄','เสือ🐯','กระต่าย🐇','มังกร🐉','งู🐍','ม้า🐎','แพะ🐐'];
+    const elements = ['ทอง','ทอง','น้ำ','น้ำ','ไม้','ไม้','ไฟ','ไฟ','ดิน','ดิน'];
+    const animal = animals[(year - 2016 % 12 + 1200) % 12];
+    const element = elements[(year - 2020 % 10 + 1000) % 10];
+    return { animal, element };
 }
 
 // ─── Trigger ─────────────────────────────────────────────────────────────────
@@ -2736,14 +2842,13 @@ function openDobPicker() {
     document.getElementById('dobPickerOverlay').style.display = 'block';
     const popup = document.getElementById('dobPickerPopup');
     popup.style.display = 'block';
-    // reset theme to default blue
     _applyDobTheme(null);
-    // reset fields
     ['dobDay','dobMonth','dobYear'].forEach(id => {
         const el = document.getElementById(id);
-        el.value = '';
-        el.classList.remove('filled');
+        el.value = ''; el.classList.remove('filled'); el.style.borderColor = '';
     });
+    const ph = document.getElementById('dobPhoneInput');
+    ph.value = ''; ph.classList.remove('filled'); ph.style.borderColor = '';
     document.getElementById('dobAgeBand').style.display = 'none';
     document.getElementById('dobAstroRow').style.display = 'none';
     document.getElementById('dobEraHint').textContent = '';
@@ -2755,7 +2860,7 @@ function openDobPicker() {
         const d = new Date(); d.setFullYear(d.getFullYear() - age);
         document.getElementById('dobDay').value = d.getDate();
         document.getElementById('dobMonth').value = d.getMonth() + 1;
-        document.getElementById('dobYear').value = d.getFullYear() + 543; // แสดงเป็น พ.ศ.
+        document.getElementById('dobYear').value = d.getFullYear() + 543;
         ['dobDay','dobMonth','dobYear'].forEach(id => document.getElementById(id).classList.add('filled'));
         _onDobFieldChange();
     }
@@ -2784,7 +2889,6 @@ function closeDobPicker() {
         const maxLen = id === 'dobYear' ? 4 : 2;
         if (this.value.length > maxLen) this.value = this.value.slice(0, maxLen);
         this.classList.toggle('filled', this.value.length === maxLen);
-        // auto-advance
         if (this.value.length === maxLen) {
             const next = { dobDay:'dobMonth', dobMonth:'dobYear' }[id];
             if (next) document.getElementById(next).focus();
@@ -2799,14 +2903,19 @@ function closeDobPicker() {
     });
 });
 
+function _onDobPhoneChange() {
+    const ph = document.getElementById('dobPhoneInput');
+    ph.classList.toggle('filled', ph.value.length === 10);
+    _renderDobDetail();
+}
+
 function _parseDob() {
     const d = parseInt(document.getElementById('dobDay').value);
     const m = parseInt(document.getElementById('dobMonth').value);
     let y = parseInt(document.getElementById('dobYear').value);
     if (!d || !m || !y) return null;
     if (d < 1 || d > 31 || m < 1 || m > 12) return null;
-    // auto-detect พ.ศ. vs ค.ศ.
-    if (y > 2500) y -= 543; // พ.ศ. → ค.ศ.
+    if (y > 2500) y -= 543;
     if (y < 1900 || y > 2100) return null;
     const date = new Date(y, m - 1, d);
     if (date.getFullYear() !== y || date.getMonth() !== m-1 || date.getDate() !== d) return null;
@@ -2825,10 +2934,9 @@ function _calcInsuranceAge(date) {
 function _onDobFieldChange() {
     const date = _parseDob();
     const y = parseInt(document.getElementById('dobYear').value);
-    // era hint
     const hint = document.getElementById('dobEraHint');
-    if (y > 2500) hint.textContent = `🇹🇭 รับปี พ.ศ. ${y} → ค.ศ. ${y-543}`;
-    else if (y >= 1900 && y <= 2500) hint.textContent = `🌐 รับปี ค.ศ. ${y} → พ.ศ. ${y+543}`;
+    if (y > 2500) hint.innerHTML = `<span style="color:#7c3aed;">🇹🇭 พ.ศ. ${y}</span> <span style="color:#94a3b8;">→ ค.ศ. ${y-543}</span>`;
+    else if (y >= 1900 && y <= 2500) hint.innerHTML = `<span style="color:#0891b2;">🌐 ค.ศ. ${y}</span> <span style="color:#94a3b8;">→ พ.ศ. ${y+543}</span>`;
     else hint.textContent = '';
 
     if (!date) {
@@ -2841,12 +2949,10 @@ function _onDobFieldChange() {
     }
 
     const age = _calcInsuranceAge(date);
-    const dow = date.getDay();
-    const theme = _DOB_THEMES[dow];
+    const theme = _DOB_THEMES[date.getDay()];
 
-    // age display
+    // age band
     document.getElementById('dobAgeBig').textContent = age;
-    // next birthday note
     const today2 = new Date(); today2.setHours(0,0,0,0);
     const bdayThis = new Date(today2.getFullYear(), date.getMonth(), date.getDate());
     const next = today2 >= bdayThis ? new Date(today2.getFullYear()+1, date.getMonth(), date.getDate()) : bdayThis;
@@ -2854,60 +2960,106 @@ function _onDobFieldChange() {
     document.getElementById('dobAgeNote').textContent = days === 0 ? '🎂 วันเกิดครบรอบวันนี้พอดี!' : `อีก ${days} วัน จะครบปีถัดไป`;
     document.getElementById('dobAgeBand').style.display = 'block';
 
-    // apply color theme
     _applyDobTheme(theme);
 
-    // astrology
+    const lp = _calcLifePath(date);
+    const lpData = _DOB_LIFEPATH[lp] || _DOB_LIFEPATH[9];
     const zodiac = _getZodiac(date.getMonth()+1, date.getDate());
-    document.getElementById('dobAstroPlanetSym').textContent = theme.emoji;
-    document.getElementById('dobAstroPlanetLabel').textContent = `วันเกิด: วัน${theme.day} · ดาว${theme.planet} · สีมงคล: ${theme.color}`;
-    document.getElementById('dobAstroZodiacLabel').textContent = `ราศี ${zodiac.sym} ${zodiac.name} · แตะเพื่อดูพยากรณ์`;
+    const cz = _chineseZodiac(date.getFullYear());
+
+    document.getElementById('dobAstroPlanetSym').textContent = lpData.emoji;
+    document.getElementById('dobAstroPlanetLabel').textContent = `${lpData.label}`;
+    document.getElementById('dobAstroZodiacLabel').textContent = `${zodiac.sym} ${zodiac.name} · ปีนักษัตร${cz.animal} · แตะดูพยากรณ์`;
     document.getElementById('dobAstroRow').style.display = 'block';
 
-    // astrology detail content
-    document.getElementById('dobAstroDetailInner').innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-            <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};">
-                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">โหราศาสตร์ไทย</div>
-                <div style="font-size:22px;margin-bottom:2px;">${theme.emoji} ${theme.sym}</div>
-                <div style="font-size:12px;font-weight:700;color:${theme.accent};">วัน${theme.day}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">ดาว${theme.planet}</div>
-            </div>
-            <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;">
-                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">ราศีตะวันตก</div>
-                <div style="font-size:22px;margin-bottom:2px;">${zodiac.sym}</div>
-                <div style="font-size:12px;font-weight:700;color:#1e293b;">${zodiac.name}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">${zodiac.traits}</div>
-            </div>
-        </div>
-        <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};margin-bottom:10px;">
-            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;">🌟 ลักษณะนิสัย</div>
-            <div style="font-size:12px;color:#334155;font-weight:500;line-height:1.6;">${theme.traits}</div>
-        </div>
-        <div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};margin-bottom:10px;">
-            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;">🔮 ดวงชะตา</div>
-            <div style="font-size:12px;color:#334155;font-weight:500;line-height:1.6;">${theme.fortune}</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
-                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">💎 พลอยมงคล</div>
-                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.stone}</div>
-            </div>
-            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
-                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">🧭 ทิศมงคล</div>
-                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.luck}</div>
-            </div>
-            <div style="background:white;border-radius:10px;padding:8px;border:1px solid ${theme.border};text-align:center;">
-                <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:3px;">🔢 เลขมงคล</div>
-                <div style="font-size:11px;font-weight:700;color:${theme.accent};">${theme.num}</div>
-            </div>
-        </div>`;
+    _renderDobDetail();
 
-    // confirm button
     const btn = document.getElementById('dobConfirmBtn');
     btn.style.background = theme.grad;
     btn.style.boxShadow = `0 4px 14px ${theme.shadow}`;
     btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+}
+
+function _renderDobDetail() {
+    const date = _parseDob();
+    if (!date) return;
+    const theme = _DOB_THEMES[date.getDay()];
+    const lp = _calcLifePath(date);
+    const lpData = _DOB_LIFEPATH[lp] || _DOB_LIFEPATH[9];
+    const zodiac = _getZodiac(date.getMonth()+1, date.getDate());
+    const cz = _chineseZodiac(date.getFullYear());
+    const phone = document.getElementById('dobPhoneInput').value.replace(/\D/g,'');
+    const phoneNum = phone.length >= 9 ? _calcPhoneNum(phone) : null;
+    const phoneData = phoneNum ? _DOB_PHONE_NUM[phoneNum] : null;
+
+    const card = (title, emoji, content, border) => `
+        <div style="background:white;border-radius:12px;padding:12px 14px;border:1.5px solid ${border||'#e2e8f0'};margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:7px;">${emoji} ${title}</div>
+            ${content}
+        </div>`;
+
+    const tag = (txt, accent) => `<span style="display:inline-block;background:${accent}18;color:${accent};font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin:2px 2px 0 0;">${txt}</span>`;
+
+    let html = '';
+
+    // 1. เลขชีวิต (Life Path) — ที่แม่นยำที่สุด
+    html += card('เลขชีวิต (Life Path Numerology)', '🔢',
+        `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:36px;font-weight:900;color:${theme.accent};line-height:1;">${lp}</div>
+            <div><div style="font-size:13px;font-weight:800;color:#1e293b;">${lpData.label.split('—')[1]?.trim()}</div>
+            <div style="font-size:11px;color:#64748b;">${lpData.label.split('—')[0]?.trim()}</div></div>
+        </div>
+        <div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:8px;">${lpData.core}</div>
+        <div style="font-size:12px;color:#475569;line-height:1.6;margin-bottom:6px;"><span style="font-weight:700;color:${theme.accent};">ความสัมพันธ์ · </span>${lpData.relate}</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5;"><span style="font-weight:700;">💼 อาชีพที่เหมาะ · </span>${lpData.career}</div>`,
+        theme.border);
+
+    // 2. ราศีตะวันตก — บุคลิกภาพ
+    html += card(`ราศี ${zodiac.name} — บุคลิกภาพ`, zodiac.sym,
+        `<div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:8px;">${zodiac.personality}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${zodiac.strength.split('·').map(s=>`${tag(s.trim(),'#059669')}`).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${zodiac.weakness.split('·').map(s=>`${tag(s.trim(),'#dc2626')}`).join('')}</div>`);
+
+    // 3. วันเกิด (โหราศาสตร์ไทย) + ปีนักษัตรจีน
+    html += card(`วัน${_DOB_THEMES[date.getDay()].day} · ปีนักษัตร${cz.animal}`, _DOB_THEMES[date.getDay()].emoji,
+        `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:${theme.bg};border-radius:10px;padding:10px 12px;border:1px solid ${theme.border};">
+                <div style="font-size:10px;font-weight:700;color:${theme.accent};margin-bottom:5px;text-transform:uppercase;">วันเกิด</div>
+                <div style="font-size:20px;margin-bottom:3px;">${theme.emoji}</div>
+                <div style="font-size:12px;font-weight:700;color:#1e293b;">วัน${_DOB_THEMES[date.getDay()].day}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:3px;line-height:1.5;">คนวัน${_DOB_THEMES[date.getDay()].day}มักมีเสน่ห์เฉพาะตัวที่ผู้อื่นสังเกตเห็นได้ตั้งแต่แรกพบ</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;">
+                <div style="font-size:10px;font-weight:700;color:#7c3aed;margin-bottom:5px;text-transform:uppercase;">นักษัตรจีน</div>
+                <div style="font-size:20px;margin-bottom:3px;">${cz.animal.match(/[\u{1F300}-\u{1F9FF}]/u)?.[0] || '🐾'}</div>
+                <div style="font-size:12px;font-weight:700;color:#1e293b;">ปี${cz.animal.replace(/[^฀-๿]/g,'').trim()}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:3px;">ธาตุ${cz.element} · ลักษณะนิสัยของปีนี้ผสมกับเลขชีวิตจะเป็นตัวชี้วัดที่แม่นยำ</div>
+            </div>
+        </div>`);
+
+    // 4. เบอร์โทรศัพท์ (ถ้ากรอก)
+    if (phoneData) {
+        html += card(`พยากรณ์เบอร์ ${phone.slice(0,3)}-${phone.slice(3,6)}-${phone.slice(6)}`, phoneData.emoji,
+            `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <div style="font-size:28px;font-weight:900;color:${theme.accent};line-height:1;">${phoneNum}</div>
+                <div style="font-size:13px;font-weight:800;color:#1e293b;">${phoneData.label}</div>
+            </div>
+            <div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:8px;">${phoneData.reading}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">${phoneData.vibe.split('·').map(v=>`${tag(v.trim(), theme.accent)}`).join('')}</div>`,
+            theme.border);
+    } else {
+        html += `<div style="background:${theme.bg};border:1.5px dashed ${theme.border};border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:10px;">
+            <div style="font-size:13px;color:${theme.accent};font-weight:700;margin-bottom:3px;">📱 กรอกเบอร์โทรเพื่อดูพยากรณ์เลขมือถือ</div>
+            <div style="font-size:11px;color:#94a3b8;">วิเคราะห์พลังงานตัวเลขในเบอร์ของคุณ</div>
+        </div>`;
+    }
+
+    document.getElementById('dobAstroDetailInner').innerHTML = html;
+    // update max-height if panel open
+    const detail = document.getElementById('dobAstroDetail');
+    if (detail.classList.contains('open')) {
+        detail.style.maxHeight = document.getElementById('dobAstroDetailInner').scrollHeight + 20 + 'px';
+    }
 }
 
 function _applyDobTheme(theme) {
@@ -2918,18 +3070,14 @@ function _applyDobTheme(theme) {
         band.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
         btn.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
         btn.style.boxShadow = '0 4px 14px rgba(59,130,246,0.35)';
-        if (astroBtn) { astroBtn.style.borderColor = '#e2e8f0'; }
+        if (astroBtn) astroBtn.style.borderColor = '#e2e8f0';
         return;
     }
     band.style.background = theme.grad;
-    if (astroBtn) {
-        astroBtn.style.borderColor = theme.border;
-        astroBtn.style.background = theme.bg;
-    }
-    document.querySelectorAll('.dob-field input.filled').forEach(el => {
-        el.style.setProperty('--dob-accent', theme.accent);
-        el.style.borderColor = theme.accent;
-    });
+    if (astroBtn) { astroBtn.style.borderColor = theme.border; astroBtn.style.background = theme.bg; }
+    document.querySelectorAll('.dob-field input.filled').forEach(el => el.style.borderColor = theme.accent);
+    const ph = document.getElementById('dobPhoneInput');
+    if (ph && ph.classList.contains('filled')) ph.style.borderColor = theme.accent;
 }
 
 function toggleDobAstro() {
@@ -2937,11 +3085,9 @@ function toggleDobAstro() {
     const chev = document.getElementById('dobAstroChevron');
     const open = detail.classList.toggle('open');
     chev.style.transform = open ? 'rotate(180deg)' : '';
-    if (open) {
-        detail.style.maxHeight = detail.querySelector('#dobAstroDetailInner').scrollHeight + 20 + 'px';
-    } else {
-        detail.style.maxHeight = '0';
-    }
+    detail.style.maxHeight = open
+        ? document.getElementById('dobAstroDetailInner').scrollHeight + 20 + 'px'
+        : '0';
 }
 
 function confirmDobAge() {
