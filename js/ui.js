@@ -5849,7 +5849,7 @@ function generatePolicyTableData() {
         trow += hideAnnualSaving ? '' : _boxTd(totalSaving);
         trow += showTaxColumn ? _boxTd(accTax) : '';
         trow += hideAnnualSaving ? _blankTd : '';
-        trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _blankTd) : '';
+        trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _boxTd(accCashFlow + accTax)) : '';
         trow += showDepositColumn ? _blankTd : '';
         if (_mfLabel) trow += _blankTd + _blankTd;
         trow += (isBreakevenActive || isShowCVActive) ? (_blankTd + _blankTd) : '';
