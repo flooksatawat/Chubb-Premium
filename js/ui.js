@@ -5264,6 +5264,8 @@ function _generateSTATable() {
     const _isMedium = window._isMedium || false;
     const _tdBase = 'px-2 py-2';
     const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
+    const _mfData = window._mfAfterSixtyByAge || null;
+    const _hasMF = _mfData && Object.keys(_mfData).length > 0;
 
     // ทุนประกัน: ก่อนอายุ 60 = MAX(105%เบี้ยสะสม, CV)
     //           ระหว่างรับบำนาญ 15 ครั้งแรก (อายุ 60-74) = MAX(PV บำนาญที่เหลือ, เบี้ยสะสม - บำนาญรับแล้ว)
@@ -5296,6 +5298,10 @@ function _generateSTATable() {
         }
 
         const trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
+        const mfPrem = _hasMF ? (_mfData[currentAge] ?? null) : null;
+        const mfTd = _hasMF
+            ? `<td class="${_tdBase} text-sky-700 font-bold text-right" style="${_fSz}">${mfPrem != null ? mfPrem.toLocaleString() : '—'}</td>`
+            : '';
 
         html += `<tr class="${trClass}">
             <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
@@ -5303,6 +5309,7 @@ function _generateSTATable() {
             <td class="${_tdBase} text-slate-600 text-right" style="${_fSz}">${totalPrem.toLocaleString()}</td>
             <td class="${_tdBase} text-orange-600 font-bold text-right" style="${_fSz}">${annuityAmt > 0 ? annuityAmt.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-orange-700 font-bold text-right" style="${_fSz}">${totalAnnuity > 0 ? totalAnnuity.toLocaleString() : '—'}</td>
+            ${mfTd}
             <td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : '—'}</td>
             <td class="${_tdBase} text-rose-600 font-bold text-right" style="${_fSz}">${deathBenefit > 0 ? deathBenefit.toLocaleString() : '—'}</td>
         </tr>`;
@@ -5316,12 +5323,14 @@ function _generateSTATable() {
     // Table header columns
     const thead = document.getElementById('policyTableHead');
     if (thead) {
+        const _mfTh = _hasMF ? `<th class="px-2 py-2 text-right text-sky-700 font-bold">MF เบี้ย/ปี</th>` : '';
         thead.innerHTML = `<tr>
             <th class="px-2 py-2 text-center text-slate-600 font-bold">อายุ</th>
             <th class="px-2 py-2 text-right text-slate-600 font-bold">ออม (บ.)</th>
             <th class="px-2 py-2 text-right text-slate-600 font-bold">ออมสะสม</th>
             <th class="px-2 py-2 text-right text-orange-600 font-bold">บำนาญ/ปี</th>
             <th class="px-2 py-2 text-right text-orange-700 font-bold">บำนาญสะสม</th>
+            ${_mfTh}
             <th class="px-2 py-2 text-right text-blue-600 font-bold">เงินสดพร้อมใช้</th>
             <th class="px-2 py-2 text-right text-rose-600 font-bold">ทุนประกัน</th>
         </tr>`;

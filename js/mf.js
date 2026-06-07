@@ -898,17 +898,39 @@ window.mfGenerateTable = function() {
     const _pd = _isMobile ? '5px 6px' : '6px 10px';
     const _pdH = _isMobile ? '6px 6px' : '7px 10px';
 
+    // เก็บข้อมูล after-60 ไว้สำหรับ Step Annuity (ถ้ามีการ long-press)
+    window._mfAfterSixtyByAge = {};
+    afterRows.forEach(r => { window._mfAfterSixtyByAge[r.age] = r.prem; });
+
     // Header
-    if (head) head.innerHTML = `<tr style="background:linear-gradient(135deg,#0d9488,#0369a1);">
-        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:2px solid rgba(255,255,255,0.3);">ก่อนอายุ 60 ปี</th>
-        <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;">หลังอายุ 60 ปี</th>
-    </tr>
-    <tr style="background:rgba(14,165,233,0.08);">
-        <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
-        <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;border-right:2px solid #bae6fd;">เบี้ย/ปี</th>
-        <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #e2e8f0;">อายุ</th>
-        <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี</th>
-    </tr>`;
+    let _longPressTimer = null;
+    const _onAfterDown = () => { _longPressTimer = setTimeout(() => {
+        _longPressTimer = null;
+        if (typeof selectAppPlan === 'function') selectAppPlan('Step Annuity');
+    }, 600); };
+    const _onAfterUp = () => { if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; } };
+
+    if (head) {
+        head.innerHTML = `<tr style="background:linear-gradient(135deg,#0d9488,#0369a1);">
+            <th colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;border-right:2px solid rgba(255,255,255,0.3);">ก่อนอายุ 60 ปี</th>
+            <th colspan="2" id="mfAfter60Th" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;cursor:pointer;user-select:none;" title="กดค้างเพื่อเปิด Step Annuity">หลังอายุ 60 ปี <i class="fas fa-stairs" style="font-size:9px;opacity:0.7;"></i></th>
+        </tr>
+        <tr style="background:rgba(14,165,233,0.08);">
+            <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
+            <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;border-right:2px solid #bae6fd;">เบี้ย/ปี</th>
+            <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #e2e8f0;">อายุ</th>
+            <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี</th>
+        </tr>`;
+        const _th = head.querySelector('#mfAfter60Th');
+        if (_th) {
+            _th.addEventListener('mousedown', _onAfterDown);
+            _th.addEventListener('mouseup', _onAfterUp);
+            _th.addEventListener('mouseleave', _onAfterUp);
+            _th.addEventListener('touchstart', _onAfterDown, { passive: true });
+            _th.addEventListener('touchend', _onAfterUp);
+            _th.addEventListener('touchcancel', _onAfterUp);
+        }
+    }
 
     let bodyHtml = '';
     for (let i = 0; i < maxLen; i++) {
