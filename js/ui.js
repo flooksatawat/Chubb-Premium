@@ -531,32 +531,31 @@ function showDepositIRRPopup() {
     const res0 = _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, defaultReceive, depositUntilAge, depositRate);
     const irr0 = res0 ? _calcIRR(res0.cfs) : null;
 
-    // สร้าง pills รอบ depositUntilAge
-    const pillAges = [...new Set([depositUntilAge, depositUntilAge + 5, depositUntilAge + 10].filter(a => a > startAge && a <= maxAge))];
+    // สร้าง pills milestone (เหมือน LV IRR)
+    const pillAges = [...new Set([60, 65, 70, 75, 80, 85, 90].filter(a => a > startAge && a <= maxAge))];
     const pillsHTML = pillAges.map(a =>
         `<button type="button" class="dep-irr-pill" data-age="${a}" onclick="window._updateDepositIRR(${a})"
-         style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #bbf7d0;
-                background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;
+         style="flex:1;min-width:0;height:36px;border-radius:10px;border:1.5px solid #ddd6fe;
+                background:#f5f3ff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;
                 transition:all 0.18s;touch-action:manipulation;">${a}</button>`
     ).join('');
-
-    const pct0 = irr0 !== null ? ((irr0 * 100).toFixed(2) + '%') : '—';
 
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="background:linear-gradient(150deg,#064e3b,#065f46,#059669);border-radius:22px 22px 0 0;padding:20px 20px 22px;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative;">
+  <div style="background:linear-gradient(150deg,#312e81 0%,#4f46e5 45%,#7c3aed 100%);border-radius:22px 22px 0 0;padding:20px 20px 22px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-24px;right:-16px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-28px;left:20px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;position:relative;">
       <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <i class="fas fa-piggy-bank" style="color:#fff;font-size:17px;"></i>
       </div>
       <div>
-        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;">IRR สะสม รับ ${(depositRate*100).toFixed(0)}%</div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-0.02em;">IRR สะสม รับ ${(depositRate*100).toFixed(0)}%</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">ฝากสะสมทบต้น ${(depositRate*100).toFixed(2)}% · คิด IRR เมื่อรับก้อนที่อายุ</div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;">
       <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
         <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">สะสมถึงอายุ</div>
         <div style="font-size:15px;font-weight:800;color:#fff;">${depositUntilAge} ปี</div>
@@ -567,38 +566,38 @@ function showDepositIRRPopup() {
       </div>
       <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
         <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ออมปีละ</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;">${premium.toLocaleString()} ฿</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${premium.toLocaleString()} ฿</div>
       </div>
       <div style="background:rgba(255,255,255,0.13);border-radius:10px;padding:7px 10px;">
         <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1px;">ทุนประกัน</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;">${sa.toLocaleString()} ฿</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sa.toLocaleString()} ฿</div>
       </div>
     </div>
   </div>
-  <div style="background:#f0fdf4;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
-    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">รับก้อนที่อายุ (ปี)</div>
+  <div style="background:#f8f7ff;border-radius:0 0 22px 22px;padding:18px 18px 16px;">
+    <div style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;">คำนวณ IRR ณ อายุที่รับ (ปี)</div>
     <div id="depIrrPills" style="display:flex;gap:6px;margin-bottom:12px;">${pillsHTML}</div>
-    <div style="display:flex;align-items:center;background:#fff;border:2px solid #bbf7d0;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(5,150,105,0.08);">
-      <button type="button" onclick="window._stepDepositIRR(-1)" style="width:48px;height:48px;border:none;background:transparent;color:#15803d;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-right:1.5px solid #bbf7d0;">−</button>
+    <div style="display:flex;align-items:center;gap:0;background:#fff;border:2px solid #ddd6fe;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(109,40,217,0.08);">
+      <button type="button" onclick="window._stepDepositIRR(-1)" style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-right:1.5px solid #ede9fe;">−</button>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 0;">
         <input id="depIrrAgeInput" type="number" value="${defaultReceive}" min="${startAge+1}" max="${maxAge}" oninput="window._updateDepositIRR(parseInt(this.value))"
-               style="width:100%;text-align:center;font-size:26px;font-weight:900;color:#14532d;border:none;outline:none;background:transparent;line-height:1;">
-        <div style="font-size:10px;color:#86efac;font-weight:600;margin-top:1px;">ถือ <span id="depIrrYears" style="font-weight:800;color:#16a34a;">—</span></div>
+               style="width:100%;text-align:center;font-size:26px;font-weight:900;color:#312e81;border:none;outline:none;background:transparent;line-height:1;">
+        <div style="font-size:10px;color:#a78bfa;font-weight:600;margin-top:1px;">ถือกรมธรรม์ <span id="depIrrYears" style="font-weight:800;color:#7c3aed;">—</span></div>
       </div>
-      <button type="button" onclick="window._stepDepositIRR(1)" style="width:48px;height:48px;border:none;background:transparent;color:#15803d;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-left:1.5px solid #bbf7d0;">+</button>
+      <button type="button" onclick="window._stepDepositIRR(1)" style="width:48px;height:48px;border:none;background:transparent;color:#7c3aed;font-size:24px;font-weight:300;cursor:pointer;flex-shrink:0;touch-action:manipulation;border-left:1.5px solid #ede9fe;">+</button>
     </div>
-    <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;box-shadow:0 4px 20px rgba(5,150,105,0.10);border:1px solid #bbf7d0;">
+    <div style="background:#fff;border-radius:18px;padding:18px 18px 14px;margin-bottom:12px;box-shadow:0 4px 20px rgba(109,40,217,0.10);border:1px solid #ddd6fe;">
       <div style="text-align:center;margin-bottom:12px;">
-        <div style="font-size:10px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
-        <div id="depIrrResult" style="font-size:52px;font-weight:900;color:#15803d;line-height:1;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
+        <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">IRR ต่อปี</div>
+        <div id="depIrrResult" style="font-size:52px;font-weight:900;color:#312e81;line-height:1;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">—</div>
       </div>
-      <div style="background:#dcfce7;border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
-        <div id="depIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#4ade80,#16a34a);"></div>
+      <div style="background:#ede9fe;border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
+        <div id="depIrrBarFill" style="height:100%;width:0%;border-radius:99px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);background:linear-gradient(90deg,#818cf8,#4f46e5);"></div>
       </div>
       <div style="display:flex;justify-content:space-between;">
-        <span style="font-size:10px;color:#86efac;font-weight:600;">0%</span>
-        <span style="font-size:10px;color:#86efac;font-weight:600;">ดีมาก ≥ 4%</span>
-        <span style="font-size:10px;color:#86efac;font-weight:600;">6%+</span>
+        <span style="font-size:10px;color:#a78bfa;font-weight:600;">0%</span>
+        <span style="font-size:10px;color:#a78bfa;font-weight:600;">ดีมาก ≥ 4%</span>
+        <span style="font-size:10px;color:#a78bfa;font-weight:600;">6%+</span>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
@@ -606,16 +605,16 @@ function showDepositIRRPopup() {
         <div style="font-size:10px;color:#f87171;font-weight:700;margin-bottom:4px;">เบี้ยสะสม</div>
         <div id="depIrrPaid" style="font-size:12px;font-weight:800;color:#dc2626;line-height:1.2;">—</div>
       </div>
-      <div style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;">
-        <div style="font-size:10px;color:#4ade80;font-weight:700;margin-bottom:4px;">รับก้อนสะสม</div>
-        <div id="depIrrPool" style="font-size:12px;font-weight:800;color:#15803d;line-height:1.2;">—</div>
+      <div style="background:#fff;border:1px solid #ddd6fe;border-radius:14px;padding:10px 8px;text-align:center;">
+        <div style="font-size:10px;color:#818cf8;font-weight:700;margin-bottom:4px;">รับคืนสะสม</div>
+        <div id="depIrrPool" style="font-size:12px;font-weight:800;color:#4f46e5;line-height:1.2;">—</div>
       </div>
-      <div id="depIrrProfitRow" style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:10px 8px;text-align:center;color:#15803d;">
+      <div id="depIrrProfitRow" style="background:#fff;border:1px solid #ddd6fe;border-radius:14px;padding:10px 8px;text-align:center;color:#15803d;">
         <div style="font-size:10px;font-weight:700;margin-bottom:4px;">ผลตอบแทนสุทธิ</div>
         <div id="depIrrProfit" style="font-size:12px;font-weight:800;line-height:1.2;">—</div>
       </div>
     </div>
-    <div style="text-align:center;font-size:10px;color:#86efac;font-weight:500;">คำนวณจาก: เบี้ยออก − รับก้อนสะสม ที่อายุที่เลือก</div>
+    <div style="text-align:center;font-size:10px;color:#a78bfa;font-weight:500;">คำนวณจากกระแสเงินสดจริง − จ่ายจริง ไม่รวมภาษี</div>
   </div>
 </div>`,
             background: 'transparent',
@@ -625,7 +624,6 @@ function showDepositIRRPopup() {
             padding: '0px',
             customClass: { popup: 'lv-irr-swal-popup', closeButton: 'lv-irr-close-btn' },
             didOpen: () => {
-                // state สำหรับ update
                 window._depIrrState = { startAge, premium, sa, payYears, planType, depositUntilAge, depositRate, maxAge };
                 const cb = document.querySelector('.lv-irr-close-btn');
                 if (cb) Object.assign(cb.style, { position:'absolute',top:'12px',right:'14px',color:'rgba(255,255,255,0.85)',fontSize:'20px',zIndex:'10',background:'rgba(255,255,255,0.18)',borderRadius:'50%',width:'32px',height:'32px',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)' });
@@ -648,11 +646,11 @@ window._updateDepositIRR = function(age) {
 
     document.querySelectorAll('.dep-irr-pill').forEach(b => {
         const active = parseInt(b.dataset.age) === receiveAge;
-        b.style.background  = active ? 'linear-gradient(135deg,#059669,#16a34a)' : '#f0fdf4';
-        b.style.color       = active ? '#fff' : '#15803d';
-        b.style.borderColor = active ? 'transparent' : '#bbf7d0';
-        b.style.fontWeight  = active ? '800' : '700';
-        b.style.boxShadow   = active ? '0 3px 10px rgba(5,150,105,0.3)' : 'none';
+        b.style.background  = active ? 'linear-gradient(135deg,#7c3aed,#4f46e5)' : '#f5f3ff';
+        b.style.color       = active ? '#fff' : '#7c3aed';
+        b.style.borderColor = active ? 'transparent' : '#ddd6fe';
+        b.style.fontWeight  = active ? '800' : '600';
+        b.style.boxShadow   = active ? '0 3px 10px rgba(124,58,237,0.3)' : 'none';
     });
 
     const yearsEl = document.getElementById('depIrrYears');
