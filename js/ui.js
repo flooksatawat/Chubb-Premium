@@ -1267,14 +1267,16 @@ function openPlanModal() {
         cardWrapper.classList.add('translate-y-0', 'opacity-100');
     }
 
+    // Capture active plan NOW — before any timeout can race with __cmpHighlightPlan
+    const _activePlanSnapshot = window.__cmpHighlightPlan || currentAppPlan;
+
     renderModernCards(modernPlansData, true);
     initSwipeToDismiss();
     initModernScrollInteractions();
-    // Stagger entrance after wrapper slide starts + scroll jump settles
-    setTimeout(_animateModalCards, 90);
+    setTimeout(() => _animateModalCards(_activePlanSnapshot), 90);
 }
 
-function _animateModalCards() {
+function _animateModalCards(activePlanOverride) {
     const container = document.getElementById('planListContainer');
     if (!container) return;
     const cards = Array.from(container.querySelectorAll('.card-3d-container'));
@@ -1283,7 +1285,7 @@ function _animateModalCards() {
     // Loop mode: second copy (index n..2n-1) is the visible one after scrollTop jump
     // Search mode: first n cards visible
     const startIdx = isModernSearchActive ? 0 : n;
-    const _activePlan = window.__cmpHighlightPlan || currentAppPlan;
+    const _activePlan = activePlanOverride || window.__cmpHighlightPlan || currentAppPlan;
     for (let i = 0; i < n; i++) {
         const card = cards[startIdx + i];
         if (!card) continue;
