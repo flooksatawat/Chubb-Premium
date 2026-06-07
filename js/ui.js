@@ -5216,7 +5216,7 @@ function generatePolicyTableData() {
                 rightMenuHTML = `
                     <div class="flex items-center gap-2 min-w-0">
                         <i class="fas fa-wallet text-sky-500 text-[16px] w-5 text-center shrink-0"></i>
-                        <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
+                        <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">ออมสะสม / เงินสดพร้อมใช้</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleShowCV" class="sr-only peer" onchange="generatePolicyTableData();">
@@ -5482,8 +5482,8 @@ function generatePolicyTableData() {
         ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">คงเหลือ</th>` : ''}
-        ${isBreakevenActive ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
-        ${isBreakevenActive ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lCV}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
@@ -5742,8 +5742,8 @@ function generatePolicyTableData() {
         } else if (_mfLabel) {
             html += `<td class="${_tdBase}"></td><td class="${_tdBase}"></td>`;
         }
-        html += `${isBreakevenActive ? `<td class="${_tdBase} ${y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
-        html += `${isBreakevenActive ? `<td class="${_tdBase} ${y === beYear ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         let _dd50SARow = 0, _dd50RowPrem = 0;
         if (showDD50Column) {
             const _dd50SA = parseInt(window.currentDD50SA) || 0;
