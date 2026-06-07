@@ -5430,7 +5430,7 @@ function _generateSTATable() {
         const _mfTh = _hasMF ? `<th class="px-2 py-2 text-right text-sky-700 font-bold" style="white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:3px;justify-content:flex-end;">${_mfColLabel}<button onclick="window._mfAfterSixtyByAge={}; window.currentMF='ไม่เลือก'; window._mfCurrentLabel=null; _generateSTATable();" style="${_mfCloseBtnStyle}" title="ปิด MF">✕</button></span></th>` : '';
         thead.innerHTML = `<tr>
             <th class="px-2 py-2 text-center text-slate-600 font-bold">อายุ</th>
-            <th class="px-2 py-2 text-right text-slate-600 font-bold">ออม (บ.)</th>
+            <th class="px-2 py-2 text-right text-slate-600 font-bold">ออมเงิน</th>
             <th class="px-2 py-2 text-right text-slate-600 font-bold">ออมสะสม</th>
             <th class="px-2 py-2 text-right text-orange-600 font-bold">บำนาญ/ปี</th>
             <th class="px-2 py-2 text-right text-orange-700 font-bold">บำนาญสะสม</th>
@@ -5743,7 +5743,7 @@ function generatePolicyTableData() {
             </div>
         </div>` : `
         <div class="flex gap-1.5 items-center py-0.5 w-full">
-            <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan === 'AS10' ? 'STA10' : currentPlan === 'AS60' ? 'STA60' : currentPlan}</span>
+            <span class="${_badgeDesktop} bg-blue-600 text-white shadow-sm">${currentPlan}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">เพศ: ${_gThai}</span>
             <span class="${_badgeDesktop} bg-white/80 text-slate-700 border border-slate-200">อายุ: ${d.age}</span>
             <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
