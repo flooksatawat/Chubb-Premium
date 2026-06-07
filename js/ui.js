@@ -2331,12 +2331,11 @@ window.__comparePlan = null;
 // ==================== TABLE PLAN PICKER (เฉพาะหน้า Medical Fund) ====================
 (function() {
     const CF_PLANS = [
-        { name: 'Whole Life Extra',       abbr: 'WXN',   icon: 'fa-infinity',            color: '#4f46e5', bg: '#eef2ff' },
-        { name: '24 TX',                  abbr: 'TX',    icon: 'fa-coins',               color: '#0284c7', bg: '#eff6ff' },
-        { name: '868 / 818 Elite Saving', abbr: 'Elite', icon: 'fa-crown',               color: '#9333ea', bg: '#faf5ff' },
-        { name: 'LifeTime Value',         abbr: 'LV',    icon: 'fa-chart-line',          color: '#7c3aed', bg: '#f5f3ff' },
-        { name: 'Smart Plan 21/7',        abbr: '7SM',   icon: 'fa-piggy-bank',          color: '#0d9488', bg: '#f0fdfa' },
-        { name: '3D Health Excellence',   abbr: '3D',    icon: 'fa-hand-holding-medical',color: '#be123c', bg: '#fff1f2' },
+        { name: 'Whole Life Extra',       abbr: 'WXN',   icon: 'fa-infinity',   color: '#4f46e5', bg: '#eef2ff' },
+        { name: '24 TX',                  abbr: 'TX',    icon: 'fa-coins',      color: '#0284c7', bg: '#eff6ff' },
+        { name: '868 / 818 Elite Saving', abbr: 'Elite', icon: 'fa-crown',      color: '#9333ea', bg: '#faf5ff' },
+        { name: 'LifeTime Value',         abbr: 'LV',    icon: 'fa-chart-line', color: '#7c3aed', bg: '#f5f3ff' },
+        { name: 'Smart Plan 21/7',        abbr: '7SM',   icon: 'fa-piggy-bank', color: '#0d9488', bg: '#f0fdfa' },
     ];
 
     // ซิงค์ส่วน "ประกันสุขภาพที่เลือก" จาก mfInlineContainer
