@@ -2679,7 +2679,9 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
 
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
     const _sA = settingsA || {}, _sB = settingsB || {};
-    const _ageA = _sA.age || dA.age, _ageB = _sB.age || dB.age;
+    const _curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+    const _ageA = _sA.age || dA.age || _curAge;
+    const _ageB = _sB.age || dB.age || _curAge;
     const _genA = _sA.gender || (genderA === 'ชาย' ? 'male' : 'female');
     const _genB = _sB.gender || (genderB === 'ชาย' ? 'male' : 'female');
     const _inp = 'style="width:52px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#f8fafc;color:#1e293b;outline:none;"';
@@ -2701,9 +2703,9 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
                 <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
                 <span style="font-size:11px;font-weight:700;color:#0f766e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planA}</span>
                 <span ${_lbl}>อายุ</span>
-                <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} onkeydown="if(event.key==='Enter')window._cmpApply()">
+                <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
                 <span ${_lbl}>ปี</span>
-                <select id="cmpGenA" ${_sel}>
+                <select id="cmpGenA" ${_sel} onchange="window._cmpApply()">
                     <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
                     <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
                 </select>
@@ -2713,9 +2715,9 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
                 <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
                 <span style="font-size:11px;font-weight:700;color:#6d28d9;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planB}</span>
                 <span ${_lbl}>อายุ</span>
-                <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} onkeydown="if(event.key==='Enter')window._cmpApply()">
+                <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
                 <span ${_lbl}>ปี</span>
-                <select id="cmpGenB" ${_sel}>
+                <select id="cmpGenB" ${_sel} onchange="window._cmpApply()">
                     <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
                     <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
                 </select>
@@ -2775,12 +2777,19 @@ window._cmpApply = function() {
     if (!pA || !pB) return;
     const ageA = parseInt(document.getElementById('cmpAgeA')?.value) || 0;
     const ageB = parseInt(document.getElementById('cmpAgeB')?.value) || 0;
+    if (ageA < 1 || ageA > 99 || ageB < 1 || ageB > 99) return; // ยังกรอกไม่ครบ
     const genA = document.getElementById('cmpGenA')?.value || 'male';
     const genB = document.getElementById('cmpGenB')?.value || 'male';
     window.renderCompareView(pA, pB,
-        ageA > 0 ? { age: ageA, gender: genA } : { gender: genA },
-        ageB > 0 ? { age: ageB, gender: genB } : { gender: genB }
+        { age: ageA, gender: genA },
+        { age: ageB, gender: genB }
     );
+};
+
+window._cmpApplyTimer = null;
+window._cmpApplyDebounced = function() {
+    clearTimeout(window._cmpApplyTimer);
+    window._cmpApplyTimer = setTimeout(() => window._cmpApply(), 600);
 };
 
 // Long-press delegation — เริ่ม compare mode (ทุกอุปกรณ์: touch / mouse / stylus)
