@@ -707,6 +707,31 @@ function showCongratsToast(msg) {
 }
 
 let isLongPressActive = false;
+
+// Long-press on main header → show insurance conditions popup
+(function() {
+    const HOLD_MS = 500;
+    let _t = null;
+    function _cancel() { clearTimeout(_t); _t = null; }
+    document.addEventListener('DOMContentLoaded', () => {
+        const hdr = document.getElementById('mainHeaderBtn');
+        if (!hdr) return;
+        hdr.addEventListener('pointerdown', () => {
+            _cancel();
+            _t = setTimeout(() => {
+                _t = null;
+                isLongPressActive = true;
+                if (navigator.vibrate) navigator.vibrate(40);
+                updateConditionsModal(currentAppPlan);
+                openPopup('insuranceConditionsModal');
+            }, HOLD_MS);
+        });
+        hdr.addEventListener('pointerup', _cancel);
+        hdr.addEventListener('pointercancel', _cancel);
+        hdr.addEventListener('pointermove', _cancel);
+    });
+})();
+
 /**
  * 🌟 Smart Quick Calc (เพิ่มฟังก์ชันใหม่)
  * รองรับ: "ชาย 30 ออม 50,000", "หญิง 25 ทุน 1,000,000", หรือแค่ตัวเลข "1M"
@@ -1892,33 +1917,31 @@ function getConditionsHTML(planName) {
         return html;
     }
 
-    let issueAge = 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
-    let minSA = 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
-    let planData = null;
-
-    const exactMapping = {
-        'Life Protector 20': '20LPB',
-        'Supreme Life Protector': 'Supreme_Life_Protector_90_20'
+    // Per-plan overrides for age range and min sum (more accurate than PLAN_CONFIG fallback)
+    const _planInfo = {
+        'CI Extra Plus':          { age: 'แรกเกิด - 65 ปี', sum: '500,000 บาท' },
+        'Whole Life Extra':       { age: 'แรกเกิด - 50 ปี', sum: '100,000 บาท', prem: 'เบี้ยขั้นต่ำ 50,000 บาท/ปี' },
+        '24 TX':                  { age: 'แรกเกิด - 55 ปี', sum: '100,000 บาท', prem: 'เบี้ยขั้นต่ำ 50,000 บาท/ปี' },
+        'Signature Legacy':       { age: 'แรกเกิด - 70 ปี', sum: '5,000,000 บาท' },
+        'Life Protector 20':      { age: 'แรกเกิด - 70 ปี', sum: '100,000 บาท' },
+        'Supreme Life Protector': { age: 'แรกเกิด - 70 ปี', sum: '100,000 บาท' },
+        'Century Life':           { age: 'แรกเกิด - 75 ปี', sum: '100,000 บาท' },
+        '3D Health Excellence':   { age: '11 - 75 ปี', sum: '100,000 บาท' },
+        'Convertable Term':       { age: '20 - 65 ปี', sum: '1,000,000 บาท' },
+        'Medical Fund':           { age: 'ขึ้นกับบริษัทและแผนที่เลือก', sum: 'ขึ้นกับแผนประกันสุขภาพ' },
     };
-    
-    let searchKey = exactMapping[planName] || planName;
-    for (let i = 0; i < allInsurancePlans.length; i++) {
-        if (allInsurancePlans[i].name === planName || getPlanAbbr(allInsurancePlans[i].name) === searchKey) {
-            planData = allInsurancePlans[i]; break;
-        }
-    }
-    
-    let config = PLAN_CONFIG[planName] || PLAN_CONFIG[planData?.name];
-    if (config) {
-        issueAge = config.minAge === 0 ? `แรกเกิด - ${config.maxAge} ปี` : `${config.minAge} - ${config.maxAge} ปี`;
-        minSA = config.minSum ? `${config.minSum.toLocaleString()} บาท` : minSA;
-    }
-    
+
+    const info = _planInfo[planName];
+    const issueAge = info ? info.age : (PLAN_CONFIG[planName] ? (PLAN_CONFIG[planName].minAge === 0 ? `แรกเกิด - ${PLAN_CONFIG[planName].maxAge} ปี` : `${PLAN_CONFIG[planName].minAge} - ${PLAN_CONFIG[planName].maxAge} ปี`) : 'โปรดดูรายละเอียดในเล่มกรมธรรม์');
+    const minSA = info ? info.sum : (PLAN_CONFIG[planName]?.minSum ? `${PLAN_CONFIG[planName].minSum.toLocaleString()} บาท` : 'โปรดดูรายละเอียดในเล่มกรมธรรม์');
+    const minPrem = info?.prem || null;
+
     let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
     html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${issueAge}</p></div></div>`;
-    html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSA}</p></div></div>`;
+    html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนประกันเริ่มต้น</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSA}</p></div></div>`;
+    if (minPrem) html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-receipt text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เบี้ยขั้นต่ำ</p><p class="text-[13.5px] font-bold text-amber-800 leading-tight">${minPrem}</p></div></div>`;
     html += '</div></div>';
-    
+
     return html;
 }
 
@@ -2653,11 +2676,14 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
         if (beIdxB < 0 && r.totalSaving > 0 && r.netCash >= r.totalSaving) beIdxB = i;
     }
 
+    const isSamePlan = planA === planB;
+
     let bodyRows = '';
     for (let i = 0; i < maxRows; i++) {
         const rA = rowsA[i];
         const rB = rowsB[i];
-        const age = rA ? rA.age : rB.age;
+        const ageA = rA ? rA.age : (rB ? rB.age - (dB.age - dA.age) : '');
+        const ageB = rB ? rB.age : '';
         const odd = i % 2 === 0;
         const isBeA = i === beIdxA;
         const isBeB = i === beIdxB;
@@ -2684,11 +2710,16 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
         const ageBg   = (isBeA || isBeB) ? '#d1fae5' : bg;
         const ageBdr  = (isBeA || isBeB) ? 'border-top:2px solid #34d399;border-bottom:2px solid #34d399;' : bdBot;
 
+        const ageBCell = isSamePlan
+            ? `<td style="font-size:12px;padding:6px 6px;text-align:center;color:#7c3aed;background:${(isBeB)?'#d1fae5':bg};${(isBeB)?'border-top:2px solid #34d399;border-bottom:2px solid #34d399;':bdBot}">${ageB}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>`
+            : '';
+
         bodyRows += `<tr class="cmp-row">
-            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBdr}">${age}${(isBeA||isBeB)?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
+            <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBdr}">${ageA}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
             <td style="${tdBase}">${savA}</td>
             <td style="${tdBase}">${cfA}</td>
             <td style="${tdNetA}">${netA}</td>
+            ${ageBCell}
             <td style="${tdBase}">${savB}</td>
             <td style="${tdBase}">${cfB}</td>
             <td style="${tdNetB}">${netB}</td>
@@ -2748,12 +2779,13 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
                     <th id="cmpHdrA" colspan="3" onclick="window._cmpStartReplace('A','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
-                    <th id="cmpHdrB" colspan="3" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrB" colspan="${isSamePlan ? 4 : 3}" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
                     <th ${thS}>${cfHdrA}</th>
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;border-right:2px solid rgba(255,255,255,0.3);">เงินสดพร้อมใช้</th>
+                    ${isSamePlan ? `<th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;background:rgba(255,255,255,0.1);">อายุ</th>` : ''}
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">ออมเงิน</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">${cfHdrB}</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">เงินสดพร้อมใช้</th>
