@@ -451,54 +451,71 @@ window._depositIrrLongStart = function(e) {
 };
 window._depositIrrLongEnd = function() { clearTimeout(_depositIrrTimer); };
 
-// สร้าง cash flows สำหรับ IRR ของ deposit column:
-// outflow = premium (ช่วงชำระ), inflow = depositPool ก้อนเดียวที่ receiveAge
-function _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, receiveAge, depositUntilAge, depositRate) {
-    const totalYrs = receiveAge - startAge;
+// helper: cash flow ของแผนแต่ละปี
+function _getPlanCF(planType, age, yr, sa, startAge) {
+    if (planType === 'WXN') {
+        if (age <= 60)       return Math.round(sa * 0.0225);
+        if (age === 61)      return Math.round(sa * 0.10);
+        if (age < 90)        return Math.round(sa * (0.10 + (age - 61) * 0.005));
+        return Math.round(sa);
+    }
+    if (planType === 'TX') {
+        if (yr % 3 === 0 && yr <= 24) return Math.round(sa * 0.05);
+        if (yr === 25)       return Math.round(sa * 0.70);
+        if (yr >= 26 && age < 90) return Math.round(sa * 0.08);
+        if (age >= 90)       return Math.round(sa);
+        return 0;
+    }
+    if (planType === 'ELITE') {
+        const maxYr = startAge <= 50 ? 68 - startAge : 18;
+        return yr < maxYr ? Math.round(sa * 0.12) : Math.round(sa * 7.20);
+    }
+    if (planType === 'SM') {
+        if (yr === 21) return Math.round(sa * 2.12);
+        if (yr >= 2 && yr <= 20) return Math.round(sa * 0.02);
+        return 0;
+    }
+    if (planType === 'LV') return Math.round(sa * _lvCashPctGlobal(age) / 100);
+    return 0;
+}
+
+// สร้าง cash flows สำหรับ IRR แบบ "สะสม + รับต่อ":
+//   ก่อน depositUntilAge : เงินคืนทุกปีไปสะสมใน pool (ไม่รับตรง)
+//   ที่ depositUntilAge  : รับ pool ก้อนเดียว
+//   หลัง depositUntilAge ถึง targetAge : รับเงินคืนจากกรมธรรม์ปกติ
+function _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, targetAge, depositUntilAge, depositRate) {
+    const totalYrs = targetAge - startAge;
     if (totalYrs <= 0) return null;
 
-    // คำนวณ deposit pool ที่ receiveAge
+    // คำนวณ pool จนถึง depositUntilAge (หรือ targetAge ถ้าน้อยกว่า)
+    const poolStopAge = Math.min(depositUntilAge, targetAge);
     let pool = 0;
-    for (let yr = 1; yr <= receiveAge - startAge; yr++) {
+    for (let yr = 1; yr <= poolStopAge - startAge; yr++) {
         const age = startAge + yr;
-        // คำนวณ cashFlowAmt ตามแผน (ลอกจาก generatePolicyTableData)
-        let cf = 0;
-        if (planType === 'WXN') {
-            if (age <= 60)       cf = Math.round(sa * 0.0225);
-            else if (age === 61) cf = Math.round(sa * 0.10);
-            else if (age < 90)   cf = Math.round(sa * (0.10 + (age - 61) * 0.005));
-            else                 cf = Math.round(sa);
-        } else if (planType === 'TX') {
-            if (yr % 3 === 0 && yr <= 24) cf = Math.round(sa * 0.05);
-            else if (yr === 25)  cf = Math.round(sa * 0.70);
-            else if (yr >= 26 && age < 90) cf = Math.round(sa * 0.08);
-            else if (age >= 90)  cf = Math.round(sa);
-        } else if (planType === 'ELITE') {
-            const maxYr = startAge <= 50 ? 68 - startAge : 18;
-            if (yr < maxYr)       cf = Math.round(sa * 0.12);
-            else if (yr >= maxYr) cf = Math.round(sa * 7.20);
-        } else if (planType === 'SM') {
-            if (yr === 21)             cf = Math.round(sa * 2.12);
-            else if (yr >= 2 && yr <= 20) cf = Math.round(sa * 0.02);
-        } else if (planType === 'LV') {
-            cf = Math.round(sa * _lvCashPctGlobal(age) / 100);
-        }
-        // สะสม: grow แล้วบวก cash flow ของปีนี้
-        if (age <= depositUntilAge) {
-            pool = Math.round(pool * (1 + depositRate) + cf);
-        } else {
-            pool = Math.round(pool * (1 + depositRate)); // หลังอายุสะสม: ทบต้นแต่ไม่รับเพิ่ม
-        }
+        pool = Math.round(pool * (1 + depositRate) + _getPlanCF(planType, age, yr, sa, startAge));
     }
 
-    // สร้าง cash flows: outflow = premium, inflow = pool ที่ receiveAge
+    // สร้าง cash flows
     const cfs = [];
     for (let yr = 1; yr <= totalYrs; yr++) {
+        const age = startAge + yr;
         const prem = yr <= payYears ? premium : 0;
-        cfs.push(-prem); // ไม่รับ cash flow ระหว่างทาง (ไปสะสมทั้งหมด)
+        let cf = -prem;
+        if (age === poolStopAge) {
+            cf += pool;                                        // รับ pool ที่ depositUntilAge
+        } else if (age > depositUntilAge) {
+            cf += _getPlanCF(planType, age, yr, sa, startAge); // รับเงินคืนปกติหลัง deposit หมด
+        }
+        cfs.push(cf);
     }
-    cfs[totalYrs - 1] += pool; // รับก้อนเดียวที่ receiveAge
-    return { cfs, pool };
+
+    // คำนวณรับสุทธิรวม (pool + เงินคืนหลัง depositUntilAge)
+    let totalReturn = pool;
+    for (let yr = poolStopAge - startAge + 1; yr <= totalYrs; yr++) {
+        totalReturn += _getPlanCF(planType, startAge + yr, yr, sa, startAge);
+    }
+
+    return { cfs, pool, totalReturn };
 }
 
 function showDepositIRRPopup() {
@@ -552,7 +569,7 @@ function showDepositIRRPopup() {
       </div>
       <div>
         <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-0.02em;">IRR สะสม รับ ${(depositRate*100).toFixed(0)}%</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">ฝากสะสมทบต้น ${(depositRate*100).toFixed(2)}% · คิด IRR เมื่อรับก้อนที่อายุ</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500;margin-top:1px;">ฝากสะสม ${(depositRate*100).toFixed(2)}% ถึงอายุ ${depositUntilAge} · รับต่อจนอายุที่เลือก</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;">
@@ -658,16 +675,16 @@ window._updateDepositIRR = function(age) {
 
     const res = _buildDepositIRRCashFlows(startAge, premium, sa, payYears, planType, receiveAge, depositUntilAge, depositRate);
     if (!res) return;
-    const { cfs, pool } = res;
+    const { cfs, totalReturn } = res;
     const irr = _calcIRR(cfs);
 
     let totalPaid = 0;
     for (let yr = 1; yr <= receiveAge - startAge; yr++) { if (yr <= payYears) totalPaid += premium; }
-    const profit = pool - totalPaid;
+    const profit = totalReturn - totalPaid;
 
     const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
     set('depIrrPaid',   Math.round(totalPaid).toLocaleString() + ' ฿');
-    set('depIrrPool',   Math.round(pool).toLocaleString() + ' ฿');
+    set('depIrrPool',   Math.round(totalReturn).toLocaleString() + ' ฿');
     set('depIrrProfit', (profit >= 0 ? '+' : '') + Math.round(profit).toLocaleString() + ' ฿');
     const pr = document.getElementById('depIrrProfitRow');
     if (pr) pr.style.color = profit >= 0 ? '#15803d' : '#dc2626';
