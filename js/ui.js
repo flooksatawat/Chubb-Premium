@@ -5685,7 +5685,7 @@ function generatePolicyTableData() {
         
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
-            let breakevenValue = (isElitePlan || isTX || isWXN || isLV) ? surrenderTotal
+            let breakevenValue = (isElitePlan || isTX || isWXN || isLV || isSM) ? surrenderTotal
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
