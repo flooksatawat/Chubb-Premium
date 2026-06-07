@@ -1939,8 +1939,6 @@ function getConditionsHTML(planName) {
 
     let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
     html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${issueAge}</p></div></div>`;
-    html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนประกันเริ่มต้น</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSA}</p></div></div>`;
-    if (minPrem) html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-receipt text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เบี้ยขั้นต่ำ</p><p class="text-[13.5px] font-bold text-amber-800 leading-tight">${minPrem}</p></div></div>`;
     html += '</div></div>';
 
     return html;
