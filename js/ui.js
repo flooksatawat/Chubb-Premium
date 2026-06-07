@@ -5430,19 +5430,20 @@ function generatePolicyTableData() {
             : currentSA;
 
         // 1. การออมเงิน: Elite หยุดที่ปีที่ 8 (อ้างอิง image_f3685c.png)
+        const _mfAnnualSav = hasMFCol && d.sum > 0 ? Math.round(d.sum / payYears) : 0;
         let annualSaving = 0;
         if (isElitePlan) {
             if (y <= 8) {
-                annualSaving = d.premium;
+                annualSaving = hasMFCol ? Math.round(d.sum / 8) : d.premium;
                 totalSaving += annualSaving;
             }
         } else if (isLV || isSM) {
             if (y <= payYears) {
-                annualSaving = d.premium;
+                annualSaving = hasMFCol ? _mfAnnualSav : d.premium;
                 totalSaving += annualSaving;
             }
         } else if (y <= payYears && currentSA > 0) {
-            annualSaving = Math.round((currentSA / initialSA) * initialPrem); 
+            annualSaving = hasMFCol ? _mfAnnualSav : Math.round((currentSA / initialSA) * initialPrem); 
             totalSaving += annualSaving; 
         }
 
