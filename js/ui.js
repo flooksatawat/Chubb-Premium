@@ -2059,14 +2059,31 @@ function selectAppPlan(planName) {
         window.__cmpHighlightPlan = null;
         closePlanModal();
         (async () => {
-            const picked = await window._cmpPickOption(planName);
-            if (picked === null) return;
+            const _existSett = slot === 'A' ? (window.__cmpSettingsA || {}) : (window.__cmpSettingsB || {});
+            const _cfg = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]) || {};
+            const _opts = _cfg.options || [];
+            const _isElite = planName === '868 / 818 Elite Saving';
+            const _extYrs = (o) => { const m = String(o).match(/\d+/); return m ? parseInt(m[0]) : 0; };
+
+            let selectedOption = _opts[0] || '';
+            if (_opts.length > 1 && !_isElite) {
+                const _curYrs = _extYrs(_existSett.option || '');
+                const _matchOpt = _opts.find(o => _extYrs(o) === _curYrs);
+                if (_matchOpt) {
+                    selectedOption = _matchOpt;
+                } else {
+                    const _picked = await window._cmpPickPeriodOnly(planName, _opts);
+                    if (_picked === null) return;
+                    selectedOption = _picked;
+                }
+            }
+
             const newA = slot === 'A' ? planName : curA;
             const newB = slot === 'B' ? planName : curB;
-            const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
-            const _base = { age: picked.age, mode: picked.mode, ..._mv };
-            const settA = Object.assign({}, window.__cmpSettingsA || {}, _base, slot === 'A' ? { option: picked.option } : {});
-            const settB = Object.assign({}, window.__cmpSettingsB || {}, _base, slot === 'B' ? { option: picked.option } : {});
+            const settA = Object.assign({}, window.__cmpSettingsA || {});
+            const settB = Object.assign({}, window.__cmpSettingsB || {});
+            if (slot === 'A') settA.option = selectedOption;
+            else settB.option = selectedOption;
             window.renderCompareView(newA, newB, settA, settB);
             // สลับ main plan ด้วย
             _cachedForPlan = null;
@@ -2751,6 +2768,50 @@ window.cancelCompareMode = function() {
     if (banner) banner.style.display = 'none';
 };
 
+window._cmpPickPeriodOnly = async function(planName, opts) {
+    const r = await Swal.fire({
+        title: '',
+        width: Math.min(320, window.innerWidth - 20),
+        html: `<div style="font-family:Kanit,sans-serif;text-align:left;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#0d9488,#2563eb);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-calendar-check" style="color:#fff;font-size:15px;"></i>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:800;color:#1e293b;line-height:1.2;">ระยะเวลาชำระเบี้ย</div>
+                    <div style="font-size:11px;color:#94a3b8;font-weight:600;">${planName}</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:5px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:4px;" id="_cmpPeriodBtns">
+                ${opts.map((o, i) => `<button type="button" id="_cmpPer_${i}" onclick="window._cmpSelPer(${i})"
+                    style="flex:1;min-width:0;padding:8px 4px;border-radius:9px;border:none;background:${i===0?'#fff':'transparent'};color:${i===0?'#1d4ed8':'#64748b'};box-shadow:${i===0?'0 2px 6px rgba(37,99,235,0.15)':'none'};font-family:Kanit,sans-serif;font-size:12.5px;font-weight:${i===0?'700':'600'};cursor:pointer;transition:all 0.2s;white-space:nowrap;">${window._cmpOptLabel(o)}</button>`).join('')}
+            </div>
+            <input type="hidden" id="_cmpPerVal" value="${opts[0]}">
+        </div>`,
+        confirmButtonText: '<i class="fas fa-check" style="margin-right:6px;"></i>ยืนยัน',
+        showCancelButton: true,
+        cancelButtonText: 'ยกเลิก',
+        buttonsStyling: false,
+        customClass: { popup: '_cmpSwalPopup', confirmButton: '_cmpSwalConfirm', cancelButton: '_cmpSwalCancel', actions: '_cmpSwalActions' },
+        didOpen: () => {
+            window._cmpSelPer = (idx) => {
+                document.getElementById('_cmpPerVal').value = opts[idx];
+                opts.forEach((_, i) => {
+                    const b = document.getElementById(`_cmpPer_${i}`);
+                    if (!b) return;
+                    const on = i === idx;
+                    b.style.background  = on ? '#fff' : 'transparent';
+                    b.style.color       = on ? '#1d4ed8' : '#64748b';
+                    b.style.boxShadow   = on ? '0 2px 6px rgba(37,99,235,0.15)' : 'none';
+                    b.style.fontWeight  = on ? '700' : '600';
+                });
+            };
+        },
+        preConfirm: () => document.getElementById('_cmpPerVal')?.value || opts[0],
+    });
+    return r.isConfirmed ? r.value : null;
+};
+
 window._cmpStartReplace = function(slot, curA, curB) {
     window.__cmpReplaceSlot = slot;
     window.__cmpSlotPlanA  = curA;
@@ -2774,7 +2835,7 @@ window._cmpStartReplace = function(slot, curA, curB) {
     // ซ่อน sheet (ถ้ามี) แล้วเปิดเมนูเลือกแบบอัตโนมัติ
     const sheet = document.getElementById('_cmpMobileSheet');
     if (sheet && sheet.style.display !== 'none') {
-        sheet.style.transform = 'translateY(100%)';
+        sheet.style.display = 'none';
     }
     // ส่ง slotLabel โดยตรงเข้า openPlanModal — ไม่พึ่ง __cmpHighlightPlan global
     setTimeout(() => {
@@ -2791,7 +2852,7 @@ window._cmpCancelReplace = function() {
     if (banner) banner.style.display = 'none';
     // คืน sheet บนมือถือ
     const sheet = document.getElementById('_cmpMobileSheet');
-    if (sheet && window.__cmpViewPlanA) sheet.style.transform = 'translateY(0)';
+    if (sheet && window.__cmpViewPlanA) sheet.style.display = 'flex';
 };
 
 // ── Compare helpers ──
@@ -3186,9 +3247,11 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         const isBeB = i === beIdxB;
 
         const savA = rA ? fAn(rA.annSav) : '—';
+        const saA  = rA && hasCF_A ? fA(rA.currentSA, false, '#475569') : null;
         const cfA  = rA ? (hasCF_A ? fA(rA.cfAmt, true, '#2563eb') : fA(rA.currentSA, false, '#475569')) : '—';
         const netA = rA ? fA(rA.netCash, true, '#059669') : '—';
         const savB = rB ? fAn(rB.annSav) : '—';
+        const saB  = rB && hasCF_B ? fA(rB.currentSA, false, '#475569') : null;
         const cfB  = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
         const netB = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
@@ -3207,10 +3270,12 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         bodyRows += `<tr class="cmp-row">
             <td style="font-size:12px;padding:6px 6px;text-align:center;color:#475569;background:${ageBg};${ageBdr}">${ageA}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
             <td style="${tdBase}">${savA}</td>
+            ${saA !== null ? `<td style="${tdBase}">${saA}</td>` : ''}
             <td style="${tdBase}">${cfA}</td>
             <td style="${tdNetA}">${netA}</td>
             ${ageBCell}
             <td style="${tdBase}">${savB}</td>
+            ${saB !== null ? `<td style="${tdBase}">${saB}</td>` : ''}
             <td style="${tdBase}">${cfB}</td>
             <td style="${tdNetB}">${netB}</td>
         </tr>`;
@@ -3222,6 +3287,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             mobileBodyRowsA += `<tr>
                 <td style="${_mTdC(isBeA,'#475569')}">${rA.age}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
                 <td style="${_mTd(isBeA)}">${savA}</td>
+                ${saA !== null ? `<td style="${_mTd(isBeA)}">${saA}</td>` : ''}
                 <td style="${_mTd(isBeA)}">${cfA}</td>
                 <td style="${_mTd(isBeA)}">${netA}</td>
             </tr>`;
@@ -3230,6 +3296,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             mobileBodyRowsB += `<tr>
                 <td style="${_mTdC(isBeB,'#7c3aed')}">${rB.age}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
                 <td style="${_mTd(isBeB)}">${savB}</td>
+                ${saB !== null ? `<td style="${_mTd(isBeB)}">${saB}</td>` : ''}
                 <td style="${_mTd(isBeB)}">${cfB}</td>
                 <td style="${_mTd(isBeB)}">${netB}</td>
             </tr>`;
@@ -3251,6 +3318,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                         <tr style="background:#e6f7f6;">
                             <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#0f766e;">อายุ</th>
                             <th ${_mTh('#0f766e')}>ออมเงิน</th>
+                            ${hasCF_A ? `<th ${_mTh('#0f766e')}>ทุนประกัน</th>` : ''}
                             <th ${_mTh('#0f766e')}>${cfHdrA}</th>
                             <th ${_mTh('#0f766e')}>เงินสดพร้อมใช้</th>
                         </tr>
@@ -3275,6 +3343,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                         <tr style="background:#f3f0ff;">
                             <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#6d28d9;">อายุ</th>
                             <th ${_mTh('#6d28d9')}>ออมเงิน</th>
+                            ${hasCF_B ? `<th ${_mTh('#6d28d9')}>ทุนประกัน</th>` : ''}
                             <th ${_mTh('#6d28d9')}>${cfHdrB}</th>
                             <th ${_mTh('#6d28d9')}>เงินสดพร้อมใช้</th>
                         </tr>
@@ -3364,15 +3433,17 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             <thead>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;" rowspan="2">อายุ</th>
-                    <th id="cmpHdrA" colspan="3" onclick="window._cmpStartReplace('A','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
-                    <th id="cmpHdrB" colspan="4" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrA" colspan="${3 + (hasCF_A ? 1 : 0)}" onclick="window._cmpStartReplace('A','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;border-right:2px solid rgba(255,255,255,0.3);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planA} · อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
+                    <th id="cmpHdrB" colspan="${4 + (hasCF_B ? 1 : 0)}" onclick="window._cmpStartReplace('B','${planA}','${planB}')" style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;background:rgba(255,255,255,0.1);white-space:nowrap;cursor:pointer;user-select:none;" title="แตะเพื่อเปลี่ยนแบบประกัน">${planB} · อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:4px;"></i></th>
                 </tr>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:30px;z-index:2;">
                     <th ${thS}>ออมเงิน</th>
+                    ${hasCF_A ? `<th ${thS}>ทุนประกัน</th>` : ''}
                     <th ${thS}>${cfHdrA}</th>
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;border-right:2px solid rgba(255,255,255,0.3);">เงินสดพร้อมใช้</th>
                     <th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;background:rgba(255,255,255,0.1);">อายุ</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">ออมเงิน</th>
+                    ${hasCF_B ? `<th style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">ทุนประกัน</th>` : ''}
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">${cfHdrB}</th>
                     <th ${thS} style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:rgba(255,255,255,0.1);">เงินสดพร้อมใช้</th>
                 </tr>
