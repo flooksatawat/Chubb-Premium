@@ -2804,7 +2804,8 @@ window._cmpPickOption = async function(planName) {
 window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
-    if (!lastCalculationData) { showCustomError('กรุณาคำนวณก่อนเปรียบเทียบ'); return; }
+    const _cmpAge = parseInt(document.getElementById('ageInput')?.value) || 0;
+    if (_cmpAge <= 0) { showCustomError('กรุณากรอกอายุก่อนเปรียบเทียบ'); return; }
 
     // บันทึก settings ไว้เพื่อ refresh
     window.__cmpSettingsA = settingsA || null;
@@ -2812,7 +2813,7 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
 
     const savedPlan = currentPlan;
     const hasOverrideA = settingsA && (settingsA.age || settingsA.gender);
-    const dA = (planA === currentAppPlan && !hasOverrideA)
+    const dA = (planA === currentAppPlan && !hasOverrideA && lastCalculationData)
         ? Object.assign({}, lastCalculationData, { _planName: planA })
         : window.computeForPlan(planA, settingsA);
     const optA = settingsA?.option || ((planA === currentAppPlan && !hasOverrideA) ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || ''));
@@ -3162,7 +3163,7 @@ window._cmpApplyDebounced = function() {
 // overrides: { age, gender } — ตั้งค่าชั่วคราวก่อน calculate แล้วคืนค่าเดิม
 window.computeForPlan = function (planName, overrides) {
     if (!planName || typeof PLAN_CONFIG === 'undefined' || !PLAN_CONFIG[planName]) return null;
-    if (planName === currentAppPlan && !overrides) return lastCalculationData;
+    if (planName === currentAppPlan && !overrides && lastCalculationData) return lastCalculationData;
 
     const cfg = PLAN_CONFIG[planName];
     const ageInp = document.getElementById('ageInput');
