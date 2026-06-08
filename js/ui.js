@@ -2839,7 +2839,7 @@ window._cmpPickOption = async function(planName) {
     const opts = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]?.options) || [];
     const isElite = planName === '868 / 818 Elite Saving';
 
-    // ── Step 1: กรอกอายุ ──
+    // ── Step 1: กรอกอายุ (ถ้ายังไม่ได้กรอก) ──
     const _ageEl = document.getElementById('ageInput');
     let age = parseInt(_ageEl?.value) || 0;
     if (age <= 0) {
@@ -2859,31 +2859,8 @@ window._cmpPickOption = async function(planName) {
         if (_ageEl) _ageEl.value = age;
     }
 
-    // ── Step 2: เลือกระยะเวลาชำระ (ถ้ามีหลายตัวเลือก) ──
-    let pickedOpt = opts[0] || '';
-    if (opts.length > 1 && !isElite) {
-        const inputOptions = {};
-        opts.forEach(o => { inputOptions[o] = window._cmpOptLabel(o); });
-        const r1 = await Swal.fire({
-            title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">เลือกระยะเวลาชำระ</span>',
-            input: 'radio',
-            inputOptions,
-            inputValue: opts[0],
-            confirmButtonText: 'ถัดไป →',
-            showCancelButton: true,
-            cancelButtonText: 'ยกเลิก',
-            didOpen: () => {
-                document.querySelectorAll('.swal2-radio label').forEach(el => {
-                    el.style.fontFamily = 'Kanit,sans-serif';
-                    el.style.fontSize = '14px';
-                });
-            }
-        });
-        if (!r1.isConfirmed) return null;
-        pickedOpt = r1.value || opts[0];
-    }
-
-    // ── Step 3: เลือกเบี้ย หรือ ทุน + จำนวนเงิน ──
+    // ── Step 2: เลือกระยะเวลาชำระ + จำนวนเงิน (รวมเป็น 1 popup) ──
+    const hasMultiOpts = opts.length > 1 && !isElite;
     const _sumPills  = [500000,1000000,3000000,5000000,10000000];
     const _premPills = [10000,24000,50000,100000,200000];
     const _fmtPill = n => n >= 1000000 ? `${n/1000000}ล้าน` : n >= 100000 ? `${n/100000}แสน` : n >= 10000 ? `${n/10000}หมื่น` : n.toLocaleString();
@@ -2893,10 +2870,26 @@ window._cmpPickOption = async function(planName) {
             onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='#f8fafc'">${_fmtPill(v)}</button>`
     ).join('');
 
-    const r2 = await Swal.fire({
-        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">ระบุจำนวนเงิน</span>',
+    const _optRadios = hasMultiOpts ? `
+        <div style="margin-bottom:4px;">
+            <p style="font-size:12px;color:#64748b;font-weight:700;margin:0 0 6px;">ระยะเวลาชำระ</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;" id="_cmpOptBtns">
+                ${opts.map((o, i) => `
+                    <button type="button" id="_cmpOpt_${o}"
+                        onclick="window._cmpSetOpt('${o}')"
+                        style="padding:7px 16px;border-radius:10px;border:1.5px solid ${i===0?'#0369a1':'#e2e8f0'};background:${i===0?'#0369a1':'#f8fafc'};color:${i===0?'#fff':'#475569'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">
+                        ${window._cmpOptLabel(o)}
+                    </button>`).join('')}
+            </div>
+            <input type="hidden" id="_cmpOptVal" value="${opts[0]}">
+        </div>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:4px 0;">` : '';
+
+    const r = await Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">ตั้งค่าการเปรียบเทียบ</span>',
         html: `
             <div id="_cmpSetupBox" style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:10px;align-items:center;">
+                ${_optRadios}
                 <div style="display:flex;gap:8px;">
                     <button id="_cmpM_sum" type="button"
                         onclick="window._cmpSetMode('sum')"
@@ -2918,7 +2911,11 @@ window._cmpPickOption = async function(planName) {
             const raw = document.getElementById('_cmpAmtVal')?.value || '';
             const amt = window._parseThaiAmount(raw);
             if (amt <= 0) { Swal.showValidationMessage('กรุณาระบุจำนวนเงิน'); return false; }
-            return { mode: document.getElementById('_cmpModeVal')?.value || 'sum', amount: amt };
+            return {
+                mode: document.getElementById('_cmpModeVal')?.value || 'sum',
+                amount: amt,
+                option: document.getElementById('_cmpOptVal')?.value || opts[0] || ''
+            };
         },
         didOpen: () => {
             window._cmpSetMode = (m) => {
@@ -2927,11 +2924,24 @@ window._cmpPickOption = async function(planName) {
                 document.getElementById('_cmpM_prem').style.cssText += m==='premium'? ';background:#7c3aed;color:#fff;' : ';background:#f1f5f9;color:#475569;';
                 document.getElementById('_cmpPillsBox').innerHTML = _makePills(m === 'sum' ? _sumPills : _premPills);
             };
+            if (hasMultiOpts) {
+                window._cmpSetOpt = (o) => {
+                    document.getElementById('_cmpOptVal').value = o;
+                    opts.forEach(opt => {
+                        const btn = document.getElementById(`_cmpOpt_${opt}`);
+                        if (!btn) return;
+                        const active = opt === o;
+                        btn.style.background = active ? '#0369a1' : '#f8fafc';
+                        btn.style.color = active ? '#fff' : '#475569';
+                        btn.style.borderColor = active ? '#0369a1' : '#e2e8f0';
+                    });
+                };
+            }
             setTimeout(() => document.getElementById('_cmpAmtVal')?.focus(), 100);
         }
     });
-    if (!r2.isConfirmed) return null;
-    const { mode, amount } = r2.value;
+    if (!r.isConfirmed) return null;
+    const { mode, amount, option: pickedOpt } = r.value;
     return { option: pickedOpt, mode, age,
         sum: mode === 'sum' ? amount : 0,
         premium: mode === 'premium' ? amount : 0 };
