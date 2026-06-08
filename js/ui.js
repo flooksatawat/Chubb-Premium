@@ -2999,12 +2999,22 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     const _ageB = _sB.age || dB.age || _curAge;
     const _genA = _sA.gender || (genderA === 'ชาย' ? 'male' : 'female');
     const _genB = _sB.gender || (genderB === 'ชาย' ? 'male' : 'female');
+    const _modeA = _sA.mode || 'sum';
+    const _modeB = _sB.mode || 'sum';
+    const _valA  = _modeA === 'premium' ? (_sA.premium || dA.premium || 50000) : (_sA.sum || dA.sum || 1000000);
+    const _valB  = _modeB === 'premium' ? (_sB.premium || dB.premium || 50000) : (_sB.sum || dB.sum || 1000000);
     const _inp = 'style="width:52px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#f8fafc;color:#1e293b;outline:none;"';
     const _sel = 'style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;"';
     const _lbl = 'style="font-size:10px;font-weight:700;color:#94a3b8;white-space:nowrap;"';
+    const _valInp = (id, val) => `<input id="${id}" type="number" min="0" step="1000" value="${Math.round(val)}" style="width:90px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:right;background:#f8fafc;color:#1e293b;outline:none;" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">`;
+    const _modeToggle = (selId, valId, mode, color) => `
+        <select id="${selId}" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:${color};outline:none;" onchange="window._cmpApply()">
+            <option value="sum"${mode==='sum'?' selected':''}>ทุน ฿</option>
+            <option value="premium"${mode==='premium'?' selected':''}>เบี้ย ฿</option>
+        </select>`;
     const html = `<style>
         .cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}
-        #cmpAgeA:focus,#cmpAgeB:focus,#cmpGenA:focus,#cmpGenB:focus{border-color:#0d9488;background:#fff;}
+        #cmpAgeA:focus,#cmpAgeB:focus,#cmpValA:focus,#cmpValB:focus{border-color:#0d9488;background:#fff;}
     </style>
     <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
         <div style="padding:10px 14px 6px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -3012,34 +3022,52 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             <span style="font-weight:700;color:#334155;font-size:13px;">เปรียบเทียบแบบประกัน</span>
             <button onclick="window.resetRightPaneToPlaceholder()" style="margin-left:auto;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="fas fa-xmark"></i> ปิด</button>
         </div>
-        <!-- Settings bar: ปรับอายุ/เพศ แต่ละฝั่งได้ -->
-        <div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
-                <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
-                <span style="font-size:11px;font-weight:700;color:#0f766e;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${planA}</span>
-                ${(cfgA.options?.length > 1 && planA !== '868 / 818 Elite Saving') ? `<select id="cmpOptA" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgA.options.map(o=>`<option value="${o}"${o===optA?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
-                <span ${_lbl}>อายุ</span>
-                <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                <span ${_lbl}>ปี</span>
-                <select id="cmpGenA" ${_sel} onchange="window._cmpApply()">
-                    <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
-                    <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
-                </select>
+        <!-- Settings bar: ปรับอายุ/เพศ/ทุน/เบี้ย แต่ละฝั่งได้ -->
+        <div style="display:flex;align-items:flex-start;gap:6px;padding:8px 12px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;flex-wrap:wrap;">
+            <!-- Plan A -->
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
+                    <span style="font-size:11px;font-weight:700;color:#0f766e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${planA}</span>
+                    ${(cfgA.options?.length > 1 && planA !== '868 / 818 Elite Saving') ? `<select id="cmpOptA" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgA.options.map(o=>`<option value="${o}"${o===optA?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                    <span ${_lbl}>อายุ</span>
+                    <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+                    <span ${_lbl}>ปี</span>
+                    <select id="cmpGenA" ${_sel} onchange="window._cmpApply()">
+                        <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
+                        <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    ${_modeToggle('cmpModeA','cmpValA',_modeA,'#0f766e')}
+                    ${_valInp('cmpValA', _valA)}
+                </div>
             </div>
-            <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;">vs</span>
-            <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
-                <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
-                <span style="font-size:11px;font-weight:700;color:#6d28d9;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${planB}</span>
-                ${(cfgB.options?.length > 1 && planB !== '868 / 818 Elite Saving') ? `<select id="cmpOptB" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgB.options.map(o=>`<option value="${o}"${o===optB?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
-                <span ${_lbl}>อายุ</span>
-                <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                <span ${_lbl}>ปี</span>
-                <select id="cmpGenB" ${_sel} onchange="window._cmpApply()">
-                    <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
-                    <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
-                </select>
+            <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;align-self:center;">vs</span>
+            <!-- Plan B -->
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
+                    <span style="font-size:11px;font-weight:700;color:#6d28d9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${planB}</span>
+                    ${(cfgB.options?.length > 1 && planB !== '868 / 818 Elite Saving') ? `<select id="cmpOptB" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgB.options.map(o=>`<option value="${o}"${o===optB?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                    <span ${_lbl}>อายุ</span>
+                    <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+                    <span ${_lbl}>ปี</span>
+                    <select id="cmpGenB" ${_sel} onchange="window._cmpApply()">
+                        <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
+                        <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    ${_modeToggle('cmpModeB','cmpValB',_modeB,'#6d28d9')}
+                    ${_valInp('cmpValB', _valB)}
+                </div>
             </div>
-            <button onclick="window._cmpApply()" style="flex-shrink:0;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;"><i class="fas fa-rotate"></i> อัปเดต</button>
+            <button onclick="window._cmpApply()" style="flex-shrink:0;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;align-self:center;"><i class="fas fa-rotate"></i> อัปเดต</button>
         </div>
         <div style="overflow-x:auto;overflow-y:auto;flex:1;">
         <table style="width:100%;border-collapse:collapse;min-width:480px;">
@@ -3096,23 +3124,29 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     window.__cmpViewPlanB = planB;
 };
 
-// อัปเดตตาราง compare ด้วย age/gender ใหม่จาก settings bar
+// อัปเดตตาราง compare ด้วย age/gender/mode/value ใหม่จาก settings bar
 window._cmpApply = function() {
     const pA = window.__cmpViewPlanA, pB = window.__cmpViewPlanB;
     if (!pA || !pB) return;
     const _sA = window.__cmpSettingsA || {}, _sB = window.__cmpSettingsB || {};
     const ageA = parseInt(document.getElementById('cmpAgeA')?.value) || _sA.age || 0;
     const ageB = parseInt(document.getElementById('cmpAgeB')?.value) || _sB.age || 0;
-    if (ageA < 1 || ageA > 99) return; // ต้องมีอายุแบบที่ 1 อย่างน้อย
-    const genA = document.getElementById('cmpGenA')?.value || 'male';
-    const genB = document.getElementById('cmpGenB')?.value || 'male';
-    const optA = document.getElementById('cmpOptA')?.value || _sA.option || null;
-    const optB = document.getElementById('cmpOptB')?.value || _sB.option || null;
+    if (ageA < 1 || ageA > 99) return;
+    const genA  = document.getElementById('cmpGenA')?.value  || 'male';
+    const genB  = document.getElementById('cmpGenB')?.value  || 'male';
+    const optA  = document.getElementById('cmpOptA')?.value  || _sA.option || null;
+    const optB  = document.getElementById('cmpOptB')?.value  || _sB.option || null;
+    const modeA = document.getElementById('cmpModeA')?.value || _sA.mode || 'sum';
+    const modeB = document.getElementById('cmpModeB')?.value || _sB.mode || 'sum';
+    const rawValA = parseFloat(String(document.getElementById('cmpValA')?.value || '').replace(/,/g,'')) || 0;
+    const rawValB = parseFloat(String(document.getElementById('cmpValB')?.value || '').replace(/,/g,'')) || 0;
     const finalAgeB = (ageB >= 1 && ageB <= 99) ? ageB : ageA;
-    const sA = { age: ageA, gender: genA };
-    const sB = { age: finalAgeB, gender: genB };
+    const sA = { age: ageA, gender: genA, mode: modeA };
+    const sB = { age: finalAgeB, gender: genB, mode: modeB };
     if (optA) sA.option = optA;
     if (optB) sB.option = optB;
+    if (rawValA > 0) { if (modeA === 'sum') sA.sum = rawValA; else sA.premium = rawValA; }
+    if (rawValB > 0) { if (modeB === 'sum') sB.sum = rawValB; else sB.premium = rawValB; }
     window.renderCompareView(pA, pB, sA, sB);
 };
 
@@ -3180,19 +3214,25 @@ window.computeForPlan = function (planName, overrides) {
     if (planName === currentAppPlan && !overrides && lastCalculationData) return lastCalculationData;
 
     const cfg = PLAN_CONFIG[planName];
-    const ageInp = document.getElementById('ageInput');
+    const ageInp  = document.getElementById('ageInput');
+    const sumInp  = document.getElementById('sumInsuredInput');
+    const premInp = document.getElementById('premiumInput');
     const saved = {
         appPlan: currentAppPlan,
         plan: currentPlan,
         data: lastCalculationData,
-        mode: typeof currentMode !== 'undefined' ? currentMode : 'premium',
+        mode: typeof currentMode !== 'undefined' ? currentMode : 'sum',
         suppress: window.__suppressLive,
-        ageVal: ageInp ? ageInp.value : null,
+        ageVal:  ageInp  ? ageInp.value  : null,
+        sumVal:  sumInp  ? sumInp.value  : null,
+        premVal: premInp ? premInp.value : null,
         gender: typeof currentGender !== 'undefined' ? currentGender : null,
     };
     // Apply overrides temporarily
     if (overrides?.age && ageInp) ageInp.value = overrides.age;
     if (overrides?.gender && typeof currentGender !== 'undefined') currentGender = overrides.gender;
+    if (overrides?.mode === 'sum'     && overrides?.sum     && sumInp)  sumInp.value  = String(overrides.sum);
+    if (overrides?.mode === 'premium' && overrides?.premium && premInp) premInp.value = String(overrides.premium);
     window.__suppressLive = true;
     let result = null;
     try {
@@ -3205,7 +3245,7 @@ window.computeForPlan = function (planName, overrides) {
         } else {
             currentPlan = (cfg.options && cfg.options[0]) || currentPlan;
         }
-        if (typeof calculate === 'function') calculate(saved.mode, true);
+        if (typeof calculate === 'function') calculate(overrides?.mode || saved.mode, true);
         if (lastCalculationData) {
             result = Object.assign({}, lastCalculationData, { _planName: planName });
         }
@@ -3216,8 +3256,10 @@ window.computeForPlan = function (planName, overrides) {
         currentPlan = saved.plan;
         lastCalculationData = saved.data;
         window.__suppressLive = saved.suppress;
-        if (saved.ageVal !== null && ageInp) ageInp.value = saved.ageVal;
-        if (saved.gender !== null && typeof currentGender !== 'undefined') currentGender = saved.gender;
+        if (saved.ageVal  !== null && ageInp)  ageInp.value  = saved.ageVal;
+        if (saved.sumVal  !== null && sumInp)  sumInp.value  = saved.sumVal;
+        if (saved.premVal !== null && premInp) premInp.value = saved.premVal;
+        if (saved.gender  !== null && typeof currentGender !== 'undefined') currentGender = saved.gender;
     }
     return result;
 };
