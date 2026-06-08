@@ -2089,11 +2089,11 @@ function selectAppPlan(planName) {
             _cachedForPlan = null;
             currentAppPlan = planName;
             currentMode = 'sum';
-            const _cfg = PLAN_CONFIG[planName] || PLAN_CONFIG['CI Extra Plus'];
+            const _cfg2 = PLAN_CONFIG[planName] || PLAN_CONFIG['CI Extra Plus'];
             const _inpAge = document.getElementById('ageInput');
             const _curAge = parseInt(_inpAge?.value) || 0;
-            if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg.minAge || 1;
-            currentPlanOptions = _cfg.options || [];
+            if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg2.minAge || 1;
+            currentPlanOptions = _cfg2.options || [];
             const _ageVal = parseInt(_inpAge?.value) || 0;
             currentPlan = selectedOption || ((planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || ''));
             const _titleEl = document.getElementById('headerTitleText');
