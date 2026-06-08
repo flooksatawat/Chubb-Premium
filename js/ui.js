@@ -6065,6 +6065,15 @@ function generatePolicyTableData() {
             ${_lastBadgeDesktop}
         </div>`;
 
+    // ── ปุ่ม เปรียบเทียบ + แชร์ บนหัวตาราง: แสดงเฉพาะจอใหญ่กว่ามือถือ ──
+    {
+        const _wide = typeof window.isWideLayout === 'function' ? window.isWideLayout() : (window.innerWidth >= 600);
+        const _cmpBtn = document.getElementById('cmpFromTableBtn');
+        const _shrBtn = document.getElementById('tableShareBtn');
+        if (_cmpBtn) _cmpBtn.style.display = _wide ? 'flex' : 'none';
+        if (_shrBtn) _shrBtn.style.display = _wide ? 'flex' : 'none';
+    }
+
     // compact: เฉพาะจอแคบ (<400px) เท่านั้น — desktop ไม่ compact แม้มี SA column
     const _isCompact  = (isWXN || isElite || isTX || isLV) && _isNarrow;
     // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
