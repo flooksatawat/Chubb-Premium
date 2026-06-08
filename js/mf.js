@@ -445,6 +445,10 @@ window.mfInlineRender = function() {
         const label = [coName, planName, p.roomRate].filter(Boolean).join(' · ');
         window.currentMF = key;
         window._mfCurrentLabel = label;
+        // คำนวณใหม่เพื่อให้ premiumInput รวมเบี้ย MF ด้วย
+        if (typeof calculate === 'function') {
+            calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+        }
     }
 
     // Wide screen: auto-show table in right pane when selection complete

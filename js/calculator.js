@@ -175,6 +175,15 @@ function getHealthRate(categoryKey, planName, age, gender) {
         return 0;
     }
 
+    // MF (Medical Fund) — ดึงเบี้ยจาก mfBuildPremiumMap แทน LIFE_RATES
+    if (categoryKey === 'MF') {
+        if (typeof window.mfBuildPremiumMap === 'function' && typeof window.mfPremForAge === 'function') {
+            const _mfm = window.mfBuildPremiumMap(gender);
+            if (_mfm) return window.mfPremForAge(_mfm, age) || 0;
+        }
+        return 0;
+    }
+
     let cleanName = planName.trim();
     if (LIFE_RATES[cleanName]?.[gender]?.[age]) return LIFE_RATES[cleanName][gender][age];
     if (LIFE_RATES[categoryKey] && LIFE_RATES[categoryKey][cleanName]?.[gender]?.[age]) return LIFE_RATES[categoryKey][cleanName][gender][age];
