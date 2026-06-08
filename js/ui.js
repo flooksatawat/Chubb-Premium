@@ -2056,46 +2056,50 @@ function selectAppPlan(planName) {
         window.__cmpSlotPlanB  = null;
         const banner = document.getElementById('_cmpReplaceBanner');
         if (banner) banner.style.display = 'none';
-        const newA = slot === 'A' ? planName : curA;
-        const newB = slot === 'B' ? planName : curB;
         window.__cmpHighlightPlan = null;
-        window.renderCompareView(newA, newB);
-        // สลับ main plan ด้วย (ไม่ reset right pane เพราะ compare view อยู่แล้ว)
-        _cachedForPlan = null;
-        currentAppPlan = planName;
-        currentMode = 'sum';
-        const _cfg = PLAN_CONFIG[planName] || PLAN_CONFIG['CI Extra Plus'];
-        const _inpAge = document.getElementById('ageInput');
-        const _curAge = parseInt(_inpAge?.value) || 0;
-        if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg.minAge || 1;
-        currentPlanOptions = _cfg.options || [];
-        const _ageVal = parseInt(_inpAge?.value) || 0;
-        currentPlan = (planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || '');
-        const _titleEl = document.getElementById('headerTitleText');
-        if (_titleEl) { _titleEl.innerText = planName; if (typeof fitHeaderTitle === 'function') fitHeaderTitle(); }
-        const _planInfo = allInsurancePlans.find(p => p.name === planName);
-        if (_planInfo && typeof setText === 'function') setText('headerDescText', _planInfo.desc);
-        updateConditionsModal(planName);
-        if (typeof setPlan === 'function') setPlan(currentPlan);
-        if (typeof updateQuickPills === 'function') updateQuickPills(planName);
-        if (typeof window._updateMFPlanSelectorVisibility === 'function') window._updateMFPlanSelectorVisibility(planName);
         closePlanModal();
+        (async () => {
+            const newOpt = await window._cmpPickOption(planName);
+            if (newOpt === null) return;
+            const newA = slot === 'A' ? planName : curA;
+            const newB = slot === 'B' ? planName : curB;
+            const settNewPlan = newOpt ? { option: newOpt } : null;
+            const settA = slot === 'A' ? settNewPlan : (window.__cmpSettingsA || null);
+            const settB = slot === 'B' ? settNewPlan : (window.__cmpSettingsB || null);
+            window.renderCompareView(newA, newB, settA, settB);
+            // สลับ main plan ด้วย
+            _cachedForPlan = null;
+            currentAppPlan = planName;
+            currentMode = 'sum';
+            const _cfg = PLAN_CONFIG[planName] || PLAN_CONFIG['CI Extra Plus'];
+            const _inpAge = document.getElementById('ageInput');
+            const _curAge = parseInt(_inpAge?.value) || 0;
+            if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg.minAge || 1;
+            currentPlanOptions = _cfg.options || [];
+            const _ageVal = parseInt(_inpAge?.value) || 0;
+            currentPlan = newOpt || ((planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || ''));
+            const _titleEl = document.getElementById('headerTitleText');
+            if (_titleEl) { _titleEl.innerText = planName; if (typeof fitHeaderTitle === 'function') fitHeaderTitle(); }
+            const _planInfo = allInsurancePlans.find(p => p.name === planName);
+            if (_planInfo && typeof setText === 'function') setText('headerDescText', _planInfo.desc);
+            updateConditionsModal(planName);
+            if (typeof setPlan === 'function') setPlan(currentPlan);
+            if (typeof updateQuickPills === 'function') updateQuickPills(planName);
+            if (typeof window._updateMFPlanSelectorVisibility === 'function') window._updateMFPlanSelectorVisibility(planName);
+        })();
         return;
     }
 
     // ── Compare mode intercept ──
     if (window.__compareMode && window.__comparePlanA) {
         const planA = window.__comparePlanA;
-        if (planName !== planA) {
-            window.cancelCompareMode();
-            window.renderCompareView(planA, planName);
-            return;
-        } else {
-            // แตะแบบเดิมหลัง long-press — เปรียบเทียบแบบเดียวกัน (ต่างอายุ)
-            window.cancelCompareMode();
-            window.renderCompareView(planA, planName);
-            return;
-        }
+        window.cancelCompareMode();
+        (async () => {
+            const optB = await window._cmpPickOption(planName);
+            if (optB === null) return;
+            window.renderCompareView(planA, planName, null, optB ? { option: optB } : null);
+        })();
+        return;
     }
 
     _cachedForPlan = null; // invalidate card cache so active highlight updates
@@ -2760,6 +2764,43 @@ window._cmpCancelReplace = function() {
     if (sheet && window.__cmpViewPlanA) sheet.style.transform = 'translateY(0)';
 };
 
+// ── Compare option helpers ──
+window._cmpOptLabel = function(opt) {
+    if (!opt) return opt;
+    if (opt === 'AS60') return 'ชำระถึง 60 ปี';
+    const m = opt.match(/^(\d+)/);
+    if (m) return `ชำระ ${m[1]} ปี`;
+    const m2 = opt.match(/(\d+)$/);
+    if (m2) return `ชำระ ${m2[1]} ปี`;
+    return opt;
+};
+
+window._cmpPickOption = async function(planName) {
+    const opts = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]?.options) || [];
+    if (opts.length <= 1 || planName === '868 / 818 Elite Saving') return opts[0] || '';
+    const inputOptions = {};
+    opts.forEach(o => { inputOptions[o] = window._cmpOptLabel(o); });
+    const result = await Swal.fire({
+        title: `<span style="font-family:Kanit,sans-serif;font-size:15px;">เลือกระยะเวลาชำระ</span>`,
+        html: `<div style="font-family:Kanit,sans-serif;font-size:13px;color:#64748b;margin-bottom:4px;">${planName}</div>`,
+        input: 'radio',
+        inputOptions,
+        inputValue: opts[0],
+        confirmButtonText: 'เลือก',
+        showCancelButton: true,
+        cancelButtonText: 'ยกเลิก',
+        customClass: { confirmButton: 'swal2-confirm-kanit' },
+        didOpen: () => {
+            document.querySelectorAll('.swal2-radio label').forEach(el => {
+                el.style.fontFamily = 'Kanit,sans-serif';
+                el.style.fontSize = '14px';
+            });
+        }
+    });
+    if (!result.isConfirmed) return null;
+    return result.value || opts[0];
+};
+
 window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
@@ -2774,9 +2815,9 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     const dA = (planA === currentAppPlan && !hasOverrideA)
         ? Object.assign({}, lastCalculationData, { _planName: planA })
         : window.computeForPlan(planA, settingsA);
-    const optA = (planA === currentAppPlan && !hasOverrideA) ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || '');
+    const optA = settingsA?.option || ((planA === currentAppPlan && !hasOverrideA) ? savedPlan : ((PLAN_CONFIG[planA]?.options || [])[0] || ''));
     const dB = window.computeForPlan(planB, settingsB);
-    const optB = (PLAN_CONFIG[planB]?.options || [])[0] || '';
+    const optB = settingsB?.option || (PLAN_CONFIG[planB]?.options || [])[0] || '';
     if (!dA || !dB) { showCustomError('ไม่สามารถคำนวณข้อมูลเปรียบเทียบได้'); return; }
 
     const fmt  = n => Math.round(n).toLocaleString();
@@ -2960,7 +3001,8 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
         <div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
                 <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
-                <span style="font-size:11px;font-weight:700;color:#0f766e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planA}</span>
+                <span style="font-size:11px;font-weight:700;color:#0f766e;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${planA}</span>
+                ${(cfgA.options?.length > 1 && planA !== '868 / 818 Elite Saving') ? `<select id="cmpOptA" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgA.options.map(o=>`<option value="${o}"${o===optA?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
                 <span ${_lbl}>อายุ</span>
                 <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
                 <span ${_lbl}>ปี</span>
@@ -2972,7 +3014,8 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
             <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;">vs</span>
             <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
                 <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
-                <span style="font-size:11px;font-weight:700;color:#6d28d9;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${planB}</span>
+                <span style="font-size:11px;font-weight:700;color:#6d28d9;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${planB}</span>
+                ${(cfgB.options?.length > 1 && planB !== '868 / 818 Elite Saving') ? `<select id="cmpOptB" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgB.options.map(o=>`<option value="${o}"${o===optB?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
                 <span ${_lbl}>อายุ</span>
                 <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
                 <span ${_lbl}>ปี</span>
@@ -3048,11 +3091,14 @@ window._cmpApply = function() {
     if (ageA < 1 || ageA > 99) return; // ต้องมีอายุแบบที่ 1 อย่างน้อย
     const genA = document.getElementById('cmpGenA')?.value || 'male';
     const genB = document.getElementById('cmpGenB')?.value || 'male';
-    const finalAgeB = (ageB >= 1 && ageB <= 99) ? ageB : ageA; // fallback = อายุแบบที่ 1
-    window.renderCompareView(pA, pB,
-        { age: ageA, gender: genA },
-        { age: finalAgeB, gender: genB }
-    );
+    const optA = document.getElementById('cmpOptA')?.value || _sA.option || null;
+    const optB = document.getElementById('cmpOptB')?.value || _sB.option || null;
+    const finalAgeB = (ageB >= 1 && ageB <= 99) ? ageB : ageA;
+    const sA = { age: ageA, gender: genA };
+    const sB = { age: finalAgeB, gender: genB };
+    if (optA) sA.option = optA;
+    if (optB) sB.option = optB;
+    window.renderCompareView(pA, pB, sA, sB);
 };
 
 window._cmpApplyTimer = null;
@@ -3136,7 +3182,14 @@ window.computeForPlan = function (planName, overrides) {
     let result = null;
     try {
         currentAppPlan = planName;
-        currentPlan = (cfg.options && cfg.options[0]) || currentPlan;
+        const _eliteAge = overrides?.age ? parseInt(overrides.age) : (parseInt(ageInp?.value) || 0);
+        if (overrides?.option) {
+            currentPlan = overrides.option;
+        } else if (planName === '868 / 818 Elite Saving') {
+            currentPlan = _eliteAge <= 50 ? 'S868' : 'S818';
+        } else {
+            currentPlan = (cfg.options && cfg.options[0]) || currentPlan;
+        }
         if (typeof calculate === 'function') calculate(saved.mode, true);
         if (lastCalculationData) {
             result = Object.assign({}, lastCalculationData, { _planName: planName });
