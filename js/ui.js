@@ -3309,7 +3309,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     // ── Settings bar: single-line card per plan ──
     const _cs = (color, border) => `padding:3px 5px;border:1px solid ${border};border-radius:6px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#fff;color:${color};outline:none;`;
     const _ci = (color, border, w) => `width:${w||'42px'};padding:3px 4px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#fff;color:${color};outline:none;`;
-    const _cv = (color, border) => `flex:1;min-width:0;padding:3px 5px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:right;background:#fff;color:${color};outline:none;`;
+    const _cv = (color, border) => `width:85px;padding:3px 5px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:right;background:#fff;color:${color};outline:none;`;
 
     const _mkCard = (letter, pName, cfg, optVal, ageVal, genVal, modeVal, valVal, bg, border, color, dot) => {
         const optSel = (cfg.options?.length > 1 && pName !== '868 / 818 Elite Saving')
@@ -3317,7 +3317,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             : '';
         return `<div style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;">
             <div style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
-            <span style="font-size:11px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;flex-shrink:0;" title="${pName}">${pName}</span>
+            <span style="font-size:11px;font-weight:700;color:${color};white-space:nowrap;flex-shrink:0;">${pName}</span>
             ${optSel ? `<span style="color:#cbd5e1;font-size:10px;flex-shrink:0;">|</span>${optSel}` : ''}
             <span style="color:#cbd5e1;font-size:10px;flex-shrink:0;">|</span>
             <span style="font-size:10px;color:#94a3b8;font-weight:600;flex-shrink:0;white-space:nowrap;">อายุ</span>
@@ -5982,7 +5982,7 @@ function generatePolicyTableData() {
             // จอใหญ่กว่ามือถือ → รวมปุ่มเปรียบเทียบ+แชร์ ไว้ในแถว toggle เดียวกัน
             const _wideTbl = (typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 600);
             const _tblBtns = _wideTbl ? `
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-2 shrink-0 pl-3 ml-2 border-l border-slate-200">
                     <button onclick="window._startCmpFromTable()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#0369a1,#1e40af);box-shadow:0 2px 8px rgba(3,105,161,0.3);"><i class="fas fa-code-compare text-[11px]"></i> เปรียบเทียบ</button>
                     <button onclick="exportTableToPDF('modal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#059669,#0d9488);box-shadow:0 2px 8px rgba(5,150,105,0.3);"><i class="fas fa-share-nodes text-[11px]"></i> แชร์</button>
                 </div>` : '';
@@ -6001,10 +6001,8 @@ function generatePolicyTableData() {
             if (_wideTbl) {
                 // จอใหญ่: toggle ชิดซ้าย + ปุ่มชิดขวา ในบรรทัดเดียว
                 _menuInner = `
-                    <div class="flex items-center gap-4 min-w-0 flex-1">
-                        <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
-                        ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-1 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
-                    </div>
+                    <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
+                    ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-2 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
                     ${_tblBtns}`;
             } else {
                 // มือถือ: คงเดิม (toggle กระจายเต็มแถว)
