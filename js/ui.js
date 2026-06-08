@@ -2653,10 +2653,16 @@ window.__comparePlan = null;
 
     window._tppSelectPlan = function(planName) {
         window.closeTablePlanPicker();
+        // เลือกแบบประกันจากหน้าคำนวณ → ทำงานเหมือน popup: term picker + auto-fill เบี้ยออม
+        // (mfSelectMainPlan → mfApplyMainPlan ซึ่ง auto-fill = MF ตลอดชีพ ÷ payYears แล้ว switchView)
         setTimeout(() => {
-            if (typeof selectAppPlan === 'function') selectAppPlan(planName);
-            if (typeof calculate === 'function') calculate('premium');
-            setTimeout(() => { if (typeof switchView === 'function') switchView('table'); }, 80);
+            if (typeof window.mfSelectMainPlan === 'function') {
+                window.mfSelectMainPlan(planName);
+            } else if (typeof selectAppPlan === 'function') {
+                selectAppPlan(planName);
+                if (typeof calculate === 'function') calculate('premium');
+                setTimeout(() => { if (typeof switchView === 'function') switchView('table'); }, 80);
+            }
         }, 100);
     };
 
