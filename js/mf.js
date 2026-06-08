@@ -801,6 +801,16 @@ window.mfGenerateTable = function() {
     }
     window._mfLastAlertKey = null;
 
+    // อายุถูกต้อง + เลือกแผนครบ → เด้ง popup เลือกแบบประกันออม
+    // (รองรับกรณีกรอกอายุ "หลัง" เลือกแผน ซึ่งตอนเลือกแผน popup เคย return เพราะยังไม่มีอายุ)
+    // key-guard กันไม่ให้เด้งซ้ำตอน re-render ที่ไม่ได้เปลี่ยน แผน/อายุ/เพศ
+    const _mfPopupGender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const _mfPopupKey = `${p.company}|${p.plan}|${p.roomRate || ''}|${curAge}|${_mfPopupGender}`;
+    if (window._mfPopupShownKey !== _mfPopupKey) {
+        window._mfPopupShownKey = _mfPopupKey;
+        if (typeof mfScheduleTotalPopup === 'function') mfScheduleTotalPopup();
+    }
+
     const startEl = document.getElementById('mfInlineAgeStart');
     const endEl = document.getElementById('mfInlineAgeEnd');
     const defaultStart = Math.max(curAge, dataMin);
