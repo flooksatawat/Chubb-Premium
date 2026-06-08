@@ -2826,7 +2826,7 @@ window._cmpPickOption = async function(planName) {
     const _initGender = (typeof currentGender !== 'undefined' && currentGender) || 'male';
 
     const _sumPills  = [500000,1000000,3000000,5000000,10000000];
-    const _premPills = [10000,24000,50000,100000,200000];
+    const _premPills = [100000,200000,500000,1000000,2000000];
     const _fmtPill = n => n >= 1000000 ? `${n/1000000} ล้าน` : n >= 100000 ? `${n/100000} แสน` : n >= 10000 ? `${n/10000} หมื่น` : n.toLocaleString();
     // segmented pills เหมือนหน้าหลัก (เต็มความกว้าง แบ่งเท่ากัน)
     const _makePills = (arr) => arr.map(v =>
