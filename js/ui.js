@@ -2849,7 +2849,7 @@ window._cmpPickOption = async function(planName) {
 
     const r = await Swal.fire({
         title: '',
-        width: 380,
+        width: Math.min(340, window.innerWidth - 20),
         html: `
         <div style="font-family:Kanit,sans-serif;text-align:left;">
 
@@ -2930,7 +2930,7 @@ window._cmpPickOption = async function(planName) {
             const s = document.createElement('style');
             s.id = '_cmpSwalStyle';
             s.textContent = `
-                ._cmpSwalPopup { border-radius: 24px !important; padding: 22px 20px 18px !important; box-shadow: 0 20px 60px rgba(15,23,42,0.18) !important; overflow: hidden !important; }
+                ._cmpSwalPopup { border-radius: 20px !important; padding: 16px 15px 14px !important; box-shadow: 0 20px 60px rgba(15,23,42,0.18) !important; overflow: hidden !important; }
                 ._cmpSwalPopup .swal2-html-container { overflow: hidden !important; margin: 0 !important; }
                 ._cmpSwalActions { gap: 9px !important; margin-top: 18px !important; width: 100% !important; }
                 ._cmpSwalConfirm { flex: 2 !important; background: linear-gradient(135deg,#0d9488,#7c3aed) !important; color:#fff !important; border:none !important; border-radius: 13px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; font-size: 14.5px !important; padding: 12px 16px !important; box-shadow: 0 6px 16px rgba(124,58,237,0.3) !important; transition: all 0.15s !important; }
@@ -3170,7 +3170,12 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
 
     const isSamePlan = planA === planB;
 
-    let bodyRows = '';
+    const fA  = (v, bold, color) => v !== null && v !== undefined && v > 0
+        ? `<span style="${bold?'font-weight:700;':''}color:${color};">${fmt(v)}</span>`
+        : '<span style="color:#cbd5e1;">—</span>';
+    const fAn = (v) => v > 0 ? fmt(v) : '<span style="color:#cbd5e1;">—</span>';
+
+    let bodyRows = '', mobileBodyRowsA = '', mobileBodyRowsB = '';
     for (let i = 0; i < maxRows; i++) {
         const rA = rowsA[i];
         const rB = rowsB[i];
@@ -3179,11 +3184,6 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         const odd = i % 2 === 0;
         const isBeA = i === beIdxA;
         const isBeB = i === beIdxB;
-
-        const fA  = (v, bold, color) => v !== null && v !== undefined && v > 0
-            ? `<span style="${bold?'font-weight:700;':''}color:${color};">${fmt(v)}</span>`
-            : '<span style="color:#cbd5e1;">—</span>';
-        const fAn = (v) => v > 0 ? fmt(v) : '<span style="color:#cbd5e1;">—</span>';
 
         const savA = rA ? fAn(rA.annSav) : '—';
         const cfA  = rA ? (hasCF_A ? fA(rA.cfAmt, true, '#2563eb') : fA(rA.currentSA, false, '#475569')) : '—';
@@ -3214,9 +3214,76 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             <td style="${tdBase}">${cfB}</td>
             <td style="${tdNetB}">${netB}</td>
         </tr>`;
+
+        // Mobile: แยกแถวสำหรับแต่ละแผน (บนล่าง)
+        const _mTd  = (hl) => `font-size:12px;font-variant-numeric:tabular-nums;padding:5px 5px;text-align:right;background:${hl?'#d1fae5':bg};${hl?'border-top:2px solid #34d399;border-bottom:2px solid #34d399;':bdBot}`;
+        const _mTdC = (hl, c) => `font-size:12px;padding:5px 5px;text-align:center;color:${c};background:${hl?'#d1fae5':bg};${hl?'border-top:2px solid #34d399;border-bottom:2px solid #34d399;':bdBot}`;
+        if (rA) {
+            mobileBodyRowsA += `<tr>
+                <td style="${_mTdC(isBeA,'#475569')}">${rA.age}${isBeA?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
+                <td style="${_mTd(isBeA)}">${savA}</td>
+                <td style="${_mTd(isBeA)}">${cfA}</td>
+                <td style="${_mTd(isBeA)}">${netA}</td>
+            </tr>`;
+        }
+        if (rB) {
+            mobileBodyRowsB += `<tr>
+                <td style="${_mTdC(isBeB,'#7c3aed')}">${rB.age}${isBeB?'<span style="font-size:9px;color:#059669;display:block;line-height:1;">★คุ้มทุน</span>':''}</td>
+                <td style="${_mTd(isBeB)}">${savB}</td>
+                <td style="${_mTd(isBeB)}">${cfB}</td>
+                <td style="${_mTd(isBeB)}">${netB}</td>
+            </tr>`;
+        }
     }
 
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
+    const _mTh = (c) => `style="padding:6px 5px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;color:${c};"`;
+    const mobileTablesHtml = `
+        <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;padding:8px 8px 4px;">
+            <div style="border-radius:12px;overflow:hidden;border:1.5px solid #0d9488;box-shadow:0 2px 8px rgba(13,148,136,0.12);">
+                <div style="background:linear-gradient(135deg,#0d9488,#0369a1);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._cmpStartReplace('A','${planA}','${planB}')">
+                    <span style="font-size:12px;font-weight:700;color:#fff;">${planA}</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.85);">อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:3px;"></i></span>
+                </div>
+                <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#e6f7f6;">
+                            <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#0f766e;">อายุ</th>
+                            <th ${_mTh('#0f766e')}>ออมเงิน</th>
+                            <th ${_mTh('#0f766e')}>${cfHdrA}</th>
+                            <th ${_mTh('#0f766e')}>เงินสดพร้อมใช้</th>
+                        </tr>
+                    </thead>
+                    <tbody>${mobileBodyRowsA}</tbody>
+                </table>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:2px 4px;flex-shrink:0;">
+                <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+                <span style="font-size:11px;font-weight:800;color:#94a3b8;letter-spacing:1px;">VS</span>
+                <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;border:1.5px solid #7c3aed;box-shadow:0 2px 8px rgba(124,58,237,0.12);">
+                <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._cmpStartReplace('B','${planA}','${planB}')">
+                    <span style="font-size:12px;font-weight:700;color:#fff;">${planB}</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.85);">อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:3px;"></i></span>
+                </div>
+                <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f3f0ff;">
+                            <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#6d28d9;">อายุ</th>
+                            <th ${_mTh('#6d28d9')}>ออมเงิน</th>
+                            <th ${_mTh('#6d28d9')}>${cfHdrB}</th>
+                            <th ${_mTh('#6d28d9')}>เงินสดพร้อมใช้</th>
+                        </tr>
+                    </thead>
+                    <tbody>${mobileBodyRowsB}</tbody>
+                </table>
+                </div>
+            </div>
+        </div>`;
     const _sA = settingsA || {}, _sB = settingsB || {};
     const _curAge = parseInt(document.getElementById('ageInput')?.value) || 0;
     const _ageA = _sA.age || dA.age || _curAge;
@@ -3292,7 +3359,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             <button onclick="window._cmpClose()" style="margin-left:auto;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="fas fa-xmark"></i> ปิด</button>
         </div>
         ${settingsBar}
-        <div style="overflow-x:auto;overflow-y:auto;flex:1;">
+        ${isWide ? `<div style="overflow-x:auto;overflow-y:auto;flex:1;">
         <table style="width:100%;border-collapse:collapse;min-width:480px;">
             <thead>
                 <tr style="background:linear-gradient(135deg,#0d9488,#0369a1);color:#fff;position:sticky;top:0;z-index:2;">
@@ -3312,7 +3379,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             </thead>
             <tbody>${bodyRows}</tbody>
         </table>
-        </div>
+        </div>` : mobileTablesHtml}
         <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;border-top:1px solid #e2e8f0;">
             <button onclick="selectAppPlan('${planA}')" style="padding:8px;border-radius:10px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;"><i class="fas fa-arrow-right"></i> เลือก ${planA}</button>
             <button onclick="selectAppPlan('${planB}')" style="padding:8px;border-radius:10px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;cursor:pointer;"><i class="fas fa-arrow-right"></i> เลือก ${planB}</button>
