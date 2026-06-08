@@ -2827,21 +2827,22 @@ window._cmpPickOption = async function(planName) {
 
     const _sumPills  = [500000,1000000,3000000,5000000,10000000];
     const _premPills = [10000,24000,50000,100000,200000];
-    const _fmtPill = n => n >= 1000000 ? `${n/1000000}ล้าน` : n >= 100000 ? `${n/100000}แสน` : n >= 10000 ? `${n/10000}หมื่น` : n.toLocaleString();
+    const _fmtPill = n => n >= 1000000 ? `${n/1000000} ล้าน` : n >= 100000 ? `${n/100000} แสน` : n >= 10000 ? `${n/10000} หมื่น` : n.toLocaleString();
     const _makePills = (arr) => arr.map(v =>
-        `<button type="button" onclick="document.getElementById('_cmpAmtVal').value='${v}';document.getElementById('_cmpAmtVal').dispatchEvent(new Event('input'));"
-            style="padding:5px 11px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;font-family:Kanit,sans-serif;font-size:12px;font-weight:700;color:#475569;cursor:pointer;transition:all 0.15s;"
-            onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd';"
-            onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0';">${_fmtPill(v)}</button>`
+        `<button type="button" onclick="document.getElementById('_cmpAmtVal').value='${v}';document.getElementById('_cmpAmtVal').dispatchEvent(new Event('input'));window._cmpHiPill('${v}');"
+            id="_cmpPill_${v}"
+            style="flex:1;min-width:60px;padding:7px 4px;border-radius:9px;border:1.5px solid #e9d5ff;background:#fff;font-family:Kanit,sans-serif;font-size:12.5px;font-weight:700;color:#7c3aed;cursor:pointer;transition:all 0.15s;white-space:nowrap;"
+            onmouseover="if(this.dataset.on!=='1'){this.style.background='#f5f3ff';}"
+            onmouseout="if(this.dataset.on!=='1'){this.style.background='#fff';}">${_fmtPill(v)}</button>`
     ).join('');
 
     const _optSection = hasMultiOpts ? `
-        <div style="background:#f0f9ff;border-radius:12px;padding:12px 14px;">
-            <p style="font-size:11px;color:#0369a1;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">ระยะเวลาชำระ</p>
-            <div style="display:flex;flex-wrap:wrap;gap:7px;" id="_cmpOptBtns">
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+            <p style="font-size:12px;color:#0369a1;font-weight:700;margin:0 0 9px;display:flex;align-items:center;gap:6px;"><i class="fas fa-calendar-check" style="font-size:11px;"></i> ระยะเวลาชำระเบี้ย</p>
+            <div style="display:flex;gap:7px;" id="_cmpOptBtns">
                 ${opts.map((o, i) => `
                     <button type="button" id="_cmpOpt_${o}" onclick="window._cmpSetOpt('${o}')"
-                        style="padding:7px 18px;border-radius:10px;border:2px solid ${i===0?'#0369a1':'#e2e8f0'};background:${i===0?'#0369a1':'#fff'};color:${i===0?'#fff':'#64748b'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">
+                        style="flex:1;padding:9px 6px;border-radius:11px;border:2px solid ${i===0?'#0369a1':'#e2e8f0'};background:${i===0?'#0369a1':'#fff'};color:${i===0?'#fff':'#64748b'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
                         ${window._cmpOptLabel(o)}
                     </button>`).join('')}
             </div>
@@ -2849,62 +2850,109 @@ window._cmpPickOption = async function(planName) {
         </div>` : '';
 
     const r = await Swal.fire({
-        title: `<div style="font-family:Kanit,sans-serif;font-size:16px;font-weight:800;color:#1e293b;">ตั้งค่าการเปรียบเทียบ</div>`,
+        title: '',
         html: `
-        <div style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:10px;text-align:left;">
+        <div style="font-family:Kanit,sans-serif;text-align:left;">
+
+            <!-- Header -->
+            <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;">
+                <div style="width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#0d9488,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(124,58,237,0.25);">
+                    <i class="fas fa-code-compare" style="color:#fff;font-size:17px;"></i>
+                </div>
+                <div style="min-width:0;">
+                    <div style="font-size:16.5px;font-weight:800;color:#1e293b;line-height:1.2;">ตั้งค่าการเปรียบเทียบ</div>
+                    <div style="font-size:12px;color:#94a3b8;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${planName}</div>
+                </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:11px;">
 
             <!-- Age + Gender -->
-            <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:12px;padding:12px 14px;">
-                <p style="font-size:11px;color:#059669;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">ข้อมูลผู้เอาประกัน</p>
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:13px;color:#374151;font-weight:600;">อายุ</span>
+            <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                <p style="font-size:12px;color:#059669;font-weight:700;margin:0 0 9px;display:flex;align-items:center;gap:6px;"><i class="fas fa-user" style="font-size:11px;"></i> ผู้เอาประกัน</p>
+                <div style="display:flex;align-items:center;gap:9px;">
+                    <div style="display:flex;align-items:center;gap:7px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:4px 12px;">
+                        <span style="font-size:13px;color:#64748b;font-weight:600;">อายุ</span>
                         <input id="_cmpAgeInp" type="number" min="1" max="99" value="${_initAge > 0 ? _initAge : ''}" placeholder="–"
-                            style="width:56px;padding:7px 6px;border:2px solid #6ee7b7;border-radius:9px;font-size:16px;font-weight:800;text-align:center;font-family:Kanit,sans-serif;outline:none;color:#065f46;background:#fff;"
-                            onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#6ee7b7'">
-                        <span style="font-size:13px;color:#374151;font-weight:600;">ปี</span>
+                            style="width:48px;padding:4px 2px;border:none;font-size:18px;font-weight:800;text-align:center;font-family:Kanit,sans-serif;outline:none;color:#0f766e;background:transparent;">
+                        <span style="font-size:13px;color:#94a3b8;font-weight:600;">ปี</span>
                     </div>
-                    <select id="_cmpGenInp" style="padding:7px 10px;border:2px solid #6ee7b7;border-radius:9px;font-size:13px;font-family:Kanit,sans-serif;font-weight:700;background:#fff;color:#065f46;outline:none;cursor:pointer;">
-                        <option value="male" ${_initGender==='male'?'selected':''}>ชาย</option>
-                        <option value="female" ${_initGender==='female'?'selected':''}>หญิง</option>
-                    </select>
+                    <div style="display:flex;gap:6px;flex:1;">
+                        <button id="_cmpG_male" type="button" onclick="window._cmpSetGen('male')"
+                            style="flex:1;padding:9px 4px;border-radius:11px;border:2px solid ${_initGender==='male'?'#0ea5e9':'#e2e8f0'};background:${_initGender==='male'?'#0ea5e9':'#fff'};color:${_initGender==='male'?'#fff':'#94a3b8'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;"><i class="fas fa-mars" style="font-size:11px;margin-right:4px;"></i>ชาย</button>
+                        <button id="_cmpG_female" type="button" onclick="window._cmpSetGen('female')"
+                            style="flex:1;padding:9px 4px;border-radius:11px;border:2px solid ${_initGender==='female'?'#ec4899':'#e2e8f0'};background:${_initGender==='female'?'#ec4899':'#fff'};color:${_initGender==='female'?'#fff':'#94a3b8'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;"><i class="fas fa-venus" style="font-size:11px;margin-right:4px;"></i>หญิง</button>
+                    </div>
+                    <input type="hidden" id="_cmpGenInp" value="${_initGender}">
                 </div>
             </div>
 
             ${_optSection}
 
             <!-- Mode + Amount -->
-            <div style="background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:12px 14px;">
-                <p style="font-size:11px;color:#7c3aed;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">จำนวนเงิน</p>
+            <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                <p style="font-size:12px;color:#7c3aed;font-weight:700;margin:0 0 9px;display:flex;align-items:center;gap:6px;"><i class="fas fa-coins" style="font-size:11px;"></i> จำนวนเงิน</p>
                 <div style="display:flex;gap:7px;margin-bottom:10px;">
                     <button id="_cmpM_sum" type="button" onclick="window._cmpSetMode('sum')"
-                        style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid #0d9488;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">ทุนประกัน</button>
+                        style="flex:1;padding:9px 4px;border-radius:11px;border:2px solid #0d9488;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">ทุนประกัน</button>
                     <button id="_cmpM_prem" type="button" onclick="window._cmpSetMode('premium')"
-                        style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#94a3b8;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">เบี้ยประกัน</button>
+                        style="flex:1;padding:9px 4px;border-radius:11px;border:2px solid #e2e8f0;background:#fff;color:#94a3b8;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">เบี้ยประกัน</button>
                 </div>
                 <input type="hidden" id="_cmpModeVal" value="sum">
-                <input id="_cmpAmtVal" type="text" placeholder="เช่น 1ล้าน · 5แสน · 50000"
-                    style="width:100%;box-sizing:border-box;padding:9px 12px;border:2px solid #ddd6fe;border-radius:10px;font-size:15px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;outline:none;color:#1e293b;background:#fff;"
-                    onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#ddd6fe'">
-                <div id="_cmpPillsBox" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">${_makePills(_sumPills)}</div>
+                <div style="position:relative;">
+                    <input id="_cmpAmtVal" type="text" inputmode="numeric" placeholder="ระบุจำนวนเงิน"
+                        style="width:100%;box-sizing:border-box;padding:11px 38px 11px 14px;border:2px solid #ddd6fe;border-radius:12px;font-size:18px;font-family:Kanit,sans-serif;font-weight:800;text-align:right;outline:none;color:#1e293b;background:#faf5ff;"
+                        oninput="window._cmpHiPill(null)"
+                        onfocus="this.style.borderColor='#7c3aed';this.style.background='#fff';" onblur="this.style.borderColor='#ddd6fe';this.style.background='#faf5ff';">
+                    <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:14px;color:#94a3b8;font-weight:700;pointer-events:none;">฿</span>
+                </div>
+                <div id="_cmpPillsBox" style="display:flex;gap:5px;margin-top:9px;">${_makePills(_sumPills)}</div>
+                <p style="font-size:10.5px;color:#cbd5e1;font-weight:600;margin:7px 0 0;text-align:center;">รองรับ 1ล้าน · 5แสน · 50000</p>
+            </div>
             </div>
         </div>`,
-        confirmButtonText: '<i class="fas fa-code-compare" style="margin-right:6px;"></i>เปรียบเทียบ',
+        confirmButtonText: '<i class="fas fa-arrow-right" style="margin-right:7px;"></i>เปรียบเทียบ',
         showCancelButton: true,
         cancelButtonText: 'ยกเลิก',
-        customClass: { popup: '_cmpSwalPopup', confirmButton: '_cmpSwalConfirm' },
+        buttonsStyling: false,
+        customClass: { popup: '_cmpSwalPopup', confirmButton: '_cmpSwalConfirm', cancelButton: '_cmpSwalCancel', actions: '_cmpSwalActions' },
         didOpen: () => {
             // inject custom styles
-            if (!document.getElementById('_cmpSwalStyle')) {
-                const s = document.createElement('style');
-                s.id = '_cmpSwalStyle';
-                s.textContent = `
-                    ._cmpSwalPopup { border-radius: 20px !important; padding: 20px 20px 16px !important; max-width: 360px !important; }
-                    ._cmpSwalConfirm { background: linear-gradient(135deg,#0d9488,#7c3aed) !important; border-radius: 10px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; padding: 10px 24px !important; }
-                    .swal2-cancel { border-radius: 10px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; }
-                `;
-                document.head.appendChild(s);
-            }
+            const _st = document.getElementById('_cmpSwalStyle');
+            if (_st) _st.remove();
+            const s = document.createElement('style');
+            s.id = '_cmpSwalStyle';
+            s.textContent = `
+                ._cmpSwalPopup { border-radius: 24px !important; padding: 22px 20px 18px !important; max-width: 380px !important; box-shadow: 0 20px 60px rgba(15,23,42,0.18) !important; }
+                ._cmpSwalActions { gap: 9px !important; margin-top: 18px !important; width: 100% !important; }
+                ._cmpSwalConfirm { flex: 2 !important; background: linear-gradient(135deg,#0d9488,#7c3aed) !important; color:#fff !important; border:none !important; border-radius: 13px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; font-size: 14.5px !important; padding: 12px 16px !important; box-shadow: 0 6px 16px rgba(124,58,237,0.3) !important; transition: all 0.15s !important; }
+                ._cmpSwalConfirm:hover { transform: translateY(-1px) !important; box-shadow: 0 8px 20px rgba(124,58,237,0.4) !important; }
+                ._cmpSwalCancel { flex: 1 !important; background: #f1f5f9 !important; color:#64748b !important; border:none !important; border-radius: 13px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; font-size: 14.5px !important; padding: 12px 16px !important; transition: all 0.15s !important; }
+                ._cmpSwalCancel:hover { background: #e2e8f0 !important; }
+                #_cmpAgeInp::-webkit-outer-spin-button,#_cmpAgeInp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+            `;
+            document.head.appendChild(s);
+
+            window._cmpSetGen = (g) => {
+                document.getElementById('_cmpGenInp').value = g;
+                const bm = document.getElementById('_cmpG_male'), bf = document.getElementById('_cmpG_female');
+                if (g === 'male') {
+                    bm.style.cssText += ';background:#0ea5e9;color:#fff;border-color:#0ea5e9;';
+                    bf.style.cssText += ';background:#fff;color:#94a3b8;border-color:#e2e8f0;';
+                } else {
+                    bf.style.cssText += ';background:#ec4899;color:#fff;border-color:#ec4899;';
+                    bm.style.cssText += ';background:#fff;color:#94a3b8;border-color:#e2e8f0;';
+                }
+            };
+            window._cmpHiPill = (v) => {
+                document.querySelectorAll('#_cmpPillsBox button').forEach(btn => {
+                    const on = v !== null && btn.id === `_cmpPill_${v}`;
+                    btn.dataset.on = on ? '1' : '0';
+                    btn.style.background  = on ? '#7c3aed' : '#fff';
+                    btn.style.color       = on ? '#fff' : '#7c3aed';
+                    btn.style.borderColor = on ? '#7c3aed' : '#e9d5ff';
+                });
+            };
             window._cmpSetMode = (m) => {
                 document.getElementById('_cmpModeVal').value = m;
                 const btnSum  = document.getElementById('_cmpM_sum');
