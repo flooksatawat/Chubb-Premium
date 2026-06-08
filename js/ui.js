@@ -5934,9 +5934,10 @@ function generatePolicyTableData() {
             if (_wideTbl) {
                 // จอใหญ่: toggle ชิดซ้าย + ปุ่มชิดขวา ในบรรทัดเดียว
                 _menuInner = `
-                    <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
-                    ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-3 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
-                    <div class="flex-1 min-w-[12px]"></div>
+                    <div class="flex items-center gap-4 min-w-0 flex-1">
+                        <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
+                        ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-1 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
+                    </div>
                     ${_tblBtns}`;
             } else {
                 // มือถือ: คงเดิม (toggle กระจายเต็มแถว)
