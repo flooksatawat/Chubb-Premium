@@ -6080,7 +6080,7 @@ function generatePolicyTableData() {
             // จอใหญ่กว่ามือถือ → รวมปุ่มเปรียบเทียบ+แชร์ ไว้ในแถว toggle เดียวกัน
             const _wideTbl = (typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 600);
             const _tblBtns = _wideTbl ? `
-                <div class="flex items-center gap-2 shrink-0 pl-3 ml-2 border-l border-slate-200">
+                <div class="flex items-center gap-2 shrink-0 ml-auto pl-3 border-l border-slate-200">
                     <button onclick="window._startCmpFromTable()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#0369a1,#1e40af);box-shadow:0 2px 8px rgba(3,105,161,0.3);"><i class="fas fa-code-compare text-[11px]"></i> เปรียบเทียบ</button>
                     <button onclick="exportTableToPDF('modal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#059669,#0d9488);box-shadow:0 2px 8px rgba(5,150,105,0.3);"><i class="fas fa-share-nodes text-[11px]"></i> แชร์</button>
                 </div>` : '';
