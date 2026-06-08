@@ -3022,52 +3022,40 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             <span style="font-weight:700;color:#334155;font-size:13px;">เปรียบเทียบแบบประกัน</span>
             <button onclick="window.resetRightPaneToPlaceholder()" style="margin-left:auto;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="fas fa-xmark"></i> ปิด</button>
         </div>
-        <!-- Settings bar: ปรับอายุ/เพศ/ทุน/เบี้ย แต่ละฝั่งได้ -->
-        <div style="display:flex;align-items:flex-start;gap:6px;padding:8px 12px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;flex-wrap:wrap;">
+        <!-- Settings bar: ปรับอายุ/เพศ/ทุน/เบี้ย แต่ละฝั่งได้ — single row -->
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f0fdf4;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;flex-shrink:0;overflow-x:auto;white-space:nowrap;">
             <!-- Plan A -->
-            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
-                <div style="display:flex;align-items:center;gap:4px;">
-                    <div style="width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
-                    <span style="font-size:11px;font-weight:700;color:#0f766e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${planA}</span>
-                    ${(cfgA.options?.length > 1 && planA !== '868 / 818 Elite Saving') ? `<select id="cmpOptA" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgA.options.map(o=>`<option value="${o}"${o===optA?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
-                </div>
-                <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                    <span ${_lbl}>อายุ</span>
-                    <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                    <span ${_lbl}>ปี</span>
-                    <select id="cmpGenA" ${_sel} onchange="window._cmpApply()">
-                        <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
-                        <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
-                    </select>
-                </div>
-                <div style="display:flex;align-items:center;gap:4px;">
-                    ${_modeToggle('cmpModeA','cmpValA',_modeA,'#0f766e')}
-                    ${_valInp('cmpValA', _valA)}
-                </div>
+            <div style="display:inline-flex;align-items:center;gap:4px;flex-shrink:0;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#0d9488;flex-shrink:0;"></div>
+                <span style="font-size:11px;font-weight:700;color:#0f766e;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${planA}">${planA}</span>
+                ${(cfgA.options?.length > 1 && planA !== '868 / 818 Elite Saving') ? `<select id="cmpOptA" ${_sel} onchange="window._cmpApply()" style="padding:2px 3px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgA.options.map(o=>`<option value="${o}"${o===optA?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
+                <span ${_lbl}>อายุ</span>
+                <input id="cmpAgeA" type="number" min="1" max="99" value="${_ageA}" style="width:42px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#f8fafc;color:#1e293b;outline:none;" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+                <span ${_lbl}>ปี</span>
+                <select id="cmpGenA" ${_sel} onchange="window._cmpApply()" style="padding:2px 3px;font-size:11px;">
+                    <option value="male" ${_genA==='male'?'selected':''}>ชาย</option>
+                    <option value="female" ${_genA==='female'?'selected':''}>หญิง</option>
+                </select>
+                ${_modeToggle('cmpModeA','cmpValA',_modeA,'#0f766e')}
+                ${_valInp('cmpValA', _valA)}
             </div>
-            <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;align-self:center;">vs</span>
+            <span style="color:#94a3b8;font-size:11px;font-weight:700;flex-shrink:0;">vs</span>
             <!-- Plan B -->
-            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
-                <div style="display:flex;align-items:center;gap:4px;">
-                    <div style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
-                    <span style="font-size:11px;font-weight:700;color:#6d28d9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${planB}</span>
-                    ${(cfgB.options?.length > 1 && planB !== '868 / 818 Elite Saving') ? `<select id="cmpOptB" ${_sel} onchange="window._cmpApply()" style="padding:3px 4px;border:1px solid #cbd5e1;border-radius:7px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgB.options.map(o=>`<option value="${o}"${o===optB?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
-                </div>
-                <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                    <span ${_lbl}>อายุ</span>
-                    <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" ${_inp} oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                    <span ${_lbl}>ปี</span>
-                    <select id="cmpGenB" ${_sel} onchange="window._cmpApply()">
-                        <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
-                        <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
-                    </select>
-                </div>
-                <div style="display:flex;align-items:center;gap:4px;">
-                    ${_modeToggle('cmpModeB','cmpValB',_modeB,'#6d28d9')}
-                    ${_valInp('cmpValB', _valB)}
-                </div>
+            <div style="display:inline-flex;align-items:center;gap:4px;flex-shrink:0;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#7c3aed;flex-shrink:0;"></div>
+                <span style="font-size:11px;font-weight:700;color:#6d28d9;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${planB}">${planB}</span>
+                ${(cfgB.options?.length > 1 && planB !== '868 / 818 Elite Saving') ? `<select id="cmpOptB" ${_sel} onchange="window._cmpApply()" style="padding:2px 3px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#f8fafc;color:#1e293b;outline:none;">${cfgB.options.map(o=>`<option value="${o}"${o===optB?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : ''}
+                <span ${_lbl}>อายุ</span>
+                <input id="cmpAgeB" type="number" min="1" max="99" value="${_ageB}" style="width:42px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#f8fafc;color:#1e293b;outline:none;" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+                <span ${_lbl}>ปี</span>
+                <select id="cmpGenB" ${_sel} onchange="window._cmpApply()" style="padding:2px 3px;font-size:11px;">
+                    <option value="male" ${_genB==='male'?'selected':''}>ชาย</option>
+                    <option value="female" ${_genB==='female'?'selected':''}>หญิง</option>
+                </select>
+                ${_modeToggle('cmpModeB','cmpValB',_modeB,'#6d28d9')}
+                ${_valInp('cmpValB', _valB)}
             </div>
-            <button onclick="window._cmpApply()" style="flex-shrink:0;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;align-self:center;"><i class="fas fa-rotate"></i> อัปเดต</button>
+            <button onclick="window._cmpApply()" style="flex-shrink:0;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#0369a1);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;"><i class="fas fa-rotate"></i> อัปเดต</button>
         </div>
         <div style="overflow-x:auto;overflow-y:auto;flex:1;">
         <table style="width:100%;border-collapse:collapse;min-width:480px;">
