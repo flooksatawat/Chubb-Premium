@@ -2117,8 +2117,8 @@ function selectAppPlan(planName) {
                 const picked = await window._cmpPickOption(planName);
                 if (picked === null) return;
                 const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
-                settA = { age: picked.age, mode: picked.mode, ..._mv };
-                settB = { age: picked.age, option: picked.option, mode: picked.mode, ..._mv };
+                settA = { age: picked.age, gender: picked.gender, mode: picked.mode, ..._mv };
+                settB = { age: picked.age, gender: picked.gender, option: picked.option, mode: picked.mode, ..._mv };
             }
             window.renderCompareView(planA, planName, settA, settB);
         })();
@@ -2815,94 +2815,107 @@ window._cmpOptLabel = function(opt) {
     return opt;
 };
 
-// returns { option, mode, sum, premium, age } or null if cancelled
+// returns { option, mode, sum, premium, age, gender } or null if cancelled
 window._cmpPickOption = async function(planName) {
     const opts = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]?.options) || [];
     const isElite = planName === '868 / 818 Elite Saving';
-
-    // ── Step 1: กรอกอายุ (ถ้ายังไม่ได้กรอก) ──
-    const _ageEl = document.getElementById('ageInput');
-    let age = parseInt(_ageEl?.value) || 0;
-    if (age <= 0) {
-        const rAge = await Swal.fire({
-            title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">กรอกอายุผู้เอาประกัน</span>',
-            input: 'number',
-            inputAttributes: { min: 1, max: 99, step: 1, placeholder: 'อายุ (ปี)' },
-            inputValue: '',
-            confirmButtonText: 'ถัดไป →',
-            showCancelButton: true,
-            cancelButtonText: 'ยกเลิก',
-            inputValidator: v => (!v || parseInt(v) < 1 || parseInt(v) > 99) ? 'กรุณากรอกอายุ 1–99 ปี' : null,
-            didOpen: () => { setTimeout(() => document.querySelector('.swal2-input')?.focus(), 50); }
-        });
-        if (!rAge.isConfirmed) return null;
-        age = parseInt(rAge.value);
-        if (_ageEl) _ageEl.value = age;
-    }
-
-    // ── Step 2: เลือกระยะเวลาชำระ + จำนวนเงิน (รวมเป็น 1 popup) ──
     const hasMultiOpts = opts.length > 1 && !isElite;
+
+    const _ageEl = document.getElementById('ageInput');
+    const _initAge = parseInt(_ageEl?.value) || 0;
+    const _initGender = (typeof currentGender !== 'undefined' && currentGender) || 'male';
+
     const _sumPills  = [500000,1000000,3000000,5000000,10000000];
     const _premPills = [10000,24000,50000,100000,200000];
     const _fmtPill = n => n >= 1000000 ? `${n/1000000}ล้าน` : n >= 100000 ? `${n/100000}แสน` : n >= 10000 ? `${n/10000}หมื่น` : n.toLocaleString();
     const _makePills = (arr) => arr.map(v =>
         `<button type="button" onclick="document.getElementById('_cmpAmtVal').value='${v}';document.getElementById('_cmpAmtVal').dispatchEvent(new Event('input'));"
-            style="padding:5px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;font-family:Kanit,sans-serif;font-size:12px;font-weight:600;color:#475569;cursor:pointer;"
-            onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='#f8fafc'">${_fmtPill(v)}</button>`
+            style="padding:5px 11px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;font-family:Kanit,sans-serif;font-size:12px;font-weight:700;color:#475569;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd';"
+            onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0';">${_fmtPill(v)}</button>`
     ).join('');
 
-    const _optRadios = hasMultiOpts ? `
-        <div style="margin-bottom:4px;">
-            <p style="font-size:12px;color:#64748b;font-weight:700;margin:0 0 6px;">ระยะเวลาชำระ</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;" id="_cmpOptBtns">
+    const _optSection = hasMultiOpts ? `
+        <div style="background:#f0f9ff;border-radius:12px;padding:12px 14px;">
+            <p style="font-size:11px;color:#0369a1;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">ระยะเวลาชำระ</p>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;" id="_cmpOptBtns">
                 ${opts.map((o, i) => `
-                    <button type="button" id="_cmpOpt_${o}"
-                        onclick="window._cmpSetOpt('${o}')"
-                        style="padding:7px 16px;border-radius:10px;border:1.5px solid ${i===0?'#0369a1':'#e2e8f0'};background:${i===0?'#0369a1':'#f8fafc'};color:${i===0?'#fff':'#475569'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">
+                    <button type="button" id="_cmpOpt_${o}" onclick="window._cmpSetOpt('${o}')"
+                        style="padding:7px 18px;border-radius:10px;border:2px solid ${i===0?'#0369a1':'#e2e8f0'};background:${i===0?'#0369a1':'#fff'};color:${i===0?'#fff':'#64748b'};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">
                         ${window._cmpOptLabel(o)}
                     </button>`).join('')}
             </div>
             <input type="hidden" id="_cmpOptVal" value="${opts[0]}">
-        </div>
-        <hr style="border:none;border-top:1px solid #e2e8f0;margin:4px 0;">` : '';
+        </div>` : '';
 
     const r = await Swal.fire({
-        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">ตั้งค่าการเปรียบเทียบ</span>',
+        title: `<div style="font-family:Kanit,sans-serif;font-size:16px;font-weight:800;color:#1e293b;">ตั้งค่าการเปรียบเทียบ</div>`,
         html: `
-            <div id="_cmpSetupBox" style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:10px;align-items:center;">
-                ${_optRadios}
-                <div style="display:flex;gap:8px;">
-                    <button id="_cmpM_sum" type="button"
-                        onclick="window._cmpSetMode('sum')"
-                        style="padding:8px 22px;border-radius:10px;border:none;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">ทุนประกัน</button>
-                    <button id="_cmpM_prem" type="button"
-                        onclick="window._cmpSetMode('premium')"
-                        style="padding:8px 22px;border-radius:10px;border:none;background:#f1f5f9;color:#475569;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">เบี้ยประกัน</button>
+        <div style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:10px;text-align:left;">
+
+            <!-- Age + Gender -->
+            <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:12px;padding:12px 14px;">
+                <p style="font-size:11px;color:#059669;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">ข้อมูลผู้เอาประกัน</p>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:13px;color:#374151;font-weight:600;">อายุ</span>
+                        <input id="_cmpAgeInp" type="number" min="1" max="99" value="${_initAge > 0 ? _initAge : ''}" placeholder="–"
+                            style="width:56px;padding:7px 6px;border:2px solid #6ee7b7;border-radius:9px;font-size:16px;font-weight:800;text-align:center;font-family:Kanit,sans-serif;outline:none;color:#065f46;background:#fff;"
+                            onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#6ee7b7'">
+                        <span style="font-size:13px;color:#374151;font-weight:600;">ปี</span>
+                    </div>
+                    <select id="_cmpGenInp" style="padding:7px 10px;border:2px solid #6ee7b7;border-radius:9px;font-size:13px;font-family:Kanit,sans-serif;font-weight:700;background:#fff;color:#065f46;outline:none;cursor:pointer;">
+                        <option value="male" ${_initGender==='male'?'selected':''}>ชาย</option>
+                        <option value="female" ${_initGender==='female'?'selected':''}>หญิง</option>
+                    </select>
+                </div>
+            </div>
+
+            ${_optSection}
+
+            <!-- Mode + Amount -->
+            <div style="background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:12px 14px;">
+                <p style="font-size:11px;color:#7c3aed;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;text-transform:uppercase;">จำนวนเงิน</p>
+                <div style="display:flex;gap:7px;margin-bottom:10px;">
+                    <button id="_cmpM_sum" type="button" onclick="window._cmpSetMode('sum')"
+                        style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid #0d9488;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">ทุนประกัน</button>
+                    <button id="_cmpM_prem" type="button" onclick="window._cmpSetMode('premium')"
+                        style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#94a3b8;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">เบี้ยประกัน</button>
                 </div>
                 <input type="hidden" id="_cmpModeVal" value="sum">
-                <input id="_cmpAmtVal" type="text" placeholder="เช่น 1ล้าน 5แสน 50000"
-                    style="width:200px;padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;outline:none;"
-                    onfocus="this.style.borderColor='#0d9488'" onblur="this.style.borderColor='#cbd5e1'">
-                <div id="_cmpPillsBox" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">${_makePills(_sumPills)}</div>
-            </div>`,
-        confirmButtonText: 'เปรียบเทียบ',
+                <input id="_cmpAmtVal" type="text" placeholder="เช่น 1ล้าน · 5แสน · 50000"
+                    style="width:100%;box-sizing:border-box;padding:9px 12px;border:2px solid #ddd6fe;border-radius:10px;font-size:15px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;outline:none;color:#1e293b;background:#fff;"
+                    onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#ddd6fe'">
+                <div id="_cmpPillsBox" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">${_makePills(_sumPills)}</div>
+            </div>
+        </div>`,
+        confirmButtonText: '<i class="fas fa-code-compare" style="margin-right:6px;"></i>เปรียบเทียบ',
         showCancelButton: true,
         cancelButtonText: 'ยกเลิก',
-        preConfirm: () => {
-            const raw = document.getElementById('_cmpAmtVal')?.value || '';
-            const amt = window._parseThaiAmount(raw);
-            if (amt <= 0) { Swal.showValidationMessage('กรุณาระบุจำนวนเงิน'); return false; }
-            return {
-                mode: document.getElementById('_cmpModeVal')?.value || 'sum',
-                amount: amt,
-                option: document.getElementById('_cmpOptVal')?.value || opts[0] || ''
-            };
-        },
+        customClass: { popup: '_cmpSwalPopup', confirmButton: '_cmpSwalConfirm' },
         didOpen: () => {
+            // inject custom styles
+            if (!document.getElementById('_cmpSwalStyle')) {
+                const s = document.createElement('style');
+                s.id = '_cmpSwalStyle';
+                s.textContent = `
+                    ._cmpSwalPopup { border-radius: 20px !important; padding: 20px 20px 16px !important; max-width: 360px !important; }
+                    ._cmpSwalConfirm { background: linear-gradient(135deg,#0d9488,#7c3aed) !important; border-radius: 10px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; padding: 10px 24px !important; }
+                    .swal2-cancel { border-radius: 10px !important; font-family: Kanit,sans-serif !important; font-weight: 700 !important; }
+                `;
+                document.head.appendChild(s);
+            }
             window._cmpSetMode = (m) => {
                 document.getElementById('_cmpModeVal').value = m;
-                document.getElementById('_cmpM_sum').style.cssText  += m==='sum'    ? ';background:#0d9488;color:#fff;'  : ';background:#f1f5f9;color:#475569;';
-                document.getElementById('_cmpM_prem').style.cssText += m==='premium'? ';background:#7c3aed;color:#fff;' : ';background:#f1f5f9;color:#475569;';
+                const btnSum  = document.getElementById('_cmpM_sum');
+                const btnPrem = document.getElementById('_cmpM_prem');
+                if (m === 'sum') {
+                    btnSum.style.cssText  += ';background:#0d9488;color:#fff;border-color:#0d9488;';
+                    btnPrem.style.cssText += ';background:#fff;color:#94a3b8;border-color:#e2e8f0;';
+                } else {
+                    btnPrem.style.cssText += ';background:#7c3aed;color:#fff;border-color:#7c3aed;';
+                    btnSum.style.cssText  += ';background:#fff;color:#94a3b8;border-color:#e2e8f0;';
+                }
                 document.getElementById('_cmpPillsBox').innerHTML = _makePills(m === 'sum' ? _sumPills : _premPills);
             };
             if (hasMultiOpts) {
@@ -2912,18 +2925,33 @@ window._cmpPickOption = async function(planName) {
                         const btn = document.getElementById(`_cmpOpt_${opt}`);
                         if (!btn) return;
                         const active = opt === o;
-                        btn.style.background = active ? '#0369a1' : '#f8fafc';
-                        btn.style.color = active ? '#fff' : '#475569';
-                        btn.style.borderColor = active ? '#0369a1' : '#e2e8f0';
+                        btn.style.background   = active ? '#0369a1' : '#fff';
+                        btn.style.color        = active ? '#fff' : '#64748b';
+                        btn.style.borderColor  = active ? '#0369a1' : '#e2e8f0';
                     });
                 };
             }
-            setTimeout(() => document.getElementById('_cmpAmtVal')?.focus(), 100);
+            setTimeout(() => document.getElementById(_initAge > 0 ? '_cmpAmtVal' : '_cmpAgeInp')?.focus(), 100);
+        },
+        preConfirm: () => {
+            const age = parseInt(document.getElementById('_cmpAgeInp')?.value);
+            if (!age || age < 1 || age > 99) { Swal.showValidationMessage('กรุณากรอกอายุ 1–99 ปี'); return false; }
+            const raw = document.getElementById('_cmpAmtVal')?.value || '';
+            const amt = window._parseThaiAmount(raw);
+            if (amt <= 0) { Swal.showValidationMessage('กรุณาระบุจำนวนเงิน'); return false; }
+            return {
+                age,
+                gender: document.getElementById('_cmpGenInp')?.value || 'male',
+                mode: document.getElementById('_cmpModeVal')?.value || 'sum',
+                amount: amt,
+                option: document.getElementById('_cmpOptVal')?.value || opts[0] || ''
+            };
         }
     });
     if (!r.isConfirmed) return null;
-    const { mode, amount, option: pickedOpt } = r.value;
-    return { option: pickedOpt, mode, age,
+    const { age, gender, mode, amount, option: pickedOpt } = r.value;
+    if (_ageEl) _ageEl.value = age;
+    return { option: pickedOpt, mode, age, gender,
         sum: mode === 'sum' ? amount : 0,
         premium: mode === 'premium' ? amount : 0 };
 };
@@ -3129,49 +3157,47 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
 
     const isWide = window.isWideLayout();
 
-    // ── Settings bar: wide = 2 cards side-by-side, mobile = 2 cards stacked ──
-    const _cardInpStyle = (color, border) => `width:42px;padding:3px 4px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#fff;color:${color};outline:none;`;
-    const _cardSelStyle = (color, border) => `padding:3px 4px;border:1px solid ${border};border-radius:6px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#fff;color:${color};outline:none;`;
-    const _cardValStyle = (color, border) => `flex:1;min-width:0;padding:3px 6px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:right;background:#fff;color:${color};outline:none;`;
-    const _cardOptSel = (opts, optVal, color, border, id) => (opts?.length > 1 && opts) ?
-        `<select id="${id}" style="${_cardSelStyle(color,border)}" onchange="window._cmpApply()">${opts.map(o=>`<option value="${o}"${o===optVal?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>` : '';
+    // ── Settings bar: single-line card per plan ──
+    const _cs = (color, border) => `padding:3px 5px;border:1px solid ${border};border-radius:6px;font-size:11px;font-family:Kanit,sans-serif;font-weight:700;background:#fff;color:${color};outline:none;`;
+    const _ci = (color, border, w) => `width:${w||'42px'};padding:3px 4px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;background:#fff;color:${color};outline:none;`;
+    const _cv = (color, border) => `flex:1;min-width:0;padding:3px 5px;border:1px solid ${border};border-radius:6px;font-size:12px;font-family:Kanit,sans-serif;font-weight:700;text-align:right;background:#fff;color:${color};outline:none;`;
 
-    const _mkCard = (letter, planName, cfg, optVal, ageVal, genVal, modeVal, valVal, bg, border, color, dotColor) => `
-        <div style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:5px;min-width:0;">
-            <div style="display:flex;align-items:center;gap:5px;min-width:0;">
-                <div style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
-                <span style="font-size:12px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;" title="${planName}">${planName}</span>
-                ${_cardOptSel(cfg.options, optVal, color, border, `cmpOpt${letter}`)}
-            </div>
-            <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;">
-                <span style="font-size:10px;color:#64748b;font-weight:600;white-space:nowrap;">อายุ</span>
-                <input id="cmpAge${letter}" type="number" min="1" max="99" value="${ageVal}" style="${_cardInpStyle(color,border)}" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                <span style="font-size:10px;color:#64748b;font-weight:600;">ปี</span>
-                <select id="cmpGen${letter}" style="${_cardSelStyle(color,border)}" onchange="window._cmpApply()">
-                    <option value="male"${genVal==='male'?' selected':''}>ชาย</option>
-                    <option value="female"${genVal==='female'?' selected':''}>หญิง</option>
-                </select>
-            </div>
-            <div style="display:flex;align-items:center;gap:4px;">
-                <select id="cmpMode${letter}" style="${_cardSelStyle(color,border)};flex-shrink:0;" onchange="window._cmpApply()">
-                    <option value="sum"${modeVal==='sum'?' selected':''}>ทุนประกัน</option>
-                    <option value="premium"${modeVal==='premium'?' selected':''}>เบี้ยประกัน</option>
-                </select>
-                <input id="cmpVal${letter}" type="number" min="0" step="1000" value="${Math.round(valVal)}" style="${_cardValStyle(color,border)}" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
-                <span style="font-size:10px;color:#64748b;font-weight:600;flex-shrink:0;">฿</span>
-            </div>
+    const _mkCard = (letter, pName, cfg, optVal, ageVal, genVal, modeVal, valVal, bg, border, color, dot) => {
+        const optSel = (cfg.options?.length > 1 && pName !== '868 / 818 Elite Saving')
+            ? `<select id="cmpOpt${letter}" style="${_cs(color,border)}" onchange="window._cmpApply()">${cfg.options.map(o=>`<option value="${o}"${o===optVal?' selected':''}>${window._cmpOptLabel(o)}</option>`).join('')}</select>`
+            : '';
+        return `<div style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;">
+            <div style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
+            <span style="font-size:11px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;flex-shrink:0;" title="${pName}">${pName}</span>
+            ${optSel ? `<span style="color:#cbd5e1;font-size:10px;flex-shrink:0;">|</span>${optSel}` : ''}
+            <span style="color:#cbd5e1;font-size:10px;flex-shrink:0;">|</span>
+            <span style="font-size:10px;color:#94a3b8;font-weight:600;flex-shrink:0;white-space:nowrap;">อายุ</span>
+            <input id="cmpAge${letter}" type="number" min="1" max="99" value="${ageVal}" style="${_ci(color,border,'40px')}" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+            <span style="font-size:10px;color:#94a3b8;font-weight:600;flex-shrink:0;">ปี</span>
+            <select id="cmpGen${letter}" style="${_cs(color,border)}" onchange="window._cmpApply()">
+                <option value="male"${genVal==='male'?' selected':''}>ชาย</option>
+                <option value="female"${genVal==='female'?' selected':''}>หญิง</option>
+            </select>
+            <span style="color:#cbd5e1;font-size:10px;flex-shrink:0;">|</span>
+            <select id="cmpMode${letter}" style="${_cs(color,border)};flex-shrink:0;" onchange="window._cmpApply()">
+                <option value="sum"${modeVal==='sum'?' selected':''}>ทุน</option>
+                <option value="premium"${modeVal==='premium'?' selected':''}>เบี้ย</option>
+            </select>
+            <input id="cmpVal${letter}" type="number" min="0" step="1000" value="${Math.round(valVal)}" style="${_cv(color,border)}" oninput="window._cmpApplyDebounced()" onkeydown="if(event.key==='Enter'){clearTimeout(window._cmpApplyTimer);window._cmpApply();}">
+            <span style="font-size:10px;color:#94a3b8;font-weight:600;flex-shrink:0;">฿</span>
         </div>`;
+    };
 
     const cardA = _mkCard('A', planA, cfgA, optA, _ageA, _genA, _modeA, _valA, '#f0fdf4','#0d9488','#0f766e','#0d9488');
     const cardB = _mkCard('B', planB, cfgB, optB, _ageB, _genB, _modeB, _valB, '#faf5ff','#7c3aed','#6d28d9','#7c3aed');
-    const vsDivider = `<div style="display:flex;flex-direction:${isWide?'column':'row'};align-items:center;justify-content:center;padding:${isWide?'0 8px':'4px 0'};flex-shrink:0;gap:4px;">
-        <span style="font-size:11px;font-weight:800;color:#94a3b8;letter-spacing:1px;">VS</span>
-        <button onclick="window._cmpApply()" style="padding:5px 8px;border-radius:8px;font-size:10px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#7c3aed);border:none;cursor:pointer;white-space:nowrap;font-family:Kanit,sans-serif;" title="อัปเดตตาราง"><i class="fas fa-rotate"></i></button>
+    const vsDivider = `<div style="display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;gap:3px;">
+        <span style="font-size:10px;font-weight:800;color:#94a3b8;letter-spacing:1px;">VS</span>
+        <button onclick="window._cmpApply()" style="padding:4px 7px;border-radius:7px;font-size:10px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#7c3aed);border:none;cursor:pointer;font-family:Kanit,sans-serif;" title="อัปเดตตาราง"><i class="fas fa-rotate"></i></button>
     </div>`;
 
     const settingsBar = isWide
-        ? `<div style="display:flex;align-items:stretch;gap:0;padding:8px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;">${cardA}${vsDivider}${cardB}</div>`
-        : `<div style="display:flex;flex-direction:column;gap:6px;padding:8px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;">${cardA}${vsDivider}${cardB}</div>`;
+        ? `<div style="display:flex;align-items:center;gap:0;padding:6px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;">${cardA}${vsDivider}${cardB}</div>`
+        : `<div style="display:flex;flex-direction:column;gap:5px;padding:6px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;">${cardA}<div style="display:flex;justify-content:center;gap:6px;align-items:center;"><span style="font-size:10px;font-weight:800;color:#94a3b8;letter-spacing:1px;">VS</span><button onclick="window._cmpApply()" style="padding:4px 10px;border-radius:7px;font-size:10px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0d9488,#7c3aed);border:none;cursor:pointer;font-family:Kanit,sans-serif;"><i class="fas fa-rotate"></i> อัปเดต</button></div>${cardB}</div>`;
 
     const html = `<style>
         .cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}
