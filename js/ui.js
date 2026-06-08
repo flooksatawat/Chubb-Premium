@@ -2063,11 +2063,10 @@ function selectAppPlan(planName) {
             if (picked === null) return;
             const newA = slot === 'A' ? planName : curA;
             const newB = slot === 'B' ? planName : curB;
-            const settNewPlan = { option: picked.option, mode: picked.mode };
-            if (picked.mode === 'sum') settNewPlan.sum = picked.sum;
-            else settNewPlan.premium = picked.premium;
-            const settA = slot === 'A' ? settNewPlan : (window.__cmpSettingsA || null);
-            const settB = slot === 'B' ? settNewPlan : (window.__cmpSettingsB || null);
+            const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
+            const _base = { age: picked.age, mode: picked.mode, ..._mv };
+            const settA = Object.assign({}, window.__cmpSettingsA || {}, _base, slot === 'A' ? { option: picked.option } : {});
+            const settB = Object.assign({}, window.__cmpSettingsB || {}, _base, slot === 'B' ? { option: picked.option } : {});
             window.renderCompareView(newA, newB, settA, settB);
             // สลับ main plan ด้วย
             _cachedForPlan = null;
@@ -2099,10 +2098,10 @@ function selectAppPlan(planName) {
         (async () => {
             const picked = await window._cmpPickOption(planName);
             if (picked === null) return;
-            const settB = { option: picked.option, mode: picked.mode };
-            if (picked.mode === 'sum') settB.sum = picked.sum;
-            else settB.premium = picked.premium;
-            window.renderCompareView(planA, planName, null, settB);
+            const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
+            const settA = { age: picked.age, mode: picked.mode, ..._mv };
+            const settB = { age: picked.age, option: picked.option, mode: picked.mode, ..._mv };
+            window.renderCompareView(planA, planName, settA, settB);
         })();
         return;
     }
@@ -2769,7 +2768,17 @@ window._cmpCancelReplace = function() {
     if (sheet && window.__cmpViewPlanA) sheet.style.transform = 'translateY(0)';
 };
 
-// ── Compare option helpers ──
+// ── Compare helpers ──
+window._parseThaiAmount = function(str) {
+    str = String(str).trim().replace(/,/g, '').replace(/\s+/g, '');
+    const units = [{ k:'ล้าน', v:1000000 }, { k:'แสน', v:100000 }, { k:'หมื่น', v:10000 }, { k:'พัน', v:1000 }];
+    for (const { k, v } of units) {
+        const idx = str.indexOf(k);
+        if (idx >= 0) { const n = parseFloat(str.substring(0, idx)); return (isNaN(n) ? 1 : n) * v; }
+    }
+    return parseFloat(str) || 0;
+};
+
 window._cmpOptLabel = function(opt) {
     if (!opt) return opt;
     if (opt === 'AS60') return 'ชำระถึง 60 ปี';
@@ -2780,12 +2789,32 @@ window._cmpOptLabel = function(opt) {
     return opt;
 };
 
-// returns { option, mode, sum, premium } or null if cancelled
+// returns { option, mode, sum, premium, age } or null if cancelled
 window._cmpPickOption = async function(planName) {
     const opts = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]?.options) || [];
     const isElite = planName === '868 / 818 Elite Saving';
 
-    // ── Step 1: เลือกระยะเวลาชำระ (ถ้ามีหลายตัวเลือก) ──
+    // ── Step 1: กรอกอายุ ──
+    const _ageEl = document.getElementById('ageInput');
+    let age = parseInt(_ageEl?.value) || 0;
+    if (age <= 0) {
+        const rAge = await Swal.fire({
+            title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">กรอกอายุผู้เอาประกัน</span>',
+            input: 'number',
+            inputAttributes: { min: 1, max: 99, step: 1, placeholder: 'อายุ (ปี)' },
+            inputValue: '',
+            confirmButtonText: 'ถัดไป →',
+            showCancelButton: true,
+            cancelButtonText: 'ยกเลิก',
+            inputValidator: v => (!v || parseInt(v) < 1 || parseInt(v) > 99) ? 'กรุณากรอกอายุ 1–99 ปี' : null,
+            didOpen: () => { setTimeout(() => document.querySelector('.swal2-input')?.focus(), 50); }
+        });
+        if (!rAge.isConfirmed) return null;
+        age = parseInt(rAge.value);
+        if (_ageEl) _ageEl.value = age;
+    }
+
+    // ── Step 2: เลือกระยะเวลาชำระ (ถ้ามีหลายตัวเลือก) ──
     let pickedOpt = opts[0] || '';
     if (opts.length > 1 && !isElite) {
         const inputOptions = {};
@@ -2809,56 +2838,66 @@ window._cmpPickOption = async function(planName) {
         pickedOpt = r1.value || opts[0];
     }
 
-    // ── Step 2: เลือกเบี้ย หรือ ทุน ──
+    // ── Step 3: เลือกเบี้ย หรือ ทุน + จำนวนเงิน ──
+    const _sumPills  = [500000,1000000,3000000,5000000,10000000];
+    const _premPills = [10000,24000,50000,100000,200000];
+    const _fmtPill = n => n >= 1000000 ? `${n/1000000}ล้าน` : n >= 100000 ? `${n/100000}แสน` : n >= 10000 ? `${n/10000}หมื่น` : n.toLocaleString();
+    const _makePills = (arr) => arr.map(v =>
+        `<button type="button" onclick="document.getElementById('_cmpAmtVal').value='${v}';document.getElementById('_cmpAmtVal').dispatchEvent(new Event('input'));"
+            style="padding:5px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;font-family:Kanit,sans-serif;font-size:12px;font-weight:600;color:#475569;cursor:pointer;"
+            onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='#f8fafc'">${_fmtPill(v)}</button>`
+    ).join('');
+
     const r2 = await Swal.fire({
         title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">ระบุจำนวนเงิน</span>',
         html: `
-            <div style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:12px;align-items:center;">
+            <div id="_cmpSetupBox" style="font-family:Kanit,sans-serif;display:flex;flex-direction:column;gap:10px;align-items:center;">
                 <div style="display:flex;gap:8px;">
-                    <button id="_cmpM_sum" onclick="document.getElementById('_cmpM_sum').style.background='#0d9488';document.getElementById('_cmpM_sum').style.color='#fff';document.getElementById('_cmpM_prem').style.background='#f1f5f9';document.getElementById('_cmpM_prem').style.color='#475569';document.getElementById('_cmpModeVal').value='sum';"
-                        style="padding:8px 20px;border-radius:10px;border:none;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">ทุนประกัน</button>
-                    <button id="_cmpM_prem" onclick="document.getElementById('_cmpM_prem').style.background='#7c3aed';document.getElementById('_cmpM_prem').style.color='#fff';document.getElementById('_cmpM_sum').style.background='#f1f5f9';document.getElementById('_cmpM_sum').style.color='#475569';document.getElementById('_cmpModeVal').value='premium';"
-                        style="padding:8px 20px;border-radius:10px;border:none;background:#f1f5f9;color:#475569;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">เบี้ยประกัน</button>
+                    <button id="_cmpM_sum" type="button"
+                        onclick="window._cmpSetMode('sum')"
+                        style="padding:8px 22px;border-radius:10px;border:none;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">ทุนประกัน</button>
+                    <button id="_cmpM_prem" type="button"
+                        onclick="window._cmpSetMode('premium')"
+                        style="padding:8px 22px;border-radius:10px;border:none;background:#f1f5f9;color:#475569;font-family:Kanit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">เบี้ยประกัน</button>
                 </div>
                 <input type="hidden" id="_cmpModeVal" value="sum">
-                <input id="_cmpAmtVal" type="number" min="0" step="10000" placeholder="จำนวนเงิน (บาท)"
-                    style="width:180px;padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;outline:none;"
+                <input id="_cmpAmtVal" type="text" placeholder="เช่น 1ล้าน 5แสน 50000"
+                    style="width:200px;padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:Kanit,sans-serif;font-weight:700;text-align:center;outline:none;"
                     onfocus="this.style.borderColor='#0d9488'" onblur="this.style.borderColor='#cbd5e1'">
+                <div id="_cmpPillsBox" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">${_makePills(_sumPills)}</div>
             </div>`,
         confirmButtonText: 'เปรียบเทียบ',
         showCancelButton: true,
         cancelButtonText: 'ยกเลิก',
         preConfirm: () => {
-            const amt = parseFloat(document.getElementById('_cmpAmtVal')?.value) || 0;
+            const raw = document.getElementById('_cmpAmtVal')?.value || '';
+            const amt = window._parseThaiAmount(raw);
             if (amt <= 0) { Swal.showValidationMessage('กรุณาระบุจำนวนเงิน'); return false; }
             return { mode: document.getElementById('_cmpModeVal')?.value || 'sum', amount: amt };
         },
-        didOpen: () => { setTimeout(() => document.getElementById('_cmpAmtVal')?.focus(), 100); }
+        didOpen: () => {
+            window._cmpSetMode = (m) => {
+                document.getElementById('_cmpModeVal').value = m;
+                document.getElementById('_cmpM_sum').style.cssText  += m==='sum'    ? ';background:#0d9488;color:#fff;'  : ';background:#f1f5f9;color:#475569;';
+                document.getElementById('_cmpM_prem').style.cssText += m==='premium'? ';background:#7c3aed;color:#fff;' : ';background:#f1f5f9;color:#475569;';
+                document.getElementById('_cmpPillsBox').innerHTML = _makePills(m === 'sum' ? _sumPills : _premPills);
+            };
+            setTimeout(() => document.getElementById('_cmpAmtVal')?.focus(), 100);
+        }
     });
     if (!r2.isConfirmed) return null;
     const { mode, amount } = r2.value;
-    return { option: pickedOpt, mode, sum: mode === 'sum' ? amount : 0, premium: mode === 'premium' ? amount : 0 };
+    return { option: pickedOpt, mode, age,
+        sum: mode === 'sum' ? amount : 0,
+        premium: mode === 'premium' ? amount : 0 };
 };
 
 window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
+    // fallback: ถ้า age ยังเป็น 0 และไม่ได้ถามจาก _cmpPickOption
     const _ageEl = document.getElementById('ageInput');
-    if (_ageEl && (!(parseInt(_ageEl.value) > 0))) {
-        const _ageRes = await Swal.fire({
-            title: '<span style="font-family:Kanit,sans-serif;font-size:16px;">กรอกอายุผู้เอาประกัน</span>',
-            input: 'number',
-            inputAttributes: { min: 1, max: 99, step: 1, placeholder: 'อายุ (ปี)' },
-            inputValue: '',
-            confirmButtonText: 'ยืนยัน',
-            showCancelButton: true,
-            cancelButtonText: 'ยกเลิก',
-            inputValidator: v => (!v || parseInt(v) < 1 || parseInt(v) > 99) ? 'กรุณากรอกอายุ 1–99 ปี' : null,
-            didOpen: () => { document.querySelector('.swal2-input')?.focus(); }
-        });
-        if (!_ageRes.isConfirmed) return;
-        _ageEl.value = parseInt(_ageRes.value);
-    }
+    if (_ageEl && !(parseInt(_ageEl.value) > 0)) _ageEl.value = 30;
 
     // บันทึก settings ไว้เพื่อ refresh
     window.__cmpSettingsA = settingsA || null;
