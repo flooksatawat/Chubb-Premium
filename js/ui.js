@@ -2804,8 +2804,8 @@ window._cmpPickOption = async function(planName) {
 window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
-    const _cmpAge = parseInt(document.getElementById('ageInput')?.value) || 0;
-    if (_cmpAge <= 0) { showCustomError('กรุณากรอกอายุก่อนเปรียบเทียบ'); return; }
+    const _ageEl = document.getElementById('ageInput');
+    if (_ageEl && (!(parseInt(_ageEl.value) > 0))) _ageEl.value = 30;
 
     // บันทึก settings ไว้เพื่อ refresh
     window.__cmpSettingsA = settingsA || null;
