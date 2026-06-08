@@ -2801,7 +2801,7 @@ window._cmpPickOption = async function(planName) {
     return result.value || opts[0];
 };
 
-window.renderCompareView = function(planA, planB, settingsA, settingsB) {
+window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
     const _ageEl = document.getElementById('ageInput');
