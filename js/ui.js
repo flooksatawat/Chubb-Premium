@@ -2159,6 +2159,7 @@ function selectAppPlan(planName) {
     if (!_mfSupportedPlans.includes(planName)) {
         window.currentMF = 'ไม่เลือก';
         window._mfCurrentLabel = null;
+        window._mfPremiumSetForKey = null;
     }
     // ล้าง STA MF data เมื่อเปลี่ยนออกจาก Step Annuity
     if (planName !== 'Step Annuity') {

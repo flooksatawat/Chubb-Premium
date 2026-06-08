@@ -445,10 +445,15 @@ window.mfInlineRender = function() {
         const label = [coName, planName, p.roomRate].filter(Boolean).join(' · ');
         window.currentMF = key;
         window._mfCurrentLabel = label;
-        // คำนวณใหม่เพื่อให้ premiumInput รวมเบี้ย MF ด้วย
+        // เซ็ต "ออมเงิน" หน้าหลัก = MF ตลอดชีพ ÷ payYears (ครั้งเดียวตอนเลือก MF ใหม่)
+        // จากนั้นคำนวณ premium mode เพื่อให้ตาราง "ออม" ตรงกับหน้าหลัก
+        const _autoSet = window._mfApplyAnnualSavings(key);
         if (typeof calculate === 'function') {
-            calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+            calculate(_autoSet ? 'premium' : (typeof currentMode !== 'undefined' ? currentMode : 'sum'), true);
         }
+    } else {
+        // ยังเลือกไม่ครบ → reset flag เพื่อให้ auto-set ใหม่เมื่อเลือกครบรอบหน้า
+        window._mfPremiumSetForKey = null;
     }
 
     // Wide screen: auto-show table in right pane when selection complete
@@ -459,6 +464,46 @@ window.mfInlineRender = function() {
 
     // Already showing — refresh real-time
     if (tableActive && typeof generatePolicyTableData === 'function') generatePolicyTableData();
+};
+
+// ── จำนวนปีที่ชำระเบี้ย ตามแผนหลักที่เลือก (ใช้คำนวณ ออม/ปี ของ MF) ──
+window._mfPayYearsForPlan = function() {
+    const ap = typeof currentAppPlan !== 'undefined' ? currentAppPlan : '';
+    if (ap === '868 / 818 Elite Saving') return 8;
+    if (ap === '24 TX') return 24;
+    if (ap === 'Smart Plan 21/7') return 7;
+    // WXN / LifeTime Value: ใช้ตัวเลขจากรหัสแผน (WXN10→10, 15LV→15)
+    const m = (typeof currentPlan !== 'undefined' ? currentPlan : '').match(/\d+/);
+    return m ? parseInt(m[0]) : 10;
+};
+
+// ── ออมเงิน/ปี จาก MF = เบี้ยสุขภาพตลอดชีพ ÷ จำนวนปีที่ชำระ ──
+window.mfAnnualSavings = function() {
+    const mfKey = window.currentMF;
+    if (!mfKey || mfKey === 'ไม่เลือก') return 0;
+    if (typeof window.mfBuildPremiumMap !== 'function' || typeof window.mfLifetimeTotal !== 'function') return 0;
+    const gender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const map = window.mfBuildPremiumMap(gender);
+    if (!map) return 0;
+    const age = parseInt(document.getElementById('ageInput')?.value) || 0;
+    if (!age) return 0;
+    const payYears = window._mfPayYearsForPlan();
+    const lifetime = window.mfLifetimeTotal(map, age) || 0;
+    return payYears > 0 ? Math.round(lifetime / payYears) : 0;
+};
+
+// ── เซ็ตช่อง "ออมเงิน" หน้าหลัก = mfAnnualSavings (ครั้งเดียวต่อการเลือก MF ใหม่) ──
+// คืน true เมื่อเซ็ตค่าใหม่ (ให้ผู้เรียกใช้ calculate('premium'))
+window._mfApplyAnnualSavings = function(key) {
+    if (window._mfPremiumSetForKey === key) return false;
+    const sav = window.mfAnnualSavings();
+    if (sav > 0) {
+        const pi = document.getElementById('premiumInput');
+        if (pi) pi.value = sav.toLocaleString('en-US');
+        window._mfPremiumSetForKey = key;
+        return true;
+    }
+    return false;
 };
 
 // ==================== MF Picker (rider for 24TX/Elite/WXN) ====================
@@ -592,7 +637,11 @@ window.mfPickerConfirm = async function() {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
         return;
     }
-    if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+    // เซ็ต "ออมเงิน" หน้าหลัก = MF ตลอดชีพ ÷ payYears (ครั้งเดียวตอนเลือก MF ใหม่)
+    const _autoSet = window._mfApplyAnnualSavings(key);
+    if (typeof calculate === 'function') {
+        calculate(_autoSet ? 'premium' : (typeof currentMode !== 'undefined' ? currentMode : 'sum'), true);
+    }
     mfScheduleTotalPopup();
 };
 
@@ -667,6 +716,7 @@ window.mfPickerClear = function() {
     window._mfPicker = { company: null, plan: null, roomRate: null };
     window.currentMF = 'ไม่เลือก';
     window._mfCurrentLabel = null;
+    window._mfPremiumSetForKey = null;
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
 };
