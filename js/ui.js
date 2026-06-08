@@ -1194,9 +1194,9 @@ function switchView(targetView) {
     const activeBtn = document.getElementById(activeMap[targetView]);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // ── แสดงปุ่มแชร์เฉพาะหน้าตาราง ──
+    // ── แสดงปุ่มแชร์เฉพาะหน้าตาราง (มือถือเท่านั้น — wide layout ใช้ tableShareBtn ใน header) ──
     const shareBtn = document.getElementById('navShareBtn');
-    if (shareBtn) shareBtn.style.display = targetView === 'table' ? '' : 'none';
+    if (shareBtn) shareBtn.style.display = (targetView === 'table' && !window.isWideLayout()) ? '' : 'none';
 
     // 3D plan: ตาราง → แสดง 19 หมวด (หลังจาก highlight nav แล้ว)
     if (targetView === 'table' && currentAppPlan === '3D Health Excellence') {

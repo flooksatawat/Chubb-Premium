@@ -739,6 +739,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         <i class="fas fa-code-compare text-[11px]"></i>
                         เปรียบเทียบ
                     </button>
+                    <button id="tableShareBtn"
+                        class="hidden min-[600px]:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold text-white shrink-0 transition-all active:scale-95"
+                        style="background:linear-gradient(135deg,#059669,#0d9488);box-shadow:0 2px 8px rgba(5,150,105,0.3);"
+                        onclick="exportTableToPDF('modal')">
+                        <i class="fas fa-share-nodes text-[11px]"></i>
+                        แชร์
+                    </button>
                 </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">
