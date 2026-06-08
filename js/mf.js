@@ -445,15 +445,6 @@ window.mfInlineRender = function() {
         const label = [coName, planName, p.roomRate].filter(Boolean).join(' · ');
         window.currentMF = key;
         window._mfCurrentLabel = label;
-        // เซ็ต "ออมเงิน" หน้าหลัก = MF ตลอดชีพ ÷ payYears (ครั้งเดียวตอนเลือก MF ใหม่)
-        // จากนั้นคำนวณ premium mode เพื่อให้ตาราง "ออม" ตรงกับหน้าหลัก
-        const _autoSet = window._mfApplyAnnualSavings(key);
-        if (typeof calculate === 'function') {
-            calculate(_autoSet ? 'premium' : (typeof currentMode !== 'undefined' ? currentMode : 'sum'), true);
-        }
-    } else {
-        // ยังเลือกไม่ครบ → reset flag เพื่อให้ auto-set ใหม่เมื่อเลือกครบรอบหน้า
-        window._mfPremiumSetForKey = null;
     }
 
     // Wide screen: auto-show table in right pane when selection complete
@@ -490,20 +481,6 @@ window.mfAnnualSavings = function() {
     const payYears = window._mfPayYearsForPlan();
     const lifetime = window.mfLifetimeTotal(map, age) || 0;
     return payYears > 0 ? Math.round(lifetime / payYears) : 0;
-};
-
-// ── เซ็ตช่อง "ออมเงิน" หน้าหลัก = mfAnnualSavings (ครั้งเดียวต่อการเลือก MF ใหม่) ──
-// คืน true เมื่อเซ็ตค่าใหม่ (ให้ผู้เรียกใช้ calculate('premium'))
-window._mfApplyAnnualSavings = function(key) {
-    if (window._mfPremiumSetForKey === key) return false;
-    const sav = window.mfAnnualSavings();
-    if (sav > 0) {
-        const pi = document.getElementById('premiumInput');
-        if (pi) pi.value = sav.toLocaleString('en-US');
-        window._mfPremiumSetForKey = key;
-        return true;
-    }
-    return false;
 };
 
 // ==================== MF Picker (rider for 24TX/Elite/WXN) ====================
@@ -637,12 +614,10 @@ window.mfPickerConfirm = async function() {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
         return;
     }
-    // เซ็ต "ออมเงิน" หน้าหลัก = MF ตลอดชีพ ÷ payYears (ครั้งเดียวตอนเลือก MF ใหม่)
-    const _autoSet = window._mfApplyAnnualSavings(key);
+    // เส้นทาง "ปุ่ม": แทรกคอลัมน์เบี้ย MF ในตารางเท่านั้น ไม่แตะเบี้ยออม/ไม่แสดง popup
     if (typeof calculate === 'function') {
-        calculate(_autoSet ? 'premium' : (typeof currentMode !== 'undefined' ? currentMode : 'sum'), true);
+        calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
     }
-    mfScheduleTotalPopup();
 };
 
 // ── Build {age: premium} map for the selected MF plan (for inline column in main table) ──
@@ -716,7 +691,6 @@ window.mfPickerClear = function() {
     window._mfPicker = { company: null, plan: null, roomRate: null };
     window.currentMF = 'ไม่เลือก';
     window._mfCurrentLabel = null;
-    window._mfPremiumSetForKey = null;
     closePopup('mfPlanModal');
     if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
 };
@@ -1316,10 +1290,19 @@ window.mfSelectMainPlan = function(planName, btn) {
 };
 
 // นำแบบประกันออมทรัพย์ + ระยะชำระมาใช้ และแสดงผลในตารางทันที
+// เส้นทาง "ตัวเลือก": auto-fill เบี้ยออม = MF ตลอดชีพ ÷ payYears (ขั้นตอนที่ 5)
+// ผู้ใช้แก้ตัวเลขเองได้หลังตารางเปิดขึ้นมา
 function mfApplyMainPlan(planName, term) {
     if (typeof selectAppPlan === 'function') {
         selectAppPlan(planName);
         if (term && typeof setPlan === 'function') setPlan(term);
+        // ขั้นตอนที่ 5: กรอกเบี้ยออมให้อัตโนมัติ จาก MF ตลอดชีพ ÷ payYears
+        const sav = (typeof window.mfAnnualSavings === 'function') ? window.mfAnnualSavings() : 0;
+        if (sav > 0) {
+            const pi = document.getElementById('premiumInput');
+            if (pi) pi.value = sav.toLocaleString('en-US');
+            if (typeof calculate === 'function') calculate('premium', true);
+        }
     } else {
         window.currentAppPlan = planName;
         if (typeof calculate === 'function') calculate('sum', true);
