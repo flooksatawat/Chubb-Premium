@@ -2095,7 +2095,7 @@ function selectAppPlan(planName) {
             if (_curAge <= 0 && _inpAge) _inpAge.value = _cfg.minAge || 1;
             currentPlanOptions = _cfg.options || [];
             const _ageVal = parseInt(_inpAge?.value) || 0;
-            currentPlan = picked.option || ((planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || ''));
+            currentPlan = selectedOption || ((planName === '868 / 818 Elite Saving') ? (_ageVal <= 50 ? 'S868' : 'S818') : (currentPlanOptions[0] || ''));
             const _titleEl = document.getElementById('headerTitleText');
             if (_titleEl) { _titleEl.innerText = planName; if (typeof fitHeaderTitle === 'function') fitHeaderTitle(); }
             const _planInfo = allInsurancePlans.find(p => p.name === planName);
