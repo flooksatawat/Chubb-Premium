@@ -2805,7 +2805,21 @@ window.renderCompareView = function(planA, planB, settingsA, settingsB) {
     window.cancelCompareMode();
 
     const _ageEl = document.getElementById('ageInput');
-    if (_ageEl && (!(parseInt(_ageEl.value) > 0))) _ageEl.value = 30;
+    if (_ageEl && (!(parseInt(_ageEl.value) > 0))) {
+        const _ageRes = await Swal.fire({
+            title: '<span style="font-family:Kanit,sans-serif;font-size:16px;">กรอกอายุผู้เอาประกัน</span>',
+            input: 'number',
+            inputAttributes: { min: 1, max: 99, step: 1, placeholder: 'อายุ (ปี)' },
+            inputValue: '',
+            confirmButtonText: 'ยืนยัน',
+            showCancelButton: true,
+            cancelButtonText: 'ยกเลิก',
+            inputValidator: v => (!v || parseInt(v) < 1 || parseInt(v) > 99) ? 'กรุณากรอกอายุ 1–99 ปี' : null,
+            didOpen: () => { document.querySelector('.swal2-input')?.focus(); }
+        });
+        if (!_ageRes.isConfirmed) return;
+        _ageEl.value = parseInt(_ageRes.value);
+    }
 
     // บันทึก settings ไว้เพื่อ refresh
     window.__cmpSettingsA = settingsA || null;
