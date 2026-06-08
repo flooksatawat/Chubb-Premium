@@ -5912,21 +5912,43 @@ function generatePolicyTableData() {
             const _sT = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold bg-white shadow-sm text-emerald-700 transition-all';
             const _sF = 'flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold text-slate-500 transition-all';
 
-            let leftMenuClass = rightMenuHTML ? "flex-1 min-w-0 pr-3 border-r border-slate-200 justify-between" : "w-full justify-center gap-8";
+            // จอใหญ่กว่ามือถือ → รวมปุ่มเปรียบเทียบ+แชร์ ไว้ในแถว toggle เดียวกัน
+            const _wideTbl = (typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 600);
+            const _tblBtns = _wideTbl ? `
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="window._startCmpFromTable()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#0369a1,#1e40af);box-shadow:0 2px 8px rgba(3,105,161,0.3);"><i class="fas fa-code-compare text-[11px]"></i> เปรียบเทียบ</button>
+                    <button onclick="exportTableToPDF('modal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white active:scale-95 transition-all" style="background:linear-gradient(135deg,#059669,#0d9488);box-shadow:0 2px 8px rgba(5,150,105,0.3);"><i class="fas fa-share-nodes text-[11px]"></i> แชร์</button>
+                </div>` : '';
+
+            const _beToggle = `
+                <div class="flex items-center gap-2 min-w-0">
+                    <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
+                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                </label>`;
+
+            let _menuInner;
+            if (_wideTbl) {
+                // จอใหญ่: toggle ชิดซ้าย + ปุ่มชิดขวา ในบรรทัดเดียว
+                _menuInner = `
+                    <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
+                    ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-3 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
+                    <div class="flex-1 min-w-[12px]"></div>
+                    ${_tblBtns}`;
+            } else {
+                // มือถือ: คงเดิม (toggle กระจายเต็มแถว)
+                const leftMenuClass = rightMenuHTML ? "flex-1 min-w-0 pr-3 border-r border-slate-200 justify-between" : "w-full justify-center gap-8";
+                _menuInner = `
+                    <div class="${leftMenuClass} flex items-center">${_beToggle}</div>
+                    ${rightMenuHTML ? `<div class="flex-1 min-w-0 pl-3 flex items-center justify-between">${rightMenuHTML}</div>` : ''}`;
+            }
 
             surrenderContainer.innerHTML = `
-                <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-3.5 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm">
-                    <div class="${leftMenuClass} flex items-center">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
-                            <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                        </label>
-                    </div>
-                    ${rightMenuHTML ? `<div class="flex-1 min-w-0 pl-3 flex items-center justify-between">${rightMenuHTML}</div>` : ''}
+                <div id="uxMenuContainer" data-menu-type="${currentMenuType}" class="px-4 py-3 flex flex-row items-center w-full bg-white border-t border-slate-100 shadow-sm">
+                    ${_menuInner}
                 </div>
                 ${hasSurrenderMenu ? `
                 <div id="cfInlineControls" class="hidden bg-white border-t border-slate-100">
@@ -6099,13 +6121,12 @@ function generatePolicyTableData() {
             ${_lastBadgeDesktop}
         </div>`;
 
-    // ── ปุ่ม เปรียบเทียบ + แชร์ บนหัวตาราง: แสดงเฉพาะจอใหญ่กว่ามือถือ ──
+    // ── ปุ่ม เปรียบเทียบ + แชร์ ย้ายไปอยู่ในแถว toggle (uxMenuContainer) แล้ว — ซ่อนปุ่มบน header เดิม ──
     {
-        const _wide = typeof window.isWideLayout === 'function' ? window.isWideLayout() : (window.innerWidth >= 600);
         const _cmpBtn = document.getElementById('cmpFromTableBtn');
         const _shrBtn = document.getElementById('tableShareBtn');
-        if (_cmpBtn) _cmpBtn.style.display = _wide ? 'flex' : 'none';
-        if (_shrBtn) _shrBtn.style.display = _wide ? 'flex' : 'none';
+        if (_cmpBtn) _cmpBtn.style.display = 'none';
+        if (_shrBtn) _shrBtn.style.display = 'none';
     }
 
     // compact: เฉพาะจอแคบ (<400px) เท่านั้น — desktop ไม่ compact แม้มี SA column
