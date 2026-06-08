@@ -732,6 +732,13 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             <div class="glass-header shrink-0 relative z-20 border-b border-white/50 mt-1">
                 <div id="tableHeaderRow" class="flex items-center gap-1.5 px-2 py-1.5">
                     <div id="tableHeaderTitle" class="flex-1 min-w-0 leading-tight"></div>
+                    <button id="cmpFromTableBtn"
+                        class="hidden min-[600px]:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold text-white shrink-0 transition-all active:scale-95"
+                        style="background:linear-gradient(135deg,#0369a1,#1e40af);box-shadow:0 2px 8px rgba(3,105,161,0.3);"
+                        onclick="window._startCmpFromTable()">
+                        <i class="fas fa-code-compare text-[11px]"></i>
+                        เปรียบเทียบ
+                    </button>
                 </div>
             </div>
             <div class="flex flex-col border-b border-white/40 bg-white/40 backdrop-blur-md shrink-0 relative z-10">

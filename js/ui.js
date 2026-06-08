@@ -2094,13 +2094,51 @@ function selectAppPlan(planName) {
     // ── Compare mode intercept ──
     if (window.__compareMode && window.__comparePlanA) {
         const planA = window.__comparePlanA;
+        const fromMain = window.__cmpFromMain;
+        window.__cmpFromMain = false;
         window.cancelCompareMode();
         (async () => {
-            const picked = await window._cmpPickOption(planName);
-            if (picked === null) return;
-            const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
-            const settA = { age: picked.age, mode: picked.mode, ..._mv };
-            const settB = { age: picked.age, option: picked.option, mode: picked.mode, ..._mv };
+            let settA, settB;
+            if (fromMain && lastCalculationData) {
+                const age = lastCalculationData.age;
+                const mode = currentMode || 'sum';
+                const _mv = mode === 'sum'
+                    ? { sum: lastCalculationData.sum }
+                    : { premium: lastCalculationData.premium };
+                const cfgB = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]) || {};
+                const optsB = cfgB.options || [];
+                const isEliteB = planName === '868 / 818 Elite Saving';
+                let optionB = optsB[0] || '';
+                if (optsB.length > 1 && !isEliteB) {
+                    const inputOptions = {};
+                    optsB.forEach(o => { inputOptions[o] = window._cmpOptLabel(o); });
+                    const r = await Swal.fire({
+                        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">เลือกระยะเวลาชำระ</span>',
+                        input: 'radio',
+                        inputOptions,
+                        inputValue: optsB[0],
+                        confirmButtonText: 'เปรียบเทียบ',
+                        showCancelButton: true,
+                        cancelButtonText: 'ยกเลิก',
+                        didOpen: () => {
+                            document.querySelectorAll('.swal2-radio label').forEach(el => {
+                                el.style.fontFamily = 'Kanit,sans-serif';
+                                el.style.fontSize = '14px';
+                            });
+                        }
+                    });
+                    if (!r.isConfirmed) return;
+                    optionB = r.value || optsB[0];
+                }
+                settA = { age, mode, option: currentPlan, ..._mv };
+                settB = { age, option: optionB, mode, ..._mv };
+            } else {
+                const picked = await window._cmpPickOption(planName);
+                if (picked === null) return;
+                const _mv = picked.mode === 'sum' ? { sum: picked.sum } : { premium: picked.premium };
+                settA = { age: picked.age, mode: picked.mode, ..._mv };
+                settB = { age: picked.age, option: picked.option, mode: picked.mode, ..._mv };
+            }
             window.renderCompareView(planA, planName, settA, settB);
         })();
         return;
@@ -2697,6 +2735,13 @@ window.__comparePlan = null;
 // ── Side-by-side comparison (wide layout only) ─────────────────────────────
 window.__compareMode  = false;
 window.__comparePlanA = null;
+window.__cmpFromMain  = false;
+
+window._startCmpFromTable = function() {
+    if (!currentAppPlan) return;
+    window.__cmpFromMain = true;
+    window.startCompareMode(currentAppPlan);
+};
 
 window.startCompareMode = function(planName) {
     window.__compareMode  = true;
