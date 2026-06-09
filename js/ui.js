@@ -6103,10 +6103,10 @@ function generatePolicyTableData() {
 
             let _menuInner;
             if (_wideTbl) {
-                // จอใหญ่: toggle ชิดซ้าย + ปุ่มชิดขวา ในบรรทัดเดียว
+                // จอใหญ่: toggle1 ซ้าย | toggle2 กึ่งกลาง | ปุ่มขวา
                 _menuInner = `
                     <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
-                    ${rightMenuHTML ? `<div class="flex items-center gap-2 shrink-0 pl-3 ml-2 border-l border-slate-200">${rightMenuHTML}</div>` : ''}
+                    ${rightMenuHTML ? `<div class="flex-1 flex items-center justify-center px-3 border-l border-slate-200 mx-2"><div class="flex items-center gap-2">${rightMenuHTML}</div></div>` : '<div class="flex-1"></div>'}
                     ${_tblBtns}`;
             } else {
                 // มือถือ: คงเดิม (toggle กระจายเต็มแถว)
