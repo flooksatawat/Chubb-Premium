@@ -2551,6 +2551,11 @@ function setPlan(plan) {
 
 function _updatePlanPills(activePlan) {
     const btns = [document.getElementById('btnPlan1'), document.getElementById('btnPlan2'), document.getElementById('btnPlan3'), document.getElementById('btnPlan4')];
+    const container = document.getElementById('planSelectionContainer');
+    const isTwoOptions = currentPlanOptions.length === 2;
+    if (container) {
+        container.style.justifyContent = isTwoOptions ? 'center' : '';
+    }
     let activeBtn = null;
     btns.forEach((btn, idx) => {
         if (!btn) return;
@@ -2566,8 +2571,9 @@ function _updatePlanPills(activePlan) {
             btn.classList.remove('hidden');
             btn.onclick = () => setPlan(currentPlanOptions[idx]);
             const isTarget = activePlan === currentPlanOptions[idx];
-            if (isTarget) { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300'; activeBtn = btn; }
-            else { btn.className = 'flex-1 relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300'; }
+            const sizeClass = isTwoOptions ? 'w-[45%]' : 'flex-1';
+            if (isTarget) { btn.className = `${sizeClass} relative z-10 rounded-[10px] text-[14px] font-bold text-blue-700 transition-all duration-300`; activeBtn = btn; }
+            else { btn.className = `${sizeClass} relative z-10 rounded-[10px] text-[14px] font-medium text-slate-500 hover:text-slate-700 transition-all duration-300`; }
         } else { btn.classList.add('hidden'); }
     });
     const planBg = document.getElementById('planBg');
