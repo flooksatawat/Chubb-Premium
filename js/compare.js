@@ -133,7 +133,7 @@ window._buildCompareHTML = function() {
                 }).join('');
                 return `<tr><td style="padding:6px 10px;font-size:11px;font-weight:600;color:#64748b;font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${row.label}</td>${cells}</tr>`;
             }).join('');
-            tableHtml = `<div style="overflow-x:auto;border-radius:12px;border:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px 10px;background:#f8fafc;font-size:10px;color:#94a3b8;font-family:'Kanit',sans-serif;text-align:left;">รายการ</th>${hdrCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>
+            tableHtml = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px 10px;background:#f8fafc;font-size:10px;color:#94a3b8;font-family:'Kanit',sans-serif;text-align:left;">รายการ</th>${hdrCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>
             <div style="margin-top:6px;font-size:10px;color:#94a3b8;font-family:'Kanit',sans-serif;text-align:center;">★ = ดีที่สุดในกลุ่มที่เลือก &nbsp;|&nbsp; อายุ ${age} ปี &nbsp;${gender==='male'?'ชาย':'หญิง'} &nbsp;เบี้ย ${premium.toLocaleString()} บ./ปี</div>`;
         } else {
             tableHtml = `<div style="padding:20px;text-align:center;color:#94a3b8;font-family:'Kanit',sans-serif;">ไม่พบข้อมูลสำหรับอายุ ${age} ปี</div>`;
@@ -175,7 +175,17 @@ window.openCompareModal = function(preselect) {
         showConfirmButton: false,
         showCloseButton: true,
         width: Math.min(window.innerWidth - 20, 780),
-        didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+        didOpen: () => {
+            const p = Swal.getPopup();
+            if (p) p.style.borderRadius = '20px';
+            const hc = Swal.getHtmlContainer();
+            if (hc) {
+                hc.style.overflowY = 'auto';
+                hc.style.overflowX = 'hidden';
+                hc.style.maxHeight = Math.round(window.innerHeight * 0.65) + 'px';
+                hc.style.webkitOverflowScrolling = 'touch';
+            }
+        }
     });
 };
 
@@ -248,6 +258,16 @@ window.openCompare3DModal = function() {
         showConfirmButton: false,
         showCloseButton: true,
         width: Math.min(window.innerWidth - 20, 780),
-        didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+        didOpen: () => {
+            const p = Swal.getPopup();
+            if (p) p.style.borderRadius = '20px';
+            const hc = Swal.getHtmlContainer();
+            if (hc) {
+                hc.style.overflowY = 'auto';
+                hc.style.overflowX = 'hidden';
+                hc.style.maxHeight = Math.round(window.innerHeight * 0.65) + 'px';
+                hc.style.webkitOverflowScrolling = 'touch';
+            }
+        }
     });
 };
