@@ -3307,7 +3307,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
     const _mTh = (c) => `style="padding:6px 5px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;color:${c};"`;
     const mobileTablesHtml = `
-        <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;padding:8px 8px 4px;-webkit-overflow-scrolling:touch;">
+        <div style="overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:8px 8px 4px;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;">
             <div style="border-radius:12px;overflow:hidden;border:1.5px solid #0d9488;box-shadow:0 2px 8px rgba(13,148,136,0.12);">
                 <div style="background:linear-gradient(135deg,#0d9488,#0369a1);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._cmpStartReplace('A','${planA}','${planB}')">
                     <span style="font-size:12px;font-weight:700;color:#fff;">${planA}</span>
