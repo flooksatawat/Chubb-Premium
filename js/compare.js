@@ -112,14 +112,21 @@ window._buildCompareHTML = function() {
 
         let tableHtml = '';
         if (results.length > 0) {
+            // SA at year y for SLPA grows +5% every 5 years; others fixed
+            function saAtYear(r, y) {
+                if (r.plan.abbr === 'SLPA') return Math.round(r.sa * (1 + 0.05 * Math.floor(y / 5)));
+                return r.sa;
+            }
             const rows = [
-                { label: 'ทุนประกัน (บาท)',  getVal: r => r.sa,            fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
-                { label: 'เบี้ย/ปี (บาท)',   getVal: r => r.annualPrem,    fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'min' },
-                { label: 'ชำระเบี้ย (ปี)',   getVal: r => r.plan.payYears, fmt: v => v + ' ปี',                        best: 'min' },
-                { label: 'คุ้มครองถึงอายุ',  getVal: r => r.plan.coverAge, fmt: v => v + ' ปี',                        best: 'max' },
-                { label: 'CV ปีที่ 10',      getVal: r => r.cv10,          fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
-                { label: 'CV ปีที่ 20',      getVal: r => r.cv20,          fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
-                { label: 'จุดคุ้มทุน (อายุ)',getVal: r => r.beAge || 999,  fmt: v => v < 999 ? v + ' ปี' : '-',       best: 'min' },
+                { label: 'ทุนประกัน ตั้งต้น (บาท)', getVal: r => r.sa,                fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
+                { label: 'ทุนประกัน ปีที่ 10 (บาท)', getVal: r => saAtYear(r, 10),    fmt: (v,r) => r.plan.abbr==='SLPA' ? `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>` : v.toLocaleString(), best: 'max', raw: true },
+                { label: 'ทุนประกัน ปีที่ 20 (บาท)', getVal: r => saAtYear(r, 20),    fmt: (v,r) => r.plan.abbr==='SLPA' ? `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>` : v.toLocaleString(), best: 'max', raw: true },
+                { label: 'เบี้ย/ปี (บาท)',            getVal: r => r.annualPrem,       fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'min' },
+                { label: 'ชำระเบี้ย (ปี)',            getVal: r => r.plan.payYears,    fmt: v => v + ' ปี',                        best: 'min' },
+                { label: 'คุ้มครองถึงอายุ',           getVal: r => r.plan.coverAge,    fmt: v => v + ' ปี',                        best: 'max' },
+                { label: 'CV ปีที่ 10',               getVal: r => r.cv10,             fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
+                { label: 'CV ปีที่ 20',               getVal: r => r.cv20,             fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
+                { label: 'จุดคุ้มทุน (อายุ)',         getVal: r => r.beAge || 999,     fmt: v => v < 999 ? v + ' ปี' : '-',       best: 'min' },
             ];
             const hdrCells = results.map(r => `<th style="padding:10px 8px;background:${r.plan.color};color:white;font-size:11px;font-family:'Kanit',sans-serif;min-width:100px;text-align:center;white-space:nowrap;">${r.plan.label}</th>`).join('');
             const bodyRows = rows.map(row => {
@@ -129,7 +136,8 @@ window._buildCompareHTML = function() {
                 const cells = results.map((r, i) => {
                     const val = vals[i]; const isBest = results.length > 1 && bestVal !== null && val === bestVal;
                     const star = isBest ? `<span style="color:${r.plan.color};font-size:9px;margin-right:2px;">★</span>` : '';
-                    return `<td style="padding:6px 10px;background:${isBest?r.plan.bg:'white'};text-align:right;font-size:12px;font-weight:${isBest?800:500};font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;">${star}${row.fmt(val)}</td>`;
+                    const display = row.raw ? row.fmt(val, r) : row.fmt(val);
+                    return `<td style="padding:6px 10px;background:${isBest?r.plan.bg:'white'};text-align:right;font-size:12px;font-weight:${isBest?800:500};font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;">${star}${display}</td>`;
                 }).join('');
                 return `<tr><td style="padding:6px 10px;font-size:11px;font-weight:600;color:#64748b;font-family:'Kanit',sans-serif;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${row.label}</td>${cells}</tr>`;
             }).join('');
@@ -269,5 +277,74 @@ window.openCompare3DModal = function() {
                 hc.style.webkitOverflowScrolling = 'touch';
             }
         }
+    });
+};
+
+// ==================== ค้นหาโรงพยาบาลคู่สัญญา ====================
+
+window.openHospitalSearch = function() {
+    const allHospitals = window.CHUBB_HOSPITALS || [];
+    const provinces = [...new Set(allHospitals.map(h => h.j).filter(Boolean))].sort((a, b) => {
+        if (a === 'กรุงเทพมหานคร') return -1;
+        if (b === 'กรุงเทพมหานคร') return 1;
+        return a.localeCompare(b, 'th');
+    });
+
+    function renderList(query, province) {
+        const q = (query || '').trim().toLowerCase();
+        const filtered = allHospitals.filter(h => {
+            const matchProv = !province || h.j === province;
+            const matchQ = !q || h.n.toLowerCase().includes(q) || (h.j||'').includes(q) || (h.a||'').includes(q);
+            return matchProv && matchQ;
+        });
+        if (!filtered.length) return '<div style="padding:20px;text-align:center;color:#94a3b8;font-family:Kanit,sans-serif;font-size:13px;">ไม่พบโรงพยาบาลที่ค้นหา</div>';
+        const items = filtered.slice(0, 80).map(function(h) {
+            var isIPD = h.n.includes('IPD');
+            var isClinic = h.n.startsWith('คลินิก');
+            var isSP = h.n.startsWith('สถานพยาบาล');
+            var typeColor = isClinic ? '#7c3aed' : isSP ? '#d97706' : '#0891b2';
+            var shortName = h.n.replace(/^โรงพยาบาล|^คลินิก|^สถานพยาบาล/, '').trim();
+            return '<div style="padding:10px 12px;border-bottom:1px solid #f1f5f9;display:flex;gap:10px;align-items:flex-start;">' +
+                '<div style="width:32px;height:32px;border-radius:10px;background:' + typeColor + '22;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;">' +
+                '<i class="fas fa-hospital-alt" style="color:' + typeColor + ';font-size:14px;"></i></div>' +
+                '<div style="flex:1;min-width:0;">' +
+                '<div style="font-family:Kanit,sans-serif;font-size:12px;font-weight:700;color:#1e293b;line-height:1.4;">' + shortName + (isIPD ? '<span style="font-size:9px;background:#fef3c7;color:#d97706;padding:1px 5px;border-radius:5px;margin-left:4px;font-weight:700;">IPD only</span>' : '') + '</div>' +
+                '<div style="font-family:Kanit,sans-serif;font-size:11px;color:#64748b;margin-top:1px;">' + h.j + (h.a ? ' · ' + h.a : '') + '</div>' +
+                '<div style="font-family:Kanit,sans-serif;font-size:11px;color:#0891b2;margin-top:1px;"><i class="fas fa-phone" style="font-size:9px;margin-right:3px;"></i>' + h.p + '</div>' +
+                '</div></div>';
+        }).join('');
+        var more = filtered.length > 80 ? '<div style="padding:10px;text-align:center;font-family:Kanit,sans-serif;font-size:11px;color:#94a3b8;">แสดง 80 จาก ' + filtered.length + ' รายการ — พิมพ์เพื่อกรอง</div>' : '';
+        return items + more;
+    }
+
+    var provinceOptions = provinces.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
+
+    Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:17px;">🏥 โรงพยาบาลคู่สัญญา Chubb Life</span>',
+        html: '<div style="font-family:Kanit,sans-serif;">' +
+            '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+            '<input id="_hospSearchInput" type="text" placeholder="ค้นหาชื่อ..." style="flex:1;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:12px;font-family:Kanit,sans-serif;font-size:13px;outline:none;min-width:0;" oninput="window._hospRefresh()">' +
+            '<select id="_hospProvSelect" style="padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:12px;font-family:Kanit,sans-serif;font-size:12px;background:white;color:#374151;max-width:120px;" onchange="window._hospRefresh()">' +
+            '<option value="">ทุกจังหวัด</option>' + provinceOptions + '</select></div>' +
+            '<div id="_hospList" style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch;">' +
+            renderList('', '') + '</div>' +
+            '<div style="margin-top:6px;font-size:10px;color:#94a3b8;text-align:center;">อัปเดต เมษายน 2567 · รวม ' + allHospitals.length + ' สาขา ทั่วประเทศ</div></div>',
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: Math.min(window.innerWidth - 16, 600),
+        didOpen: function() {
+            var pop = Swal.getPopup();
+            if (pop) pop.style.borderRadius = '20px';
+            var hc = Swal.getHtmlContainer();
+            if (hc) { hc.style.padding = '0 16px 8px'; hc.style.overflowX = 'hidden'; }
+            window._hospRefresh = function() {
+                var q = document.getElementById('_hospSearchInput') ? document.getElementById('_hospSearchInput').value : '';
+                var prov = document.getElementById('_hospProvSelect') ? document.getElementById('_hospProvSelect').value : '';
+                var list = document.getElementById('_hospList');
+                if (list) list.innerHTML = renderList(q, prov);
+            };
+            setTimeout(function() { var el = document.getElementById('_hospSearchInput'); if (el) el.focus(); }, 150);
+        },
+        willClose: function() { delete window._hospRefresh; }
     });
 };

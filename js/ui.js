@@ -2675,6 +2675,14 @@ function selectAppPlan(planName) {
             medFundBtnContainer.classList.add('hidden');
         }
     }
+    const hospitalSearchBtnContainer = document.getElementById('hospitalSearchBtnContainer');
+    if (hospitalSearchBtnContainer) {
+        if (planName === '3D Health Excellence') {
+            hospitalSearchBtnContainer.classList.remove('hidden');
+        } else {
+            hospitalSearchBtnContainer.classList.add('hidden');
+        }
+    }
     // เมนูภาษี: แสดงเฉพาะแบบ 7SM (Smart Plan 21/7)
     const taxBtn = document.getElementById('taxBtn');
     if (taxBtn) {
