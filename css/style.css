@@ -450,7 +450,6 @@
         /* Right-pane close affordance — high-visibility red */
         .menu-x,
         #rightPane .close-btn,
-        #rightPane button[onclick*="close"],
         #rightPane [data-close] {
             background-color: #ef4444 !important;
             color: white !important;
