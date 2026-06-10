@@ -587,53 +587,78 @@ window._enablePolicyColHide = function() {
     window._applyPolicyColHide();
 };
 
-// ==================== Cell Diff (คลิก 2 ช่อง → หาส่วนต่าง) ====================
-window._diffCell1 = null;
+// ==================== Cell Diff (คลิก 3 ช่อง → หาส่วนต่าง) ====================
+window._diffCells = [];
 
 window._enableCellDiff = function() {
     const body = document.getElementById('policyTableBody');
     if (!body || body.dataset.diffReady) return;
     body.dataset.diffReady = '1';
 
+    const COLORS = [
+        { outline: '#f59e0b', bg: '#fef9c3', label: '#fbbf24' },
+        { outline: '#3b82f6', bg: '#eff6ff', label: '#60a5fa' },
+        { outline: '#a855f7', bg: '#faf5ff', label: '#c084fc' },
+    ];
+
     const _parseVal = td => {
-        const raw = td.textContent.replace(/,/g, '').trim();
-        const n = parseFloat(raw);
+        const n = parseFloat(td.textContent.replace(/,/g, '').trim());
         return isNaN(n) ? null : n;
     };
 
-    const _clearSel = () => {
-        if (window._diffCell1) {
-            window._diffCell1.style.outline = '';
-            window._diffCell1.style.background = '';
-            window._diffCell1 = null;
-        }
-        const chip = document.getElementById('_diffChip');
-        if (chip) chip.remove();
+    const _getLabel = cell => {
+        const head = document.getElementById('policyTableHead');
+        const ths = head ? Array.from(head.querySelectorAll('th')) : [];
+        const idx = Array.from(cell.parentElement.children).indexOf(cell);
+        const col = (ths[idx] ? ths[idx].textContent.trim().replace(/\n.*/, '') : `ช่อง${idx+1}`);
+        const row = cell.parentElement.querySelector('td')?.textContent.trim() || '';
+        return row ? `${col}(${row})` : col;
     };
 
-    const _showChip = (a, b, labelA, labelB) => {
+    const _clearSel = () => {
+        window._diffCells.forEach(td => { td.style.outline = ''; td.style.background = ''; });
+        window._diffCells = [];
         document.getElementById('_diffChip')?.remove();
-        const diff = b - a;
-        const sign = diff >= 0 ? '+' : '';
-        const color = diff >= 0 ? '#16a34a' : '#dc2626';
+    };
+
+    const _showChip = cells => {
+        document.getElementById('_diffChip')?.remove();
+        const vals = cells.map(td => _parseVal(td));
+        const labels = cells.map(td => _getLabel(td));
+        const n = cells.length;
+
+        const fmtDiff = (a, b, la, lb, ci) => {
+            const d = b - a;
+            const sign = d >= 0 ? '+' : '';
+            const color = d >= 0 ? '#4ade80' : '#f87171';
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334155;gap:12px;">
+                <span style="font-size:11px;color:#94a3b8;white-space:nowrap;">
+                    <span style="color:${COLORS[la].label};">●</span> − <span style="color:${COLORS[lb].label};">●</span>
+                    <span style="color:#cbd5e1;margin-left:4px;">${labels[la]} → ${labels[lb]}</span>
+                </span>
+                <span style="font-weight:700;font-size:13px;color:${color};white-space:nowrap;">${sign}${d.toLocaleString()}</span>
+            </div>`;
+        };
+
+        let rows = '';
+        // แสดง: ช่อง2-ช่อง1, ช่อง3-ช่อง1, ช่อง3-ช่อง2 (ถ้า 3 ช่อง)
+        if (n >= 2) rows += fmtDiff(vals[0], vals[1], 0, 1);
+        if (n === 3) {
+            rows += fmtDiff(vals[0], vals[2], 0, 2);
+            rows += fmtDiff(vals[1], vals[2], 1, 2).replace('border-bottom:1px solid #334155;', '');
+        }
+
         const chip = document.createElement('div');
         chip.id = '_diffChip';
         chip.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;
-            background:#1e293b;color:#f8fafc;border-radius:16px;padding:10px 20px;font-family:Kanit,sans-serif;
-            font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;gap:4px;
-            min-width:260px;text-align:center;`;
+            background:#1e293b;color:#f8fafc;border-radius:16px;padding:12px 16px;font-family:Kanit,sans-serif;
+            font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.4);min-width:280px;max-width:calc(100vw - 32px);`;
         chip.innerHTML = `
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">
-                <span style="color:#fbbf24;">${labelA}</span> → <span style="color:#60a5fa;">${labelB}</span>
-            </div>
-            <div style="font-size:15px;font-weight:700;">
-                ${b.toLocaleString()} − ${a.toLocaleString()} =
-                <span style="color:${color};margin-left:4px;">${sign}${diff.toLocaleString()}</span> บาท
-            </div>
-            <div style="font-size:10px;color:#64748b;margin-top:2px;">แตะที่อื่นเพื่อปิด</div>`;
+            <div style="font-size:10px;color:#64748b;text-align:center;margin-bottom:8px;">ส่วนต่าง — แตะเพื่อปิด</div>
+            ${rows}`;
         chip.addEventListener('click', _clearSel);
         document.body.appendChild(chip);
-        setTimeout(_clearSel, 8000);
+        setTimeout(_clearSel, 10000);
     };
 
     body.addEventListener('click', e => {
@@ -642,28 +667,20 @@ window._enableCellDiff = function() {
         const val = _parseVal(td);
         if (val === null) { _clearSel(); return; }
 
-        if (!window._diffCell1) {
-            window._diffCell1 = td;
-            td.style.outline = '2px solid #f59e0b';
-            td.style.background = '#fef9c3';
-        } else if (td === window._diffCell1) {
-            _clearSel();
-        } else {
-            const val1 = _parseVal(window._diffCell1);
-            const val2 = val;
-            if (val1 !== null) {
-                // หา label จาก column header
-                const head = document.getElementById('policyTableHead');
-                const ths = head ? Array.from(head.querySelectorAll('th')) : [];
-                const getLabel = cell => {
-                    const idx = Array.from(cell.parentElement.children).indexOf(cell);
-                    return ths[idx] ? ths[idx].textContent.trim().replace(/\n.*/,'') : `ช่อง ${idx+1}`;
-                };
-                _showChip(val1, val2, getLabel(window._diffCell1), getLabel(td));
-            }
-            window._diffCell1.style.outline = '';
-            window._diffCell1.style.background = '';
-            window._diffCell1 = null;
+        // คลิกซ้ำช่องที่เลือกอยู่ → ยกเลิก
+        const existing = window._diffCells.indexOf(td);
+        if (existing !== -1) { _clearSel(); return; }
+
+        // เพิ่มช่อง
+        const i = window._diffCells.length;
+        if (i >= 3) { _clearSel(); return; }
+        window._diffCells.push(td);
+        td.style.outline = `2px solid ${COLORS[i].outline}`;
+        td.style.background = COLORS[i].bg;
+
+        // แสดงผลเมื่อเลือกครบ 2 หรือ 3 ช่อง
+        if (window._diffCells.length >= 2) {
+            _showChip(window._diffCells);
         }
     });
 };
@@ -7092,7 +7109,7 @@ function generatePolicyTableData() {
 
     // เพิ่มปุ่มซ่อนคอลัมน์ในหัวตาราง (ซ่อนแต่ละคอลัมน์อิสระ)
     if (typeof window._enablePolicyColHide === 'function') window._enablePolicyColHide();
-    window._diffCell1 = null; document.getElementById('_diffChip')?.remove();
+    window._diffCells = []; document.getElementById('_diffChip')?.remove();
     if (typeof window._enableCellDiff === 'function') window._enableCellDiff();
 
     // --- 5. Summary Text ---
