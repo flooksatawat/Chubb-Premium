@@ -6359,7 +6359,7 @@ function generatePolicyTableData() {
                     <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
                     <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
+                <label class="relative inline-flex items-center cursor-pointer" ontouchstart="this._ts=Date.now();" ontouchend="if(Date.now()-this._ts>400)event.preventDefault();">
                     <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
                     <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
                 </label>`;
