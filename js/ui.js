@@ -6485,7 +6485,11 @@ function generatePolicyTableData() {
                 <label class="relative inline-flex items-center cursor-pointer" ontouchstart="this._ts=Date.now();" onclick="if(this._ts&&Date.now()-this._ts>400){this._ts=0;event.preventDefault();event.stopPropagation();return false;}">
                     <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
                     <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                </label>`;
+                </label>
+                <button id="beHighlightBtn" onclick="toggleBeHighlight()" title="ซ่อน/แสดงสีไฮไลท์จุดคุ้มทุน"
+                    style="display:none;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;border:1px solid #d1fae5;background:#ecfdf5;color:#047857;cursor:pointer;transition:all .2s;">
+                    <i class="fas fa-eye" id="beHighlightIcon"></i>
+                </button>`;
 
             let _menuInner;
             if (_wideTbl) {
@@ -7166,6 +7170,9 @@ function toggleBreakevenDisplay(smoothScroll = true) {
     if (!tableBody) return;
     if (summary) summary.classList.add('hidden'); // ไม่ใช้ banner แล้ว
 
+    const btn = document.getElementById('beHighlightBtn');
+    if (btn) btn.style.display = isChecked ? '' : 'none';
+
     if (isChecked) {
         tableBody.classList.add('show-breakeven');
         // เลื่อนไปที่แถวจุดคุ้มทุนภายในตาราง (ไม่ค้าง ใช้งานตารางต่อได้ปกติ)
@@ -7182,6 +7189,22 @@ function toggleBreakevenDisplay(smoothScroll = true) {
         }
     } else {
         tableBody.classList.remove('show-breakeven');
+    }
+}
+
+function toggleBeHighlight() {
+    const tableBody = document.getElementById('policyTableBody');
+    const btn = document.getElementById('beHighlightBtn');
+    const icon = document.getElementById('beHighlightIcon');
+    if (!tableBody) return;
+    const hidden = tableBody.classList.toggle('hide-be-highlight');
+    if (btn) {
+        btn.style.background = hidden ? '#f1f5f9' : '#ecfdf5';
+        btn.style.color = hidden ? '#94a3b8' : '#047857';
+        btn.style.borderColor = hidden ? '#e2e8f0' : '#d1fae5';
+    }
+    if (icon) {
+        icon.className = hidden ? 'fas fa-eye-slash' : 'fas fa-eye';
     }
 }
 
