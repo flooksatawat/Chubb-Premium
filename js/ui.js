@@ -3690,7 +3690,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         .cmp-row:hover td{background:#f0fdf4!important;transition:background 0.15s;}
         #cmpAgeA:focus,#cmpAgeB:focus,#cmpValA:focus,#cmpValB:focus{border-color:#0d9488;background:#fff;}
     </style>
-    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+    <div style="display:flex;flex-direction:column;flex:1;min-height:0;height:100%;overflow:hidden;">
         <div style="padding:10px 14px 6px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <i class="fas fa-code-compare" style="color:#2563eb;font-size:13px;"></i>
             <span style="font-weight:700;color:#334155;font-size:13px;">เปรียบเทียบแบบประกัน</span>
