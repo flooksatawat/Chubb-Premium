@@ -151,7 +151,7 @@ window.AI_CX = (function () {
     function _loadCustomIdeas() { try { return JSON.parse(localStorage.getItem(_LS_CUSTOM) || '[]'); } catch (e) { return []; } }
     function _saveCustomIdeas(arr) { try { localStorage.setItem(_LS_CUSTOM, JSON.stringify(arr)); } catch (e) {} }
 
-    window.AI_CX.addCustomIdea = async function () {
+    async function addCustomIdea() {
         const { value: title } = await Swal.fire({
             title: '<span style="font-family:Kanit,sans-serif;font-size:15px;color:#b45309;"><i class="fas fa-plus" style="margin-right:6px;"></i>เพิ่มไอเดียการขาย</span>',
             input: 'text',
@@ -160,7 +160,6 @@ window.AI_CX = (function () {
             inputAttributes: { style: 'font-family:Kanit,sans-serif;font-size:13px;' },
             showCancelButton: true, confirmButtonText: 'ถัดไป', cancelButtonText: 'ยกเลิก',
             confirmButtonColor: '#d97706',
-            customClass: { popup: '_swalKanit' },
             didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
         });
         if (!title || !title.trim()) return;
@@ -180,16 +179,15 @@ window.AI_CX = (function () {
         customs.push({ html, forChild: _isChild() });
         _saveCustomIdeas(customs);
         _toast('บันทึกไอเดียเรียบร้อย ✓');
-        // refresh modal content
-        if (typeof AI_CX._refresh === 'function') AI_CX._refresh();
-    };
+        if (typeof window.AI_CX._refresh === 'function') window.AI_CX._refresh();
+    }
 
-    window.AI_CX.deleteCustomIdea = function (idx) {
+    function deleteCustomIdea(idx) {
         const customs = _loadCustomIdeas();
         customs.splice(idx, 1);
         _saveCustomIdeas(customs);
-        window.AI_CX.showAllIdeas();
-    };
+        showAllIdeas();
+    }
 
     function _pickPoolWithCustom(base) {
         const builtin = _pickPool(base);
@@ -268,7 +266,7 @@ window.AI_CX = (function () {
         });
     }
 
-    window.AI_CX.viewCustomIdea = function (ci) {
+    function viewCustomIdea(ci) {
         const customs = _loadCustomIdeas().filter(c => !!c.forChild === _isChild());
         const c = customs[ci];
         if (!c) return;
@@ -282,7 +280,7 @@ window.AI_CX = (function () {
             width: Math.min(window.innerWidth - 20, 460),
             didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
         });
-    };
+    }
 
     function viewIdea(i) {
         const pool = _pickPool('ideas');
@@ -322,5 +320,5 @@ window.AI_CX = (function () {
     }
 
     // expose
-    return { menuHTML, showAllIdeas, viewIdea, _refresh: () => {} };
+    return { menuHTML, showAllIdeas, viewIdea, viewCustomIdea, addCustomIdea, deleteCustomIdea, _refresh: () => {} };
 })();
