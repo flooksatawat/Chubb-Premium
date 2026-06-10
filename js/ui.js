@@ -606,13 +606,11 @@ window._enableCellDiff = function() {
         return isNaN(n) ? null : n;
     };
 
-    const _getLabel = cell => {
+    const _getColName = cell => {
         const head = document.getElementById('policyTableHead');
         const ths = head ? Array.from(head.querySelectorAll('th')) : [];
         const idx = Array.from(cell.parentElement.children).indexOf(cell);
-        const col = (ths[idx] ? ths[idx].textContent.trim().replace(/\n.*/, '') : `ช่อง${idx+1}`);
-        const row = cell.parentElement.querySelector('td')?.textContent.trim() || '';
-        return row ? `${col}(${row})` : col;
+        return ths[idx] ? ths[idx].textContent.trim().replace(/[\n\s]*[%＊✂].*$/, '').replace(/\n.*/, '').trim() : `ช่อง${idx+1}`;
     };
 
     const _clearSel = () => {
@@ -625,7 +623,7 @@ window._enableCellDiff = function() {
     const _showChip = cells => {
         document.getElementById('_diffChip')?.remove();
         const vals = cells.map(td => _parseVal(td));
-        const labels = cells.map(td => _getLabel(td));
+        const colNames = cells.map(td => _getColName(td));
         const n = cells.length;
 
         const fmtDiff = (va, vb, la, lb, isLast) => {
@@ -633,13 +631,18 @@ window._enableCellDiff = function() {
             const color = result >= 0 ? '#4ade80' : '#f87171';
             const resultStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
             const border = isLast ? '' : 'border-bottom:1px solid #334155;';
-            return `<div style="${border}padding:10px 0;text-align:center;">
-                <div style="font-size:15px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
-                    <span style="color:#e2e8f0;font-weight:700;">${va.toLocaleString()}</span>
-                    <span style="color:#64748b;">−</span>
-                    <span style="color:#e2e8f0;font-weight:700;">${vb.toLocaleString()}</span>
-                    <span style="color:#64748b;">=</span>
-                    <span style="color:${color};font-weight:800;font-size:17px;">${resultStr}</span>
+            const cell = (label, num, numColor, numWeight, numSize) => `
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <span style="font-size:10px;color:#64748b;font-weight:500;">${label}</span>
+                    <span style="color:${numColor};font-weight:${numWeight};font-size:${numSize};">${num}</span>
+                </div>`;
+            return `<div style="${border}padding:10px 0;">
+                <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;">
+                    ${cell(colNames[la], va.toLocaleString(), '#e2e8f0', 700, '15px')}
+                    <span style="color:#64748b;font-size:15px;padding-top:14px;">−</span>
+                    ${cell(colNames[lb], vb.toLocaleString(), '#e2e8f0', 700, '15px')}
+                    <span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>
+                    ${cell('ส่วนต่าง', resultStr, color, 800, '17px')}
                 </div>
             </div>`;
         };
