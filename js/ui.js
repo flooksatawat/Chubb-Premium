@@ -3152,7 +3152,11 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         else if (isTX)  { payYears = 24; maxYear = 90 - d.age; }
         else if (isLV)  { payYears = parseInt(d.years) || 10; maxYear = 100 - d.age; }
         else if (isSM)  { payYears = 7;  maxYear = 21; }
-        else if (isCL)  { maxYear = 100 - d.age; }
+        else if (isCL)  {
+            maxYear = 100 - d.age;
+            const clNum = parseInt((pOpt || '').match(/\d+/)?.[0]);
+            if (clNum >= 60) payYears = Math.max(1, clNum - d.age);
+        }
         else if (isSLB) { maxYear = 99  - d.age; }
         else if (isTLA) { maxYear = payYears; }
         if (maxYear <= 0) return [];
@@ -6439,6 +6443,9 @@ function generatePolicyTableData() {
         maxYear = 21;   // คุ้มครอง 21 ปี
     } else if (isCL) {
         maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
+        // 60CL/90CL/100CL: ชำระ "จนถึงอายุ N" ดังนั้น payYears = N - อายุปัจจุบัน
+        const clNum = parseInt((currentPlan || '').match(/\d+/)?.[0]);
+        if (clNum >= 60) payYears = Math.max(1, clNum - d.age);
     } else if (isSLB) {
         maxYear = 99 - d.age; // Signature Legacy คุ้มครองถึงอายุ 99
     } else if (isTLA) {
