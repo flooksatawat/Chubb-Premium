@@ -619,6 +619,7 @@ window._enableCellDiff = function() {
         window._diffCells.forEach(td => { td.style.outline = ''; td.style.background = ''; });
         window._diffCells = [];
         document.getElementById('_diffChip')?.remove();
+        document.getElementById('_diffOverlay')?.remove();
     };
 
     const _showChip = cells => {
@@ -627,43 +628,55 @@ window._enableCellDiff = function() {
         const labels = cells.map(td => _getLabel(td));
         const n = cells.length;
 
-        const fmtDiff = (a, b, la, lb, ci) => {
-            const d = b - a;
-            const sign = d >= 0 ? '+' : '';
+        const fmtDiff = (va, vb, la, lb, isLast) => {
+            const d = vb - va;
+            const op = d >= 0 ? '+' : '−';
             const color = d >= 0 ? '#4ade80' : '#f87171';
-            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334155;gap:12px;">
-                <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">
-                    <span style="color:${COLORS[la].label};">●</span> <span style="color:#e2e8f0;">${vals[la] !== null ? vals[la].toLocaleString() : '-'}</span>
-                    <span style="color:#64748b;margin:0 4px;">→</span>
-                    <span style="color:${COLORS[lb].label};">●</span> <span style="color:#e2e8f0;">${vals[lb] !== null ? vals[lb].toLocaleString() : '-'}</span>
-                </span>
-                <span style="font-weight:700;font-size:13px;color:${color};white-space:nowrap;">${sign}${d.toLocaleString()}</span>
+            const absDiff = Math.abs(d).toLocaleString();
+            const border = isLast ? '' : 'border-bottom:1px solid #334155;';
+            return `<div style="${border}padding:8px 0;">
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:3px;white-space:nowrap;">
+                    <span style="color:${COLORS[la].label};">●</span> <span style="color:#e2e8f0;">${va.toLocaleString()}</span>
+                    <span style="color:#64748b;margin:0 5px;">${d >= 0 ? '+' : '−'}</span>
+                    <span style="color:${COLORS[lb].label};">●</span> <span style="color:#e2e8f0;">${vb.toLocaleString()}</span>
+                    <span style="color:#64748b;margin:0 5px;">=</span>
+                    <span style="color:${color};font-weight:700;">${d >= 0 ? '' : '−'}${absDiff}</span>
+                </div>
             </div>`;
         };
 
         let rows = '';
-        // แสดง: ช่อง2-ช่อง1, ช่อง3-ช่อง1, ช่อง3-ช่อง2 (ถ้า 3 ช่อง)
-        if (n >= 2) rows += fmtDiff(vals[0], vals[1], 0, 1);
+        if (n >= 2) rows += fmtDiff(vals[0], vals[1], 0, 1, n < 3);
         if (n === 3) {
-            rows += fmtDiff(vals[0], vals[2], 0, 2);
-            rows += fmtDiff(vals[1], vals[2], 1, 2).replace('border-bottom:1px solid #334155;', '');
+            rows += fmtDiff(vals[0], vals[2], 0, 2, false);
+            rows += fmtDiff(vals[1], vals[2], 1, 2, true);
         }
+
+        // popup กลางจอ + overlay ด้านหลัง
+        document.getElementById('_diffOverlay')?.remove();
+        const overlay = document.createElement('div');
+        overlay.id = '_diffOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;';
+        overlay.addEventListener('click', _clearSel);
+        document.body.appendChild(overlay);
 
         const chip = document.createElement('div');
         chip.id = '_diffChip';
-        chip.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;
-            background:#1e293b;color:#f8fafc;border-radius:16px;padding:12px 16px;font-family:Kanit,sans-serif;
-            font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.4);min-width:280px;max-width:calc(100vw - 32px);`;
+        chip.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;
+            background:#1e293b;color:#f8fafc;border-radius:20px;padding:16px 20px;font-family:Kanit,sans-serif;
+            font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);min-width:260px;max-width:calc(100vw - 40px);`;
         chip.innerHTML = `
-            <div style="font-size:10px;color:#64748b;text-align:center;margin-bottom:8px;">ส่วนต่าง — แตะเพื่อปิด</div>
+            <div style="font-size:10px;color:#64748b;text-align:center;margin-bottom:10px;letter-spacing:.05em;">การคำนวณ — แตะเพื่อปิด</div>
             ${rows}`;
-        chip.addEventListener('click', _clearSel);
+        chip.addEventListener('click', e => { e.stopPropagation(); _clearSel(); });
         document.body.appendChild(chip);
-        setTimeout(_clearSel, 10000);
+        setTimeout(_clearSel, 15000);
     };
 
     let _pressTimer = null;
     let _pressTarget = null;
+    // ป้องกัน click หลัง long-press
+    let _suppressClick = false;
 
     const _selectCell = td => {
         const val = _parseVal(td);
@@ -678,11 +691,17 @@ window._enableCellDiff = function() {
         if (window._diffCells.length >= 2) _showChip(window._diffCells);
     };
 
+    // ── ช่องแรก: long-press ──
     const _startPress = (e, td) => {
+        if (window._diffCells.length > 0) return; // มีช่องเลือกแล้ว ไม่ต้อง long-press
         _pressTarget = td;
         _pressTimer = setTimeout(() => {
             _pressTimer = null;
-            if (_pressTarget === td) _selectCell(td);
+            if (_pressTarget === td) {
+                _suppressClick = true;
+                _selectCell(td);
+                setTimeout(() => { _suppressClick = false; }, 400);
+            }
         }, 400);
     };
 
@@ -690,6 +709,15 @@ window._enableCellDiff = function() {
         if (_pressTimer) { clearTimeout(_pressTimer); _pressTimer = null; }
         _pressTarget = null;
     };
+
+    // ── ช่องถัดไป: click ──
+    body.addEventListener('click', e => {
+        if (_suppressClick) return;
+        const td = e.target.closest('td');
+        if (!td) return;
+        if (window._diffCells.length === 0) return; // ยังไม่ได้ long-press ช่องแรก
+        _selectCell(td);
+    });
 
     body.addEventListener('mousedown', e => {
         const td = e.target.closest('td');
@@ -704,9 +732,7 @@ window._enableCellDiff = function() {
         if (!td) return;
         _startPress(e, td);
     }, { passive: true });
-    body.addEventListener('touchend', e => {
-        _cancelPress();
-    });
+    body.addEventListener('touchend', _cancelPress);
     body.addEventListener('touchmove', _cancelPress, { passive: true });
 };
 
