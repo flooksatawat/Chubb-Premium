@@ -3320,16 +3320,16 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     const thS = 'style="padding:8px 6px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;"';
     const _mTh = (c) => `style="padding:6px 5px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;color:${c};"`;
     const mobileTablesHtml = `
-        <div style="overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:8px 8px 4px;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;">
-            <div style="border-radius:12px;overflow:hidden;border:1.5px solid #0d9488;box-shadow:0 2px 8px rgba(13,148,136,0.12);">
-                <div style="background:linear-gradient(135deg,#0d9488,#0369a1);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._cmpStartReplace('A','${planA}','${planB}')">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;padding:8px 8px 4px;">
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1.5px solid #0d9488;box-shadow:0 2px 8px rgba(13,148,136,0.12);">
+                <div style="background:linear-gradient(135deg,#0d9488,#0369a1);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-shrink:0;" onclick="window._cmpStartReplace('A','${planA}','${planB}')">
                     <span style="font-size:12px;font-weight:700;color:#fff;">${planA}</span>
                     <span style="font-size:11px;color:rgba(255,255,255,0.85);">อายุ ${dA.age} ${genderA} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:3px;"></i></span>
                 </div>
-                <div style="overflow-x:auto;">
+                <div style="flex-shrink:0;background:#e6f7f6;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr style="background:#e6f7f6;">
+                        <tr>
                             <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#0f766e;">อายุ</th>
                             <th ${_mTh('#0f766e')}>ออมเงิน</th>
                             ${hasCF_A ? `<th ${_mTh('#0f766e')}>ทุนประกัน</th>` : ''}
@@ -3337,6 +3337,10 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                             <th ${_mTh('#0f766e')}>เงินสดพร้อมใช้</th>
                         </tr>
                     </thead>
+                </table>
+                </div>
+                <div style="overflow-y:auto;overflow-x:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;">
+                <table style="width:100%;border-collapse:collapse;">
                     <tbody>${mobileBodyRowsA}</tbody>
                 </table>
                 </div>
@@ -3346,15 +3350,15 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                 <span style="font-size:11px;font-weight:800;color:#94a3b8;letter-spacing:1px;">VS</span>
                 <div style="flex:1;height:1px;background:#e2e8f0;"></div>
             </div>
-            <div style="border-radius:12px;overflow:hidden;border:1.5px solid #7c3aed;box-shadow:0 2px 8px rgba(124,58,237,0.12);">
-                <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="window._cmpStartReplace('B','${planA}','${planB}')">
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1.5px solid #7c3aed;box-shadow:0 2px 8px rgba(124,58,237,0.12);">
+                <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-shrink:0;" onclick="window._cmpStartReplace('B','${planA}','${planB}')">
                     <span style="font-size:12px;font-weight:700;color:#fff;">${planB}</span>
                     <span style="font-size:11px;color:rgba(255,255,255,0.85);">อายุ ${dB.age} ${genderB} <i class="fas fa-pen" style="font-size:9px;opacity:0.7;margin-left:3px;"></i></span>
                 </div>
-                <div style="overflow-x:auto;">
+                <div style="flex-shrink:0;background:#f3f0ff;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr style="background:#f3f0ff;">
+                        <tr>
                             <th style="padding:6px 5px;font-size:10px;font-weight:700;text-align:center;white-space:nowrap;color:#6d28d9;">อายุ</th>
                             <th ${_mTh('#6d28d9')}>ออมเงิน</th>
                             ${hasCF_B ? `<th ${_mTh('#6d28d9')}>ทุนประกัน</th>` : ''}
@@ -3362,6 +3366,10 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                             <th ${_mTh('#6d28d9')}>เงินสดพร้อมใช้</th>
                         </tr>
                     </thead>
+                </table>
+                </div>
+                <div style="overflow-y:auto;overflow-x:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;">
+                <table style="width:100%;border-collapse:collapse;">
                     <tbody>${mobileBodyRowsB}</tbody>
                 </table>
                 </div>
