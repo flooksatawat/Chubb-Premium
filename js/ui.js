@@ -545,6 +545,117 @@ window._clearDepositConfig = function() {
     if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
 };
 
+// ==================== ซ่อนคอลัมน์ตาราง (Hide Columns) ====================
+// ซ่อนแต่ละคอลัมน์อิสระ — จดจำด้วย "ชื่อหัวคอลัมน์" จึงคงสภาพข้ามการคำนวณใหม่
+window._hiddenColLabels = window._hiddenColLabels || new Set();
+
+window._colLabelOf = function(th) {
+    // ดึงชื่อหัวคอลัมน์แบบสะอาด (ตัดปุ่ม/ไอคอนที่เราเพิ่มออก)
+    const clone = th.cloneNode(true);
+    clone.querySelectorAll('button, .col-hide-btn, i').forEach(n => n.remove());
+    return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+};
+
+window._enablePolicyColHide = function() {
+    const head = document.getElementById('policyTableHead');
+    if (!head) return;
+    const headerRow = head.querySelector('tr');
+    if (!headerRow) return;
+    const ths = Array.from(headerRow.children);
+    ths.forEach((th, idx) => {
+        const label = window._colLabelOf(th);
+        // ใส่ปุ่มซ่อน (ถ้ายังไม่มี)
+        if (!th.querySelector('.col-hide-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'col-hide-btn';
+            btn.type = 'button';
+            btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            btn.title = 'ซ่อนคอลัมน์นี้';
+            btn.style.cssText = 'margin-left:4px;font-size:8px;background:rgba(255,255,255,0.22);border:none;border-radius:50%;width:14px;height:14px;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;flex-shrink:0;';
+            btn.addEventListener('click', (e) => { e.stopPropagation(); window._hidePolicyCol(label); });
+            btn.addEventListener('mousedown', (e) => e.stopPropagation());
+            btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+            th.appendChild(btn);
+        }
+    });
+    window._applyPolicyColHide();
+};
+
+window._hidePolicyCol = function(label) {
+    if (!label) return;
+    window._hiddenColLabels.add(label);
+    window._applyPolicyColHide();
+};
+
+window._showPolicyCol = function(label) {
+    window._hiddenColLabels.delete(label);
+    window._applyPolicyColHide();
+};
+
+window._showAllPolicyCols = function() {
+    window._hiddenColLabels.clear();
+    window._applyPolicyColHide();
+};
+
+window._applyPolicyColHide = function() {
+    const head = document.getElementById('policyTableHead');
+    const body = document.getElementById('policyTableBody');
+    if (!head) return;
+    const headerRow = head.querySelector('tr');
+    if (!headerRow) return;
+    const ths = Array.from(headerRow.children);
+    const hiddenIdx = [];
+    ths.forEach((th, idx) => {
+        const label = window._colLabelOf(th);
+        const hidden = window._hiddenColLabels.has(label);
+        th.style.display = hidden ? 'none' : '';
+        if (hidden) hiddenIdx.push(idx);
+    });
+    // ซ่อน td ตาม index ในทุกแถว (รวมแถวสรุป)
+    if (body) {
+        body.querySelectorAll('tr').forEach(tr => {
+            const cells = Array.from(tr.children);
+            cells.forEach((td, i) => { td.style.display = hiddenIdx.includes(i) ? 'none' : ''; });
+        });
+    }
+    window._renderHiddenColChip();
+};
+
+window._renderHiddenColChip = function() {
+    let chip = document.getElementById('_hiddenColChip');
+    const labels = Array.from(window._hiddenColLabels);
+    if (labels.length === 0) { if (chip) chip.remove(); return; }
+    if (!chip) {
+        chip = document.createElement('div');
+        chip.id = '_hiddenColChip';
+        chip.style.cssText = 'position:fixed;bottom:78px;left:50%;transform:translateX(-50%);z-index:9000;background:#1e293b;color:#fff;padding:8px 14px;border-radius:20px;font-family:Kanit,sans-serif;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;max-width:92vw;cursor:pointer;';
+        chip.onclick = () => window._showHiddenColMenu();
+        document.body.appendChild(chip);
+    }
+    chip.innerHTML = `<i class="fas fa-eye-slash" style="color:#94a3b8;"></i> ซ่อน ${labels.length} คอลัมน์ <span style="color:#60a5fa;font-weight:700;">แตะเพื่อจัดการ</span>`;
+};
+
+window._showHiddenColMenu = function() {
+    const labels = Array.from(window._hiddenColLabels);
+    if (!labels.length) return;
+    const items = labels.map(l => `<button onclick="window._showPolicyCol('${l.replace(/'/g, "\\'")}');window._refreshHiddenColMenu();" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;margin-bottom:8px;cursor:pointer;font-family:Kanit,sans-serif;font-size:13px;color:#334155;font-weight:600;"><span>${l}</span><span style="color:#16a34a;font-size:12px;"><i class="fas fa-eye"></i> แสดง</span></button>`).join('');
+    Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;">คอลัมน์ที่ซ่อนอยู่</span>',
+        html: `<div style="text-align:left;">${items}</div>`,
+        showConfirmButton: true,
+        confirmButtonText: 'แสดงทั้งหมด',
+        confirmButtonColor: '#2563eb',
+        showCloseButton: true,
+        width: Math.min(360, window.innerWidth - 20),
+        didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '18px'; }
+    }).then(r => { if (r.isConfirmed) window._showAllPolicyCols(); });
+};
+
+window._refreshHiddenColMenu = function() {
+    if (window._hiddenColLabels.size === 0) { Swal.close(); return; }
+    window._showHiddenColMenu();
+};
+
 // ==================== Deposit IRR ====================
 let _depositIrrTimer = null;
 window._depositIrrLongStart = function(e) {
@@ -6873,6 +6984,9 @@ function generatePolicyTableData() {
     }
 
     document.getElementById('policyTableBody').innerHTML = html;
+
+    // เพิ่มปุ่มซ่อนคอลัมน์ในหัวตาราง (ซ่อนแต่ละคอลัมน์อิสระ)
+    if (typeof window._enablePolicyColHide === 'function') window._enablePolicyColHide();
 
     // --- 5. Summary Text ---
     if (foundBreakeven) {
