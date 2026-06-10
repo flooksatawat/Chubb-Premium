@@ -98,9 +98,11 @@
         #policyTableBody.show-breakeven .breakeven-target td { font-weight: 800; color: #047857 !important; }
         #policyTableBody.show-breakeven .breakeven-target .be-badge { display: block !important; }
         .be-highlight-row { background-color: #d1fae5; }
-        .be-highlight-row td { font-weight: 800 !important; color: #047857 !important; }
+        .be-highlight-row td { font-weight: 800 !important; }
+        .be-highlight-row td.be-td-colored { color: #047857 !important; }
         #policyTableBody.hide-be-highlight .be-highlight-row { background-color: transparent !important; border-top-color: transparent !important; border-bottom-color: transparent !important; border-top-width: 1px !important; border-bottom-width: 1px !important; }
-        #policyTableBody.hide-be-highlight .be-highlight-row td.be-td-colored { color: #334155 !important; font-weight: 400 !important; }
+        #policyTableBody.hide-be-highlight .be-highlight-row td { font-weight: inherit !important; }
+        #policyTableBody.hide-be-highlight .be-highlight-row td.be-td-colored { color: inherit !important; }
         .list-row { transition: all 0.2s; border: 1px solid transparent; cursor: pointer; }
         .list-row:active { background-color: #f8fafc; border-color: #e2e8f0; transform: scale(0.98); }
         
