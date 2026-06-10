@@ -9787,8 +9787,10 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
       <div id="_tblShareBg" style="position:absolute;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);"></div>
       <div style="position:relative;width:100%;background:#0f172a;border-radius:24px 24px 0 0;padding:18px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom));z-index:1;">
         <div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>
-        <div style="color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:4px;">ชื่อไฟล์</div>
-        <div style="color:white;font-size:13px;font-weight:700;margin-bottom:18px;word-break:break-all;">${cleanName}</div>
+        <div style="color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:6px;">ชื่อไฟล์ <span style="color:#64748b;font-weight:500;">(แตะเพื่อแก้ไข)</span></div>
+        <input id="_shareFileNameInput" type="text" value="${cleanName}"
+          style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:10px;color:white;font-size:13px;font-weight:700;padding:9px 12px;margin-bottom:18px;box-sizing:border-box;font-family:Kanit,sans-serif;outline:none;"
+          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'" />
         <div style="display:flex;flex-direction:column;gap:10px;" id="_tblShareBtns">
           <button data-action="image"
             style="width:100%;background:linear-gradient(135deg,#06c755,#059c44);border:none;border-radius:16px;color:white;padding:15px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;">
@@ -9815,23 +9817,29 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     document.body.appendChild(overlay);
     document.getElementById('_tblShareBg').addEventListener('click', () => { overlay.remove(); URL.revokeObjectURL(blobUrl); });
 
+    const _getFileName = () => (document.getElementById('_shareFileNameInput')?.value.trim() || cleanName);
+
     overlay.querySelector('[data-action="image"]').addEventListener('click', async () => {
+        const name = _getFileName();
         overlay.remove();
-        await _shareTableAsImages(pdfBlob, jpgName);
+        await _shareTableAsImages(pdfBlob, name + '.jpg');
         URL.revokeObjectURL(blobUrl);
     });
 
     overlay.querySelector('[data-action="pdf"]').addEventListener('click', async () => {
+        const name = _getFileName();
+        const dynPdfName = name + '.pdf';
+        const dynPdfFile = new File([pdfBlob], dynPdfName, { type: 'application/pdf' });
         overlay.remove();
-        const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] });
+        const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [dynPdfFile] });
         if (canShare) {
-            try { await navigator.share({ files: [pdfFile], title: pdfName }); }
-            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(pdfBlob, pdfName); }
+            try { await navigator.share({ files: [dynPdfFile], title: dynPdfName }); }
+            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(pdfBlob, dynPdfName); }
         } else if (navigator.share) {
-            try { await navigator.share({ title: pdfName, url: window.location.href }); }
+            try { await navigator.share({ title: dynPdfName, url: window.location.href }); }
             catch {}
         } else {
-            _fallbackDownload(pdfBlob, pdfName);
+            _fallbackDownload(pdfBlob, dynPdfName);
         }
         URL.revokeObjectURL(blobUrl);
     });
@@ -9857,8 +9865,9 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     });
 
     overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
+        const name = _getFileName();
         overlay.remove();
-        _fallbackDownload(pdfBlob, pdfName);
+        _fallbackDownload(pdfBlob, name + '.pdf');
         URL.revokeObjectURL(blobUrl);
     });
 }
