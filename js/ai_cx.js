@@ -242,17 +242,17 @@ window.AI_CX = (function () {
 
     // ---------- HTML เมนู 3 ปุ่ม (แทรกใน aiMenu เมื่อเลือก CX) ----------
     function menuHTML() {
-        const btn = (fn, icon, color, bg, brd, title, sub) => `
+        const btn = (fn, icon, iconColor, bg, brd, txtColor, title, sub) => `
             <button onclick="closePopup&&closePopup('aiMenuModal');if(typeof Swal!=='undefined'&&Swal.isVisible())Swal.close();setTimeout(${fn},120);" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:${bg};border:1.5px solid ${brd};border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
-                <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas ${icon}" style="color:${color};font-size:17px;"></i></div>
-                <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:${color};">${title}</div><div style="font-size:11px;color:#64748b;">${sub}</div></div>
+                <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas ${icon}" style="color:${iconColor};font-size:17px;"></i></div>
+                <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:${txtColor};">${title}</div><div style="font-size:11px;color:#64748b;">${sub}</div></div>
                 <i class="fas fa-chevron-right" style="color:${brd};font-size:11px;"></i>
             </button>`;
         return `<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
             <div style="font-size:11px;font-weight:700;color:#6366f1;text-align:left;padding-left:4px;"><i class="fas fa-robot" style="margin-right:5px;"></i>ที่ปรึกษาการขาย — CI Extra Plus</div>
-            ${btn('window.openAIStats', 'fa-chart-pie', '#4f46e5', '#eef2ff', '#c7d2fe', 'สถิติโรคร้าย', 'ข้อมูลโรคร้ายในไทย ตามช่วงวัย')}
-            ${btn('window.openAICosts', 'fa-file-invoice-dollar', '#0891b2', '#ecfeff', '#a5f3fc', 'ประมาณการค่ารักษา', 'ค่ารักษาโรคร้ายใน รพ.เอกชน')}
-            ${btn('window.openAIIdeas', 'fa-lightbulb', '#d97706', '#fffbeb', '#fde68a', 'ไอเดียการขาย', 'สคริปต์ปิดการขาย + วิเคราะห์ด้วย AI')}
+            ${btn('window.openAIStats', 'fa-chart-pie', '#0284c7', '#eff6ff', '#bfdbfe', '#1e40af', 'สถิติโรคร้าย', 'ข้อมูลโรคร้ายในไทย ตามช่วงวัย')}
+            ${btn('window.openAICosts', 'fa-file-invoice-dollar', '#7c3aed', '#faf5ff', '#ddd6fe', '#6d28d9', 'ประมาณการค่ารักษา', 'ค่ารักษาโรคร้ายใน รพ.เอกชน')}
+            ${btn('window.openAIIdeas', 'fa-lightbulb', '#0d9488', '#f0fdfa', '#99f6e4', '#0f766e', 'ไอเดียการขาย', 'สคริปต์ปิดการขาย + วิเคราะห์ด้วย AI')}
         </div>`;
     }
 

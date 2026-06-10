@@ -562,21 +562,27 @@ window._enablePolicyColHide = function() {
     const headerRow = head.querySelector('tr');
     if (!headerRow) return;
     const ths = Array.from(headerRow.children);
-    ths.forEach((th, idx) => {
-        const label = window._colLabelOf(th);
-        // ใส่ปุ่มซ่อน (ถ้ายังไม่มี)
-        if (!th.querySelector('.col-hide-btn')) {
-            const btn = document.createElement('button');
-            btn.className = 'col-hide-btn';
-            btn.type = 'button';
-            btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            btn.title = 'ซ่อนคอลัมน์นี้';
-            btn.style.cssText = 'margin-left:4px;font-size:8px;background:rgba(255,255,255,0.22);border:none;border-radius:50%;width:14px;height:14px;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;flex-shrink:0;';
-            btn.addEventListener('click', (e) => { e.stopPropagation(); window._hidePolicyCol(label); });
-            btn.addEventListener('mousedown', (e) => e.stopPropagation());
-            btn.addEventListener('pointerdown', (e) => e.stopPropagation());
-            th.appendChild(btn);
-        }
+    ths.forEach((th) => {
+        if (th.dataset.colHideReady) return;
+        th.dataset.colHideReady = '1';
+        // Double-click (desktop)
+        th.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            window._hidePolicyCol(window._colLabelOf(th));
+        });
+        // Double-tap (mobile): two touches within 300ms
+        let _lastTap = 0;
+        th.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - _lastTap < 300) {
+                e.preventDefault();
+                e.stopPropagation();
+                window._hidePolicyCol(window._colLabelOf(th));
+                _lastTap = 0;
+            } else {
+                _lastTap = now;
+            }
+        }, { passive: false });
     });
     window._applyPolicyColHide();
 };
@@ -6619,7 +6625,7 @@ function generatePolicyTableData() {
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         ${showTaxColumn ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">ภาษี ${_taxRate}%</th>` : ''}
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz};white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;justify-content:flex-end;">รับเงินก้อน<button onmousedown="event.stopPropagation();" onclick="(function(){var t=document.getElementById('toggleSurrender');if(t){t.checked=false;t.dispatchEvent(new Event('change'));}document.getElementById('cfInlineControls')?.classList.add('hidden');})()" style="font-size:10px;color:#ef4444;background:#fee2e2;border:none;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" title="ปิดทยอยเวนคืน">&times;</button></span></th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i>${!_mfLabel ? ` <button onmousedown="event.stopPropagation();" onclick="event.stopPropagation();window._netRiderHoldMenu();" style="font-size:9px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:14px;height:14px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;" title="เพิ่มรายจ่ายจากเงินคงเหลือ"><i class="fas fa-plus" style="font-size:7px;"></i></button>` : ''}</th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}cursor:pointer;user-select:none;" ontouchstart="window._netRiderLongStart(event)" ontouchend="window._netRiderLongEnd()" ontouchcancel="window._netRiderLongEnd()" onmousedown="window._netRiderLongStart(event)" onmouseup="window._netRiderLongEnd()" onmouseleave="window._netRiderLongEnd()" title="กดค้างเพื่อเพิ่มรายจ่าย">คงเหลือ <i class='fas fa-layer-plus' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${(window._netExtraRiders||[]).map(function(r,i){const isLast=i===(window._netExtraRiders.length-1);const lp=isLast?`ontouchstart="window._netRiderLongStart(event)" ontouchend="window._netRiderLongEnd()" ontouchcancel="window._netRiderLongEnd()" onmousedown="window._netRiderLongStart(event)" onmouseup="window._netRiderLongEnd()" onmouseleave="window._netRiderLongEnd()" title="กดค้างเพื่อเพิ่มรายจ่ายอีก"`:'';return`<th class="${_mfThCls} text-rose-200 text-right" style="${_mfThSz}">${r.label} <button onclick="event.stopPropagation();window._removeNetRider(${i})" style="font-size:9px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:13px;height:13px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;line-height:1;">×</button></th><th class="${_mfThCls} ${isLast?'text-emerald-200':'text-rose-200'} text-right" style="${_mfThSz}${isLast?'cursor:pointer;user-select:none;':''}" ${lp}>คงเหลือ${isLast?` <i class='fas fa-layer-plus' style='font-size:8px;opacity:0.6;'></i>`:''}</th>`;}).join('')}
