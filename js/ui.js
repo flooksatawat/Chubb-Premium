@@ -370,6 +370,109 @@ window._tableDepositEnabled = false;
 window._tableDepositUntilAge = null;
 window._tableDepositRate = 0.02;
 
+// ==================== NET RIDER DEDUCTIONS (กดค้างหัวตาราง คงเหลือ) ====================
+window._netExtraRiders = window._netExtraRiders || [];
+
+(function() {
+    let _nrLpTimer = null;
+    window._netRiderLongStart = function(e) {
+        e.stopPropagation();
+        if (_nrLpTimer) clearTimeout(_nrLpTimer);
+        _nrLpTimer = setTimeout(function() { _nrLpTimer = null; window._netRiderHoldMenu(); }, 600);
+    };
+    window._netRiderLongEnd = function() {
+        if (_nrLpTimer) { clearTimeout(_nrLpTimer); _nrLpTimer = null; }
+    };
+})();
+
+window._netRiderHoldMenu = function() {
+    if (navigator.vibrate) navigator.vibrate(40);
+    const existing = (window._netExtraRiders || []).map(function(r) { return r.type; });
+    const opts = [
+        { type: 'MF',   icon: 'fa-hospital',      label: 'Medical Fund',    color: '#0891b2', bg: '#ecfeff' },
+        { type: 'DD50', icon: 'fa-shield-virus',   label: 'DD50 โรคร้าย 50', color: '#dc2626', bg: '#fef2f2' },
+        { type: 'TPD',  icon: 'fa-wheelchair',     label: 'TPD ทุพพลภาพ',   color: '#7c3aed', bg: '#f5f3ff' },
+    ];
+    const btns = opts.map(function(o) {
+        const done = existing.includes(o.type);
+        return `<button type="button" onclick="window._addNetRider('${o.type}')"
+            style="padding:10px 14px;border-radius:12px;border:1.5px solid ${o.color};background:${done?'#f8fafc':o.bg};color:${done?'#94a3b8':o.color};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:${done?'not-allowed':'pointer'};display:flex;align-items:center;gap:10px;text-align:left;width:100%;" ${done?'disabled':''}>
+            <i class="fas ${o.icon}"></i>${o.label}${done?' (เพิ่มแล้ว)':''}
+        </button>`;
+    }).join('');
+    Swal.fire({
+        title: '<span style="font-family:Kanit,sans-serif;font-size:15px;color:#1e293b;">➕ นำเงินคงเหลือไปจ่ายเบี้ย</span>',
+        html: `<div style="display:flex;flex-direction:column;gap:8px;font-family:Kanit,sans-serif;">${btns}</div>`,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: Math.min(300, window.innerWidth - 20),
+        didOpen: function() { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+    });
+};
+
+window._addNetRider = async function(type) {
+    Swal.close();
+    if (type === 'MF') {
+        if (typeof selectAppPlan === 'function') selectAppPlan('Medical Fund');
+        return;
+    }
+    const isDD50 = type === 'DD50';
+    const typeLabel = isDD50 ? 'DD50 โรคร้าย 50' : 'TPD ทุพพลภาพ';
+    const defaultSA = isDD50 ? 500000 : 1000000;
+    const curAge = parseInt(document.getElementById('ageInput')?.value) || 35;
+    const curGender = window.currentGender || 'male';
+    const { value, isConfirmed } = await Swal.fire({
+        title: `<span style="font-family:Kanit,sans-serif;font-size:15px;">เบี้ย ${typeLabel}</span>`,
+        html: `<div style="font-family:Kanit,sans-serif;text-align:left;">
+            <div style="margin-bottom:8px;font-size:12px;color:#64748b;">กรอกทุนประกัน (บาท)</div>
+            <input id="_nrSAInput" type="number" value="${defaultSA}"
+                style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;font-family:Kanit,sans-serif;text-align:center;box-sizing:border-box;"
+                oninput="window._nrPreviewPrem(this.value,'${type}',${curAge},'${curGender}')">
+            <div id="_nrPremPreview" style="margin-top:8px;font-size:12px;color:#64748b;min-height:18px;"></div>
+        </div>`,
+        confirmButtonText: '<i class="fas fa-check" style="margin-right:5px;"></i>เพิ่มลงตาราง',
+        showCancelButton: true,
+        cancelButtonText: 'ยกเลิก',
+        buttonsStyling: false,
+        customClass: { popup:'_nrPop', confirmButton:'_nrConf', cancelButton:'_nrCanc', actions:'_nrActs' },
+        width: Math.min(320, window.innerWidth - 20),
+        preConfirm: function() { return document.getElementById('_nrSAInput')?.value; },
+        didOpen: function() {
+            const p = Swal.getPopup(); if (p) p.style.borderRadius = '18px';
+            const c = document.querySelector('._nrConf');
+            const k = document.querySelector('._nrCanc');
+            const a = document.querySelector('._nrActs');
+            if (c) c.style.cssText = 'padding:9px 20px;border-radius:10px;background:#0d9488;color:#fff;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;';
+            if (k) k.style.cssText = 'padding:9px 16px;border-radius:10px;background:#f1f5f9;color:#64748b;font-family:Kanit,sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;';
+            if (a) a.style.cssText = 'display:flex;gap:8px;justify-content:center;flex-direction:row-reverse;';
+            window._nrPreviewPrem(String(defaultSA), type, curAge, curGender);
+        }
+    });
+    if (!isConfirmed || !value) return;
+    const sa = parseInt(String(value).replace(/,/g, '')) || 0;
+    if (sa <= 0) return;
+    const shortLabel = isDD50 ? `DD50 ${Math.round(sa/1000)}K` : `TPD ${Math.round(sa/1000)}K`;
+    window._netExtraRiders = window._netExtraRiders || [];
+    window._netExtraRiders.push({ type: type, label: shortLabel, sa: sa });
+    if (typeof calculate === 'function') calculate(window.currentMode || 'sum');
+};
+
+window._nrPreviewPrem = function(saStr, type, age, gender) {
+    const sa = parseInt(String(saStr).replace(/,/g, '')) || 0;
+    const el = document.getElementById('_nrPremPreview');
+    if (!el || !sa) { if (el) el.textContent = ''; return; }
+    const prem = (typeof getHealthRate === 'function') ? getHealthRate(type, String(sa), age, gender) : 0;
+    el.innerHTML = prem > 0
+        ? `เบี้ยปีนี้ (อายุ ${age}): <strong style="color:#0d9488;">${prem.toLocaleString()} บาท/ปี</strong>`
+        : '<span style="color:#dc2626;">ไม่พบอัตราเบี้ย</span>';
+};
+
+window._removeNetRider = function(idx) {
+    if (!window._netExtraRiders) return;
+    window._netExtraRiders.splice(idx, 1);
+    if (typeof calculate === 'function') calculate(window.currentMode || 'sum');
+};
+
 window._showDepositConfig = function() {
     document.getElementById('depositConfigBackdrop')?.remove();
     document.getElementById('depositConfigPopup')?.remove();
@@ -2143,6 +2246,7 @@ function selectAppPlan(planName) {
     }
 
     _cachedForPlan = null; // invalidate card cache so active highlight updates
+    window._netExtraRiders = []; // reset rider deductions on plan change
 
     const _rp = document.getElementById('rightPane');
     const _tv = document.getElementById('tableView');
@@ -6334,6 +6438,7 @@ function generatePolicyTableData() {
         + (forceShowCashFlow ? 2 : 0)
         + (showDepositColumn ? 1 : 0)
         + ((_mfLabel && _mfMap) ? 1 : 0)
+        + ((window._netExtraRiders?.length || 0) * 2)
         + (isBreakevenActive ? 2 : 0)
         + (showDD50Column ? 1 : 0)
         + (showCoverageColumn ? 1 : 0)
@@ -6392,9 +6497,10 @@ function generatePolicyTableData() {
         ${hideAnnualSaving ? '' : `<th class="${_thCls} text-right" style="${_thSz}">${_lSaving}</th>`}
         ${showTaxColumn ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz}">ภาษี ${_taxRate}%</th>` : ''}
         ${hideAnnualSaving ? `<th class="${_thCls} text-amber-200 text-right" style="${_thSz};white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;justify-content:flex-end;">รับเงินก้อน<button onmousedown="event.stopPropagation();" onclick="(function(){var t=document.getElementById('toggleSurrender');if(t){t.checked=false;t.dispatchEvent(new Event('change'));}document.getElementById('cfInlineControls')?.classList.add('hidden');})()" style="font-size:10px;color:#ef4444;background:#fee2e2;border:none;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" title="ปิดทยอยเวนคืน">&times;</button></span></th>` : ''}
-        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i></th>` : ''}
+        ${forceShowCashFlow ? `<th class="${_thCls} text-blue-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._depositLongStart(event)" ontouchend="window._depositLongEnd()" ontouchcancel="window._depositLongEnd()" onmousedown="window._depositLongStart(event)" onmouseup="window._depositLongEnd()" onmouseleave="window._depositLongEnd()" title="กดค้างเพื่อตั้งค่าฝากสะสม">${_lCF}${window._tableDepositEnabled ? ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.8;\'></i>' : ' <i class=\'fas fa-wand-magic-sparkles\' style=\'font-size:9px;opacity:0.5;\'></i>'}</th><th class="${_thCls} text-indigo-200 text-right" style="${_thSz};cursor:pointer;user-select:none;" ontouchstart="window._planIrrLongStart(event)" ontouchend="window._planIrrLongEnd()" ontouchcancel="window._planIrrLongEnd()" onmousedown="window._planIrrLongStart(event)" onmouseup="window._planIrrLongEnd()" onmouseleave="window._planIrrLongEnd()" title="กดค้างเพื่อดู IRR">${_lTotal} <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.5;'></i>${!_mfLabel ? ` <button onmousedown="event.stopPropagation();" onclick="event.stopPropagation();window._netRiderHoldMenu();" style="font-size:9px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:14px;height:14px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;" title="เพิ่มรายจ่ายจากเงินคงเหลือ"><i class="fas fa-plus" style="font-size:7px;"></i></button>` : ''}</th>` : ''}
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
-        ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">คงเหลือ</th>` : ''}
+        ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}cursor:pointer;user-select:none;" ontouchstart="window._netRiderLongStart(event)" ontouchend="window._netRiderLongEnd()" ontouchcancel="window._netRiderLongEnd()" onmousedown="window._netRiderLongStart(event)" onmouseup="window._netRiderLongEnd()" onmouseleave="window._netRiderLongEnd()" title="กดค้างเพื่อเพิ่มรายจ่าย">คงเหลือ <i class='fas fa-layer-plus' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
+        ${(window._netExtraRiders||[]).map(function(r,i){const isLast=i===(window._netExtraRiders.length-1);const lp=isLast?`ontouchstart="window._netRiderLongStart(event)" ontouchend="window._netRiderLongEnd()" ontouchcancel="window._netRiderLongEnd()" onmousedown="window._netRiderLongStart(event)" onmouseup="window._netRiderLongEnd()" onmouseleave="window._netRiderLongEnd()" title="กดค้างเพื่อเพิ่มรายจ่ายอีก"`:'';return`<th class="${_mfThCls} text-rose-200 text-right" style="${_mfThSz}">${r.label} <button onclick="event.stopPropagation();window._removeNetRider(${i})" style="font-size:9px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:13px;height:13px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;line-height:1;">×</button></th><th class="${_mfThCls} ${isLast?'text-emerald-200':'text-rose-200'} text-right" style="${_mfThSz}${isLast?'cursor:pointer;user-select:none;':''}" ${lp}>คงเหลือ${isLast?` <i class='fas fa-layer-plus' style='font-size:8px;opacity:0.6;'></i>`:''}</th>`;}).join('')}
         ${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
         ${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<th class="${_thCls} text-right" style="${_thSz}${(isCL || isSLB) ? 'cursor:pointer;user-select:none;' : ''}" id="cvThHeader" title="${(isCL || isSLB) ? 'กดค้างเพื่อตั้งค่าทยอยเวนคืน' : ''}">${_lCV}${(isCL || isSLB) ? ' <i class=\'fas fa-hand-holding-usd\' style=\'font-size:8px;opacity:0.6;vertical-align:middle;\'></i>' : ''}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
@@ -6493,6 +6599,7 @@ function generatePolicyTableData() {
     let html = '';
     let _mfPrevPrem = null;
     let _accMfPrem = 0;
+    let _netExtraAccPrems = (window._netExtraRiders || []).map(function() { return 0; });
     let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
     let currentSA = initialSA;
     let accCashFlow = 0;
@@ -6703,6 +6810,20 @@ function generatePolicyTableData() {
         } else if (_mfLabel) {
             html += `<td class="${_tdBase}"></td><td class="${_tdBase}"></td>`;
         }
+        // Extra rider deduction columns (after MF คงเหลือ OR after รวมรับ for cashflow plans)
+        if (window._netExtraRiders && window._netExtraRiders.length > 0) {
+            const _erBaseRem = accCashFlow - _accMfPrem; // base = after MF (or pure accCashFlow if no MF)
+            for (let _ri = 0; _ri < window._netExtraRiders.length; _ri++) {
+                const _er = window._netExtraRiders[_ri];
+                const _erP = (typeof getHealthRate === 'function') ? (getHealthRate(_er.type, String(_er.sa), currentAge, _mfGender) || 0) : 0;
+                _netExtraAccPrems[_ri] += _erP;
+                let _erRem = _erBaseRem;
+                for (let _j = 0; _j <= _ri; _j++) _erRem -= _netExtraAccPrems[_j];
+                const _erRemColor = _erRem >= 0 ? '#059669' : '#dc2626';
+                html += `<td class="${_tdBase} text-right" style="${_fSz}color:#94a3b8;">${_erP > 0 ? _erP.toLocaleString('en-US') : '—'}</td>`;
+                html += `<td class="${_tdBase} text-right" style="${_fSz}color:${_erRemColor};font-weight:600;">${_erRem.toLocaleString('en-US')}</td>`;
+            }
+        }
         html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
         html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         let _dd50SARow = 0, _dd50RowPrem = 0;
@@ -6738,6 +6859,7 @@ function generatePolicyTableData() {
         trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _blankTd) : '';
         trow += showDepositColumn ? _blankTd : '';
         if (_mfLabel) trow += _blankTd + _blankTd;
+        if (window._netExtraRiders) { for (let _ri = 0; _ri < window._netExtraRiders.length; _ri++) trow += _blankTd + _blankTd; }
         trow += (isBreakevenActive || isShowCVActive || isSurrenderActive) ? (_blankTd + _blankTd) : '';
         trow += showDD50Column ? _blankTd : '';
         trow += showCoverageColumn ? _blankTd : '';
