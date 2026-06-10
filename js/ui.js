@@ -7144,8 +7144,8 @@ function generatePolicyTableData() {
                 html += `<td class="${_tdBase} text-right" style="${_fSz}color:${_erRemColor};font-weight:600;">${_erRem.toLocaleString('en-US')}</td>`;
             }
         }
-        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
-        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         let _dd50SARow = 0, _dd50RowPrem = 0;
         if (showDD50Column) {
             const _dd50SA = parseInt(window.currentDD50SA) || 0;
