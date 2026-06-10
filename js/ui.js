@@ -2843,6 +2843,15 @@ window._cmpStartReplace = function(slot, curA, curB) {
     if (sheet && sheet.style.display !== 'none') {
         sheet.style.display = 'none';
     }
+    // Wide layout: เปิด left pane ก่อน (compare view ซ่อนไว้) แล้วค่อย openPlanModal
+    if (window.isWideLayout && window.isWideLayout()) {
+        const _layout = document.querySelector('.command-center-layout');
+        if (_layout && _layout.classList.contains('left-pane-hidden')) {
+            _layout.classList.remove('left-pane-hidden');
+            const icon = document.getElementById('toggleLeftPaneIcon');
+            if (icon) icon.className = 'fas fa-chevron-left';
+        }
+    }
     // ส่ง slotLabel โดยตรงเข้า openPlanModal — ไม่พึ่ง __cmpHighlightPlan global
     setTimeout(() => {
         if (typeof openPlanModal === 'function') openPlanModal(slotLabel);
