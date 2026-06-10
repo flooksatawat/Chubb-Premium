@@ -100,7 +100,7 @@
         .be-highlight-row { background-color: #d1fae5; }
         .be-highlight-row td { font-weight: 800 !important; color: #047857 !important; }
         #policyTableBody.hide-be-highlight .be-highlight-row { background-color: transparent !important; border-top-color: transparent !important; border-bottom-color: transparent !important; border-top-width: 1px !important; border-bottom-width: 1px !important; }
-        #policyTableBody.hide-be-highlight .be-highlight-row td { color: unset !important; font-weight: unset !important; }
+        #policyTableBody.hide-be-highlight .be-highlight-row td { color: #334155 !important; font-weight: 400 !important; }
         .list-row { transition: all 0.2s; border: 1px solid transparent; cursor: pointer; }
         .list-row:active { background-color: #f8fafc; border-color: #e2e8f0; transform: scale(0.98); }
         
