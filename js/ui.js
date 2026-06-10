@@ -629,20 +629,19 @@ window._enableCellDiff = function() {
         const n = cells.length;
 
         const fmtDiff = (va, vb, la, lb, isLast) => {
-            const d = vb - va;
-            const op = d >= 0 ? '+' : '−';
-            const color = d >= 0 ? '#4ade80' : '#f87171';
-            const absDiff = Math.abs(d).toLocaleString();
+            const result = va - vb;
+            const color = result >= 0 ? '#4ade80' : '#f87171';
+            const resultStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
             const border = isLast ? '' : 'border-bottom:1px solid #334155;';
             return `<div style="${border}padding:10px 0;">
                 <div style="font-size:15px;color:#94a3b8;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                     <span style="color:${COLORS[la].label};font-size:16px;">●</span>
                     <span style="color:#e2e8f0;font-weight:700;">${va.toLocaleString()}</span>
-                    <span style="color:#64748b;">${d >= 0 ? '+' : '−'}</span>
+                    <span style="color:#64748b;">−</span>
                     <span style="color:${COLORS[lb].label};font-size:16px;">●</span>
                     <span style="color:#e2e8f0;font-weight:700;">${vb.toLocaleString()}</span>
                     <span style="color:#64748b;">=</span>
-                    <span style="color:${color};font-weight:800;font-size:17px;">${d >= 0 ? '' : '−'}${absDiff}</span>
+                    <span style="color:${color};font-weight:800;font-size:17px;">${resultStr}</span>
                 </div>
             </div>`;
         };
