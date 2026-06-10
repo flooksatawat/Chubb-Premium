@@ -626,36 +626,32 @@ window._enableCellDiff = function() {
         const colNames = cells.map(td => _getColName(td));
         const n = cells.length;
 
-        // fmtRaw: รับ label+value ตรงๆ (ยืดหยุ่นกว่า index)
-        const fmtRaw = (labelA, va, labelB, vb, isLast) => {
-            const result = va - vb;
-            const color = result >= 0 ? '#4ade80' : '#f87171';
-            const resultStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
-            const border = isLast ? '' : 'border-bottom:1px solid #334155;';
-            const cell = (label, num, numColor, numWeight, numSize) => `
-                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
-                    <span style="font-size:10px;color:#64748b;font-weight:500;">${label}</span>
-                    <span style="color:${numColor};font-weight:${numWeight};font-size:${numSize};">${num}</span>
-                </div>`;
-            return `<div style="${border}padding:10px 0;">
-                <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;">
-                    ${cell(labelA, va.toLocaleString(), '#e2e8f0', 700, '15px')}
-                    <span style="color:#64748b;font-size:15px;padding-top:14px;">−</span>
-                    ${cell(labelB, vb.toLocaleString(), '#e2e8f0', 700, '15px')}
-                    <span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>
-                    ${cell('ส่วนต่าง', resultStr, color, 800, '17px')}
-                </div>
+        const cell = (label, num, numColor, numWeight, numSize) => `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <span style="font-size:10px;color:#64748b;font-weight:500;">${label}</span>
+                <span style="color:${numColor};font-weight:${numWeight};font-size:${numSize};">${num}</span>
             </div>`;
-        };
-        const fmtDiff = (va, vb, la, lb, isLast) => fmtRaw(colNames[la], va, colNames[lb], vb, isLast);
+        const _minus = `<span style="color:#64748b;font-size:15px;padding-top:14px;">−</span>`;
+        const _equal = `<span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>`;
+
+        // ลูกโซ่: v0 − v1 (− v2) = ผลลัพธ์เดียว
+        let result = vals[0];
+        let parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px');
+        for (let i = 1; i < n; i++) {
+            result -= vals[i];
+            parts += _minus + cell(colNames[i], vals[i].toLocaleString(), '#e2e8f0', 700, '15px');
+        }
+        const _rColor = result >= 0 ? '#4ade80' : '#f87171';
+        const _rStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
+        parts += _equal + cell('ส่วนต่าง', _rStr, _rColor, 800, '17px');
 
         let rows = '';
-        if (n >= 2) rows += fmtDiff(vals[0], vals[1], 0, 1, n < 3);
-        if (n === 3) {
-            const diff1 = vals[0] - vals[1]; // ส่วนต่างแถวแรก
-            rows += fmtDiff(vals[0], vals[2], 0, 2, false);
-            // แถวที่ 3: ส่วนต่าง(แถวแรก) − ช่องที่ 3
-            rows += fmtRaw('ส่วนต่าง', diff1, colNames[2], vals[2], true);
+        if (n >= 2) {
+            rows = `<div style="padding:10px 0;">
+                <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;">
+                    ${parts}
+                </div>
+            </div>`;
         }
 
         // popup กลางจอ
