@@ -626,7 +626,8 @@ window._enableCellDiff = function() {
         const colNames = cells.map(td => _getColName(td));
         const n = cells.length;
 
-        const fmtDiff = (va, vb, la, lb, isLast) => {
+        // fmtRaw: รับ label+value ตรงๆ (ยืดหยุ่นกว่า index)
+        const fmtRaw = (labelA, va, labelB, vb, isLast) => {
             const result = va - vb;
             const color = result >= 0 ? '#4ade80' : '#f87171';
             const resultStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
@@ -638,20 +639,23 @@ window._enableCellDiff = function() {
                 </div>`;
             return `<div style="${border}padding:10px 0;">
                 <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;">
-                    ${cell(colNames[la], va.toLocaleString(), '#e2e8f0', 700, '15px')}
+                    ${cell(labelA, va.toLocaleString(), '#e2e8f0', 700, '15px')}
                     <span style="color:#64748b;font-size:15px;padding-top:14px;">−</span>
-                    ${cell(colNames[lb], vb.toLocaleString(), '#e2e8f0', 700, '15px')}
+                    ${cell(labelB, vb.toLocaleString(), '#e2e8f0', 700, '15px')}
                     <span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>
                     ${cell('ส่วนต่าง', resultStr, color, 800, '17px')}
                 </div>
             </div>`;
         };
+        const fmtDiff = (va, vb, la, lb, isLast) => fmtRaw(colNames[la], va, colNames[lb], vb, isLast);
 
         let rows = '';
         if (n >= 2) rows += fmtDiff(vals[0], vals[1], 0, 1, n < 3);
         if (n === 3) {
+            const diff1 = vals[0] - vals[1]; // ส่วนต่างแถวแรก
             rows += fmtDiff(vals[0], vals[2], 0, 2, false);
-            rows += fmtDiff(vals[1], vals[2], 1, 2, true);
+            // แถวที่ 3: ส่วนต่าง(แถวแรก) − ช่องที่ 3
+            rows += fmtRaw('ส่วนต่าง', diff1, colNames[2], vals[2], true);
         }
 
         // popup กลางจอ
