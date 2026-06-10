@@ -1040,10 +1040,11 @@ function calculate(source, enforceMin = false) {
         else cashFlowVal = getSafeValue('cashFlowInput');
         
         highlightActivePills(fSum, fPrem, cashFlowVal);
-        const _tlaTpdPrem = (currentAppPlan === 'Convertable Term' && window.currentTPDEnabled) ? (typeof tpdPrem !== 'undefined' ? tpdPrem : 0) : 0;
         const _cxDD50Prem = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
         const _cxDD50SA = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
-        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _tlaTpdPrem, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0'), dd50Prem: _cxDD50Prem, dd50SA: _cxDD50SA };
+        // tpdPrem: 3D แผนใช้ _3dPremData, แผนอื่น (CL/TLA/ฯลฯ) ใช้ _generalTPDPrem
+        const _generalTpdFinal = window.currentTPDEnabled ? (typeof _generalTPDPrem !== 'undefined' ? _generalTPDPrem : 0) : 0;
+        lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _generalTpdFinal, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0'), dd50Prem: _cxDD50Prem, dd50SA: _cxDD50SA };
         
         if (typeof refreshAllDisplays === 'function') refreshAllDisplays();
 

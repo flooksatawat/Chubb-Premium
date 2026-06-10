@@ -881,7 +881,7 @@ function showPlansByAge(age) {
     let html = '';
     for (const p of matched) {
         const ageRange = p.planName === 'CI Extra Plus' ? `แรกเกิด – ${p.maxAge} ปี` : p.minAge === 0 ? `31 วัน – ${p.maxAge} ปี` : `${p.minAge} – ${p.maxAge} ปี`;
-        html += `<button onclick="closePopup('ageSearchModal');selectAppPlan('${p.planName}');setTimeout(()=>setPlan('${p.abbr}'),80)"
+        html += `<button onclick="closePopup('ageSearchModal');(()=>{const _ai=document.getElementById('ageInput');if(_ai){_ai.value=${age};}})();selectAppPlan('${p.planName}');setTimeout(()=>setPlan('${p.abbr}'),80)"
             class="w-full flex justify-between items-center p-3 bg-${p.color}-50 border border-${p.color}-200 rounded-xl active:bg-${p.color}-100 transition-colors shadow-sm text-left">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-${p.color}-600 shadow-sm shrink-0">
