@@ -97,8 +97,8 @@
         #policyTableBody.show-breakeven .breakeven-target { background-color: #ecfdf5 !important; }
         #policyTableBody.show-breakeven .breakeven-target td { font-weight: 800; color: #047857 !important; }
         #policyTableBody.show-breakeven .breakeven-target .be-badge { display: block !important; }
-        #policyTableBody.show-breakeven.hide-be-highlight .breakeven-target { background-color: transparent !important; }
-        #policyTableBody.show-breakeven.hide-be-highlight .breakeven-target td { color: inherit !important; font-weight: inherit !important; }
+        body #policyTableBody.show-breakeven.hide-be-highlight .breakeven-target { background-color: transparent !important; }
+        body #policyTableBody.show-breakeven.hide-be-highlight .breakeven-target td { color: unset !important; font-weight: unset !important; }
         .list-row { transition: all 0.2s; border: 1px solid transparent; cursor: pointer; }
         .list-row:active { background-color: #f8fafc; border-color: #e2e8f0; transform: scale(0.98); }
         
