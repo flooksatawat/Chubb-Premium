@@ -138,7 +138,8 @@ window._buildCompareHTML = function() {
         } else {
             tableHtml = `<div style="padding:20px;text-align:center;color:#94a3b8;font-family:'Kanit',sans-serif;">ไม่พบข้อมูลสำหรับอายุ ${age} ปี</div>`;
         }
-        return `<div style="font-family:'Kanit',sans-serif;"><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9;">${pills}</div>${tableHtml}</div>`;
+        const changePlanBtn = `<div style="margin-top:10px;text-align:center;"><button onclick="Swal.close();setTimeout(()=>{if(typeof openPlanModal==='function')openPlanModal();},150);" style="padding:8px 20px;border-radius:20px;font-size:13px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;border:2px solid #2563eb;background:#eff6ff;color:#1d4ed8;transition:all 0.15s;"><i class="fas fa-exchange-alt" style="margin-right:6px;"></i>เปลี่ยนแบบประกัน</button></div>`;
+        return `<div style="font-family:'Kanit',sans-serif;"><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9;">${pills}</div>${tableHtml}${changePlanBtn}</div>`;
     }
 
     window._cmpToggle = function(i) {
