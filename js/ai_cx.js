@@ -124,14 +124,14 @@ window.AI_CX = (function () {
 
     // ---------- โครง Swal มาตรฐานของฟีเจอร์ ----------
     function _openInfoModal(opts) {
-        // opts: { icon, title, color, render(refresh), aiBtn }
+        // opts: { icon, title, color, render(refresh), addIdeaBtn }
+        const addBtn = opts.addIdeaBtn ? `<button onclick="window.AI_CX.addCustomIdea()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #d97706;background:#fffbeb;color:#b45309;font-family:Kanit,sans-serif;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>เพิ่มไอเดีย</button>` : '';
         Swal.fire({
             title: `<span style="font-family:Kanit,sans-serif;font-size:16px;color:${opts.color};"><i class="fas ${opts.icon}" style="margin-right:7px;"></i>${opts.title}</span>`,
             html: `<div id="_aiContent" style="font-family:Kanit,sans-serif;text-align:left;font-size:13px;color:#334155;line-height:1.7;min-height:120px;"></div>
                    <div style="display:flex;gap:8px;margin-top:14px;">
                        <button onclick="window.AI_CX._refresh()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid ${opts.color}33;background:${opts.color}11;color:${opts.color};font-family:Kanit,sans-serif;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-sync-alt" style="margin-right:5px;"></i>สุ่มใหม่</button>
-                       ${opts.aiBtn ? `<button onclick="window.AI_CX._enhance()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid #6366f133;background:#6366f111;color:#4f46e5;font-family:Kanit,sans-serif;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-brain" style="margin-right:5px;"></i>${getUserKey() ? 'AI สด' : 'เชื่อม AI'}</button>` : ''}
-                       <button onclick="window._aiCXManageKey()" style="padding:9px 12px;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:Kanit,sans-serif;font-size:12px;cursor:pointer;" title="ตั้งค่า API Key"><i class="fas fa-key"></i></button>
+                       ${addBtn}
                    </div>`,
             showConfirmButton: false,
             showCloseButton: true,
@@ -139,7 +139,6 @@ window.AI_CX = (function () {
             didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; opts.render(false); }
         });
         AI_CX._refresh = () => opts.render(true);
-        AI_CX._enhance = opts.enhance || (() => {});
     }
 
     function _setContent(html) { const el = document.getElementById('_aiContent'); if (el) el.innerHTML = html; }
@@ -147,49 +146,82 @@ window.AI_CX = (function () {
         _setContent(`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0;color:#818cf8;"><i class="fas fa-robot fa-2x" style="margin-bottom:10px;animation:_aiBounce 1s infinite;"></i><span style="font-size:13px;font-weight:700;">${msg}</span></div>`);
     }
 
+    // ---------- Custom ideas (localStorage) ----------
+    const _LS_CUSTOM = 'cx_custom_ideas';
+    function _loadCustomIdeas() { try { return JSON.parse(localStorage.getItem(_LS_CUSTOM) || '[]'); } catch (e) { return []; } }
+    function _saveCustomIdeas(arr) { try { localStorage.setItem(_LS_CUSTOM, JSON.stringify(arr)); } catch (e) {} }
+
+    window.AI_CX.addCustomIdea = async function () {
+        const { value: title } = await Swal.fire({
+            title: '<span style="font-family:Kanit,sans-serif;font-size:15px;color:#b45309;"><i class="fas fa-plus" style="margin-right:6px;"></i>เพิ่มไอเดียการขาย</span>',
+            input: 'text',
+            inputLabel: 'ชื่อกลยุทธ์',
+            inputPlaceholder: 'เช่น กลยุทธ์ "ตู้ ATM ประจำบ้าน"',
+            inputAttributes: { style: 'font-family:Kanit,sans-serif;font-size:13px;' },
+            showCancelButton: true, confirmButtonText: 'ถัดไป', cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#d97706',
+            customClass: { popup: '_swalKanit' },
+            didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+        });
+        if (!title || !title.trim()) return;
+        const { value: body } = await Swal.fire({
+            title: '<span style="font-family:Kanit,sans-serif;font-size:15px;color:#b45309;">บทพูด / รายละเอียด</span>',
+            input: 'textarea',
+            inputLabel: 'บทพูดปิดการขาย',
+            inputPlaceholder: 'เขียนบทพูดหรือรายละเอียดไอเดียนี้...',
+            inputAttributes: { rows: 5, style: 'font-family:Kanit,sans-serif;font-size:13px;' },
+            showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#d97706',
+            didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+        });
+        if (!body || !body.trim()) return;
+        const html = `<strong>${title.trim()}</strong><br>${body.trim().replace(/\n/g, '<br>')}`;
+        const customs = _loadCustomIdeas();
+        customs.push({ html, forChild: _isChild() });
+        _saveCustomIdeas(customs);
+        _toast('บันทึกไอเดียเรียบร้อย ✓');
+        // refresh modal content
+        if (typeof AI_CX._refresh === 'function') AI_CX._refresh();
+    };
+
+    window.AI_CX.deleteCustomIdea = function (idx) {
+        const customs = _loadCustomIdeas();
+        customs.splice(idx, 1);
+        _saveCustomIdeas(customs);
+        window.AI_CX.showAllIdeas();
+    };
+
+    function _pickPoolWithCustom(base) {
+        const builtin = _pickPool(base);
+        if (base !== 'ideas') return builtin;
+        const customs = _loadCustomIdeas();
+        const filtered = customs.filter(c => !!c.forChild === _isChild()).map(c => `<div class='_aiItem _aiCustom'>${c.html}</div>`);
+        return [...filtered, ...builtin];
+    }
+
     // ---------- 1) สถิติโรคร้าย ----------
     window.openAIStats = function () {
         _openInfoModal({
-            icon: 'fa-chart-pie', title: 'สถิติโรคร้าย', color: '#4f46e5', aiBtn: true,
-            render: () => { _setContent(_shuffle(_pickPool('stats')).slice(0, 3).join(_SEP)); },
-            enhance: async () => {
-                _loading('AI กำลังวิเคราะห์สถิติล่าสุด...');
-                const r = await fetchGemini(`เขียน "สถิติโรคร้ายแรงที่น่าสนใจในประเทศไทย" สำหรับกลุ่ม: ${_targetText()} จำนวน 3 ข้อ (ข้อละ 1-2 บรรทัด) รูปแบบ HTML คั่นด้วย <div class="_aiItem">...</div> ใช้ <strong> เน้นคำสำคัญ เอาเฉพาะเนื้อหา 3 ข้อ`);
-                _setContent(r || _shuffle(_pickPool('stats')).slice(0, 3).join(_SEP));
-                if (!r) _toast('ใช้เนื้อหาในตัว (ยังไม่ได้ตั้งค่า API Key หรือเรียกไม่สำเร็จ)');
-            }
+            icon: 'fa-chart-pie', title: 'สถิติโรคร้าย', color: '#4f46e5',
+            render: () => { _setContent(_shuffle(_pickPool('stats')).slice(0, 3).join(_SEP)); }
         });
     };
 
     // ---------- 2) ประมาณการค่ารักษา ----------
     window.openAICosts = function () {
         _openInfoModal({
-            icon: 'fa-file-invoice-dollar', title: 'ประมาณการค่ารักษา', color: '#0891b2', aiBtn: true,
-            render: () => { _setContent(_shuffle(_pickPool('costs')).slice(0, 3).join(_SEP)); },
-            enhance: async () => {
-                _loading('AI กำลังดึงข้อมูลค่ารักษา...');
-                const r = await fetchGemini(`เขียน "ประมาณการค่ารักษาพยาบาลโรคร้ายแรงใน รพ.เอกชนไทย" สำหรับกลุ่ม: ${_targetText()} จำนวน 3 ข้อ (ระบุตัวเลขเป็นบาทชัดเจน) รูปแบบ HTML คั่นด้วย <div class="_aiItem">...</div> ใช้ <strong> เน้นชื่อโรคและราคา เอาเฉพาะ 3 ข้อ`);
-                _setContent(r || _shuffle(_pickPool('costs')).slice(0, 3).join(_SEP));
-                if (!r) _toast('ใช้เนื้อหาในตัว (ยังไม่ได้ตั้งค่า API Key หรือเรียกไม่สำเร็จ)');
-            }
+            icon: 'fa-file-invoice-dollar', title: 'ประมาณการค่ารักษา', color: '#0891b2',
+            render: () => { _setContent(_shuffle(_pickPool('costs')).slice(0, 3).join(_SEP)); }
         });
     };
 
     // ---------- 3) ไอเดียการขาย ----------
     window.openAIIdeas = function () {
         _openInfoModal({
-            icon: 'fa-lightbulb', title: 'ไอเดียการขาย', color: '#d97706', aiBtn: true,
-            render: () => { const pool = _pickPool('ideas'); _setContent(pool[Math.floor(Math.random() * pool.length)] + _allIdeasBtn()); },
-            enhance: async () => {
-                const d = window.lastCalculationData;
-                if (!d) { _toast('กรุณาคำนวณเบี้ยก่อน เพื่อให้ AI วิเคราะห์ตามโปรไฟล์ลูกค้า'); return; }
-                _loading('AI กำลังวิเคราะห์โปรไฟล์ลูกค้า (มุมมอง TOT)...');
-                const prompt = `คุณคือนักขายประกันระดับ MDRT (TOT) ช่วยคิดบทเสนอขาย "CI Extra Plus" ให้ลูกค้า เพศ${d.gender} อายุ ${d.age} ปี (ออม ${Math.round(d.premium).toLocaleString()} บาท/ปี ทุน ${Math.round(d.sum).toLocaleString()} บาท)
-จุดเด่น: 1) ออมได้ผลตอบแทน ครบสัญญาอายุ 90 รับ 105% 2) คุ้มครองโรคร้าย (เด็ก 15 โรค, ผู้ใหญ่ 5+45 โรค) 3) เจอโรคร้ายระยะรุนแรง หยุดจ่ายเบี้ย + วงเงินค่ารักษา/ฟื้นฟูเพิ่ม 10%
-สั่ง: วิเคราะห์ Pain point วัยนี้ 1-2 บรรทัด แล้วเสนอบทพูดปิดการขายทรงพลัง 3-4 บรรทัด ใช้ HTML <strong> เน้นคำ และ <div class="_aiClose"> สำหรับบทปิด ไม่ต้องมีคำเกริ่น`;
-                const r = await fetchGemini(prompt, "คุณคือนักขายประกันระดับ TOP ของประเทศ พูดน่าเชื่อถือ ปิดการขายเก่ง");
-                if (r) { _setContent(r + _allIdeasBtn()); }
-                else { const pool = _pickPool('ideas'); _setContent(pool[Math.floor(Math.random() * pool.length)] + _allIdeasBtn()); _toast('ใช้ไอเดียในตัว (ยังไม่ได้ตั้งค่า API Key หรือเรียกไม่สำเร็จ)'); }
+            icon: 'fa-lightbulb', title: 'ไอเดียการขาย', color: '#d97706', addIdeaBtn: true,
+            render: () => {
+                const pool = _pickPoolWithCustom('ideas');
+                _setContent(pool[Math.floor(Math.random() * pool.length)] + _allIdeasBtn());
             }
         });
     };
@@ -201,15 +233,32 @@ window.AI_CX = (function () {
     window.AI_CX_showAllIdeas = function () {}; // placeholder (compat)
 
     function showAllIdeas() {
-        const pool = _pickPool('ideas');
-        const items = pool.map((idea, i) => {
+        const customs = _loadCustomIdeas().filter(c => !!c.forChild === _isChild());
+        const builtin = _pickPool('ideas');
+
+        let items = '';
+        // custom ideas (with delete button)
+        customs.forEach((c, ci) => {
+            const m = c.html.match(/<strong>(.*?)<\/strong>/);
+            const title = m ? m[1].replace(/[:""]/g, '').trim() : `ไอเดียของฉัน ${ci + 1}`;
+            items += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <button onclick="window.AI_CX.viewCustomIdea(${ci})" style="flex:1;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;cursor:pointer;font-family:Kanit,sans-serif;">
+                    <span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#fef3c7;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-star" style="font-size:11px;"></i></span><span style="font-size:12.5px;font-weight:700;color:#92400e;line-height:1.3;">${title}</span></span>
+                    <i class="fas fa-chevron-right" style="color:#fbbf24;font-size:11px;flex-shrink:0;"></i>
+                </button>
+                <button onclick="window.AI_CX.deleteCustomIdea(${ci})" style="padding:10px;border-radius:10px;border:1px solid #fecaca;background:#fff1f2;color:#ef4444;font-size:12px;cursor:pointer;flex-shrink:0;" title="ลบ"><i class="fas fa-trash-alt"></i></button>
+            </div>`;
+        });
+        // built-in ideas
+        builtin.forEach((idea, i) => {
             const m = idea.match(/<strong>(.*?)<\/strong>/);
             const title = m ? m[1].replace(/[:""]/g, '').trim() : `ไอเดียที่ ${i + 1}`;
-            return `<button onclick="window.AI_CX.viewIdea(${i})" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:8px;cursor:pointer;font-family:Kanit,sans-serif;">
+            items += `<button onclick="window.AI_CX.viewIdea(${i})" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:8px;cursor:pointer;font-family:Kanit,sans-serif;">
                 <span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#fef3c7;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-lightbulb" style="font-size:12px;"></i></span><span style="font-size:12.5px;font-weight:700;color:#475569;line-height:1.3;">${title}</span></span>
                 <i class="fas fa-chevron-right" style="color:#cbd5e1;font-size:11px;flex-shrink:0;"></i>
             </button>`;
-        }).join('');
+        });
+
         Swal.fire({
             title: '<span style="font-family:Kanit,sans-serif;font-size:16px;color:#b45309;"><i class="fas fa-list-ul" style="margin-right:7px;"></i>ไอเดียการขายทั้งหมด</span>',
             html: `<div style="text-align:left;max-height:60vh;overflow-y:auto;">${items}</div>`,
@@ -218,6 +267,22 @@ window.AI_CX = (function () {
             didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
         });
     }
+
+    window.AI_CX.viewCustomIdea = function (ci) {
+        const customs = _loadCustomIdeas().filter(c => !!c.forChild === _isChild());
+        const c = customs[ci];
+        if (!c) return;
+        const m = c.html.match(/<strong>(.*?)<\/strong>/);
+        const title = m ? m[1].replace(/[:""]/g, '').trim() : `ไอเดียของฉัน ${ci + 1}`;
+        const body = c.html.replace(/<strong>.*?<\/strong><br>/, '');
+        Swal.fire({
+            title: `<span style="font-family:Kanit,sans-serif;font-size:15px;color:#b45309;">⭐ ${title}</span>`,
+            html: `<div style="font-family:Kanit,sans-serif;text-align:left;font-size:13px;color:#334155;line-height:1.7;">${body}</div>`,
+            showConfirmButton: false, showCloseButton: true,
+            width: Math.min(window.innerWidth - 20, 460),
+            didOpen: () => { const p = Swal.getPopup(); if (p) p.style.borderRadius = '20px'; }
+        });
+    };
 
     function viewIdea(i) {
         const pool = _pickPool('ideas');
@@ -257,5 +322,5 @@ window.AI_CX = (function () {
     }
 
     // expose
-    return { menuHTML, showAllIdeas, viewIdea, _refresh: () => {}, _enhance: () => {} };
+    return { menuHTML, showAllIdeas, viewIdea, _refresh: () => {} };
 })();
