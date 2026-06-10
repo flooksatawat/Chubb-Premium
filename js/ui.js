@@ -632,9 +632,10 @@ window._enableCellDiff = function() {
             const sign = d >= 0 ? '+' : '';
             const color = d >= 0 ? '#4ade80' : '#f87171';
             return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334155;gap:12px;">
-                <span style="font-size:11px;color:#94a3b8;white-space:nowrap;">
-                    <span style="color:${COLORS[la].label};">●</span> − <span style="color:${COLORS[lb].label};">●</span>
-                    <span style="color:#cbd5e1;margin-left:4px;">${labels[la]} → ${labels[lb]}</span>
+                <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">
+                    <span style="color:${COLORS[la].label};">●</span> <span style="color:#e2e8f0;">${vals[la] !== null ? vals[la].toLocaleString() : '-'}</span>
+                    <span style="color:#64748b;margin:0 4px;">→</span>
+                    <span style="color:${COLORS[lb].label};">●</span> <span style="color:#e2e8f0;">${vals[lb] !== null ? vals[lb].toLocaleString() : '-'}</span>
                 </span>
                 <span style="font-weight:700;font-size:13px;color:${color};white-space:nowrap;">${sign}${d.toLocaleString()}</span>
             </div>`;
@@ -661,28 +662,52 @@ window._enableCellDiff = function() {
         setTimeout(_clearSel, 10000);
     };
 
-    body.addEventListener('click', e => {
-        const td = e.target.closest('td');
-        if (!td) { _clearSel(); return; }
-        const val = _parseVal(td);
-        if (val === null) { _clearSel(); return; }
+    let _pressTimer = null;
+    let _pressTarget = null;
 
-        // คลิกซ้ำช่องที่เลือกอยู่ → ยกเลิก
+    const _selectCell = td => {
+        const val = _parseVal(td);
+        if (val === null) return;
         const existing = window._diffCells.indexOf(td);
         if (existing !== -1) { _clearSel(); return; }
-
-        // เพิ่มช่อง
         const i = window._diffCells.length;
         if (i >= 3) { _clearSel(); return; }
         window._diffCells.push(td);
         td.style.outline = `2px solid ${COLORS[i].outline}`;
         td.style.background = COLORS[i].bg;
+        if (window._diffCells.length >= 2) _showChip(window._diffCells);
+    };
 
-        // แสดงผลเมื่อเลือกครบ 2 หรือ 3 ช่อง
-        if (window._diffCells.length >= 2) {
-            _showChip(window._diffCells);
-        }
+    const _startPress = (e, td) => {
+        _pressTarget = td;
+        _pressTimer = setTimeout(() => {
+            _pressTimer = null;
+            if (_pressTarget === td) _selectCell(td);
+        }, 400);
+    };
+
+    const _cancelPress = () => {
+        if (_pressTimer) { clearTimeout(_pressTimer); _pressTimer = null; }
+        _pressTarget = null;
+    };
+
+    body.addEventListener('mousedown', e => {
+        const td = e.target.closest('td');
+        if (!td) return;
+        _startPress(e, td);
     });
+    body.addEventListener('mouseup', _cancelPress);
+    body.addEventListener('mouseleave', _cancelPress);
+
+    body.addEventListener('touchstart', e => {
+        const td = e.target.closest('td');
+        if (!td) return;
+        _startPress(e, td);
+    }, { passive: true });
+    body.addEventListener('touchend', e => {
+        _cancelPress();
+    });
+    body.addEventListener('touchmove', _cancelPress, { passive: true });
 };
 
 window._hidePolicyCol = function(label) {
