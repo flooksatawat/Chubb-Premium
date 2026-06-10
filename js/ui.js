@@ -3383,6 +3383,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         const isCL    = pName === 'Century Life';
         const isSLB   = pName === 'Signature Legacy';
         const isTLA   = pName === 'Convertable Term';
+        const isSLPA  = pName === 'Supreme Life Protector';
 
         let payYears = parseInt(d.years) || 20;
         let maxYear  = 90 - d.age;
@@ -3442,9 +3443,18 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                 }
             }
 
+            // ทุนประกันที่แท้จริง (death benefit) ตามเงื่อนไขแผน
+            let effectiveSA = currentSA;
+            if (isSLPA) {
+                effectiveSA = Math.round(initSA * (1 + 0.05 * Math.floor(y / 5)));
+            } else if (isLV) {
+                const lvMult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (age <= 70 ? 2.0 : 1.5);
+                effectiveSA = Math.round(initSA * lvMult);
+            }
+
             accCF += cfAmt;
             const netCash = cvTotal + accCF;
-            rows.push({ age, annSav, totalSaving, cfAmt, accCF, netCash, cvTotal, currentSA });
+            rows.push({ age, annSav, totalSaving, cfAmt, accCF, netCash, cvTotal, currentSA, effectiveSA });
         }
         return rows;
     }
@@ -3490,12 +3500,12 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         const isBeB = i === beIdxB;
 
         const savA = rA ? fAn(rA.annSav) : '—';
-        const saA  = rA && hasCF_A ? fA(rA.currentSA, false, '#475569') : null;
-        const cfA  = rA ? (hasCF_A ? fA(rA.cfAmt, true, '#2563eb') : fA(rA.currentSA, false, '#475569')) : '—';
+        const saA  = rA && hasCF_A ? fA(rA.effectiveSA, false, '#475569') : null;
+        const cfA  = rA ? (hasCF_A ? fA(rA.cfAmt, true, '#2563eb') : fA(rA.effectiveSA, false, '#475569')) : '—';
         const netA = rA ? fA(rA.netCash, true, '#059669') : '—';
         const savB = rB ? fAn(rB.annSav) : '—';
-        const saB  = rB && hasCF_B ? fA(rB.currentSA, false, '#475569') : null;
-        const cfB  = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.currentSA, false, '#475569')) : '—';
+        const saB  = rB && hasCF_B ? fA(rB.effectiveSA, false, '#475569') : null;
+        const cfB  = rB ? (hasCF_B ? fA(rB.cfAmt, true, '#7c3aed') : fA(rB.effectiveSA, false, '#475569')) : '—';
         const netB = rB ? fA(rB.netCash, true, '#0891b2') : '—';
 
         const bg    = odd ? '#fff' : '#f8fafc';
