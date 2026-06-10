@@ -6701,16 +6701,14 @@ function generatePolicyTableData() {
     const _autoFitHeaderFont = () => {
         const el = document.getElementById('tableHeaderTitle');
         if (!el) return;
-        const spans = el.querySelectorAll('span');
+        const spans = Array.from(el.querySelectorAll('span'));
         if (!spans.length) return;
+        // reset ก่อนวัด
+        spans.forEach(s => { s.style.fontSize = ''; s.style.overflow = 'hidden'; s.style.textOverflow = 'ellipsis'; });
         let fs = parseFloat(getComputedStyle(spans[0]).fontSize) || 13;
-        const minFs = 8;
-        const check = () => {
-            let overflow = false;
-            spans.forEach(s => { if (s.scrollWidth > s.clientWidth + 2) overflow = true; });
-            return overflow;
-        };
-        while (check() && fs > minFs) {
+        const minFs = 7.5;
+        const isOverflow = () => spans.some(s => s.scrollWidth > s.offsetWidth + 1);
+        while (isOverflow() && fs > minFs) {
             fs -= 0.5;
             spans.forEach(s => { s.style.fontSize = fs + 'px'; });
         }
@@ -6736,7 +6734,7 @@ function generatePolicyTableData() {
             ${_lastBadgeDesktop}
         </div>`;
 
-    requestAnimationFrame(_autoFitHeaderFont);
+    requestAnimationFrame(() => requestAnimationFrame(_autoFitHeaderFont));
 
     // ── ปุ่ม เปรียบเทียบ + แชร์ ย้ายไปอยู่ในแถว toggle (uxMenuContainer) แล้ว — ซ่อนปุ่มบน header เดิม ──
     {
