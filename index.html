@@ -2720,14 +2720,14 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 let _dobHoldTimer = null;
 let _dobLastTap = 0;
 function _dobHoldStart(e) {
-    const now = Date.now();
-    // double-tap (< 350ms): block keyboard flicker, ไม่เปิด picker
-    if (now - _dobLastTap < 350) {
-        _dobLastTap = 0;
+    const isTouchEvent = e.type === 'touchstart';
+    const inputEl = document.getElementById('ageInput');
+    // มือถือ: ถ้า input ยังไม่ได้ focus → ให้ tap ปกติ (เปิด keyboard) ไม่เริ่ม hold timer
+    if (isTouchEvent && document.activeElement !== inputEl) {
         _dobHoldEnd();
-        if (e.cancelable) e.preventDefault();
         return;
     }
+    const now = Date.now();
     _dobLastTap = now;
     _dobHoldEnd();
     _dobHoldTimer = setTimeout(() => {
