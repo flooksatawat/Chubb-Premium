@@ -587,6 +587,87 @@ window._enablePolicyColHide = function() {
     window._applyPolicyColHide();
 };
 
+// ==================== Cell Diff (คลิก 2 ช่อง → หาส่วนต่าง) ====================
+window._diffCell1 = null;
+
+window._enableCellDiff = function() {
+    const body = document.getElementById('policyTableBody');
+    if (!body || body.dataset.diffReady) return;
+    body.dataset.diffReady = '1';
+
+    const _parseVal = td => {
+        const raw = td.textContent.replace(/,/g, '').trim();
+        const n = parseFloat(raw);
+        return isNaN(n) ? null : n;
+    };
+
+    const _clearSel = () => {
+        if (window._diffCell1) {
+            window._diffCell1.style.outline = '';
+            window._diffCell1.style.background = '';
+            window._diffCell1 = null;
+        }
+        const chip = document.getElementById('_diffChip');
+        if (chip) chip.remove();
+    };
+
+    const _showChip = (a, b, labelA, labelB) => {
+        document.getElementById('_diffChip')?.remove();
+        const diff = b - a;
+        const sign = diff >= 0 ? '+' : '';
+        const color = diff >= 0 ? '#16a34a' : '#dc2626';
+        const chip = document.createElement('div');
+        chip.id = '_diffChip';
+        chip.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;
+            background:#1e293b;color:#f8fafc;border-radius:16px;padding:10px 20px;font-family:Kanit,sans-serif;
+            font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;gap:4px;
+            min-width:260px;text-align:center;`;
+        chip.innerHTML = `
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">
+                <span style="color:#fbbf24;">${labelA}</span> → <span style="color:#60a5fa;">${labelB}</span>
+            </div>
+            <div style="font-size:15px;font-weight:700;">
+                ${b.toLocaleString()} − ${a.toLocaleString()} =
+                <span style="color:${color};margin-left:4px;">${sign}${diff.toLocaleString()}</span> บาท
+            </div>
+            <div style="font-size:10px;color:#64748b;margin-top:2px;">แตะที่อื่นเพื่อปิด</div>`;
+        chip.addEventListener('click', _clearSel);
+        document.body.appendChild(chip);
+        setTimeout(_clearSel, 8000);
+    };
+
+    body.addEventListener('click', e => {
+        const td = e.target.closest('td');
+        if (!td) { _clearSel(); return; }
+        const val = _parseVal(td);
+        if (val === null) { _clearSel(); return; }
+
+        if (!window._diffCell1) {
+            window._diffCell1 = td;
+            td.style.outline = '2px solid #f59e0b';
+            td.style.background = '#fef9c3';
+        } else if (td === window._diffCell1) {
+            _clearSel();
+        } else {
+            const val1 = _parseVal(window._diffCell1);
+            const val2 = val;
+            if (val1 !== null) {
+                // หา label จาก column header
+                const head = document.getElementById('policyTableHead');
+                const ths = head ? Array.from(head.querySelectorAll('th')) : [];
+                const getLabel = cell => {
+                    const idx = Array.from(cell.parentElement.children).indexOf(cell);
+                    return ths[idx] ? ths[idx].textContent.trim().replace(/\n.*/,'') : `ช่อง ${idx+1}`;
+                };
+                _showChip(val1, val2, getLabel(window._diffCell1), getLabel(td));
+            }
+            window._diffCell1.style.outline = '';
+            window._diffCell1.style.background = '';
+            window._diffCell1 = null;
+        }
+    });
+};
+
 window._hidePolicyCol = function(label) {
     if (!label) return;
     window._hiddenColLabels.add(label);
@@ -7011,6 +7092,8 @@ function generatePolicyTableData() {
 
     // เพิ่มปุ่มซ่อนคอลัมน์ในหัวตาราง (ซ่อนแต่ละคอลัมน์อิสระ)
     if (typeof window._enablePolicyColHide === 'function') window._enablePolicyColHide();
+    window._diffCell1 = null; document.getElementById('_diffChip')?.remove();
+    if (typeof window._enableCellDiff === 'function') window._enableCellDiff();
 
     // --- 5. Summary Text ---
     if (foundBreakeven) {
