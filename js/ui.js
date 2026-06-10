@@ -7049,7 +7049,7 @@ function generatePolicyTableData() {
         const _beOnClick = (!isBreakevenActive && y === beYear)
             ? ` style="cursor:pointer;" onclick="window._showBreakevenDetail(${totalSaving},${Math.round(cvTotal)},${currentAge})"`
             : '';
-        if (isBreakevenActive && y === beYear) trClass = "bg-emerald-100 border-y-2 border-emerald-400 relative z-10";
+        if (isBreakevenActive && y === beYear) trClass = "be-highlight-row border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
         
         const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
