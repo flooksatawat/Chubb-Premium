@@ -4103,7 +4103,10 @@ window.renderToWorkspace = window.injectToWorkspace; // legacy alias
 
 // ── AI Panel helpers ──────────────────────────────────────────────────────────
 function _aiMenuHTML() {
+    // เมนู AI เฉพาะแผน CI Extra Plus (สถิติโรคร้าย / ค่ารักษา / ไอเดียการขาย)
+    const _cxMenu = (currentAppPlan === 'CI Extra Plus' && window.AI_CX) ? window.AI_CX.menuHTML() : '';
     return `<div style="display:flex;flex-direction:column;gap:10px;font-family:'Kanit',sans-serif;">
+        ${_cxMenu}
         <button onclick="window.open('https://gemini.google.com/','_blank')" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 16px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;cursor:pointer;font-family:'Kanit',sans-serif;">
             <div style="width:38px;height:38px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);flex-shrink:0;"><i class="fas fa-sparkles" style="color:#0284c7;font-size:17px;"></i></div>
             <div style="text-align:left;flex:1;"><div style="font-size:14px;font-weight:700;color:#1e40af;">Google Gemini</div><div style="font-size:11px;color:#64748b;">AI สำหรับค้นหาและวิเคราะห์</div></div>
