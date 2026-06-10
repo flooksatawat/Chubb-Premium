@@ -2700,10 +2700,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 <script>
 // Long-press to open DOB picker (500ms hold)
 let _dobHoldTimer = null;
+let _dobLastTap = 0;
 function _dobHoldStart(e) {
+    const now = Date.now();
+    // double-tap (< 350ms): block keyboard flicker, ไม่เปิด picker
+    if (now - _dobLastTap < 350) {
+        _dobLastTap = 0;
+        _dobHoldEnd();
+        if (e.cancelable) e.preventDefault();
+        return;
+    }
+    _dobLastTap = now;
     _dobHoldEnd();
     _dobHoldTimer = setTimeout(() => {
         _dobHoldTimer = null;
+        _dobLastTap = 0;
         if (e.cancelable) e.preventDefault();
         openDobPicker();
     }, 500);
