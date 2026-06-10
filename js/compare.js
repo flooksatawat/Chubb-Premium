@@ -112,15 +112,25 @@ window._buildCompareHTML = function() {
 
         let tableHtml = '';
         if (results.length > 0) {
-            // SA at year y for SLPA grows +5% every 5 years; others fixed
+            // SA/death benefit at year y — SLPA: +5% every 5 years; LV: 100/150/200% tiers; others fixed
             function saAtYear(r, y) {
                 if (r.plan.abbr === 'SLPA') return Math.round(r.sa * (1 + 0.05 * Math.floor(y / 5)));
+                if (r.plan.abbr === 'LV') {
+                    const attainedAge = (r.age || 30) + y;
+                    const mult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (attainedAge <= 70 ? 2.0 : 1.5);
+                    return Math.round(r.sa * mult);
+                }
                 return r.sa;
+            }
+            function fmtSaCell(v, r) {
+                if (r.plan.abbr === 'SLPA' && v > r.sa) return `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>`;
+                if (r.plan.abbr === 'LV'   && v > r.sa) return `<span style="color:#7c3aed;font-weight:800;">${v.toLocaleString()}</span>`;
+                return v.toLocaleString();
             }
             const rows = [
                 { label: 'ทุนประกัน ตั้งต้น (บาท)', getVal: r => r.sa,                fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
-                { label: 'ทุนประกัน ปีที่ 10 (บาท)', getVal: r => saAtYear(r, 10),    fmt: (v,r) => r.plan.abbr==='SLPA' ? `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>` : v.toLocaleString(), best: 'max', raw: true },
-                { label: 'ทุนประกัน ปีที่ 20 (บาท)', getVal: r => saAtYear(r, 20),    fmt: (v,r) => r.plan.abbr==='SLPA' ? `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>` : v.toLocaleString(), best: 'max', raw: true },
+                { label: 'ทุนประกัน ปีที่ 10 (บาท)', getVal: r => saAtYear(r, 10),    fmt: fmtSaCell, best: 'max', raw: true },
+                { label: 'ทุนประกัน ปีที่ 20 (บาท)', getVal: r => saAtYear(r, 20),    fmt: fmtSaCell, best: 'max', raw: true },
                 { label: 'เบี้ย/ปี (บาท)',            getVal: r => r.annualPrem,       fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'min' },
                 { label: 'ชำระเบี้ย (ปี)',            getVal: r => r.plan.payYears,    fmt: v => v + ' ปี',                        best: 'min' },
                 { label: 'คุ้มครองถึงอายุ',           getVal: r => r.plan.coverAge,    fmt: v => v + ' ปี',                        best: 'max' },
