@@ -6661,6 +6661,24 @@ function generatePolicyTableData() {
     const _lastBadgeDesktop = _hasTableSACol
         ? `<span class="${_badgeDesktop} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ชำระ: ${planPeriod} ปี</span>`
         : `<span class="${_badgeDesktop} bg-[#00A651]/10 text-[#007a3d] border border-[#00A651]/25 shadow-sm">ทุนประกัน: ${sumDisplay}</span>`;
+    const _autoFitHeaderFont = () => {
+        const el = document.getElementById('tableHeaderTitle');
+        if (!el) return;
+        const spans = el.querySelectorAll('span');
+        if (!spans.length) return;
+        let fs = parseFloat(getComputedStyle(spans[0]).fontSize) || 13;
+        const minFs = 8;
+        const check = () => {
+            let overflow = false;
+            spans.forEach(s => { if (s.scrollWidth > s.clientWidth + 2) overflow = true; });
+            return overflow;
+        };
+        while (check() && fs > minFs) {
+            fs -= 0.5;
+            spans.forEach(s => { s.style.fontSize = fs + 'px'; });
+        }
+    };
+
     document.getElementById('tableHeaderTitle').innerHTML = _isMobile ? `
         <div class="flex flex-col gap-1 py-1 w-full">
             <div class="flex gap-1 w-full items-stretch">
@@ -6680,6 +6698,8 @@ function generatePolicyTableData() {
             <span class="${_badgeDesktop} bg-white text-slate-800 border border-slate-200 shadow-sm">เบี้ย: ${initialPrem.toLocaleString()} ฿</span>
             ${_lastBadgeDesktop}
         </div>`;
+
+    requestAnimationFrame(_autoFitHeaderFont);
 
     // ── ปุ่ม เปรียบเทียบ + แชร์ ย้ายไปอยู่ในแถว toggle (uxMenuContainer) แล้ว — ซ่อนปุ่มบน header เดิม ──
     {
