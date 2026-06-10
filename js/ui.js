@@ -9855,6 +9855,17 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
 
     const _getFileName = () => (document.getElementById('_shareFileNameInput')?.value.trim() || cleanName);
 
+    // regenerate blob พร้อมฝัง /Title metadata = ชื่อที่ผู้ใช้แก้ (Chrome ใช้เป็นชื่อ Save as PDF)
+    const _blobWithTitle = (name) => {
+        try {
+            if (doc && typeof doc.setProperties === 'function') {
+                doc.setProperties({ title: name });
+                return doc.output('blob');
+            }
+        } catch (e) {}
+        return pdfBlob;
+    };
+
     overlay.querySelector('[data-action="image"]').addEventListener('click', async () => {
         const name = _getFileName();
         overlay.remove();
@@ -9865,12 +9876,13 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     overlay.querySelector('[data-action="pdf"]').addEventListener('click', async () => {
         const name = _getFileName();
         const dynPdfName = name + '.pdf';
-        const dynPdfFile = new File([pdfBlob], dynPdfName, { type: 'application/pdf' });
+        const dynBlob = _blobWithTitle(name);
+        const dynPdfFile = new File([dynBlob], dynPdfName, { type: 'application/pdf' });
         overlay.remove();
         const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [dynPdfFile] });
         if (canShare) {
             try { await navigator.share({ files: [dynPdfFile], title: dynPdfName }); }
-            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(pdfBlob, dynPdfName); }
+            catch (e) { if (e.name !== 'AbortError') _fallbackDownload(dynBlob, dynPdfName); }
         } else if (navigator.share) {
             try { await navigator.share({ title: dynPdfName, url: window.location.href }); }
             catch {}
@@ -9887,7 +9899,7 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
         const _origTitle = document.title;
         document.title = name;
         // เปิด PDF ใน iframe ซ่อน แล้วเรียก print dialog โดยตรง (ข้ามขั้นตอน preview)
-        const printUrl = URL.createObjectURL(pdfBlob);
+        const printUrl = URL.createObjectURL(_blobWithTitle(name));
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;border:none;';
         iframe.src = printUrl;
@@ -9907,7 +9919,7 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     overlay.querySelector('[data-action="download"]').addEventListener('click', () => {
         const name = _getFileName();
         overlay.remove();
-        _fallbackDownload(pdfBlob, name + '.pdf');
+        _fallbackDownload(_blobWithTitle(name), name + '.pdf');
         URL.revokeObjectURL(blobUrl);
     });
 }
