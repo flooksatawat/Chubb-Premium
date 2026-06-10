@@ -681,8 +681,6 @@ window._enableCellDiff = function() {
             overlay.addEventListener('click', _clearSel);
             document.body.insertBefore(overlay, chip);
         }
-
-        setTimeout(_clearSel, 15000);
     };
 
     let _pressTimer = null;
