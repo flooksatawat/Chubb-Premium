@@ -6514,16 +6514,16 @@ function generatePolicyTableData() {
                 </div>` : '';
 
             const _beToggle = `
-                <div class="flex items-center gap-2 min-w-0">
+                <div class="flex items-center gap-1.5 shrink-0">
                     <i class="fas fa-chart-line text-emerald-500 text-[16px] w-5 text-center shrink-0"></i>
-                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">แสดงจุดคุ้มทุน</span>
+                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">จุดคุ้มทุน</span>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer" ontouchstart="this._ts=Date.now();" onclick="if(this._ts&&Date.now()-this._ts>400){this._ts=0;event.preventDefault();event.stopPropagation();return false;}">
+                <label class="relative inline-flex items-center cursor-pointer shrink-0" ontouchstart="this._ts=Date.now();" onclick="if(this._ts&&Date.now()-this._ts>400){this._ts=0;event.preventDefault();event.stopPropagation();return false;}">
                     <input type="checkbox" id="toggleBreakeven" class="sr-only peer new-ux-toggle" onchange="toggleBreakevenDisplay(this.checked); generatePolicyTableData();">
                     <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
                 </label>
                 <button id="beHighlightBtn" onclick="toggleBeHighlight()" title="ซ่อน/แสดงสีไฮไลท์จุดคุ้มทุน"
-                    style="display:none;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;border:1px solid #d1fae5;background:#ecfdf5;color:#047857;cursor:pointer;transition:all .2s;">
+                    style="display:none;flex-shrink:0;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;border:1px solid #d1fae5;background:#ecfdf5;color:#047857;cursor:pointer;transition:all .2s;">
                     <i class="fas fa-eye" id="beHighlightIcon"></i>
                 </button>`;
 
