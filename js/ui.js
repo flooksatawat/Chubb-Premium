@@ -8705,6 +8705,7 @@ async function exportTableToPDF(actionType = 'preview') {
         const trs = document.querySelectorAll('#policyTableBody tr');
         const toggleBreakeven = document.getElementById('toggleBreakeven');
         const showBreakeven = toggleBreakeven ? toggleBreakeven.checked : false;
+        const hideBeHighlight = document.getElementById('policyTableBody')?.classList.contains('hide-be-highlight') || false;
         
         let beRowIndex = -1; 
         let beAgeStr = '', beYearStr = '', beCVStr = ''; 
@@ -8747,7 +8748,7 @@ async function exportTableToPDF(actionType = 'preview') {
             headStyles: { fillColor: [13, 148, 136], textColor: [255, 255, 255], fontStyle: 'bold', lineWidth: 0 },
             bodyStyles: { textColor: [71, 85, 105], lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 }, lineColor: [241, 245, 249] },
             didParseCell: function(data) {
-                if (showBreakeven && beRowIndex !== -1 && data.row.index === beRowIndex) {
+                if (showBreakeven && !hideBeHighlight && beRowIndex !== -1 && data.row.index === beRowIndex) {
                     data.cell.styles.fillColor = [209, 250, 229];
                     data.cell.styles.textColor = [6, 95, 70];
                     data.cell.styles.fontStyle = 'bold';
@@ -8904,6 +8905,17 @@ async function _captureTableHighRes() {
     // ลบ sticky thead เพื่อให้ clone render ถูก
     const stickyHead = tblClone.querySelector('thead');
     if (stickyHead) { stickyHead.style.position = 'relative'; stickyHead.style.top = 'auto'; }
+    // ถ้าซ่อนไฮไลท์อยู่ ให้ลบสีออกจาก clone ด้วย
+    const _hideHL = document.getElementById('policyTableBody')?.classList.contains('hide-be-highlight');
+    if (_hideHL) {
+        tblClone.querySelectorAll('.be-highlight-row').forEach(tr => {
+            tr.classList.remove('be-highlight-row');
+            tr.style.borderTopColor = '';
+            tr.style.borderBottomColor = '';
+            tr.style.borderTopWidth = '';
+            tr.style.borderBottomWidth = '';
+        });
+    }
     temp.appendChild(tblClone);
 
     document.body.appendChild(temp);
