@@ -663,7 +663,7 @@ window._enableCellDiff = function() {
 
         const chip = document.createElement('div');
         chip.id = '_diffChip';
-        chip.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;
+        chip.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;
             background:#1e293b;color:#f8fafc;border-radius:24px;padding:22px 28px;font-family:Kanit,sans-serif;
             font-size:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);min-width:320px;max-width:calc(100vw - 40px);width:min(480px,calc(100vw - 40px));`;
         chip.innerHTML = `
