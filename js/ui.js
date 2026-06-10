@@ -653,13 +653,13 @@ window._enableCellDiff = function() {
             rows += fmtDiff(vals[1], vals[2], 1, 2, true);
         }
 
-        // popup กลางจอ + overlay ด้านหลัง
+        // popup กลางจอ
+        document.getElementById('_diffChip')?.remove();
         document.getElementById('_diffOverlay')?.remove();
-        const overlay = document.createElement('div');
-        overlay.id = '_diffOverlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;';
-        overlay.addEventListener('click', _clearSel);
-        document.body.appendChild(overlay);
+
+        const hint = n < 3
+            ? `<div style="font-size:11px;color:#3b82f6;text-align:center;margin-top:10px;">แตะช่องที่ 3 เพื่อเพิ่ม หรือแตะที่นี่เพื่อปิด</div>`
+            : '';
 
         const chip = document.createElement('div');
         chip.id = '_diffChip';
@@ -668,9 +668,19 @@ window._enableCellDiff = function() {
             font-size:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);min-width:320px;max-width:calc(100vw - 40px);width:min(480px,calc(100vw - 40px));`;
         chip.innerHTML = `
             <div style="font-size:12px;color:#64748b;text-align:center;margin-bottom:14px;letter-spacing:.05em;">การคำนวณ — แตะเพื่อปิด</div>
-            ${rows}`;
+            ${rows}${hint}`;
         chip.addEventListener('click', e => { e.stopPropagation(); _clearSel(); });
         document.body.appendChild(chip);
+
+        // overlay เฉพาะเมื่อเลือกครบ 3 ช่อง (final) เท่านั้น
+        if (n >= 3) {
+            const overlay = document.createElement('div');
+            overlay.id = '_diffOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;';
+            overlay.addEventListener('click', _clearSel);
+            document.body.insertBefore(overlay, chip);
+        }
+
         setTimeout(_clearSel, 15000);
     };
 
