@@ -634,13 +634,15 @@ window._enableCellDiff = function() {
             const color = d >= 0 ? '#4ade80' : '#f87171';
             const absDiff = Math.abs(d).toLocaleString();
             const border = isLast ? '' : 'border-bottom:1px solid #334155;';
-            return `<div style="${border}padding:8px 0;">
-                <div style="font-size:11px;color:#94a3b8;margin-bottom:3px;white-space:nowrap;">
-                    <span style="color:${COLORS[la].label};">●</span> <span style="color:#e2e8f0;">${va.toLocaleString()}</span>
-                    <span style="color:#64748b;margin:0 5px;">${d >= 0 ? '+' : '−'}</span>
-                    <span style="color:${COLORS[lb].label};">●</span> <span style="color:#e2e8f0;">${vb.toLocaleString()}</span>
-                    <span style="color:#64748b;margin:0 5px;">=</span>
-                    <span style="color:${color};font-weight:700;">${d >= 0 ? '' : '−'}${absDiff}</span>
+            return `<div style="${border}padding:10px 0;">
+                <div style="font-size:15px;color:#94a3b8;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span style="color:${COLORS[la].label};font-size:16px;">●</span>
+                    <span style="color:#e2e8f0;font-weight:700;">${va.toLocaleString()}</span>
+                    <span style="color:#64748b;">${d >= 0 ? '+' : '−'}</span>
+                    <span style="color:${COLORS[lb].label};font-size:16px;">●</span>
+                    <span style="color:#e2e8f0;font-weight:700;">${vb.toLocaleString()}</span>
+                    <span style="color:#64748b;">=</span>
+                    <span style="color:${color};font-weight:800;font-size:17px;">${d >= 0 ? '' : '−'}${absDiff}</span>
                 </div>
             </div>`;
         };
@@ -663,10 +665,10 @@ window._enableCellDiff = function() {
         const chip = document.createElement('div');
         chip.id = '_diffChip';
         chip.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;
-            background:#1e293b;color:#f8fafc;border-radius:20px;padding:16px 20px;font-family:Kanit,sans-serif;
-            font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);min-width:260px;max-width:calc(100vw - 40px);`;
+            background:#1e293b;color:#f8fafc;border-radius:24px;padding:22px 28px;font-family:Kanit,sans-serif;
+            font-size:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);min-width:320px;max-width:calc(100vw - 40px);width:min(480px,calc(100vw - 40px));`;
         chip.innerHTML = `
-            <div style="font-size:10px;color:#64748b;text-align:center;margin-bottom:10px;letter-spacing:.05em;">การคำนวณ — แตะเพื่อปิด</div>
+            <div style="font-size:12px;color:#64748b;text-align:center;margin-bottom:14px;letter-spacing:.05em;">การคำนวณ — แตะเพื่อปิด</div>
             ${rows}`;
         chip.addEventListener('click', e => { e.stopPropagation(); _clearSel(); });
         document.body.appendChild(chip);
