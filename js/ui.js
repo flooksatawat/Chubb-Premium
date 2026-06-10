@@ -9881,7 +9881,11 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
     });
 
     overlay.querySelector('[data-action="print"]').addEventListener('click', () => {
+        const name = _getFileName();
         overlay.remove();
+        // ชื่อไฟล์เริ่มต้นใน "Save as PDF" = document.title → เปลี่ยนชั่วคราว
+        const _origTitle = document.title;
+        document.title = name;
         // เปิด PDF ใน iframe ซ่อน แล้วเรียก print dialog โดยตรง (ข้ามขั้นตอน preview)
         const printUrl = URL.createObjectURL(pdfBlob);
         const iframe = document.createElement('iframe');
@@ -9896,7 +9900,7 @@ async function _showTableShareModal(pdfBlob, pdfFile, doc, d, opts = {}) {
                 // fallback: เปิด PDF ใน tab ใหม่ให้ user พิมพ์เอง
                 window.open(printUrl, '_blank');
             }
-            setTimeout(() => { iframe.remove(); URL.revokeObjectURL(printUrl); }, 5000);
+            setTimeout(() => { iframe.remove(); URL.revokeObjectURL(printUrl); document.title = _origTitle; }, 5000);
         };
     });
 
