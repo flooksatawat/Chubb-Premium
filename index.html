@@ -3017,7 +3017,8 @@ function _chineseZodiac(year) {
 (function() {
     const ageEl = document.getElementById('ageInput');
     if (!ageEl) return;
-    ageEl.addEventListener('dblclick', function(e) { e.preventDefault(); openDobPicker(); });
+    // เปิดได้ทาง hold เท่านั้น (_dobHoldStart) — ยกเลิก dblclick ทุกกรณี
+    ageEl.addEventListener('dblclick', function(e) { e.preventDefault(); e.stopPropagation(); });
 })();
 
 // --- Open / Close -------------------------------------------------------------
