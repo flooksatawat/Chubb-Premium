@@ -3003,7 +3003,16 @@ function _updatePlanPills(activePlan) {
         } else { btn.classList.add('hidden'); }
     });
     const planBg = document.getElementById('planBg');
-    if (planBg && activeBtn) { setTimeout(() => { planBg.style.width = activeBtn.offsetWidth + 'px'; planBg.style.left = activeBtn.offsetLeft + 'px'; }, 10); }
+    if (planBg && activeBtn) {
+        // reset ก่อนเพื่อไม่ให้เห็น planBg เก่าค้างอยู่ระหว่างรอ layout
+        planBg.style.transition = 'none';
+        planBg.style.width = '0px';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            planBg.style.transition = '';
+            planBg.style.width = activeBtn.offsetWidth + 'px';
+            planBg.style.left = activeBtn.offsetLeft + 'px';
+        }));
+    }
 }
 
 // ==================== LOGIC 6: เปิด MODAL ดูรายละเอียด ====================
