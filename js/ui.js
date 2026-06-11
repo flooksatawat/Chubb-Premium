@@ -2596,8 +2596,6 @@ function selectAppPlan(planName) {
     if(premiumContainer) premiumContainer.style.order = '';
     if(sumInsuredContainer) sumInsuredContainer.style.order = '';
     if(mainActionsGroup) mainActionsGroup.style.order = '';
-    const _asdReset = document.getElementById('accumSavingDisplay');
-    if(_asdReset) _asdReset.style.order = '';
     const _siLbl = document.getElementById('sumInsuredLabel');
     if(_siLbl) _siLbl.innerHTML = '<i class="fas fa-shield-halved text-emerald-500"></i> วงเงินคุ้มครอง (บาท)';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
@@ -2733,8 +2731,6 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.style.order = '1';
         if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
         if(mainActionsGroup) mainActionsGroup.style.order = '4';
-        const _asd24 = document.getElementById('accumSavingDisplay');
-        if(_asd24) _asd24.style.order = '1';
         const premSubLbl24 = document.getElementById('premiumSubLabel');
         if(premSubLbl24) premSubLbl24.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
