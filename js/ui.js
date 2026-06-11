@@ -2631,13 +2631,13 @@ function selectAppPlan(planName) {
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
-        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '3';
         if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLblLV = document.getElementById('premiumSubLabel');
         if(premSubLblLV) premSubLblLV.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
-            cashFlowContainer.style.order = '3';
+            cashFlowContainer.style.order = '2';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
@@ -2649,13 +2649,13 @@ function selectAppPlan(planName) {
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
-        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '3';
         if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLblSM = document.getElementById('premiumSubLabel');
         if(premSubLblSM) premSubLblSM.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
-            cashFlowContainer.style.order = '3';
+            cashFlowContainer.style.order = '2';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
@@ -2702,13 +2702,13 @@ function selectAppPlan(planName) {
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.classList.remove('hidden');
         if(premiumContainer) premiumContainer.style.order = '1';
-        if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
+        if(sumInsuredContainer) sumInsuredContainer.style.order = '3';
         if(mainActionsGroup) mainActionsGroup.style.order = '4';
         const premSubLbl24 = document.getElementById('premiumSubLabel');
         if(premSubLbl24) premSubLbl24.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
             cashFlowContainer.classList.remove('hidden');
-            cashFlowContainer.style.order = '3';
+            cashFlowContainer.style.order = '2';
             document.getElementById('singleCashFlowBox').classList.remove('hidden');
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
