@@ -6765,7 +6765,7 @@ function generatePolicyTableData() {
                 </button>`;
 
             const _cvToggle = `
-                <div class="flex items-center gap-1.5 shrink-0 pl-3 border-l border-slate-200">
+                <div class="flex items-center gap-1.5">
                     <i class="fas fa-coins text-sky-500 text-[14px] w-4 text-center shrink-0"></i>
                     <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
                 </div>
@@ -6776,10 +6776,12 @@ function generatePolicyTableData() {
 
             let _menuInner;
             if (_wideTbl) {
-                // จอใหญ่: toggle1 ซ้าย | toggle2 กึ่งกลาง | ปุ่มขวา
+                // จอใหญ่: 3 toggles ซ้าย-กลาง-ขวา สมดุล + ปุ่มแชร์/เปรียบเทียบชิดขวา
+                const _col = 'flex-1 flex items-center justify-center gap-2';
                 _menuInner = `
-                    <div class="flex items-center gap-2 shrink-0">${_cvToggle}${_beToggle}</div>
-                    ${rightMenuHTML ? `<div class="flex-1 flex items-center justify-center px-3 border-l border-slate-200 mx-2"><div class="flex items-center gap-2">${rightMenuHTML}</div></div>` : '<div class="flex-1"></div>'}
+                    <div class="${_col}">${_cvToggle}</div>
+                    <div class="${_col} border-x border-slate-200">${_beToggle}</div>
+                    <div class="${_col}">${rightMenuHTML || ''}</div>
                     ${_tblBtns}`;
             } else {
                 // มือถือ: คงเดิม (toggle กระจายเต็มแถว)
