@@ -6150,7 +6150,18 @@ function refreshAllDisplays() {
             if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
             return n.toLocaleString('th-TH');
         };
-        const _total = lastCalculationData._finalTotalSaving || 0;
+        // ใช้ค่าจาก table ถ้ามี ไม่งั้น fallback คำนวณ premium × payYears (พร้อม override แต่ละแบบ)
+        let _total = lastCalculationData._finalTotalSaving || 0;
+        if (!_total) {
+            const _prem = lastCalculationData.premium || 0;
+            const _plan = String(currentAppPlan || '').toUpperCase();
+            let _py = parseInt(lastCalculationData.years) || 20;
+            if (_plan.includes('ELITE') || _plan.includes('868') || _plan.includes('818')) _py = 8;
+            else if ((currentAppPlan || '').includes('678')) _py = 6;
+            else if ((currentAppPlan || '').includes('24 TX')) _py = 24;
+            else if ((currentAppPlan || '').includes('Smart Plan')) _py = 7;
+            _total = _prem * _py;
+        }
         if (_total > 0) {
             _asv.textContent = _fmt(_total);
             _asd.classList.remove('hidden');
