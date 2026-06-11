@@ -636,6 +636,8 @@ window._enableCellDiff = function() {
         const _isCVSum = n === 2 && _hasCVAndCF(colNames);
         // n=2: ออมสะสม vs เงินสดพร้อมใช้ (ลำดับใดก็ได้) → cv − saving
         const _isCVVsSaving = n === 2 && colNames.some(c => c.includes('ออมสะสม')) && colNames.some(c => c.includes('เงินสดพร้อมใช้'));
+        // n=2: เงินสดพร้อมใช้ vs ส่วนต่าง → cv + diff (ส่วนต่างเป็นลบอยู่แล้ว)
+        const _isCVVsDiff = n === 2 && colNames.some(c => c.includes('เงินสดพร้อมใช้')) && colNames.some(c => c.trim() === 'ส่วนต่าง' || c.includes('ส่วนต่าง'));
         const _plus = `<span style="color:#64748b;font-size:15px;padding-top:14px;">+</span>`;
         let result, parts;
         if (_isCVSumVsSaving) {
@@ -651,6 +653,12 @@ window._enableCellDiff = function() {
             result = vals[cvIdx] - vals[savIdx];
             parts = cell('เงินสดพร้อมใช้', vals[cvIdx].toLocaleString(), '#e2e8f0', 700, '15px')
                   + _minus + cell('ออมสะสม', vals[savIdx].toLocaleString(), '#e2e8f0', 700, '15px');
+        } else if (_isCVVsDiff) {
+            const cvIdx = colNames.findIndex(c => c.includes('เงินสดพร้อมใช้'));
+            const diffIdx = 1 - cvIdx;
+            result = vals[cvIdx] + vals[diffIdx];
+            parts = cell('เงินสดพร้อมใช้', vals[cvIdx].toLocaleString(), '#e2e8f0', 700, '15px')
+                  + _plus + cell('ส่วนต่าง', vals[diffIdx].toLocaleString(), '#e2e8f0', 700, '15px');
         } else if (_isCVSum) {
             result = vals[0] + vals[1];
             parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px')
