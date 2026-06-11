@@ -7340,18 +7340,29 @@ function toggleBeHighlight() {
 window._showCvStarDetail = function(totalSaving, accCF, cvTotal, age) {
     const fmtShort = n => {
         n = Math.round(n);
-        if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:2}).replace(/\.?0+$/, '') + ' ล้าน';
-        if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:2}).replace(/\.?0+$/, '') + ' แสน';
+        if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' ล้าน';
+        if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
         return n.toLocaleString('th-TH');
     };
     Swal.fire({
-        title: `<span style="font-family:'Kanit',sans-serif;font-size:17px;">★ อายุ ${age} ปี</span>`,
-        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:center;padding:8px 0;line-height:2;">
-            ออม <b style="color:#059669;">${fmtShort(totalSaving)}</b> &nbsp;|&nbsp; ใช้ <b style="color:#ea580c;">${fmtShort(accCF)}</b> &nbsp;|&nbsp; เหลือ <b style="color:#1d4ed8;">${fmtShort(cvTotal)}</b>
+        title: `<span style="font-family:'Kanit',sans-serif;font-size:20px;font-weight:700;">★ อายุ ${age} ปี</span>`,
+        html: `<div style="font-family:'Kanit',sans-serif;display:flex;justify-content:center;gap:14px;padding:10px 0 4px;">
+            <div style="flex:1;max-width:120px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:14px 6px;">
+                <div style="font-size:14px;color:#475569;margin-bottom:4px;">ออม</div>
+                <div style="font-size:19px;font-weight:800;color:#059669;">${fmtShort(totalSaving)}</div>
+            </div>
+            <div style="flex:1;max-width:120px;background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:14px 6px;">
+                <div style="font-size:14px;color:#475569;margin-bottom:4px;">ใช้</div>
+                <div style="font-size:19px;font-weight:800;color:#ea580c;">${fmtShort(accCF)}</div>
+            </div>
+            <div style="flex:1;max-width:120px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;padding:14px 6px;">
+                <div style="font-size:14px;color:#475569;margin-bottom:4px;">เหลือ</div>
+                <div style="font-size:19px;font-weight:800;color:#1d4ed8;">${fmtShort(cvTotal)}</div>
+            </div>
         </div>`,
-        confirmButtonText: 'ปิด',
-        confirmButtonColor: '#059669',
+        showConfirmButton: false,
         customClass: { popup: 'swal2-popup-kanit' },
+        didOpen: (pop) => { pop.addEventListener('click', () => Swal.close()); },
     });
 };
 
