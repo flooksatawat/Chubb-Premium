@@ -6144,16 +6144,19 @@ function refreshAllDisplays() {
         const _asd = document.getElementById('accumSavingDisplay');
         const _asv = document.getElementById('accumSavingValue');
         if (!_asd || !_asv) return;
-        const _prem = lastCalculationData.premium || 0;
-        const _py   = parseInt(lastCalculationData.years) || 20;
-        const _total = _prem * _py;
         const _fmt = n => {
+            n = Math.round(n);
             if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' ล้าน';
             if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
             return n.toLocaleString('th-TH');
         };
-        _asv.textContent = `${_fmt(_prem)} × ${_py} ปี = ${_fmt(_total)}`;
-        _asd.classList.remove('hidden');
+        const _total = lastCalculationData._finalTotalSaving || 0;
+        if (_total > 0) {
+            _asv.textContent = _fmt(_total);
+            _asd.classList.remove('hidden');
+        } else {
+            _asd.classList.add('hidden');
+        }
     })();
     // ================================
 
@@ -6168,15 +6171,14 @@ function refreshAllDisplays() {
         const _age  = lastCalculationData.age || 30;
         const _isWXN = document.getElementById('dualCashFlowBox') && !document.getElementById('dualCashFlowBox').classList.contains('hidden');
         const _isSingle = document.getElementById('singleCashFlowBox') && !document.getElementById('singleCashFlowBox').classList.contains('hidden');
+        const _finalCF = lastCalculationData._finalAccCF || 0;
 
-        // Single cashflow summary
+        // Single cashflow summary — number from table last row
         const _ssd = document.getElementById('cfSingleSummary');
         const _ssv = document.getElementById('cfSingleSummaryValue');
         if (_ssd && _ssv) {
-            if (_isSingle) {
-                const _cf = parseInt((document.getElementById('cashFlowInput')?.value || '0').replace(/\D/g, '')) || 0;
-                const _yrs = Math.max(0, 90 - _age);
-                _ssv.textContent = `${_fmt(_cf)} × ${_yrs} ปี = ${_fmt(_cf * _yrs)}`;
+            if (_isSingle && _finalCF > 0) {
+                _ssv.textContent = _fmt(_finalCF);
                 _ssd.classList.remove('hidden');
             } else {
                 _ssd.classList.add('hidden');
@@ -6196,11 +6198,9 @@ function refreshAllDisplays() {
                 const _cf2 = parseInt((document.getElementById('cashFlowInput2')?.value || '0').replace(/\D/g, '')) || 0;
                 const _yrs1 = Math.max(0, 60 - _age);
                 const _yrs2 = 30; // 61-90
-                const _total1 = _cf1 * _yrs1;
-                const _total2 = _cf2 * _yrs2;
-                if (_d1v) _d1v.textContent = `${_fmt(_cf1)} × ${_yrs1} ปี = ${_fmt(_total1)}`;
-                if (_d2v) _d2v.textContent = `${_fmt(_cf2)} × ${_yrs2} ปี = ${_fmt(_total2)}`;
-                if (_dtv) _dtv.textContent = _fmt(_total1 + _total2);
+                if (_d1v) _d1v.textContent = _fmt(_cf1 * _yrs1);
+                if (_d2v) _d2v.textContent = _fmt(_cf2 * _yrs2);
+                if (_dtv) _dtv.textContent = _finalCF > 0 ? _fmt(_finalCF) : _fmt(_cf1 * _yrs1 + _cf2 * _yrs2);
                 _d1.classList.remove('hidden');
                 _d2.classList.remove('hidden');
                 _dt.classList.remove('hidden');
@@ -7337,6 +7337,7 @@ function generatePolicyTableData() {
         html += trow;
     }
 
+    if (lastCalculationData) { lastCalculationData._finalAccCF = accCashFlow; lastCalculationData._finalTotalSaving = totalSaving; }
     document.getElementById('policyTableBody').innerHTML = html;
 
     // เพิ่มปุ่มซ่อนคอลัมน์ในหัวตาราง (ซ่อนแต่ละคอลัมน์อิสระ)
