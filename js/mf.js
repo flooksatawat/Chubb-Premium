@@ -596,6 +596,18 @@ window.mfPickerConfirm = async function() {
     // Build composite key: "COMPANY|PLAN_ID|ROOM" or "COMPANY|PLAN_ID"
     const key = [p.company, p.plan, p.roomRate].filter(Boolean).join('|');
     const label = [co?.name, plan?.name, p.roomRate].filter(Boolean).join(' · ');
+    // Net Rider mode (จากปุ่ม + หัวคอลัมน์ คงเหลือ): แทรกเป็นคู่คอลัมน์ใหม่ ไม่แตะ MF หลัก
+    if (window._mfNetRiderMode) {
+        window._mfNetRiderMode = false;
+        if (p.company) await mfLoadRates(p.company);
+        closePopup('mfPlanModal');
+        const shortLabel = [co?.name, p.roomRate || plan?.name].filter(Boolean).join(' ');
+        window._netExtraRiders = window._netExtraRiders || [];
+        window._netExtraRiders.push({ type: 'MF', label: shortLabel, mfKey: key });
+        if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+        if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+        return;
+    }
     window.currentMF = key;
     window._mfCurrentLabel = label;
     // Sync to inline selector state (data + UI dropdowns)
@@ -613,19 +625,6 @@ window.mfPickerConfirm = async function() {
     // STA mode: populate _mfAfterSixtyByAge ผ่าน mfGenerateTable แล้ว render ตาราง STA
     if (window._mfSTAMode) {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
-        return;
-    }
-    // Net Rider mode (จาก นำเงินคงเหลือไปจ่ายเบี้ย): เปิดตาราง (ถ้ายังไม่เปิด) แล้วแทรก MF column + คงเหลือ
-    if (window._mfNetRiderMode) {
-        window._mfNetRiderMode = false;
-        const tv = document.getElementById('tableView');
-        const tableIsVisible = tv && tv.style.display !== 'none' && !tv.classList.contains('hidden');
-        if (tableIsVisible) {
-            if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
-            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
-        } else {
-            if (typeof switchView === 'function') switchView('table');
-        }
         return;
     }
     // เส้นทาง "ปุ่ม": แทรกคอลัมน์เบี้ย MF ในตารางเท่านั้น ไม่แตะเบี้ยออม/ไม่แสดง popup
@@ -646,6 +645,12 @@ window.mfBuildPremiumMap = function(gender) {
         if (src.gender && gender && src.gender !== gender) return null;
         return src.map;
     }
+    return window.mfBuildPremiumMapForKey(mfKey, gender);
+};
+
+// ── Build {age: premium} map for any composite key "COMPANY|PLAN|ROOM" (net rider columns) ──
+window.mfBuildPremiumMapForKey = function(mfKey, gender) {
+    if (!mfKey || mfKey === 'ไม่เลือก') return null;
     const parts = mfKey.split('|');
     const companyId = parts[0], planId = parts[1], roomRate = parts[2] || null;
     if (!companyId || !planId) return null;

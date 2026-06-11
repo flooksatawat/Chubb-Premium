@@ -370,20 +370,8 @@ window._tableDepositEnabled = false;
 window._tableDepositUntilAge = null;
 window._tableDepositRate = 0.02;
 
-// ==================== NET RIDER DEDUCTIONS (กดค้างหัวตาราง คงเหลือ) ====================
+// ==================== NET RIDER DEDUCTIONS (ปุ่ม + หัวตาราง คงเหลือ) ====================
 window._netExtraRiders = window._netExtraRiders || [];
-
-(function() {
-    let _nrLpTimer = null;
-    window._netRiderLongStart = function(e) {
-        e.stopPropagation();
-        if (_nrLpTimer) clearTimeout(_nrLpTimer);
-        _nrLpTimer = setTimeout(function() { _nrLpTimer = null; window._netRiderHoldMenu(); }, 600);
-    };
-    window._netRiderLongEnd = function() {
-        if (_nrLpTimer) { clearTimeout(_nrLpTimer); _nrLpTimer = null; }
-    };
-})();
 
 window._netRiderHoldMenu = function() {
     if (navigator.vibrate) navigator.vibrate(40);
@@ -394,7 +382,7 @@ window._netRiderHoldMenu = function() {
         { type: 'TPD',  icon: 'fa-wheelchair',     label: 'TPD ทุพพลภาพ',   color: '#7c3aed', bg: '#f5f3ff' },
     ];
     const btns = opts.map(function(o) {
-        const done = existing.includes(o.type);
+        const done = o.type !== 'MF' && existing.includes(o.type);
         return `<button type="button" onclick="window._addNetRider('${o.type}')"
             style="padding:10px 14px;border-radius:12px;border:1.5px solid ${o.color};background:${done?'#f8fafc':o.bg};color:${done?'#94a3b8':o.color};font-family:Kanit,sans-serif;font-size:13px;font-weight:700;cursor:${done?'not-allowed':'pointer'};display:flex;align-items:center;gap:10px;text-align:left;width:100%;" ${done?'disabled':''}>
             <i class="fas ${o.icon}"></i>${o.label}${done?' (เพิ่มแล้ว)':''}
@@ -7204,7 +7192,16 @@ function generatePolicyTableData() {
             const _erBaseRem = accCashFlow - _accMfPrem; // base = after MF (or pure accCashFlow if no MF)
             for (let _ri = 0; _ri < window._netExtraRiders.length; _ri++) {
                 const _er = window._netExtraRiders[_ri];
-                const _erP = (typeof getHealthRate === 'function') ? (getHealthRate(_er.type, String(_er.sa), currentAge, _mfGender) || 0) : 0;
+                let _erP = 0;
+                if (_er.type === 'MF') {
+                    if (_er._mapG !== _mfGender) {
+                        _er._map = (typeof window.mfBuildPremiumMapForKey === 'function') ? window.mfBuildPremiumMapForKey(_er.mfKey, _mfGender) : null;
+                        _er._mapG = _mfGender;
+                    }
+                    _erP = (typeof window.mfPremForAge === 'function') ? (window.mfPremForAge(_er._map, currentAge) || 0) : 0;
+                } else {
+                    _erP = (typeof getHealthRate === 'function') ? (getHealthRate(_er.type, String(_er.sa), currentAge, _mfGender) || 0) : 0;
+                }
                 _netExtraAccPrems[_ri] += _erP;
                 let _erRem = _erBaseRem;
                 for (let _j = 0; _j <= _ri; _j++) _erRem -= _netExtraAccPrems[_j];
