@@ -627,7 +627,10 @@ window._enableCellDiff = function() {
         // กรณีพิเศษ: ช่องที่ 3 = เงินสดพร้อมใช้ → เปรียบเทียบ cv vs (v0 − v1)
         // กรณีพิเศษ: ช่องที่ 1 = รวมรับ, ช่องที่ 2 = เงินสดพร้อมใช้ → บวกกัน
         const _isCVLast = n === 3 && colNames[2].includes('เงินสดพร้อมใช้');
-        const _isCVSum = n === 2 && colNames[0].includes('รวมรับ') && colNames[1].includes('เงินสดพร้อมใช้');
+        const _isCVSum = n === 2 && (
+            (colNames[0].includes('รวมรับ') && colNames[1].includes('เงินสดพร้อมใช้')) ||
+            (colNames[0].includes('เงินสดพร้อมใช้') && colNames[1].includes('รวมรับ'))
+        );
         const _plus = `<span style="color:#64748b;font-size:15px;padding-top:14px;">+</span>`;
         let result, parts;
         if (_isCVSum) {
