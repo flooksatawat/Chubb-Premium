@@ -6764,11 +6764,21 @@ function generatePolicyTableData() {
                     <i class="fas fa-eye" id="beHighlightIcon"></i>
                 </button>`;
 
+            const _cvToggle = `
+                <div class="flex items-center gap-1.5 shrink-0 pl-3 border-l border-slate-200">
+                    <i class="fas fa-coins text-sky-500 text-[14px] w-4 text-center shrink-0"></i>
+                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้ ก่อนจุดคุ้มทุน</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" id="toggleCVMiniTable" class="sr-only peer" onchange="generatePolicyTableData();">
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500 shadow-inner"></div>
+                </label>`;
+
             let _menuInner;
             if (_wideTbl) {
                 // จอใหญ่: toggle1 ซ้าย | toggle2 กึ่งกลาง | ปุ่มขวา
                 _menuInner = `
-                    <div class="flex items-center gap-2 shrink-0">${_beToggle}</div>
+                    <div class="flex items-center gap-2 shrink-0">${_beToggle}${_cvToggle}</div>
                     ${rightMenuHTML ? `<div class="flex-1 flex items-center justify-center px-3 border-l border-slate-200 mx-2"><div class="flex items-center gap-2">${rightMenuHTML}</div></div>` : '<div class="flex-1"></div>'}
                     ${_tblBtns}`;
             } else {
@@ -6868,6 +6878,7 @@ function generatePolicyTableData() {
     const isBreakevenActive = document.getElementById('toggleBreakeven')?.checked || false;
     const isShowSAActive = document.getElementById('toggleShowSA')?.checked || false;
     const isShowCVActive = document.getElementById('toggleShowCV')?.checked || false;
+    const isCVColActive = document.getElementById('toggleCVMiniTable')?.checked || false;
     const isShowDD50ColActive = document.getElementById('toggleShowDD50Col')?.checked || false;
     
     let startAge = 61, endAge = 70;
@@ -7057,8 +7068,8 @@ function generatePolicyTableData() {
         ${showDepositColumn ? `<th class="${_thCls} text-emerald-200 text-right" style="${_thSz};cursor:pointer;user-select:none;white-space:normal;line-height:1.2;" ontouchstart="window._depositIrrLongStart(event)" ontouchend="window._depositIrrLongEnd()" ontouchcancel="window._depositIrrLongEnd()" onmousedown="window._depositIrrLongStart(event)" onmouseup="window._depositIrrLongEnd()" onmouseleave="window._depositIrrLongEnd()" title="กดค้างเพื่อดู IRR">สะสม รับ ${(window._tableDepositRate*100).toFixed(0)}% <i class='fas fa-wand-magic-sparkles' style='font-size:8px;opacity:0.6;'></i></th>` : ''}
         ${_mfLabel ? `<th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">${_mfLabel}</th><th class="${_mfThCls} text-amber-200 text-right" style="${_mfThSz}">คงเหลือ <button onclick="event.stopPropagation();window._netRiderHoldMenu()" style="font-size:9px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:14px;height:14px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;line-height:1;font-weight:700;">+</button></th>` : ''}
         ${(window._netExtraRiders||[]).map(function(r,i){const isLast=i===(window._netExtraRiders.length-1);return`<th class="${_mfThCls} text-rose-200 text-right" style="${_mfThSz}">${r.label} <button onclick="event.stopPropagation();window._removeNetRider(${i})" style="font-size:9px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:13px;height:13px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;line-height:1;">×</button></th><th class="${_mfThCls} ${isLast?'text-emerald-200':'text-rose-200'} text-right" style="${_mfThSz}">คงเหลือ${isLast?` <button onclick="event.stopPropagation();window._netRiderHoldMenu()" style="font-size:9px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:14px;height:14px;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;padding:0;margin-left:2px;line-height:1;font-weight:700;">+</button>`:''}</th>`;}).join('')}
-        ${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
-        ${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<th class="${_thCls} text-right" style="${_thSz}${(isCL || isSLB) ? 'cursor:pointer;user-select:none;' : ''}" id="cvThHeader" title="${(isCL || isSLB) ? 'กดค้างเพื่อตั้งค่าทยอยเวนคืน' : ''}">${_lCV}${(isCL || isSLB) ? ' <i class=\'fas fa-hand-holding-usd\' style=\'font-size:8px;opacity:0.6;vertical-align:middle;\'></i>' : ''}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? `<th class="${_thCls} text-right" style="${_thSz}">${_lAccum}</th>` : ''}
+        ${(isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? `<th class="${_thCls} text-right" style="${_thSz}${(isCL || isSLB) ? 'cursor:pointer;user-select:none;' : ''}" id="cvThHeader" title="${(isCL || isSLB) ? 'กดค้างเพื่อตั้งค่าทยอยเวนคืน' : ''}">${_lCV}${(isCL || isSLB) ? ' <i class=\'fas fa-hand-holding-usd\' style=\'font-size:8px;opacity:0.6;vertical-align:middle;\'></i>' : ''}</th>` : ''}
         ${showDD50Column ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">เบี้ย DD50</th>` : ''}
         ${showCoverageColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lCoverage}</th>` : ''}
         ${showSAColumn ? `<th class="${_thCls} text-rose-200 text-right" style="${_thSz}">${_lSA}</th>` : ''}
@@ -7418,8 +7429,8 @@ function generatePolicyTableData() {
                 html += `<td class="${_tdBase} text-right" style="${_fSz}color:${_erRemColor};font-weight:600;">${_erRem.toLocaleString('en-US')}</td>`;
             }
         }
-        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
-        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
+        html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
         // เก็บข้อมูลสำหรับ CV mini table
         window._cvRows.push({ y, age: d.age + y, saving: totalSaving, cv: cvTotal });
         let _dd50SARow = 0, _dd50RowPrem = 0;
@@ -7456,7 +7467,7 @@ function generatePolicyTableData() {
         trow += showDepositColumn ? _blankTd : '';
         if (_mfLabel) trow += _blankTd + _blankTd;
         if (window._netExtraRiders) { for (let _ri = 0; _ri < window._netExtraRiders.length; _ri++) trow += _blankTd + _blankTd; }
-        trow += (isBreakevenActive || isShowCVActive || isSurrenderActive) ? (_blankTd + _blankTd) : '';
+        trow += (isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? (_blankTd + _blankTd) : '';
         trow += showDD50Column ? _blankTd : '';
         trow += showCoverageColumn ? _blankTd : '';
         trow += showSAColumn ? _blankTd : '';
