@@ -624,16 +624,26 @@ window._enableCellDiff = function() {
         const _equal = `<span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>`;
 
         // ลูกโซ่: v0 − v1 (− v2) = ผลลัพธ์เดียว
-        // กรณีพิเศษ: ช่องที่ 3 = เงินสดพร้อมใช้ → เปรียบเทียบ cv vs (v0 − v1)
-        // กรณีพิเศษ: ช่องที่ 1 = รวมรับ, ช่องที่ 2 = เงินสดพร้อมใช้ → บวกกัน
+        const _hasCVAndCF = names => {
+            const s = names.join('|');
+            return s.includes('เงินสดพร้อมใช้') && (s.includes('รวมรับ') || s.includes('กระแสเงินสด'));
+        };
+        // n=3: ช่อง 1+2 = รวมรับ+cv (ลำดับใดก็ได้), ช่อง 3 = ออมสะสม → (v0+v1) − v2
+        const _isCVSumVsSaving = n === 3 && colNames[2].includes('ออมสะสม') && _hasCVAndCF(colNames.slice(0,2));
+        // n=3: ช่อง 3 = เงินสดพร้อมใช้ → cv vs (v0−v1)
         const _isCVLast = n === 3 && colNames[2].includes('เงินสดพร้อมใช้');
-        const _isCVSum = n === 2 && (
-            (colNames[0].includes('รวมรับ') && colNames[1].includes('เงินสดพร้อมใช้')) ||
-            (colNames[0].includes('เงินสดพร้อมใช้') && colNames[1].includes('รวมรับ'))
-        );
+        // n=2: รวมรับ + cv (ลำดับใดก็ได้) → บวกกัน
+        const _isCVSum = n === 2 && _hasCVAndCF(colNames);
         const _plus = `<span style="color:#64748b;font-size:15px;padding-top:14px;">+</span>`;
         let result, parts;
-        if (_isCVSum) {
+        if (_isCVSumVsSaving) {
+            const sum12 = vals[0] + vals[1];
+            result = sum12 - vals[2];
+            const _sum12Str = sum12.toLocaleString();
+            const _savStr = vals[2].toLocaleString();
+            parts = cell('รวม', _sum12Str, '#e2e8f0', 700, '15px')
+                  + _minus + cell('ออมสะสม', _savStr, '#e2e8f0', 700, '15px');
+        } else if (_isCVSum) {
             result = vals[0] + vals[1];
             parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px')
                   + _plus + cell(colNames[1], vals[1].toLocaleString(), '#e2e8f0', 700, '15px');
