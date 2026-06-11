@@ -2727,7 +2727,7 @@ function selectAppPlan(planName) {
         const _staLbl = document.getElementById('premiumLabel');
         if(_staLbl) _staLbl.innerHTML = '<i class="fas fa-wallet text-orange-500"></i> เบี้ยประกัน (บาท/ปี)';
         const _staSub = document.getElementById('premiumSubLabel');
-        if(_staSub) { _staSub.textContent = 'คำนวณจากบำนาญ'; _staSub.className = 'text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold border border-orange-200'; }
+        if(_staSub) { _staSub.textContent = 'คำนวณจากเงินออม'; _staSub.className = 'text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold border border-orange-200'; }
     } else if (planName === '24 TX') {
         currentMode = 'premium';
         document.getElementById('premiumInput').value = "120,000";
