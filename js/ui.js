@@ -6961,6 +6961,7 @@ function generatePolicyTableData() {
     let _accMfPrem = 0;
     let _netExtraAccPrems = (window._netExtraRiders || []).map(function() { return 0; });
     let totalSaving = 0, foundBreakeven = false, beYear = 0, beAge = 0, beAmount = 0;
+    let cvStarYear = 0; // ปีแรกที่ เงินสดพร้อมใช้ >= ออมสะสม (ดาวที่คอลัมน์อายุ)
     let currentSA = initialSA;
     let accCashFlow = 0;
     let accTax = 0;
@@ -7146,6 +7147,9 @@ function generatePolicyTableData() {
 
         accCashFlow += cashFlowAmt;
 
+        // ดาวเงินสดพร้อมใช้: ปีแรกที่ เงินสดพร้อมใช้ >= ออมสะสม (เฉพาะแบบที่มีเงินคืน)
+        if (forceShowCashFlow && !cvStarYear && totalSaving > 0 && cvTotal >= totalSaving) cvStarYear = y;
+
         // ฝากสะสม ทบต้น: pool × (1+rate) + cashFlow ของปีนี้ (สะสมถึงอายุที่กำหนด)
         if (showDepositColumn) {
             if (currentAge <= window._tableDepositUntilAge) {
@@ -7165,8 +7169,11 @@ function generatePolicyTableData() {
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
 
         const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
+        const _cvStar = (y === cvStarYear)
+            ? `<span onclick="event.stopPropagation();window._showCvStarDetail(${totalSaving},${accCashFlow},${cvTotal},${currentAge})" style="cursor:pointer;color:#f59e0b;margin-right:2px;" title="เงินสดพร้อมใช้มากกว่าเงินออมแล้ว">★</span>`
+            : '';
         html += `<tr id="${rowId}" class="${trClass}">
-            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${_cvStar}${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
@@ -7329,7 +7336,30 @@ function toggleBeHighlight() {
     }
 }
 
-window._showBreakevenDetail = function() {};
+// ==================== CV STAR POPUP (เงินสดพร้อมใช้ >= ออมสะสม) ====================
+window._showCvStarDetail = function(totalSaving, accCF, cvTotal, age) {
+    const fmt = n => Math.round(n).toLocaleString('th-TH');
+    Swal.fire({
+        title: `<span style="font-family:'Kanit',sans-serif;font-size:17px;">★ อายุ ${age} ปี</span>`,
+        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:left;padding:4px 0;">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:12px;margin-bottom:8px;border:1px solid #bbf7d0;">
+                <span style="color:#475569;">💰 ออม</span>
+                <span style="color:#1e293b;font-weight:800;">${fmt(totalSaving)} ฿</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fff7ed;border-radius:12px;margin-bottom:8px;border:1px solid #fed7aa;">
+                <span style="color:#475569;">💸 ใช้ = รวมรับ</span>
+                <span style="color:#ea580c;font-weight:800;">${fmt(accCF)} ฿</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:12px;border:1px solid #bfdbfe;">
+                <span style="color:#475569;">💵 เหลือ = เงินสดพร้อมใช้</span>
+                <span style="color:#1d4ed8;font-weight:800;">${fmt(cvTotal)} ฿</span>
+            </div>
+        </div>`,
+        confirmButtonText: 'ปิด',
+        confirmButtonColor: '#059669',
+        customClass: { popup: 'swal2-popup-kanit' },
+    });
+};
 
 // ==================== CASH FLOW PLAN UI (LPB / SLPA) ====================
 
