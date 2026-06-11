@@ -6767,7 +6767,7 @@ function generatePolicyTableData() {
             const _cvToggle = `
                 <div class="flex items-center gap-1.5 shrink-0 pl-3 border-l border-slate-200">
                     <i class="fas fa-coins text-sky-500 text-[14px] w-4 text-center shrink-0"></i>
-                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้ ก่อนจุดคุ้มทุน</span>
+                    <span class="text-[11px] font-bold text-slate-700 whitespace-nowrap">เงินสดพร้อมใช้</span>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input type="checkbox" id="toggleCVMiniTable" class="sr-only peer" onchange="generatePolicyTableData();">
