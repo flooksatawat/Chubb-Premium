@@ -615,6 +615,19 @@ window.mfPickerConfirm = async function() {
         if (typeof mfGenerateTable === 'function') mfGenerateTable();
         return;
     }
+    // Net Rider mode (จาก นำเงินคงเหลือไปจ่ายเบี้ย): เปิดตาราง (ถ้ายังไม่เปิด) แล้วแทรก MF column + คงเหลือ
+    if (window._mfNetRiderMode) {
+        window._mfNetRiderMode = false;
+        const tv = document.getElementById('tableView');
+        const tableIsVisible = tv && tv.style.display !== 'none' && !tv.classList.contains('hidden');
+        if (tableIsVisible) {
+            if (typeof calculate === 'function') calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
+            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+        } else {
+            if (typeof switchView === 'function') switchView('table');
+        }
+        return;
+    }
     // เส้นทาง "ปุ่ม": แทรกคอลัมน์เบี้ย MF ในตารางเท่านั้น ไม่แตะเบี้ยออม/ไม่แสดง popup
     if (typeof calculate === 'function') {
         calculate(typeof currentMode !== 'undefined' ? currentMode : 'sum', true);
