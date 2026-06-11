@@ -6109,7 +6109,7 @@ function _updateTPDUI() {
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
-    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity', 'Signature Legacy', 'Century Life'];
+    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity', 'Signature Legacy', 'Century Life', '678 Step Savings'];
     if (noDisplay.includes(currentAppPlan) || !lastCalculationData) {
         el.textContent = '';
         el.classList.add('hidden');
