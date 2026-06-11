@@ -2596,6 +2596,8 @@ function selectAppPlan(planName) {
     if(premiumContainer) premiumContainer.style.order = '';
     if(sumInsuredContainer) sumInsuredContainer.style.order = '';
     if(mainActionsGroup) mainActionsGroup.style.order = '';
+    const _asdReset = document.getElementById('accumSavingDisplay');
+    if(_asdReset) _asdReset.style.order = '';
     const _siLbl = document.getElementById('sumInsuredLabel');
     if(_siLbl) _siLbl.innerHTML = '<i class="fas fa-shield-halved text-emerald-500"></i> วงเงินคุ้มครอง (บาท)';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
@@ -2731,6 +2733,8 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.style.order = '1';
         if(sumInsuredContainer) sumInsuredContainer.style.order = '2';
         if(mainActionsGroup) mainActionsGroup.style.order = '4';
+        const _asd24 = document.getElementById('accumSavingDisplay');
+        if(_asd24) _asd24.style.order = '1';
         const premSubLbl24 = document.getElementById('premiumSubLabel');
         if(premSubLbl24) premSubLbl24.className = 'text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200';
         if(cashFlowContainer) {
@@ -6183,7 +6187,45 @@ function refreshAllDisplays() {
         const _age  = lastCalculationData.age || 30;
         const _isWXN = document.getElementById('dualCashFlowBox') && !document.getElementById('dualCashFlowBox').classList.contains('hidden');
         const _cfContainerVisible = document.getElementById('cashFlowContainer') && !document.getElementById('cashFlowContainer').classList.contains('hidden');
-        const _finalCF = lastCalculationData._finalAccCF || 0;
+        let _finalCF = lastCalculationData._finalAccCF || 0;
+
+        // Fallback: คำนวณ accCashFlow จาก SA+age เมื่อยังไม่เคยเปิดตาราง
+        if (!_finalCF && _cfContainerVisible && !_isWXN) {
+            const _sa  = lastCalculationData.sum || 0;
+            const _pln = String(currentAppPlan || '');
+            const _stAge = lastCalculationData.age || 30;
+            if (_sa > 0) {
+                const _pnU = _pln.toUpperCase();
+                const _isEl = _pnU.includes('ELITE') || _pnU.includes('868') || _pnU.includes('818');
+                const _is78 = _pln === '678 Step Savings';
+                const _isTX = _pln === '24 TX';
+                let _acc = 0;
+                if (_isTX) {
+                    const _mx = 90 - _stAge;
+                    for (let _y = 1; _y <= _mx; _y++) {
+                        if (_y % 3 === 0 && _y <= 24) _acc += Math.round(_sa * 0.05);
+                        else if (_y === 25) _acc += Math.round(_sa * 0.70);
+                        else if (_y >= 26 && (_stAge + _y) < 90) _acc += Math.round(_sa * 0.08);
+                    }
+                } else if (_isEl) {
+                    const _mx = (_stAge <= 50 ? 68 : _stAge + 18) - _stAge;
+                    for (let _y = 1; _y <= _mx; _y++) {
+                        if (_y >= 9 && (_stAge + _y) < (_stAge <= 50 ? 68 : _stAge + 18)) _acc += Math.round(_sa * 0.06);
+                    }
+                } else if (_is78) {
+                    const _mx = 78 - _stAge;
+                    const _cfInput = document.getElementById('cashFlowInput');
+                    const _cfV = _cfInput ? (parseInt((_cfInput.value || '0').replace(/\D/g, '')) || 0) : 0;
+                    if (_cfV > 0) _acc = _cfV * _mx;
+                } else {
+                    // แบบอื่น: ใช้ cashFlowInput × maxYear
+                    const _cfInput = document.getElementById('cashFlowInput');
+                    const _cfV = _cfInput ? (parseInt((_cfInput.value || '0').replace(/\D/g, '')) || 0) : 0;
+                    if (_cfV > 0) _acc = _cfV * (90 - _stAge);
+                }
+                _finalCF = _acc;
+            }
+        }
 
         // Single cashflow summary — แสดงทุกแบบที่มีกระแสเงินสด (ไม่ใช่ WXN)
         const _ssd = document.getElementById('cfSingleSummary');
