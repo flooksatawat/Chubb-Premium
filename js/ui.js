@@ -6144,9 +6144,6 @@ function refreshAllDisplays() {
         const _asd = document.getElementById('accumSavingDisplay');
         const _asv = document.getElementById('accumSavingValue');
         if (!_asd || !_asv) return;
-        const _savingsPlans = ['678 Step Savings', 'Elite Life Extra', '24 TX', 'Whole Life Extra', 'Whole Life NAB', 'Lifetime', '7SM'];
-        const _isSavings = _savingsPlans.some(s => (currentAppPlan || '').includes(s) || (typeof currentAppPlan !== 'undefined' && currentAppPlan === s));
-        if (!_isSavings) { _asd.classList.add('hidden'); return; }
         const _prem = lastCalculationData.premium || 0;
         const _py   = parseInt(lastCalculationData.years) || 20;
         const _total = _prem * _py;
@@ -6159,6 +6156,62 @@ function refreshAllDisplays() {
         _asd.classList.remove('hidden');
     })();
     // ================================
+
+    // ===== CASHFLOW SUMMARY DISPLAY =====
+    (function() {
+        const _fmt = n => {
+            n = Math.round(n);
+            if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' ล้าน';
+            if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
+            return n.toLocaleString('th-TH');
+        };
+        const _age  = lastCalculationData.age || 30;
+        const _isWXN = document.getElementById('dualCashFlowBox') && !document.getElementById('dualCashFlowBox').classList.contains('hidden');
+        const _isSingle = document.getElementById('singleCashFlowBox') && !document.getElementById('singleCashFlowBox').classList.contains('hidden');
+
+        // Single cashflow summary
+        const _ssd = document.getElementById('cfSingleSummary');
+        const _ssv = document.getElementById('cfSingleSummaryValue');
+        if (_ssd && _ssv) {
+            if (_isSingle) {
+                const _cf = parseInt((document.getElementById('cashFlowInput')?.value || '0').replace(/\D/g, '')) || 0;
+                const _yrs = Math.max(0, 90 - _age);
+                _ssv.textContent = `${_fmt(_cf)} × ${_yrs} ปี = ${_fmt(_cf * _yrs)}`;
+                _ssd.classList.remove('hidden');
+            } else {
+                _ssd.classList.add('hidden');
+            }
+        }
+
+        // WXN dual cashflow summaries
+        const _d1 = document.getElementById('cfDual1Summary');
+        const _d1v = document.getElementById('cfDual1SummaryValue');
+        const _d2 = document.getElementById('cfDual2Summary');
+        const _d2v = document.getElementById('cfDual2SummaryValue');
+        const _dt = document.getElementById('cfDualTotalSummary');
+        const _dtv = document.getElementById('cfDualTotalValue');
+        if (_d1 && _d2 && _dt) {
+            if (_isWXN) {
+                const _cf1 = parseInt((document.getElementById('cashFlowInput1')?.value || '0').replace(/\D/g, '')) || 0;
+                const _cf2 = parseInt((document.getElementById('cashFlowInput2')?.value || '0').replace(/\D/g, '')) || 0;
+                const _yrs1 = Math.max(0, 60 - _age);
+                const _yrs2 = 30; // 61-90
+                const _total1 = _cf1 * _yrs1;
+                const _total2 = _cf2 * _yrs2;
+                if (_d1v) _d1v.textContent = `${_fmt(_cf1)} × ${_yrs1} ปี = ${_fmt(_total1)}`;
+                if (_d2v) _d2v.textContent = `${_fmt(_cf2)} × ${_yrs2} ปี = ${_fmt(_total2)}`;
+                if (_dtv) _dtv.textContent = _fmt(_total1 + _total2);
+                _d1.classList.remove('hidden');
+                _d2.classList.remove('hidden');
+                _dt.classList.remove('hidden');
+            } else {
+                _d1.classList.add('hidden');
+                _d2.classList.add('hidden');
+                _dt.classList.add('hidden');
+            }
+        }
+    })();
+    // ====================================
 
     const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
