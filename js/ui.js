@@ -2608,6 +2608,8 @@ function selectAppPlan(planName) {
     if(premiumContainer) premiumContainer.style.order = '';
     if(sumInsuredContainer) sumInsuredContainer.style.order = '';
     if(mainActionsGroup) mainActionsGroup.style.order = '';
+    const _siLbl = document.getElementById('sumInsuredLabel');
+    if(_siLbl) _siLbl.innerHTML = '<i class="fas fa-shield-halved text-emerald-500"></i> วงเงินคุ้มครอง (บาท)';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
     if(premiumSubLabel) premiumSubLabel.className = 'text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200';
     // reset MF column: ล้าง currentMF เมื่อเปลี่ยนไปแบบที่ไม่มีปุ่ม MF
@@ -2830,6 +2832,11 @@ function selectAppPlan(planName) {
         if (globalMFContainer) globalMFContainer.classList.remove('hidden');
     } else {
         if (globalMFContainer) globalMFContainer.classList.add('hidden');
+    }
+
+    if (planName === '678 Step Savings') {
+        const _678siLbl = document.getElementById('sumInsuredLabel');
+        if(_678siLbl) _678siLbl.innerHTML = '<i class="fas fa-piggy-bank text-fuchsia-500"></i> ออมเงิน (บาท)';
     }
 
     // TPD rider: show for 3D and CL only (not TLA)
