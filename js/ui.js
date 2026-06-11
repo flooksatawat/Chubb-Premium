@@ -2769,6 +2769,7 @@ function selectAppPlan(planName) {
         if(premiumContainer) premiumContainer.classList.add('hidden'); // ซ่อนเบี้ยใต้วงเงิน
         if(cashFlowContainer) cashFlowContainer.classList.add('hidden');
     } else {
+        currentMode = 'sum';
         const defaultSum = (planName === 'CI Extra Plus') ? 200000 : (config.minSum || 100000);
         document.getElementById('sumInsuredInput').value = defaultSum.toLocaleString();
         if(sumInsuredContainer) sumInsuredContainer.classList.remove('hidden');
