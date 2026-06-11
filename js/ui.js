@@ -2596,6 +2596,12 @@ function selectAppPlan(planName) {
     if(premiumContainer) premiumContainer.style.order = '';
     if(sumInsuredContainer) sumInsuredContainer.style.order = '';
     if(mainActionsGroup) mainActionsGroup.style.order = '';
+    // reset accumSavingDisplay กลับเข้า premiumContainer เสมอ
+    (function() {
+        const _asd = document.getElementById('accumSavingDisplay');
+        const _pc  = document.getElementById('premiumContainer');
+        if (_asd && _pc && !_pc.contains(_asd)) _pc.appendChild(_asd);
+    })();
     const _siLbl = document.getElementById('sumInsuredLabel');
     if(_siLbl) _siLbl.innerHTML = '<i class="fas fa-shield-halved text-emerald-500"></i> วงเงินคุ้มครอง (บาท)';
     const premiumSubLabel = document.getElementById('premiumSubLabel');
@@ -2826,6 +2832,10 @@ function selectAppPlan(planName) {
     if (planName === '678 Step Savings') {
         const _678siLbl = document.getElementById('sumInsuredLabel');
         if(_678siLbl) _678siLbl.innerHTML = '<i class="fas fa-piggy-bank text-fuchsia-500"></i> ออมเงิน (บาท)';
+        // ย้าย accumSavingDisplay เข้า sumInsuredContainer เพราะ premiumContainer ถูกซ่อน
+        const _asd678 = document.getElementById('accumSavingDisplay');
+        const _sic678 = document.getElementById('sumInsuredContainer');
+        if (_asd678 && _sic678 && !_sic678.contains(_asd678)) _sic678.appendChild(_asd678);
     }
 
     // TPD rider: show for 3D and CL only (not TLA)
