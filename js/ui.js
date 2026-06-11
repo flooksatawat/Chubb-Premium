@@ -625,9 +625,16 @@ window._enableCellDiff = function() {
 
         // ลูกโซ่: v0 − v1 (− v2) = ผลลัพธ์เดียว
         // กรณีพิเศษ: ช่องที่ 3 = เงินสดพร้อมใช้ → เปรียบเทียบ cv vs (v0 − v1)
+        // กรณีพิเศษ: ช่องที่ 1 = รวมรับ, ช่องที่ 2 = เงินสดพร้อมใช้ → บวกกัน
         const _isCVLast = n === 3 && colNames[2].includes('เงินสดพร้อมใช้');
+        const _isCVSum = n === 2 && colNames[0].includes('รวมรับ') && colNames[1].includes('เงินสดพร้อมใช้');
+        const _plus = `<span style="color:#64748b;font-size:15px;padding-top:14px;">+</span>`;
         let result, parts;
-        if (_isCVLast) {
+        if (_isCVSum) {
+            result = vals[0] + vals[1];
+            parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px')
+                  + _plus + cell(colNames[1], vals[1].toLocaleString(), '#e2e8f0', 700, '15px');
+        } else if (_isCVLast) {
             const diff12 = vals[0] - vals[1];
             result = vals[2] - diff12;
             const _diff12Str = diff12.toLocaleString();
