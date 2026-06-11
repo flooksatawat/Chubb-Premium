@@ -6778,7 +6778,7 @@ function generatePolicyTableData() {
             if (_wideTbl) {
                 // จอใหญ่: toggle1 ซ้าย | toggle2 กึ่งกลาง | ปุ่มขวา
                 _menuInner = `
-                    <div class="flex items-center gap-2 shrink-0">${_beToggle}${_cvToggle}</div>
+                    <div class="flex items-center gap-2 shrink-0">${_cvToggle}${_beToggle}</div>
                     ${rightMenuHTML ? `<div class="flex-1 flex items-center justify-center px-3 border-l border-slate-200 mx-2"><div class="flex items-center gap-2">${rightMenuHTML}</div></div>` : '<div class="flex-1"></div>'}
                     ${_tblBtns}`;
             } else {
