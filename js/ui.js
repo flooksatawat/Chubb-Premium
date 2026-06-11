@@ -2354,82 +2354,49 @@ window.setMFPlan = function(val) { window.currentMF = val; closePopup('mfPlanMod
 
 // ==================== ระบบดึงเงื่อนไข (เพื่อแสดงใน Popup กดค้าง) ====================
 function getConditionsHTML(planName) {
-    if (planName === 'LifeTime Value') {
-        let lvPlan = (typeof currentPlan === 'string' && currentPlan.includes('LV')) ? currentPlan : '10LV';
-        let lvAgeTxt = lvPlan === '15LV' ? '31 วัน - 45 ปี' : lvPlan === '20LV' ? '31 วัน - 40 ปี' : '31 วัน - 55 ปี';
-        let lvPayTxt = lvPlan === '15LV' ? 'ชำระเบี้ย 15 ปี' : lvPlan === '20LV' ? 'ชำระเบี้ย 20 ปี' : 'ชำระเบี้ย 10 ปี';
-        let lvMinSaTxt = lvPlan === '10LV' ? '80,000 บาท' : '100,000 บาท';
-
-        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
-        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${lvAgeTxt}</p></div></div>`;
-        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">คุ้มครองถึงอายุ 100 ปี / ${lvPayTxt}</p></div></div>`;
-        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${lvMinSaTxt}</p></div></div>`;
-        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ทุกปี 1% ของทุนประกัน<br>อายุครบ 60 ปี: 11% · 70 ปี: 22%<br>อายุครบ 80 ปี: 33% · 90 ปี: 44%<br>ครบสัญญาอายุ 100 ปี: 150%</p></div></div>`;
-        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1-10: 100%<br>ปีที่ 11-20: 150%<br>ปีที่ 21 ถึงอายุ 70: 200%<br>อายุ 71-100 ปี: 150%</p></div></div>`;
-        html += '</div></div>';
-        return html;
-    }
-    if (planName === 'Smart Plan 21/7') {
-        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
-        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">31 วัน - 70 ปี (ทุกเพศ)</p></div></div>`;
-        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">คุ้มครอง 21 ปี / ชำระเบี้ย 7 ปี</p></div></div>`;
-        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">100,000 บาท</p></div></div>`;
-        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ปีที่ 2-20: รับ 2% ของทุนประกัน/ปี<br>ครบสัญญา ปีที่ 21: รับ 212%</p></div></div>`;
-        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1-5: 100%<br>ปีที่ 6-21: 175%</p></div></div>`;
-        html += '</div></div>';
-        return html;
-    }
-    if (planName === '678 Step Savings') {
-        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
-        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">แรกเกิด - 60 ปี</p></div></div>`;
-        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">ชำระเบี้ย 6 ปี · ครบสัญญาเมื่ออายุ 78 ปี</p></div></div>`;
-        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">300,000 บาท</p></div></div>`;
-        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ปีที่ 1-6: รับ 9% ของทุนประกัน/ปี<br>ปีที่ 7-13: รับ 10% /ปี<br>ปีที่ 14 ขึ้นไป: รับ 11% /ปี<br>ครบสัญญา (อายุ 78): รับ 600%</p></div></div>`;
-        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1: 100%<br>ปีที่ 2: 200%<br>...เพิ่มขึ้น 100% ทุกปี<br>ปีที่ 6 ขึ้นไป: 600%</p></div></div>`;
-        html += '</div></div>';
-        return html;
-    }
-    if (planName === '868 / 818 Elite Saving' || planName.includes('Elite')) {
-        let ageInput = parseInt(document.getElementById('ageInput')?.value) || 0;
-        let pType = (window.currentPlan === 'S868' || ageInput <= 50) ? 'S868' : 'S818';
-        let ageTxt = pType === 'S868' ? '31 วัน - 50 ปี' : '51 - 65 ปี';
-        let minSaTxt = pType === 'S868' ? '50,000 บาท' : '70,000 บาท';
-        let periodTxt = pType === 'S868' ? 'คุ้มครอง 18 ปี / ออม 8 ปี' : 'คุ้มครองถึงอายุ 68 / ออม 8 ปี';
-        
-        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
-        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${ageTxt}</p></div></div>`;
-        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">${periodTxt}</p></div></div>`;
-        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">${minSaTxt}</p></div></div>`;
-        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1: 100%<br>ปีที่ 2: 200%<br>...เพิ่มขึ้น 100% ทุกปี<br>ปีที่ 8 ขึ้นไป: 800%</p></div></div>`;
-        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-car-burst text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองอุบัติเหตุ</p><p class="text-[12px] font-bold text-amber-800 leading-tight">เสียชีวิตจากอุบัติเหตุทั่วไป 100%<br>เสียชีวิตจากอุบัติเหตุสาธารณะ 200%<br>ICU จากอุบัติเหตุ 20%</p></div></div>`;
-        html += '</div></div>';
-        return html;
-    }
-
-    // Per-plan overrides for age range and min sum (more accurate than PLAN_CONFIG fallback)
-    const _planInfo = {
-        'CI Extra Plus':          { age: 'แรกเกิด - 65 ปี', sum: '500,000 บาท' },
-        'Whole Life Extra':       { age: 'แรกเกิด - 50 ปี', sum: '100,000 บาท', prem: 'เบี้ยขั้นต่ำ 50,000 บาท/ปี' },
-        '24 TX':                  { age: 'แรกเกิด - 55 ปี', sum: '100,000 บาท', prem: 'เบี้ยขั้นต่ำ 50,000 บาท/ปี' },
-        'Signature Legacy':       { age: 'แรกเกิด - 70 ปี', sum: '5,000,000 บาท' },
-        'Life Protector 20':      { age: 'แรกเกิด - 70 ปี', sum: '100,000 บาท' },
-        'Supreme Life Protector': { age: 'แรกเกิด - 70 ปี', sum: '100,000 บาท' },
-        'Century Life':           { age: 'แรกเกิด - 75 ปี', sum: '100,000 บาท' },
-        '3D Health Excellence':   { age: '11 - 75 ปี', sum: '100,000 บาท' },
-        'Convertable Term':       { age: '20 - 65 ปี', sum: '1,000,000 บาท' },
-        'Medical Fund':           { age: 'ขึ้นกับบริษัทและแผนที่เลือก', sum: 'ขึ้นกับแผนประกันสุขภาพ' },
+    // อายุรับประกันแต่ละแบบ
+    const _ageMap = {
+        'CI Extra Plus':          'แรกเกิด - 65 ปี',
+        'Whole Life Extra':       'แรกเกิด - 50 ปี',
+        '24 TX':                  'แรกเกิด - 55 ปี',
+        'Signature Legacy':       'แรกเกิด - 70 ปี',
+        'Life Protector 20':      'แรกเกิด - 70 ปี',
+        'Supreme Life Protector': 'แรกเกิด - 70 ปี',
+        'Century Life':           'แรกเกิด - 75 ปี',
+        '3D Health Excellence':   '11 - 75 ปี',
+        'Convertable Term':       '20 - 65 ปี',
+        'Medical Fund':           'ขึ้นกับบริษัทและแผนที่เลือก',
+        'Smart Plan 21/7':        '31 วัน - 70 ปี',
+        '678 Step Savings':       'แรกเกิด - 60 ปี',
+        'Step Annuity':           'แรกเกิด - 70 ปี',
     };
 
-    const info = _planInfo[planName];
-    const issueAge = info ? info.age : (PLAN_CONFIG[planName] ? (PLAN_CONFIG[planName].minAge === 0 ? `แรกเกิด - ${PLAN_CONFIG[planName].maxAge} ปี` : `${PLAN_CONFIG[planName].minAge} - ${PLAN_CONFIG[planName].maxAge} ปี`) : 'โปรดดูรายละเอียดในเล่มกรมธรรม์');
-    const minSA = info ? info.sum : (PLAN_CONFIG[planName]?.minSum ? `${PLAN_CONFIG[planName].minSum.toLocaleString()} บาท` : 'โปรดดูรายละเอียดในเล่มกรมธรรม์');
-    const minPrem = info?.prem || null;
+    let issueAge = _ageMap[planName] || null;
 
-    let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
-    html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">${issueAge}</p></div></div>`;
-    html += '</div></div>';
+    // แบบที่มีหลาย sub-plan: ดึง age ตาม currentPlan
+    if (planName === 'LifeTime Value') {
+        const lv = (typeof currentPlan === 'string' && currentPlan.includes('LV')) ? currentPlan : '10LV';
+        issueAge = lv === '15LV' ? '31 วัน - 45 ปี' : lv === '20LV' ? '31 วัน - 40 ปี' : '31 วัน - 55 ปี';
+    } else if (planName === '868 / 818 Elite Saving' || (planName || '').includes('Elite')) {
+        const ageInput = parseInt(document.getElementById('ageInput')?.value) || 0;
+        issueAge = (window.currentPlan === 'S868' || ageInput <= 50) ? '31 วัน - 50 ปี' : '51 - 65 ปี';
+    }
 
-    return html;
+    if (!issueAge && typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]) {
+        const cfg = PLAN_CONFIG[planName];
+        issueAge = cfg.minAge === 0 ? `แรกเกิด - ${cfg.maxAge} ปี` : `${cfg.minAge} - ${cfg.maxAge} ปี`;
+    }
+    issueAge = issueAge || 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
+
+    return `<div class="space-y-2">
+        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3">
+            <i class="fas fa-birthday-cake text-blue-500 mt-0.5 text-[16px] shrink-0"></i>
+            <div class="flex-1">
+                <p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p>
+                <p class="text-[15px] font-bold text-blue-800 leading-tight">${issueAge}</p>
+            </div>
+        </div>
+    </div>`;
 }
 
 function updateConditionsModal(planName) {
