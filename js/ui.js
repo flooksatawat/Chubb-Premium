@@ -6275,7 +6275,7 @@ function refreshAllDisplays() {
             if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
             return n.toLocaleString('th-TH');
         };
-        const _age  = lastCalculationData.age || 30;
+        const _age  = lastCalculationData.age != null ? lastCalculationData.age : 30;
         const _isWXN = document.getElementById('dualCashFlowBox') && !document.getElementById('dualCashFlowBox').classList.contains('hidden');
         const _cfContainerVisible = document.getElementById('cashFlowContainer') && !document.getElementById('cashFlowContainer').classList.contains('hidden');
         let _finalCF = lastCalculationData._finalAccCF || 0;
