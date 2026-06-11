@@ -85,6 +85,11 @@ const PLAN_ALIASES = [
     ], plan: '868 / 818 Elite Saving' },
 
     { keys: [
+        '678 step','678step','678 สเตป','สเตป เซฟวิ่ง','สเตปเซฟวิ่ง','step savings',
+        '678','a78','สเตป','step saving','678 เซฟวิ่ง',
+    ], plan: '678 Step Savings' },
+
+    { keys: [
         'lifetime value','life time value','ไลฟ์ไทม์ แวลู','ไลฟ์ไทม์แวลู',
         'ไลฟ์ไทม์','lv','10lv','15lv','20lv','แวลู','value',
         'แอลวี','lifetime','ไลฟ์ ไทม์','lv plan','ไลฟ์ไทม์ value',
@@ -462,7 +467,7 @@ function executeCommand(parsed, showPopup = true) {
             if (el && cur < 150000) el.value = '150,000';
         }
         if (typeof calculate === 'function') calculate('sum', true);
-    } else if (['24 TX','868 / 818 Elite Saving','LifeTime Value','Smart Plan 21/7','Whole Life Extra'].includes(plan)) {
+    } else if (['24 TX','868 / 818 Elite Saving','678 Step Savings','LifeTime Value','Smart Plan 21/7','Whole Life Extra'].includes(plan)) {
         if (parsed.amountType === 'premium' && parsed.amount > 0) {
             const el = document.getElementById('premiumInput');
             if (el) el.value = parsed.amount.toLocaleString();

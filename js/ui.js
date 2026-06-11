@@ -1226,6 +1226,8 @@ function showPlansByAge(age) {
         // Elite Saving
         { planName:'868 / 818 Elite Saving', abbr:'S868',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S868',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครอง 18 ปี', minAge:0, maxAge:50 },
         { planName:'868 / 818 Elite Saving', abbr:'S818',   icon:'fa-gem',               color:'emerald', label:'Elite Saving',           badge:'S818',   desc:'ออมทรัพย์ · ชำระ 8 ปี คุ้มครองถึง 68 ปี', minAge:51, maxAge:65 },
+        // 678 Step Savings
+        { planName:'678 Step Savings',       abbr:'A78',    icon:'fa-stairs',            color:'fuchsia', label:'678 Step Savings',       badge:'A78',    desc:'ออม 6 ปี · รับเงินคืนทุกปี · ครบสัญญาอายุ 78', minAge:0, maxAge:60 },
         // LifeTime Value
         { planName:'LifeTime Value',         abbr:'10LV',   icon:'fa-chart-line',        color:'sky',     label:'LifeTime Value',         badge:'10LV',   desc:'ออมถึง 100 ปี · ชำระ 10 ปี',         minAge:0,  maxAge:55 },
         { planName:'LifeTime Value',         abbr:'15LV',   icon:'fa-chart-line',        color:'sky',     label:'LifeTime Value',         badge:'15LV',   desc:'ออมถึง 100 ปี · ชำระ 15 ปี',         minAge:0,  maxAge:45 },
@@ -1537,7 +1539,7 @@ function openInstallmentModal() {
 
 // ==================== APP ROUTING & PLAN SELECTION ====================
 function getPlanAbbr(planName) {
-    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite", "LifeTime Value": "LV", "Smart Plan 21/7": "7SM" };
+    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite", "678 Step Savings": "678", "LifeTime Value": "LV", "Smart Plan 21/7": "7SM" };
     return abbrMap[planName] || planName;
 }
 
@@ -2018,6 +2020,9 @@ function updateQuickPills(planName) {
     } else if (planName === 'Smart Plan 21/7') {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(20000)" class="${inactiveClass}">2 หมื่น</button><button id="premPill2" onclick="setQuickPremium(40000)" class="${inactiveClass}">4 หมื่น</button><button id="premPill3" onclick="setQuickPremium(60000)" class="${inactiveClass}">6 หมื่น</button><button id="premPill4" onclick="setQuickPremium(80000)" class="${inactiveClass}">8 หมื่น</button><button id="premPill5" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button>`;
+    } else if (planName === '678 Step Savings') {
+        sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(300000)" class="${inactiveClass}">3 แสน</button><button id="sumPill2" onclick="setQuickSum(500000)" class="${inactiveClass}">5 แสน</button><button id="sumPill3" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill4" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill5" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button>`;
+        premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
     } else if (['868 / 818 Elite Saving', '24 TX', 'LifeTime Value'].includes(planName)) {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(120000)" class="${inactiveClass}">1.2 แสน</button><button id="premPill2" onclick="setQuickPremium(240000)" class="${inactiveClass}">2.4 แสน</button><button id="premPill3" onclick="setQuickPremium(360000)" class="${inactiveClass}">3.6 แสน</button><button id="premPill4" onclick="setQuickPremium(480000)" class="${inactiveClass}">4.8 แสน</button><button id="premPill5" onclick="setQuickPremium(600000)" class="${inactiveClass}">6 แสน</button>`;
@@ -2080,6 +2085,22 @@ function updateQuickPills(planName) {
             { label: '1 แสน', val: 100000 }
         ];
         newOpts.forEach((opt, index) => {
+            let btn = document.getElementById('cashPill' + (index + 1));
+            if (btn) {
+                btn.innerText = opt.label;
+                btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`);
+            }
+        });
+    } else if (planName === '678 Step Savings') {
+        // 678 เงินคืนปีแรก = 9% ของทุน — ตัวเลือกกระแสเงินสด
+        const s678Opts = [
+            { label: '2.7 หมื่น', val: 27000 },
+            { label: '4.5 หมื่น', val: 45000 },
+            { label: '9 หมื่น', val: 90000 },
+            { label: '1.8 แสน', val: 180000 },
+            { label: '2.7 แสน', val: 270000 }
+        ];
+        s678Opts.forEach((opt, index) => {
             let btn = document.getElementById('cashPill' + (index + 1));
             if (btn) {
                 btn.innerText = opt.label;
@@ -2365,6 +2386,16 @@ function getConditionsHTML(planName) {
         html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">100,000 บาท</p></div></div>`;
         html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ปีที่ 2-20: รับ 2% ของทุนประกัน/ปี<br>ครบสัญญา ปีที่ 21: รับ 212%</p></div></div>`;
         html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1-5: 100%<br>ปีที่ 6-21: 175%</p></div></div>`;
+        html += '</div></div>';
+        return html;
+    }
+    if (planName === '678 Step Savings') {
+        let html = '<div class="overflow-y-auto max-h-[55vh] space-y-3 pr-0.5 custom-scrollbar"><div class="space-y-2">';
+        html += `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3"><i class="fas fa-birthday-cake text-blue-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">อายุรับประกัน</p><p class="text-[13.5px] font-bold text-blue-800 leading-tight">แรกเกิด - 60 ปี</p></div></div>`;
+        html += `<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-start gap-3"><i class="fas fa-clock text-indigo-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ระยะเวลา</p><p class="text-[13.5px] font-bold text-indigo-800 leading-tight">ชำระเบี้ย 6 ปี · ครบสัญญาเมื่ออายุ 78 ปี</p></div></div>`;
+        html += `<div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-3"><i class="fas fa-coins text-emerald-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ทุนขั้นต่ำ</p><p class="text-[13.5px] font-bold text-emerald-800 leading-tight">300,000 บาท</p></div></div>`;
+        html += `<div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-start gap-3"><i class="fas fa-hand-holding-usd text-amber-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">เงินจ่ายคืนรายปี</p><p class="text-[12px] font-bold text-amber-800 leading-tight">ปีที่ 1-6: รับ 9% ของทุนประกัน/ปี<br>ปีที่ 7-13: รับ 10% /ปี<br>ปีที่ 14 ขึ้นไป: รับ 11% /ปี<br>ครบสัญญา (อายุ 78): รับ 600%</p></div></div>`;
+        html += `<div class="bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-3"><i class="fas fa-heartbeat text-rose-500 mt-1 text-[16px] shrink-0"></i><div class="flex-1"><p class="text-[12px] text-slate-500 font-bold mb-1">ความคุ้มครองชีวิต</p><p class="text-[12px] font-bold text-rose-800 leading-tight">ปีที่ 1: 100%<br>ปีที่ 2: 200%<br>...เพิ่มขึ้น 100% ทุกปี<br>ปีที่ 6 ขึ้นไป: 600%</p></div></div>`;
         html += '</div></div>';
         return html;
     }
@@ -3535,6 +3566,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
     function _computePlanRows(pName, pOpt, d, hasCF) {
         const pN = pName.toUpperCase();
         const isElite = pN.includes('ELITE') || pN.includes('868') || pN.includes('818');
+        const is678   = pName === '678 Step Savings';
         const isTX    = pName === '24 TX';
         const isWXN   = pName === 'Whole Life Extra';
         const isLV    = pName === 'LifeTime Value';
@@ -3547,6 +3579,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         let payYears = parseInt(d.years) || 20;
         let maxYear  = 90 - d.age;
         if (isElite) { payYears = 8; maxYear = d.age <= 50 ? 68 - d.age : 18; }
+        else if (is678) { payYears = 6; maxYear = 78 - d.age; }
         else if (isTX)  { payYears = 24; maxYear = 90 - d.age; }
         else if (isLV)  { payYears = parseInt(d.years) || 10; maxYear = 100 - d.age; }
         else if (isSM)  { payYears = 7;  maxYear = 21; }
@@ -3571,6 +3604,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             // ออม
             let annSav = 0;
             if (isElite) { if (y <= 8)  { annSav = initPrem; totalSaving += annSav; } }
+            else if (is678) { if (y <= 6) { annSav = initPrem; totalSaving += annSav; } }
             else if (y <= payYears)      { annSav = initPrem; totalSaving += annSav; }
 
             // CV rate
@@ -3584,6 +3618,11 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             if (hasCF) {
                 if (isElite) {
                     cfAmt = y < maxYear ? Math.round(currentSA * 0.12) : Math.round(currentSA * 7.20);
+                } else if (is678) {
+                    if (y >= maxYear) cfAmt = Math.round(currentSA * 6.00);
+                    else if (y <= 6)  cfAmt = Math.round(currentSA * 0.09);
+                    else if (y <= 13) cfAmt = Math.round(currentSA * 0.10);
+                    else              cfAmt = Math.round(currentSA * 0.11);
                 } else if (isTX) {
                     if (y % 3 === 0 && y <= 24) cfAmt = Math.round(initSA * 0.05);
                     else if (y === 25) cfAmt = Math.round(initSA * 0.70);
@@ -3609,6 +3648,8 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             } else if (isLV) {
                 const lvMult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (age <= 70 ? 2.0 : 1.5);
                 effectiveSA = Math.round(initSA * lvMult);
+            } else if (is678) {
+                effectiveSA = Math.round(initSA * Math.min(y, 6));
             }
 
             accCF += cfAmt;
@@ -6423,7 +6464,8 @@ function generatePolicyTableData() {
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
-    
+    const is678 = currentAppPlan === '678 Step Savings' || planAbbr === '678' || planName.includes('STEP SAVINGS') || planName.includes('สเตป');
+
     const hasSurrenderMenu = isLPB || isSLPA || isCL || isSLB;
 
     // ฝากสะสมทบต้น: LifeTime Value รับ 1% / แบบอื่นรับ 2%
@@ -6474,7 +6516,7 @@ function generatePolicyTableData() {
                     </label>
                     <input type="checkbox" id="toggleSurrender" class="sr-only">
                 `;
-            } else if (isWXN || isElite || isTX || isLV) {
+            } else if (isWXN || isElite || isTX || isLV || is678) {
                 rightMenuHTML = `
                     <div class="flex items-center gap-1.5 min-w-0">
                         <i class="fas fa-shield-alt text-rose-500 text-[14px] w-4 text-center shrink-0"></i>
@@ -6648,11 +6690,11 @@ function generatePolicyTableData() {
         if (startAge > endAge) [startAge, endAge] = [endAge, startAge];
     }
 
-    const showCashFlowBase = isWXN || isElite || isTX || isLV || isSM;
+    const showCashFlowBase = isWXN || isElite || isTX || isLV || is678 || isSM;
     const forceShowCashFlow = showCashFlowBase;
     const showDepositColumn = forceShowCashFlow && window._tableDepositEnabled && window._tableDepositUntilAge > 0;
     const hideAnnualSaving = isSurrenderActive && hasSurrenderMenu;
-    const showSAColumn = isLPB || isSLB || isSM || ((isWXN || isElite || isTX || isLV) && isShowSAActive);
+    const showSAColumn = isLPB || isSLB || isSM || ((isWXN || isElite || isTX || isLV || is678) && isShowSAActive);
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
     const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : isLV ? isBreakevenActive : true;
@@ -6744,7 +6786,7 @@ function generatePolicyTableData() {
     }
 
     // compact: เฉพาะจอแคบ (<400px) เท่านั้น — desktop ไม่ compact แม้มี SA column
-    const _isCompact  = (isWXN || isElite || isTX || isLV) && _isNarrow;
+    const _isCompact  = (isWXN || isElite || isTX || isLV || is678) && _isNarrow;
     // super-compact: จอแคบมาก (<380px) เช่น Honor Magic V3 outer screen
     const _isSuperCompact = _isCompact && _vw < 380;
 
@@ -6874,6 +6916,9 @@ function generatePolicyTableData() {
         } else {
             maxYear = 18; // แผน S818 คุ้มครอง 18 ปี
         }
+    } else if (is678) {
+        payYears = 6;            // 678: ชำระเบี้ย 6 ปี
+        maxYear = 78 - d.age;    // ครบสัญญาเมื่ออายุ 78 ปี
     } else if (isTX) {
         payYears = 24;
         maxYear = 90 - d.age;
@@ -6982,6 +7027,11 @@ function generatePolicyTableData() {
                 annualSaving = d.premium;
                 totalSaving += annualSaving;
             }
+        } else if (is678) {
+            if (y <= 6) {
+                annualSaving = d.premium;
+                totalSaving += annualSaving;
+            }
         } else if (isLV) {
             if (y <= payYears) {
                 annualSaving = d.premium;
@@ -7007,7 +7057,18 @@ function generatePolicyTableData() {
                 if (y < maxYear) {
                     cashFlowAmt = Math.round(currentSA * 0.12);
                 } else {
-                    cashFlowAmt = Math.round(currentSA * 7.20); 
+                    cashFlowAmt = Math.round(currentSA * 7.20);
+                }
+            } else if (is678) {
+                // 678: ปีที่ 1-6 = 9%, ปีที่ 7-13 = 10%, ปีที่ 14+ = 11%, ครบสัญญา = 600%
+                if (y >= maxYear) {
+                    cashFlowAmt = Math.round(currentSA * 6.00);
+                } else if (y <= 6) {
+                    cashFlowAmt = Math.round(currentSA * 0.09);
+                } else if (y <= 13) {
+                    cashFlowAmt = Math.round(currentSA * 0.10);
+                } else {
+                    cashFlowAmt = Math.round(currentSA * 0.11);
                 }
             } else if (isTX) {
                 if (y % 3 === 0 && y <= 24) cashFlowAmt = Math.round(currentSA * 0.05); 
@@ -7050,7 +7111,7 @@ function generatePolicyTableData() {
 
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
-            let breakevenValue = (isElitePlan || isTX || isWXN || isLV || isSM) ? surrenderTotal
+            let breakevenValue = (isElitePlan || is678 || isTX || isWXN || isLV || isSM) ? surrenderTotal
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
                 foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
@@ -7062,6 +7123,10 @@ function generatePolicyTableData() {
         if (isElitePlan && currentSA > 0) {
             let eliteMultiplier = Math.min(y, 8) * 1.0;
             deathBenefit = Math.max(Math.round(currentSA * eliteMultiplier), cvTotal, totalSaving);
+        } else if (is678 && currentSA > 0) {
+            // 678: เพิ่มขึ้น 100% ทุกปี สูงสุด 600% (ปีที่ 6 ขึ้นไป)
+            let s678Multiplier = Math.min(y, 6) * 1.0;
+            deathBenefit = Math.max(Math.round(currentSA * s678Multiplier), cvTotal, totalSaving);
         } else if (isLV && currentSA > 0) {
             // รับเงินก้อน (เสียชีวิต) = สูงสุดของ 3 ค่า:
             //   1) %ทุน × ทุนประกัน (100/150/200% ตามปี/อายุ)

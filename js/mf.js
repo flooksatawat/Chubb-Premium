@@ -461,6 +461,7 @@ window.mfInlineRender = function() {
 window._mfPayYearsForPlan = function() {
     const ap = typeof currentAppPlan !== 'undefined' ? currentAppPlan : '';
     if (ap === '868 / 818 Elite Saving') return 8;
+    if (ap === '678 Step Savings') return 6;
     if (ap === '24 TX') return 24;
     if (ap === 'Smart Plan 21/7') return 7;
     // WXN / LifeTime Value: ใช้ตัวเลขจากรหัสแผน (WXN10→10, 15LV→15)
@@ -1424,6 +1425,7 @@ window.mfShowTotalPopup = async function() {
         { label: 'WXN', name: 'Whole Life Extra',       icon: 'fas fa-infinity',    color: '#1d4ed8' },
         { label: 'TX',  name: '24 TX',                  icon: 'fas fa-chart-line',  color: '#0f766e' },
         { label: 'Elite', name: '868 / 818 Elite Saving', icon: 'fas fa-star',      color: '#7c3aed' },
+        { label: '678', name: '678 Step Savings',       icon: 'fas fa-stairs',     color: '#c026d3' },
         { label: 'LV',  name: 'LifeTime Value',         icon: 'fas fa-hourglass-half', color: '#7c3aed' },
     ];
     const overlay = document.createElement('div');
@@ -1571,6 +1573,7 @@ window.mfShow3DProjectionPopup = function() {
         { label: 'WXN',   name: 'Whole Life Extra',        icon: 'fas fa-infinity',       color: '#1d4ed8' },
         { label: 'TX',    name: '24 TX',                   icon: 'fas fa-chart-line',     color: '#0f766e' },
         { label: 'Elite', name: '868 / 818 Elite Saving',  icon: 'fas fa-star',           color: '#7c3aed' },
+        { label: '678',   name: '678 Step Savings',        icon: 'fas fa-stairs',         color: '#c026d3' },
         { label: 'LV',    name: 'LifeTime Value',          icon: 'fas fa-hourglass-half', color: '#7c3aed' },
     ];
 

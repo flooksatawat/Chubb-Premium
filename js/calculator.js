@@ -31,6 +31,7 @@ const PLAN_CONFIG = {
     "Whole Life Extra": { abbr: "WXN", minAge: 0, maxAge: 50, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['WXN10', 'WXN15'], hasCashFlow: true },
     "24 TX": { abbr: "TX", minAge: 0, maxAge: 55, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['24TX'], hasCashFlow: true },
     "868 / 818 Elite Saving": { abbr: "Elite", minAge: 0, maxAge: 65, minSum: 100000, minPrem: 50000, getMaxSum: (age) => Infinity, options: ['S868', 'S818'], hasCashFlow: true },
+    "678 Step Savings": { abbr: "678", minAge: 0, maxAge: 60, minSum: 300000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['A78'], hasCashFlow: true },
     "LifeTime Value": { abbr: "LV", minAge: 0, maxAge: 55, minSum: 80000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10LV', '15LV', '20LV'], hasCashFlow: true },
     "Century Life": { abbr: "CL", minAge: 0, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
@@ -51,6 +52,7 @@ const allInsurancePlans = [
     { name: "Whole Life Extra", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "24 TX", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "868 / 818 Elite Saving", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
+    { name: "678 Step Savings", desc: "ออม 6 ปี รับเงินคืนทุกปี ครบสัญญาอายุ 78", icon: "fas fa-stairs", color: "text-fuchsia-500", bg: "bg-fuchsia-100" },
     { name: "LifeTime Value", desc: "ออมยาว รับเงินคืนทุกปี ถึงอายุ 100", icon: "fas fa-hourglass-half", color: "text-violet-500", bg: "bg-violet-100" },
     { name: "Smart Plan 21/7", desc: "ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%", icon: "fas fa-seedling", color: "text-teal-500", bg: "bg-teal-100" },
     { name: "Step Annuity", desc: "บำนาญรายปี เพิ่มขึ้นทุก 5 ปี ถึงอายุ 90", icon: "fas fa-stairs", color: "text-orange-500", bg: "bg-orange-100" },
@@ -60,7 +62,7 @@ const allInsurancePlans = [
 async function loadAllRates() {
     const rateFiles = [
         'cx_rates.json', 'ci_rates.json', 'lp_rates.json', 'slb_rates.json', 'slpa_rates.json',
-        'tx_rates.json', 'elite_rates.json', 'lv_rates.json', 'cl_rates.json', 'tla_rates.json',
+        'tx_rates.json', 'elite_rates.json', '678_rates.json', 'lv_rates.json', 'cl_rates.json', 'tla_rates.json',
         'hx_rates.json', 'hxd_rates.json', 'hxo_rates.json', '3d_health.json',
         'hbf_rates.json', 'wxn_rates.json', 'tpd_rates.json', 'sm_rates.json', 'dd50_rates.json'
     ];
@@ -253,6 +255,7 @@ function _getPlanLabel() {
     if (currentAppPlan === '3D Health Excellence') return `แผน ${currentPlan}`;
     if (currentAppPlan === '24 TX') return 'แผน 24TX';
     if (currentAppPlan === '868 / 818 Elite Saving') return `แผน ${currentPlan}`;
+    if (currentAppPlan === '678 Step Savings') return 'แผน 678 สเตป เซฟวิ่งส์';
     if (currentAppPlan === 'LifeTime Value') return `แผน ${currentPlan}`;
     return `แผน ${currentPlan || currentAppPlan}`;
 }
@@ -573,6 +576,10 @@ function calculate(source, enforceMin = false) {
             currentPlan = age <= 50 ? 'S868' : 'S818';
         }
 
+        if (currentAppPlan === '678 Step Savings') {
+            currentPlan = 'A78';
+        }
+
         if (currentAppPlan === 'LifeTime Value') {
             if (currentPlan === '15LV' && age > 45) age = 45;
             if (currentPlan === '20LV' && age > 40) age = 40;
@@ -727,6 +734,41 @@ function calculate(source, enforceMin = false) {
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
                 document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 if(document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.12).toLocaleString();
+            }
+        }
+
+        // ---------------- 3a2. 678 Step Savings (A78) ----------------
+        else if (currentAppPlan === '678 Step Savings') {
+            currentPlan = 'A78';
+            let s678Rate = LIFE_RATES['A78']?.[currentGender]?.[age] || 0;
+
+            if (s678Rate > 0) {
+                let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
+
+                if (source === 'cashflow') {
+                    // เงินคืนปีแรก = 9% ของทุนประกัน
+                    let cf = getSafeValue('cashFlowInput');
+                    fSum = Math.round(cf / 0.09);
+                    fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
+                } else if (source === 'sum') {
+                    fSum = Math.round(getSafeValue('sumInsuredInput'));
+                    fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
+                } else {
+                    fPrem = getSafeValue('premiumInput') || 0;
+                    let basePrem = fPrem - mfPrem;
+                    if (basePrem < 0) basePrem = 0;
+                    // ไม่มีส่วนลดทุนประกันสำหรับ 678
+                    fSum = s678Rate > 0 ? Math.round((basePrem * 1000) / s678Rate) : 0;
+                }
+
+                if (enforceMin && fSum < config.minSum) {
+                    fSum = config.minSum;
+                    fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
+                }
+
+                document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
+                if (document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.09).toLocaleString();
             }
         }
 
@@ -1035,6 +1077,7 @@ function calculate(source, enforceMin = false) {
         }
         
         let yearsStr = '20'; const matchYears = currentPlan.match(/\d+/); if (matchYears) yearsStr = matchYears[0];
+        if (currentAppPlan === '678 Step Savings') yearsStr = '6';
         let cashFlowVal = 0;
         if(currentAppPlan === 'Whole Life Extra') cashFlowVal = getSafeValue('cashFlowInput1');
         else cashFlowVal = getSafeValue('cashFlowInput');
