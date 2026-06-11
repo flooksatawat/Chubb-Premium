@@ -6280,41 +6280,13 @@ function refreshAllDisplays() {
         const _cfContainerVisible = document.getElementById('cashFlowContainer') && !document.getElementById('cashFlowContainer').classList.contains('hidden');
         let _finalCF = lastCalculationData._finalAccCF || 0;
 
-        // Fallback: คำนวณ accCashFlow จาก SA+age เมื่อยังไม่เคยเปิดตาราง
-        if (!_finalCF && _cfContainerVisible && !_isWXN) {
-            const _sa  = lastCalculationData.sum || 0;
-            const _pln = String(currentAppPlan || '');
-            const _stAge = lastCalculationData.age || 30;
-            if (_sa > 0) {
-                const _pnU = _pln.toUpperCase();
-                const _isEl = _pnU.includes('ELITE') || _pnU.includes('868') || _pnU.includes('818');
-                const _is78 = _pln === '678 Step Savings';
-                const _isTX = _pln === '24 TX';
-                let _acc = 0;
-                if (_isTX) {
-                    const _mx = 90 - _stAge;
-                    for (let _y = 1; _y <= _mx; _y++) {
-                        if (_y % 3 === 0 && _y <= 24) _acc += Math.round(_sa * 0.05);
-                        else if (_y === 25) _acc += Math.round(_sa * 0.70);
-                        else if (_y >= 26 && (_stAge + _y) < 90) _acc += Math.round(_sa * 0.08);
-                    }
-                } else if (_isEl) {
-                    const _mx = (_stAge <= 50 ? 68 : _stAge + 18) - _stAge;
-                    for (let _y = 1; _y <= _mx; _y++) {
-                        if (_y >= 9 && (_stAge + _y) < (_stAge <= 50 ? 68 : _stAge + 18)) _acc += Math.round(_sa * 0.06);
-                    }
-                } else if (_is78) {
-                    const _mx = 78 - _stAge;
-                    const _cfInput = document.getElementById('cashFlowInput');
-                    const _cfV = _cfInput ? (parseInt((_cfInput.value || '0').replace(/\D/g, '')) || 0) : 0;
-                    if (_cfV > 0) _acc = _cfV * _mx;
-                } else {
-                    // แบบอื่น: ใช้ cashFlowInput × maxYear
-                    const _cfInput = document.getElementById('cashFlowInput');
-                    const _cfV = _cfInput ? (parseInt((_cfInput.value || '0').replace(/\D/g, '')) || 0) : 0;
-                    if (_cfV > 0) _acc = _cfV * (90 - _stAge);
-                }
-                _finalCF = _acc;
+        // Fallback: ให้ตารางเป็นแหล่งความจริงเดียว — render ตาราง (เงียบ ๆ) เพื่อให้ได้ accCashFlow จริง
+        if (!_finalCF && _cfContainerVisible && !_isWXN && !window.__cfSummaryGenerating) {
+            if (typeof generatePolicyTableData === 'function' && document.getElementById('policyTableBody')) {
+                window.__cfSummaryGenerating = true;
+                try { generatePolicyTableData(); } catch (e) {}
+                window.__cfSummaryGenerating = false;
+                _finalCF = lastCalculationData._finalAccCF || 0;
             }
         }
 
@@ -7504,6 +7476,13 @@ function generatePolicyTableData() {
 
     if (lastCalculationData) { lastCalculationData._finalAccCF = accCashFlow; lastCalculationData._finalTotalSaving = totalSaving; }
     document.getElementById('policyTableBody').innerHTML = html;
+
+    // sync ป้าย รับรวม/ออมรวม หน้าหลักให้ตรงกับตารางเสมอ (guard กัน recursion)
+    if (!window.__cfSummaryGenerating && typeof refreshAllDisplays === 'function') {
+        window.__cfSummaryGenerating = true;
+        try { refreshAllDisplays(); } catch (e) {}
+        window.__cfSummaryGenerating = false;
+    }
 
     // เพิ่มปุ่มซ่อนคอลัมน์ในหัวตาราง (ซ่อนแต่ละคอลัมน์อิสระ)
     if (typeof window._enablePolicyColHide === 'function') window._enablePolicyColHide();
