@@ -6181,14 +6181,14 @@ function refreshAllDisplays() {
         };
         const _age  = lastCalculationData.age || 30;
         const _isWXN = document.getElementById('dualCashFlowBox') && !document.getElementById('dualCashFlowBox').classList.contains('hidden');
-        const _isSingle = document.getElementById('singleCashFlowBox') && !document.getElementById('singleCashFlowBox').classList.contains('hidden');
+        const _cfContainerVisible = document.getElementById('cashFlowContainer') && !document.getElementById('cashFlowContainer').classList.contains('hidden');
         const _finalCF = lastCalculationData._finalAccCF || 0;
 
-        // Single cashflow summary — number from table last row
+        // Single cashflow summary — แสดงทุกแบบที่มีกระแสเงินสด (ไม่ใช่ WXN)
         const _ssd = document.getElementById('cfSingleSummary');
         const _ssv = document.getElementById('cfSingleSummaryValue');
         if (_ssd && _ssv) {
-            if (_isSingle && _finalCF > 0) {
+            if (_cfContainerVisible && !_isWXN && _finalCF > 0) {
                 _ssv.textContent = _fmt(_finalCF);
                 _ssd.classList.remove('hidden');
             } else {
