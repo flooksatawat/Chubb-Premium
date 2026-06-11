@@ -7173,15 +7173,12 @@ function generatePolicyTableData() {
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
         const rowId = (isBreakevenActive && y === beYear) ? 'breakevenRow' : `policyRow_${currentAge}`;
-        const _beOnClick = (!isBreakevenActive && y === beYear)
-            ? ` style="cursor:pointer;" onclick="window._showBreakevenDetail(${totalSaving},${Math.round(cvTotal)},${currentAge})"`
-            : '';
         if (isBreakevenActive && y === beYear) trClass = "be-highlight-row border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
-        
+
         const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
-        html += `<tr id="${rowId}" class="${trClass}"${_beOnClick}>
-            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${!isBreakevenActive && y === beYear ? '★ ' : ''}${currentAge}</td>
+        html += `<tr id="${rowId}" class="${trClass}">
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${currentAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
@@ -7335,36 +7332,7 @@ function toggleBeHighlight() {
     }
 }
 
-// ==================== BREAKEVEN DETAIL POPUP ====================
-window._showBreakevenDetail = function(totalSaving, cvTotal, age) {
-    const fmt = n => Math.round(n).toLocaleString('th-TH');
-    const diff = cvTotal - totalSaving;
-    const diffTxt = diff >= 0
-        ? `<span style="color:#059669;font-weight:700;">+${fmt(diff)} ฿ กำไร</span>`
-        : `<span style="color:#dc2626;font-weight:700;">${fmt(diff)} ฿</span>`;
-
-    Swal.fire({
-        title: `<span style="font-family:'Kanit',sans-serif;font-size:17px;">★ จุดคุ้มทุน — อายุ ${age} ปี</span>`,
-        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:left;padding:4px 0;">
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:12px;margin-bottom:8px;border:1px solid #bbf7d0;">
-                <span style="color:#475569;">💰 เงินออมสะสมทั้งหมด</span>
-                <span style="color:#1e293b;font-weight:800;">${fmt(totalSaving)} ฿</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:12px;margin-bottom:8px;border:1px solid #bfdbfe;">
-                <span style="color:#475569;">💵 เงินสดพร้อมใช้</span>
-                <span style="color:#1d4ed8;font-weight:800;">${fmt(cvTotal)} ฿</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fafafa;border-radius:12px;border:1px solid #e2e8f0;">
-                <span style="color:#475569;">📊 ส่วนต่าง</span>
-                <span>${diffTxt}</span>
-            </div>
-        </div>`,
-        icon: 'success',
-        confirmButtonText: 'ปิด',
-        confirmButtonColor: '#059669',
-        customClass: { popup: 'swal2-popup-kanit' },
-    });
-};
+window._showBreakevenDetail = function() {};
 
 // ==================== CASH FLOW PLAN UI (LPB / SLPA) ====================
 
