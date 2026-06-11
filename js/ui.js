@@ -624,14 +624,26 @@ window._enableCellDiff = function() {
         const _equal = `<span style="color:#64748b;font-size:15px;padding-top:14px;">=</span>`;
 
         // ลูกโซ่: v0 − v1 (− v2) = ผลลัพธ์เดียว
-        let result = vals[0];
-        let parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px');
-        for (let i = 1; i < n; i++) {
-            result -= vals[i];
-            parts += _minus + cell(colNames[i], vals[i].toLocaleString(), '#e2e8f0', 700, '15px');
+        // กรณีพิเศษ: ช่องที่ 3 = เงินสดพร้อมใช้ → เปรียบเทียบ cv vs (v0 − v1)
+        const _isCVLast = n === 3 && colNames[2].includes('เงินสดพร้อมใช้');
+        let result, parts;
+        if (_isCVLast) {
+            const diff12 = vals[0] - vals[1];
+            result = vals[2] - diff12;
+            const _diff12Str = diff12.toLocaleString();
+            const _cvStr = vals[2].toLocaleString();
+            parts = cell('เงินสดพร้อมใช้', _cvStr, '#e2e8f0', 700, '15px')
+                  + _minus + cell('ส่วนต่าง', _diff12Str, '#e2e8f0', 700, '15px');
+        } else {
+            result = vals[0];
+            parts = cell(colNames[0], vals[0].toLocaleString(), '#e2e8f0', 700, '15px');
+            for (let i = 1; i < n; i++) {
+                result -= vals[i];
+                parts += _minus + cell(colNames[i], vals[i].toLocaleString(), '#e2e8f0', 700, '15px');
+            }
         }
         const _rColor = result >= 0 ? '#4ade80' : '#f87171';
-        const _rStr = (result >= 0 ? '' : '−') + Math.abs(result).toLocaleString();
+        const _rStr = (result >= 0 ? '+' : '−') + Math.abs(result).toLocaleString();
         parts += _equal + cell('ส่วนต่าง', _rStr, _rColor, 800, '17px');
 
         let rows = '';
