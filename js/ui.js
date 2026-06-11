@@ -6138,6 +6138,28 @@ function refreshAllDisplays() {
         window.render3DOptionsUI();
     }
     if (typeof lastCalculationData === 'undefined' || !lastCalculationData) return;
+
+    // ===== ACCUM SAVING DISPLAY =====
+    (function() {
+        const _asd = document.getElementById('accumSavingDisplay');
+        const _asv = document.getElementById('accumSavingValue');
+        if (!_asd || !_asv) return;
+        const _savingsPlans = ['678 Step Savings', 'Elite Life Extra', '24 TX', 'Whole Life Extra', 'Whole Life NAB', 'Lifetime', '7SM'];
+        const _isSavings = _savingsPlans.some(s => (currentAppPlan || '').includes(s) || (typeof currentAppPlan !== 'undefined' && currentAppPlan === s));
+        if (!_isSavings) { _asd.classList.add('hidden'); return; }
+        const _prem = lastCalculationData.premium || 0;
+        const _py   = parseInt(lastCalculationData.years) || 20;
+        const _total = _prem * _py;
+        const _fmt = n => {
+            if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' ล้าน';
+            if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
+            return n.toLocaleString('th-TH');
+        };
+        _asv.textContent = `${_fmt(_prem)} × ${_py} ปี = ${_fmt(_total)}`;
+        _asd.classList.remove('hidden');
+    })();
+    // ================================
+
     const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
