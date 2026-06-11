@@ -7338,22 +7338,16 @@ function toggleBeHighlight() {
 
 // ==================== CV STAR POPUP (เงินสดพร้อมใช้ >= ออมสะสม) ====================
 window._showCvStarDetail = function(totalSaving, accCF, cvTotal, age) {
-    const fmt = n => Math.round(n).toLocaleString('th-TH');
+    const fmtShort = n => {
+        n = Math.round(n);
+        if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:2}).replace(/\.?0+$/, '') + ' ล้าน';
+        if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:2}).replace(/\.?0+$/, '') + ' แสน';
+        return n.toLocaleString('th-TH');
+    };
     Swal.fire({
         title: `<span style="font-family:'Kanit',sans-serif;font-size:17px;">★ อายุ ${age} ปี</span>`,
-        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:left;padding:4px 0;">
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:12px;margin-bottom:8px;border:1px solid #bbf7d0;">
-                <span style="color:#475569;">💰 ออม</span>
-                <span style="color:#1e293b;font-weight:800;">${fmt(totalSaving)} ฿</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fff7ed;border-radius:12px;margin-bottom:8px;border:1px solid #fed7aa;">
-                <span style="color:#475569;">💸 ใช้ = รวมรับ</span>
-                <span style="color:#ea580c;font-weight:800;">${fmt(accCF)} ฿</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:12px;border:1px solid #bfdbfe;">
-                <span style="color:#475569;">💵 เหลือ = เงินสดพร้อมใช้</span>
-                <span style="color:#1d4ed8;font-weight:800;">${fmt(cvTotal)} ฿</span>
-            </div>
+        html: `<div style="font-family:'Kanit',sans-serif;font-size:15px;text-align:center;padding:8px 0;line-height:2;">
+            ออม <b style="color:#059669;">${fmtShort(totalSaving)}</b> &nbsp;|&nbsp; ใช้ <b style="color:#ea580c;">${fmtShort(accCF)}</b> &nbsp;|&nbsp; เหลือ <b style="color:#1d4ed8;">${fmtShort(cvTotal)}</b>
         </div>`,
         confirmButtonText: 'ปิด',
         confirmButtonColor: '#059669',
