@@ -6105,6 +6105,67 @@ function _updateTPDUI() {
     }
 }
 
+// ==================== CV MINI TABLE (desktop only) ====================
+function onCVMiniTableToggle() {
+    if (!lastCalculationData) return;
+    // ถ้ายังไม่มีข้อมูล ให้ render table ก่อน (silent)
+    if (!window._cvRows || window._cvRows.length === 0) {
+        generatePolicyTableData();
+    }
+    renderCVMiniTable();
+}
+
+function renderCVMiniTable() {
+    const container = document.getElementById('cvMiniTableContainer');
+    if (!container) return;
+    const toggle = document.getElementById('toggleCVMiniTable');
+    if (!toggle || !toggle.checked) { container.classList.add('hidden'); return; }
+
+    const rows = window._cvRows || [];
+    if (rows.length === 0) { container.classList.add('hidden'); return; }
+
+    // หา break-even year (cv >= saving ครั้งแรก)
+    let beIdx = rows.findIndex(r => r.cv > 0 && r.cv >= r.saving);
+
+    const fmt = n => n > 0 ? Math.round(n).toLocaleString('th-TH') : '—';
+    const fmtShort = n => {
+        n = Math.round(n);
+        if (n >= 1000000) return (n / 1000000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' ล.';
+        if (n >= 100000)  return (n / 100000).toLocaleString('th-TH', {maximumFractionDigits:1}).replace(/\.0$/, '') + ' แสน';
+        return n.toLocaleString('th-TH');
+    };
+
+    let html = `<div class="overflow-auto max-h-[340px] rounded-[14px] border border-slate-200 bg-white shadow-sm">
+<table class="w-full text-[11px] border-collapse">
+<thead>
+<tr class="bg-slate-100 sticky top-0 z-10">
+  <th class="px-2 py-1.5 text-left font-bold text-slate-600">ปีที่</th>
+  <th class="px-2 py-1.5 text-center font-bold text-slate-600">อายุ</th>
+  <th class="px-2 py-1.5 text-right font-bold text-blue-700">ออมรวม</th>
+  <th class="px-2 py-1.5 text-right font-bold text-sky-700">เงินสดพร้อมใช้</th>
+</tr>
+</thead>
+<tbody>`;
+
+    rows.forEach((r, i) => {
+        const isBE = i === beIdx;
+        const trCls = isBE ? 'bg-emerald-50 border-t-2 border-emerald-400' : (i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60');
+        const txtCls = isBE ? 'font-extrabold text-emerald-700' : 'text-slate-700 font-medium';
+        const beTag = isBE ? `<span class="ml-1 text-[9px] bg-emerald-500 text-white px-1 rounded-full font-bold">จุดคุ้มทุน</span>` : '';
+        html += `<tr class="${trCls}">
+  <td class="px-2 py-1 ${txtCls}">${r.y}${beTag}</td>
+  <td class="px-2 py-1 text-center ${txtCls}">${r.age}</td>
+  <td class="px-2 py-1 text-right ${txtCls}">${fmtShort(r.saving)}</td>
+  <td class="px-2 py-1 text-right ${isBE ? 'font-extrabold text-emerald-700' : 'text-sky-700 font-medium'}">${fmtShort(r.cv)}</td>
+</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+    container.classList.remove('hidden');
+}
+// ======================================================================
+
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
@@ -6272,6 +6333,9 @@ function refreshAllDisplays() {
         }
     })();
     // ====================================
+
+    // CV mini table (desktop toggle)
+    renderCVMiniTable();
 
     const p = lastCalculationData.premium || 0;
     let rateKey = _COM_KEY_MAP[currentPlan] || _COM_KEY_MAP[currentAppPlan] || currentPlan;
@@ -7144,6 +7208,8 @@ function generatePolicyTableData() {
     const cvData = window.cvDataLookup || {};
     const cfLoopEnd = (isSurrenderActive && hasSurrenderMenu && cfMainMode !== 'specific') ? Math.min(endAge - d.age, maxYear) : maxYear;
 
+    window._cvRows = []; // reset ก่อนเริ่ม loop
+
     for (let y = 1; y <= cfLoopEnd; y++) {
         let currentAge = d.age + y;
 
@@ -7354,6 +7420,8 @@ function generatePolicyTableData() {
         }
         html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${totalSaving.toLocaleString()}</td>` : ''}`;
         html += `${(isBreakevenActive || isShowCVActive || isSurrenderActive) ? `<td class="${_tdBase} ${(isBreakevenActive && y === beYear) ? 'text-emerald-700 be-td-colored' : (isSurrenderActive && cfWithdrawalSchedule && cfWithdrawalSchedule[y] !== undefined) ? 'text-amber-600' : 'text-slate-800'} font-bold text-right" style="${_fSz}">${cvTotal > 0 ? cvTotal.toLocaleString() : "0"}</td>` : ''}`;
+        // เก็บข้อมูลสำหรับ CV mini table
+        window._cvRows.push({ y, age: d.age + y, saving: totalSaving, cv: cvTotal });
         let _dd50SARow = 0, _dd50RowPrem = 0;
         if (showDD50Column) {
             const _dd50SA = parseInt(window.currentDD50SA) || 0;
