@@ -2529,18 +2529,17 @@ function selectAppPlan(planName) {
             let settA, settB;
             if (fromMain && lastCalculationData) {
                 const age = lastCalculationData.age;
-                const mode = currentMode || 'sum';
-                const _mv = mode === 'sum'
-                    ? { sum: lastCalculationData.sum }
-                    : { premium: lastCalculationData.premium };
+                // เสมอใช้ mode='premium' เพื่อเปรียบเทียบด้วยเบี้ยเท่ากัน
+                const cmpPrem = lastCalculationData.premium || 0;
+                const _mv = { premium: cmpPrem };
                 const cfgB = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[planName]) || {};
                 const optsB = cfgB.options || [];
                 // match ระยะเวลาชำระจากแบบหลัก → หา option ของแบบ B ที่ตัวเลขปีตรงกัน
                 const _extractYears = (o) => { const m = String(o).match(/\d+/); return m ? parseInt(m[0]) : 0; };
                 const mainYears = _extractYears(currentPlan);
                 let optionB = optsB.find(o => _extractYears(o) === mainYears) || optsB[0] || '';
-                settA = { age, mode, option: currentPlan, ..._mv };
-                settB = { age, option: optionB, mode, ..._mv };
+                settA = { age, mode: 'premium', option: currentPlan, ..._mv };
+                settB = { age, option: optionB, mode: 'premium', ..._mv };
             } else {
                 const picked = await window._cmpPickOption(planName);
                 if (picked === null) return;
