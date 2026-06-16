@@ -2862,10 +2862,14 @@ function selectAppPlan(planName) {
         if (_asd678 && _sic678 && !_sic678.contains(_asd678)) _sic678.appendChild(_asd678);
     }
 
-    // TPD rider: show for all plans except Medical Fund (standalone mode)
+    // TPD rider: แสดงเฉพาะแบบไม่มีกระแสเงินสด และไม่ใช่ CX / TLA / Step Annuity / Medical Fund
+    // ตำแหน่ง: เหนือปุ่มดูรายละเอียด/แชร์ (mainActionsGroup) เหมือนแบบ CL
     const globalTPDContainer = document.getElementById('globalTPDContainer');
-    if (planName !== 'Medical Fund') {
-        if (globalTPDContainer) globalTPDContainer.classList.remove('hidden');
+    const _tpdExcluded = ['Medical Fund', 'CI Extra Plus', 'Convertable Term', 'Step Annuity'];
+    const _tpdAllowed = !_tpdExcluded.includes(planName) && !(config && config.hasCashFlow);
+    if (_tpdAllowed) {
+        if (globalTPDContainer) { globalTPDContainer.classList.remove('hidden'); globalTPDContainer.style.order = '8'; }
+        if (mainActionsGroup) mainActionsGroup.style.order = '9';
     } else {
         if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
         window.currentTPDEnabled = false;
@@ -2878,7 +2882,8 @@ function selectAppPlan(planName) {
     // HEC rider (สุขภาพ): show for LPB / SLPA / CL only
     const globalHECContainer = document.getElementById('globalHECContainer');
     if ((window.HEC_SUPPORTED_PLANS || []).includes(planName)) {
-        if (globalHECContainer) globalHECContainer.classList.remove('hidden');
+        if (globalHECContainer) { globalHECContainer.classList.remove('hidden'); globalHECContainer.style.order = '7'; }
+        if (mainActionsGroup) mainActionsGroup.style.order = '9';
         if (typeof window.hecRenderSelector === 'function') window.hecRenderSelector();
     } else {
         if (globalHECContainer) globalHECContainer.classList.add('hidden');
