@@ -1594,9 +1594,6 @@ function switchView(targetView) {
                 showCustomError('กรุณาเลือกบริษัท แผนประกัน และค่าห้องให้ครบถ้วน');
                 return;
             }
-        } else if (window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan)) {
-            // HEC: ตารางสุขภาพอิสระ ไม่ต้องตรวจเบี้ยแบบหลัก
-            if (typeof calculate === 'function') calculate(currentMode, true);
         } else {
             if (typeof calculate === 'function') calculate(currentMode, true);
             if (!lastCalculationData || lastCalculationData.premium === 0) {
@@ -1626,10 +1623,6 @@ function switchView(targetView) {
         return;
     }
 
-    // LPB / SLPA / CL + เปิด HEC: ตาราง → ใช้ตารางเบี้ย HEC แทนตารางมูลค่า (override หลัง mount)
-    const _useHEC = targetView === 'table' && window.currentHECEnabled &&
-        (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan) &&
-        typeof window.openHECTableView === 'function';
 
     document.body.setAttribute('data-view', targetView);
     if (typeof window._updateLeftPaneBtnPos === 'function') window._updateLeftPaneBtnPos();
@@ -1667,8 +1660,7 @@ function switchView(targetView) {
         } else if (targetView === 'table') {
             unmount(cashView);
             mountInRight(tableView);
-            if (_useHEC) window.openHECTableView();
-            else if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
         } else if (targetView === 'cash') {
             unmount(tableView);
             mountInRight(cashView);
@@ -1682,7 +1674,7 @@ function switchView(targetView) {
             table: document.getElementById('tableView'),
             cash:  document.getElementById('cashView'),
         };
-        if (targetView === 'table') { if (_useHEC) window.openHECTableView(); else if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
+        if (targetView === 'table') { if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
         if (targetView === 'cash')  { if (typeof refreshAllDisplays === 'function') refreshAllDisplays(); }
         Object.values(views).forEach(v => { if (v) v.style.display = 'none'; });
         if (views[targetView]) views[targetView].style.removeProperty('display');
@@ -6256,6 +6248,7 @@ function refreshAllDisplays() {
     }
 
     _updateTPDUI();
+    if (window.currentHECEnabled && typeof window.hecUpdatePremDisplay === 'function') window.hecUpdatePremDisplay();
     _updateDD50UI();
     _updateSumResultDisplay();
     if (currentAppPlan === '3D Health Excellence' && typeof window.render3DOptionsUI === 'function') {
@@ -9037,11 +9030,6 @@ async function exportTableToPDF(actionType = 'preview') {
     if (currentAppPlan === 'Medical Fund') {
         const mfRows = document.querySelectorAll('#policyTableBody tr');
         if (!mfRows.length) return showCustomError("กรุณาเลือกแผนประกันสุขภาพก่อน");
-        return _exportMFTablePDF(actionType);
-    }
-    // HEC (LPB/SLPA/CL): แชร์ตารางเบี้ยสุขภาพจาก DOM โดยตรง
-    if (window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan) &&
-        document.body.getAttribute('data-view') === 'table') {
         return _exportMFTablePDF(actionType);
     }
     if (!lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");
