@@ -1046,6 +1046,13 @@ window.mfGenerateTable = function() {
     </tr>`;
 
     if (body) body.innerHTML = bodyHtml || `<tr><td colspan="4" class="py-10 text-center text-[12px] text-slate-400">ไม่มีข้อมูลในช่วงอายุนี้</td></tr>`;
+
+    // ── ปุ่มแชร์ MF: แสดงในหัวตาราง (wide layout) + nav bar (มือถือ) ──
+    const _wide = typeof window.isWideLayout === 'function' ? window.isWideLayout() : window.innerWidth >= 600;
+    const _shrBtn = document.getElementById('tableShareBtn');
+    if (_shrBtn) _shrBtn.style.display = (_wide && grandTotal > 0) ? 'inline-flex' : 'none';
+    const _navShr = document.getElementById('navShareBtn');
+    if (_navShr) _navShr.style.display = (!_wide && grandTotal > 0) ? '' : 'none';
 };
 
 // ==================== MF Inline Search ====================
