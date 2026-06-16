@@ -6696,8 +6696,8 @@ function generatePolicyTableData() {
 
     const hasSurrenderMenu = isLPB || isSLPA || isCL || isSLB;
 
-    // ฝากสะสมทบต้น: LifeTime Value รับ 1% / แบบอื่นรับ 2%
-    window._tableDepositRate = isLV ? 0.01 : 0.02;
+    // ฝากสะสมทบต้น: LifeTime Value / Elite รับ 1% / แบบอื่นรับ 2%
+    window._tableDepositRate = (isLV || isElite) ? 0.01 : 0.02;
 
     // --- 1. UI Control Menu ---
     const surrenderContainer = document.getElementById('surrenderContainer');
