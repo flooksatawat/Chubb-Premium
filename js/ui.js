@@ -2853,9 +2853,9 @@ function selectAppPlan(planName) {
         if (_asd678 && _sic678 && !_sic678.contains(_asd678)) _sic678.appendChild(_asd678);
     }
 
-    // TPD rider: show for 3D and CL only (not TLA)
+    // TPD rider: show for all plans except Medical Fund (standalone mode)
     const globalTPDContainer = document.getElementById('globalTPDContainer');
-    if (['3D Health Excellence', 'Century Life'].includes(planName)) {
+    if (planName !== 'Medical Fund') {
         if (globalTPDContainer) globalTPDContainer.classList.remove('hidden');
     } else {
         if (globalTPDContainer) globalTPDContainer.classList.add('hidden');

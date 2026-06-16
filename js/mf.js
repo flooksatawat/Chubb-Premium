@@ -1598,15 +1598,38 @@ window.mfShow3DProjectionPopup = function() {
     const overlay = document.createElement('div');
     overlay.className = 'mf-total-popup';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
+    overlay._ageMap = ageMap;
+    overlay._defaultStart = curAge;
+    overlay._defaultEnd = lastAge;
     overlay.innerHTML = `
         <div style="max-width:380px;width:100%;background:linear-gradient(145deg,#0369a1,#0d9488);border-radius:24px;padding:28px 22px 22px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,0.45);color:#fff;">
             <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
                 <i class="fas fa-shield-alt" style="font-size:26px;color:#fff;"></i>
             </div>
             <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:2px;">เบี้ยประกันสุขภาพ ตลอดชีวิต</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:14px;">${planLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${curAge}–${lastAge} ปี</div>
-            <div style="font-size:34px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">${total.toLocaleString('en-US')}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:3px;margin-bottom:18px;">บาท (รวมทุกปีตลอดชีวิต)</div>
+            <div id="mf3dAgeLabel" style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:14px;">${planLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${curAge}–${lastAge} ปี</div>
+            <div id="mf3dTotalVal" style="font-size:34px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">${total.toLocaleString('en-US')}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:3px;margin-bottom:14px;">บาท (รวมทุกปีตลอดชีวิต)</div>
+
+            <div style="background:rgba(255,255,255,0.15);border-radius:14px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:8px;display:flex;align-items:center;gap:5px;justify-content:center;">
+                    <i class="fas fa-calendar-alt"></i> กำหนดช่วงอายุ (<span id="mf3dAgeCount">${lastAge - curAge + 1}</span> ปี)
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:4px;">เริ่มต้น</div>
+                        <input id="mf3dAgeStart" type="number" min="1" max="99" value="${curAge}"
+                            oninput="window.mf3dRecalc()"
+                            style="width:100%;background:rgba(255,255,255,0.95);border:none;border-radius:10px;padding:8px;font-size:16px;font-weight:800;color:#0f172a;text-align:center;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:4px;">สิ้นสุด</div>
+                        <input id="mf3dAgeEnd" type="number" min="1" max="99" value="${lastAge}"
+                            oninput="window.mf3dRecalc()"
+                            style="width:100%;background:rgba(255,255,255,0.95);border:none;border-radius:10px;padding:8px;font-size:16px;font-weight:800;color:#0f172a;text-align:center;outline:none;box-sizing:border-box;">
+                    </div>
+                </div>
+            </div>
 
             <div style="background:rgba(255,255,255,0.12);border-radius:16px;padding:14px 12px 10px;margin-bottom:14px;">
                 <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:10px;letter-spacing:0.03em;">เลือกแบบประกันออมทรัพย์</div>
@@ -1625,6 +1648,28 @@ window.mfShow3DProjectionPopup = function() {
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
+};
+
+window.mf3dRecalc = function() {
+    const overlay = document.querySelector('.mf-total-popup');
+    if (!overlay || !overlay._ageMap) return;
+    const map = overlay._ageMap;
+    const start = parseInt(document.getElementById('mf3dAgeStart')?.value) || overlay._defaultStart;
+    const end = parseInt(document.getElementById('mf3dAgeEnd')?.value) || overlay._defaultEnd;
+    let total = 0;
+    for (let age = start; age <= end; age++) {
+        if (map[age] !== undefined) total += map[age];
+    }
+    const totalEl = document.getElementById('mf3dTotalVal');
+    if (totalEl) totalEl.textContent = total.toLocaleString('en-US');
+    const countEl = document.getElementById('mf3dAgeCount');
+    if (countEl) countEl.textContent = Math.max(0, end - start + 1);
+    const labelEl = document.getElementById('mf3dAgeLabel');
+    if (labelEl) {
+        const planLabel = labelEl.textContent.split('|')[0].trim();
+        const gThai = labelEl.textContent.split('|')[1]?.trim() || '';
+        labelEl.innerHTML = `${planLabel}&nbsp;|&nbsp;${gThai}&nbsp;|&nbsp;อายุ ${start}–${end} ปี`;
+    }
 };
 
 // Switch to a savings plan AND inject the captured 3D Health premium as that plan's MF column.
