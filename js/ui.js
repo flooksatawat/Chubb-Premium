@@ -1594,6 +1594,9 @@ function switchView(targetView) {
                 showCustomError('กรุณาเลือกบริษัท แผนประกัน และค่าห้องให้ครบถ้วน');
                 return;
             }
+        } else if (window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan)) {
+            // HEC: ตารางสุขภาพอิสระ ไม่ต้องตรวจเบี้ยแบบหลัก
+            if (typeof calculate === 'function') calculate(currentMode, true);
         } else {
             if (typeof calculate === 'function') calculate(currentMode, true);
             if (!lastCalculationData || lastCalculationData.premium === 0) {
@@ -1622,6 +1625,11 @@ function switchView(targetView) {
         window.open3DDetailsView();
         return;
     }
+
+    // LPB / SLPA / CL + เปิด HEC: ตาราง → ใช้ตารางเบี้ย HEC แทนตารางมูลค่า (override หลัง mount)
+    const _useHEC = targetView === 'table' && window.currentHECEnabled &&
+        (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan) &&
+        typeof window.openHECTableView === 'function';
 
     document.body.setAttribute('data-view', targetView);
     if (typeof window._updateLeftPaneBtnPos === 'function') window._updateLeftPaneBtnPos();
@@ -1659,7 +1667,8 @@ function switchView(targetView) {
         } else if (targetView === 'table') {
             unmount(cashView);
             mountInRight(tableView);
-            if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
+            if (_useHEC) window.openHECTableView();
+            else if (typeof generatePolicyTableData === 'function') generatePolicyTableData();
         } else if (targetView === 'cash') {
             unmount(tableView);
             mountInRight(cashView);
@@ -1673,7 +1682,7 @@ function switchView(targetView) {
             table: document.getElementById('tableView'),
             cash:  document.getElementById('cashView'),
         };
-        if (targetView === 'table') { if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
+        if (targetView === 'table') { if (_useHEC) window.openHECTableView(); else if (typeof generatePolicyTableData === 'function') generatePolicyTableData(); }
         if (targetView === 'cash')  { if (typeof refreshAllDisplays === 'function') refreshAllDisplays(); }
         Object.values(views).forEach(v => { if (v) v.style.display = 'none'; });
         if (views[targetView]) views[targetView].style.removeProperty('display');
@@ -2864,6 +2873,20 @@ function selectAppPlan(planName) {
         if (tpdToggle) tpdToggle.checked = false;
         const tpdArea = document.getElementById('tpdSAInputArea');
         if (tpdArea) tpdArea.classList.add('hidden');
+    }
+
+    // HEC rider (สุขภาพ): show for LPB / SLPA / CL only
+    const globalHECContainer = document.getElementById('globalHECContainer');
+    if ((window.HEC_SUPPORTED_PLANS || []).includes(planName)) {
+        if (globalHECContainer) globalHECContainer.classList.remove('hidden');
+        if (typeof window.hecRenderSelector === 'function') window.hecRenderSelector();
+    } else {
+        if (globalHECContainer) globalHECContainer.classList.add('hidden');
+        window.currentHECEnabled = false;
+        const hecToggleEl = document.getElementById('hecToggle');
+        if (hecToggleEl) hecToggleEl.checked = false;
+        const hecArea = document.getElementById('hecSelectArea');
+        if (hecArea) hecArea.classList.add('hidden');
     }
 
     // DD50 rider: show for CX only
@@ -8609,17 +8632,20 @@ async function _exportMFTablePDF(actionType = 'preview') {
         document.querySelectorAll('#policyTableHead th').forEach(th => headRow.push(th.innerText.trim()));
         const tableRows = [];
         document.querySelectorAll('#policyTableBody tr').forEach(tr => {
+            if (tr.classList.contains('no-pdf')) return;
             const row = [];
             tr.querySelectorAll('td').forEach(td => row.push(td.innerText.trim()));
             if (row.some(c => c && c !== '—')) tableRows.push(row);
         });
         // Title from header
+        const _isHEC = window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
+        const _heading = _isHEC ? 'HEC — ตารางเบี้ยประกันสุขภาพ' : 'Medical Fund — ตารางเบี้ยประกันสุขภาพ';
         const titleEl = document.getElementById('tableHeaderTitle');
-        const titleText = titleEl ? titleEl.innerText.trim() : 'Medical Fund';
+        const titleText = titleEl ? titleEl.innerText.trim() : (_isHEC ? 'HEC' : 'Medical Fund');
         doc.setFont(fontName, 'bold');
         doc.setFontSize(14);
         doc.setTextColor(13, 148, 136);
-        doc.text('Medical Fund — ตารางเบี้ยประกันสุขภาพ', 14, 18);
+        doc.text(_heading, 14, 18);
         doc.setFontSize(10);
         doc.setFont(fontName, 'normal');
         doc.setTextColor(100, 116, 139);
@@ -8634,15 +8660,21 @@ async function _exportMFTablePDF(actionType = 'preview') {
             columnStyles: { 0: { halign: 'center' }, 1: { halign: 'right' } },
         });
         const pdfBlob = doc.output('blob');
-        const p = window._mfInline || {};
-        const companies = window._mfData?.companies?.companies || [];
-        const co = companies.find(c => c.id === p.company);
-        const planMeta = co?.plans?.find(pl => pl.id === p.plan);
-        const coName = co?.name || p.company || 'MF';
-        const planName = planMeta?.name || p.plan || '';
-        const roomLabel = p.roomRate ? ` ${p.roomRate}` : '';
         const gender = (typeof currentGender !== 'undefined' && currentGender === 'female') ? 'หญิง' : 'ชาย';
-        const cleanName = `Medical Fund ${coName} ${planName}${roomLabel} ${gender}`.trim();
+        let cleanName;
+        if (_isHEC) {
+            const _hp = (window.HEC_PLANS || []).find(pl => pl.id === window.currentHECPlan);
+            cleanName = `HEC ${_hp ? _hp.name + ' ' + _hp.room : ''} ${gender}`.trim();
+        } else {
+            const p = window._mfInline || {};
+            const companies = window._mfData?.companies?.companies || [];
+            const co = companies.find(c => c.id === p.company);
+            const planMeta = co?.plans?.find(pl => pl.id === p.plan);
+            const coName = co?.name || p.company || 'MF';
+            const planName = planMeta?.name || p.plan || '';
+            const roomLabel = p.roomRate ? ` ${p.roomRate}` : '';
+            cleanName = `Medical Fund ${coName} ${planName}${roomLabel} ${gender}`.trim();
+        }
         const pdfFileName = `${cleanName}.pdf`;
         const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
         if (toast.parentNode) toast.remove();
@@ -9000,6 +9032,11 @@ async function exportTableToPDF(actionType = 'preview') {
     if (currentAppPlan === 'Medical Fund') {
         const mfRows = document.querySelectorAll('#policyTableBody tr');
         if (!mfRows.length) return showCustomError("กรุณาเลือกแผนประกันสุขภาพก่อน");
+        return _exportMFTablePDF(actionType);
+    }
+    // HEC (LPB/SLPA/CL): แชร์ตารางเบี้ยสุขภาพจาก DOM โดยตรง
+    if (window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan) &&
+        document.body.getAttribute('data-view') === 'table') {
         return _exportMFTablePDF(actionType);
     }
     if (!lastCalculationData) return showCustomError("กรุณาคำนวณเบี้ยประกันก่อน");

@@ -569,6 +569,29 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
                         </div>
                     </div>
 
+                    <!-- HEC Rider container: visible for LPB / SLPA / CL only -->
+                    <div id="globalHECContainer" class="hidden p-3 bg-indigo-50 border border-indigo-200 rounded-2xl">
+                        <div class="flex items-center justify-between min-h-[28px]">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-shield-heart text-indigo-500 text-[15px]"></i>
+                                <span class="text-[12px] font-bold text-indigo-800 leading-none">สัญญาเพิ่มเติม HEC (สุขภาพ)</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="hecToggle" class="sr-only peer" onchange="window.hecToggle(this)">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 shadow-inner"></div>
+                            </label>
+                        </div>
+                        <div id="hecSelectArea" class="hidden mt-2.5">
+                            <p class="text-[10px] font-bold text-slate-500 mb-1.5"><i class="fas fa-layer-group text-indigo-400 mr-1"></i>เลือกแผนความคุ้มครอง</p>
+                            <div id="hecPlanPills" class="bg-indigo-50 p-1 rounded-2xl border border-indigo-100 shadow-inner grid grid-cols-3 gap-1 mb-2.5"></div>
+                            <p class="text-[10px] font-bold text-slate-500 mb-1.5"><i class="fas fa-bed-pulse text-rose-400 mr-1"></i>HBF ค่าชดเชยรายวัน (บ./วัน)</p>
+                            <div id="hecHBFPills" class="bg-rose-50 p-1 rounded-2xl border border-rose-100 shadow-inner grid grid-cols-5 gap-1 mb-2.5"></div>
+                            <button onclick="if(typeof switchView==='function')switchView('table')" class="w-full h-[42px] bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-[14px] font-bold flex items-center justify-center gap-2 text-[13px] shadow-[0_4px_12px_rgba(99,102,241,0.35)] active:scale-[0.98] transition-all">
+                                <i class="fas fa-table"></i> ดูตารางเบี้ย HEC
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Cash Flow Container -->
                     <div class="premium-card shrink-0 hidden border-emerald-200 bg-emerald-50/30" id="cashFlowContainer">
                         <div class="flex justify-between items-center mb-2.5">
@@ -2059,6 +2082,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     <script src="js/compare.js?v=7"></script>
     <script src="js/share.js?v=8"></script>
     <script src="js/mf.js?v=24"></script>
+    <script src="js/hec.js?v=1"></script>
     <script src="js/ai_cx.js?v=4"></script>
     <script src="js/cx_defs.js?v=1"></script>
     <script src="js/hospital_data.js?v=1"></script>
