@@ -956,9 +956,10 @@ window.mfGenerateTable = function() {
     const aRows = filterRows(afterRows);
     const maxLen = Math.max(bRows.length, aRows.length);
 
-    const _fs = _isMobile ? '11' : '12';
-    const _pd = _isMobile ? '5px 6px' : '6px 10px';
-    const _pdH = _isMobile ? '6px 6px' : '7px 10px';
+    const _fs = _isMobile ? '14' : '16';
+    const _pd = _isMobile ? '8px 8px' : '10px 14px';
+    const _pdH = _isMobile ? '9px 8px' : '11px 14px';
+    const _fsH = _isMobile ? '12' : '13';
 
     // เก็บข้อมูล after-60 ไว้สำหรับ Step Annuity
     window._mfAfterSixtyByAge = {};
@@ -994,10 +995,10 @@ window.mfGenerateTable = function() {
             <th colspan="2" id="mfAfter60Th" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:#fff;cursor:pointer;user-select:none;" title="กดค้างเพื่อเปิด Step Annuity">หลังอายุ 60 ปี <i class="fas fa-stairs" style="font-size:9px;opacity:0.7;"></i></th>
         </tr>
         <tr style="background:rgba(14,165,233,0.08);">
-            <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
-            <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#0369a1;border-right:2px solid #bae6fd;">เบี้ย/ปี</th>
-            <th style="padding:4px 6px;text-align:center;font-size:10px;font-weight:700;color:#c2410c;border-right:1px solid #e2e8f0;">อายุ</th>
-            <th style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700;color:#c2410c;">เบี้ย/ปี</th>
+            <th style="padding:6px 8px;text-align:center;font-size:${_fsH}px;font-weight:700;color:#0369a1;border-right:1px solid #e2e8f0;">อายุ</th>
+            <th style="padding:6px 8px;text-align:right;font-size:${_fsH}px;font-weight:700;color:#0369a1;border-right:2px solid #bae6fd;">เบี้ย/ปี</th>
+            <th style="padding:6px 8px;text-align:center;font-size:${_fsH}px;font-weight:700;color:#c2410c;border-right:1px solid #e2e8f0;">อายุ</th>
+            <th style="padding:6px 8px;text-align:right;font-size:${_fsH}px;font-weight:700;color:#c2410c;">เบี้ย/ปี</th>
         </tr>`;
         const _th = head.querySelector('#mfAfter60Th');
         if (_th) {
@@ -1039,7 +1040,7 @@ window.mfGenerateTable = function() {
         <td colspan="2" style="padding:${_pdH};text-align:center;font-size:${_fs}px;font-weight:700;color:rgba(255,255,255,0.8);">รวมหลัง 60 ปี</td>
     </tr>
     <tr style="background:#082f49;">
-        <td colspan="4" style="padding:${_pdH};text-align:center;font-size:${_isMobile?'13':'14'}px;font-weight:900;color:#fff;">
+        <td colspan="4" style="padding:${_pdH};text-align:center;font-size:${_isMobile?'16':'18'}px;font-weight:900;color:#fff;">
             รวมตลอดชีพ: ${grandTotal > 0 ? grandTotal.toLocaleString('en-US') : '—'} บาท
         </td>
     </tr>`;
