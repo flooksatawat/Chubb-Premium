@@ -6359,10 +6359,22 @@ function refreshAllDisplays() {
     const effectivePlan = (typeof COM_RATES !== 'undefined' && COM_RATES[rateKey]) ? rateKey : rateKey;
     
     const rateArr = getComRateArray(effectivePlan);
-    const fyc = Math.round(p * (rateArr[0] || 0)) || 0; 
-    
+
+    // ── HEC rider commission (LPB / SLPA / CL เมื่อเปิด HEC) ──
+    const _hecOn = window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
+    const _hecAge = (lastCalculationData && lastCalculationData.age) || (parseInt(document.getElementById('ageInput')?.value) || 0);
+    const _hecGender = (typeof currentGender !== 'undefined' && currentGender) ? currentGender : 'male';
+    const _hecPrem = _hecOn ? (window.hecPremForAge(window.currentHECPlan, _hecAge, _hecGender) || 0) : 0;
+    const _hecHBFPrem = (_hecOn && (parseInt(window.currentHECHBF) || 0) > 0) ? (window.hecHBFForAge(_hecAge, _hecGender) || 0) : 0;
+    const _hecRates = _hecPrem > 0 ? getComRateArray('HEC') : [];
+    const _hecHBFRates = _hecHBFPrem > 0 ? getComRateArray('HBF') : [];
+
+    const _hecFyc = (_hecPrem > 0 ? Math.round(_hecPrem * (_hecRates[0] || 0)) : 0)
+                  + (_hecHBFPrem > 0 ? Math.round(_hecHBFPrem * (_hecHBFRates[0] || 0)) : 0);
+    const fyc = (Math.round(p * (rateArr[0] || 0)) || 0) + _hecFyc;
+
     if(document.getElementById('caseIncomeComm')) {
-        document.getElementById('caseIncomeComm').innerText = fyc.toLocaleString() + " ฿"; 
+        document.getElementById('caseIncomeComm').innerText = fyc.toLocaleString() + " ฿";
     }
     
     const _yearMatch = rateKey && !rateKey.match(/^\d/) && rateKey.match(/(\d+)$/);
@@ -6416,10 +6428,10 @@ function refreshAllDisplays() {
                 <div class="text-[20px] font-black text-amber-600">${totalComAmt.toLocaleString()} <span class="text-sm">฿</span></div>
             </div>
         </div>`;
-    } else if (rateArr && rateArr.length > 0) {
+    } else if ((rateArr && rateArr.length > 0) || _hecPrem > 0) {
         const _tpdPremForCom = (lastCalculationData.tpdPrem || 0);
         const tpdRatesTLA = _tpdPremForCom > 0 ? getComRateArray('TPD') : [];
-        const maxYearsTLA = Math.max(rateArr.length, tpdRatesTLA.length);
+        const maxYearsTLA = Math.max(rateArr.length, tpdRatesTLA.length, _hecRates.length, _hecHBFRates.length);
         window.lastTotalComYears = maxYearsTLA;
         let visibleRowCount = 0;
         let lastVisibleYear = 0;
@@ -6427,8 +6439,10 @@ function refreshAllDisplays() {
             const r = i < rateArr.length ? rateArr[i] : 0;
             const annualAmt = Math.round(p * r) || 0;
             const tpdAmt = i < tpdRatesTLA.length ? Math.round(_tpdPremForCom * tpdRatesTLA[i]) : 0;
-            const yearTotal = annualAmt + tpdAmt;
-            if (yearTotal === 0 && tpdAmt === 0 && r === 0) continue;
+            const hecAmt = i < _hecRates.length ? Math.round(_hecPrem * _hecRates[i]) : 0;
+            const hecHbfAmt = i < _hecHBFRates.length ? Math.round(_hecHBFPrem * _hecHBFRates[i]) : 0;
+            const yearTotal = annualAmt + tpdAmt + hecAmt + hecHbfAmt;
+            if (yearTotal === 0) continue;
             totalComAmt += yearTotal; totalComPct += r;
             visibleRowCount++;
             lastVisibleYear = i + 1;
@@ -6437,7 +6451,9 @@ function refreshAllDisplays() {
                 <span class="bg-amber-100 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full w-14 text-center">ปีที่ ${i+1}</span>
                 <span class="text-[13px] font-black text-slate-500 text-center flex-1 text-left pl-2 leading-tight">${[
                     annualAmt > 0 ? `${formatPct(r*100)} = ${annualAmt.toLocaleString()}` : '',
-                    tpdAmt > 0    ? `TPD ${tpdAmt.toLocaleString()}` : ''
+                    tpdAmt > 0    ? `TPD ${tpdAmt.toLocaleString()}` : '',
+                    hecAmt > 0    ? `HEC ${hecAmt.toLocaleString()}` : '',
+                    hecHbfAmt > 0 ? `HBF ${hecHbfAmt.toLocaleString()}` : ''
                 ].filter(Boolean).join(' + ')}</span>
                 <span class="text-[14px] font-black text-amber-600 text-right w-20">${yearTotal.toLocaleString()}</span>
             </div>`;
