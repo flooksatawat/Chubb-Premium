@@ -8625,15 +8625,29 @@ async function _exportMFTablePDF(actionType = 'preview') {
                 fontName = 'Sarabun';
             } catch(e) {}
         }
-        // Read header and body from DOM
-        const headRow = [];
-        document.querySelectorAll('#policyTableHead th').forEach(th => headRow.push(th.innerText.trim()));
+        // Read header from DOM — รองรับ thead หลายแถว + colSpan (ก่อน/หลังอายุ 60)
+        const headTrs = document.querySelectorAll('#policyTableHead tr');
+        let headRows;
+        if (headTrs.length) {
+            headRows = [...headTrs].map(tr => [...tr.querySelectorAll('th')].map(th => {
+                const cs = parseInt(th.getAttribute('colspan')) || 1;
+                const txt = th.innerText.trim();
+                return cs > 1 ? { content: txt, colSpan: cs, styles: { halign: 'center' } } : txt;
+            }));
+        } else {
+            headRows = [['อายุ (ปี)', 'เบี้ย (บาท/ปี)']];
+        }
+        // Read body — รองรับ colSpan (แถวรวม) + ข้ามแถว no-pdf
         const tableRows = [];
         document.querySelectorAll('#policyTableBody tr').forEach(tr => {
             if (tr.classList.contains('no-pdf')) return;
-            const row = [];
-            tr.querySelectorAll('td').forEach(td => row.push(td.innerText.trim()));
-            if (row.some(c => c && c !== '—')) tableRows.push(row);
+            const row = [...tr.querySelectorAll('td')].map(td => {
+                const cs = parseInt(td.getAttribute('colspan')) || 1;
+                const txt = td.innerText.trim();
+                return cs > 1 ? { content: txt, colSpan: cs } : txt;
+            });
+            const hasContent = row.some(c => { const v = (typeof c === 'string') ? c : c.content; return v && v !== '—'; });
+            if (hasContent) tableRows.push(row);
         });
         // Title from header
         const _isHEC = window.currentHECEnabled && (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
@@ -8649,13 +8663,13 @@ async function _exportMFTablePDF(actionType = 'preview') {
         doc.setTextColor(100, 116, 139);
         doc.text(titleText.replace(/\s+/g, ' '), 14, 25);
         doc.autoTable({
-            head: [headRow.length ? headRow : ['อายุ (ปี)', 'เบี้ย (บาท/ปี)']],
+            head: headRows,
             body: tableRows,
             startY: 30,
             styles: { font: fontName, fontSize: 10, cellPadding: 3 },
-            headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold' },
+            headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold', halign: 'center' },
             alternateRowStyles: { fillColor: [240, 253, 250] },
-            columnStyles: { 0: { halign: 'center' }, 1: { halign: 'right' } },
+            columnStyles: { 0: { halign: 'center' }, 1: { halign: 'right' }, 2: { halign: 'center' }, 3: { halign: 'right' } },
         });
         const pdfBlob = doc.output('blob');
         const gender = (typeof currentGender !== 'undefined' && currentGender === 'female') ? 'หญิง' : 'ชาย';
