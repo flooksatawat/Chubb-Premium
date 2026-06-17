@@ -157,7 +157,14 @@ window.hecUpdatePremDisplay = function() {
     if (prem == null) {
         el.innerHTML = `<span class="text-slate-400">เบี้ย HEC: — (อายุ ${age} ไม่อยู่ในช่วง ${window.HEC_MIN_AGE}–${window.HEC_MAX_AGE})</span>`;
     } else {
-        el.innerHTML = `เบี้ย HEC: <span class="text-indigo-700">${prem.toLocaleString('en-US')}</span> บาท/ปี`;
+        const mainPrem = (typeof lastCalculationData !== 'undefined' && lastCalculationData && lastCalculationData.premium > 0)
+            ? lastCalculationData.premium : null;
+        let html = `เบี้ย HEC: <span class="text-indigo-700">${prem.toLocaleString('en-US')}</span> บาท/ปี`;
+        if (mainPrem != null) {
+            const total = mainPrem + prem;
+            html += `<br><span class="text-slate-500">รวมเบี้ย: </span><span class="text-violet-700 font-extrabold">${total.toLocaleString('en-US')}</span><span class="text-slate-500"> บาท/ปี</span>`;
+        }
+        el.innerHTML = html;
     }
 };
 
