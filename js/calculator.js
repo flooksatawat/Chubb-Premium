@@ -400,8 +400,24 @@ function handleSumInput(el) {
         el.value = Number(v).toLocaleString();
         calculate('sum', false);
         clearTimeout(_realtimeValidateTimer);
-        // 678: ช่องนี้คือ "ออมเงิน" (เบี้ย/ปี) ไม่ใช่ทุนประกัน — ข้ามการตรวจทุนขั้นต่ำแบบ real-time
-        if (currentAppPlan === '678 Step Savings') return;
+        // 678: ช่องนี้คือ "ออมเงิน" (เบี้ย/ปี) — ระบบคำนวณทุนประกันจากเบี้ยแล้ว
+        // จึงต้องตรวจ "ทุนประกันที่คำนวณได้" กับทุนขั้นต่ำ (ไม่ใช่ค่าในช่องโดยตรง)
+        if (currentAppPlan === '678 Step Savings') {
+            _realtimeValidateTimer = setTimeout(() => {
+                const minSum678 = PLAN_CONFIG['678 Step Savings']?.minSum || 300000;
+                const computedSum = (lastCalculationData && lastCalculationData.sum) || 0;
+                const enteredPrem = getSafeValue('sumInsuredInput');
+                if (enteredPrem > 0 && computedSum > 0 && computedSum < minSum678) {
+                    const _age = (lastCalculationData && lastCalculationData.age != null) ? lastCalculationData.age : 0;
+                    const rate678 = LIFE_RATES['A78']?.[currentGender]?.[_age] || 0;
+                    const minPrem678 = rate678 > 0 ? Math.round((minSum678 / 1000) * rate678) : 0;
+                    showCustomError(`ทุนประกันขั้นต่ำ ${minSum678.toLocaleString()} บาท (ออมเงินขั้นต่ำ ${minPrem678.toLocaleString()} บาท/ปี)`);
+                    el.value = minPrem678.toLocaleString();
+                    calculate('sum', true);
+                }
+            }, 600);
+            return;
+        }
         _realtimeValidateTimer = setTimeout(() => {
             const effectiveMinSum = getCLMinSum();
             const val = getSafeValue('sumInsuredInput');
