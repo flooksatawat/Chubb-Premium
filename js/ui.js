@@ -6505,17 +6505,10 @@ function refreshAllDisplays() {
 
 // ==================== TABLE MODULE (100% EXCEL MATH & COMPACT NUMBERS) ====================
 
-// 💥 ฟังก์ชันตัวช่วยสำหรับย่อตัวเลข (เช่น 1,000,000 -> 1 ล้าน)
+// แสดงทุนประกันแบบเต็มจำนวน ไม่ย่อ (เช่น 2,300,000) ตามที่ต้องการให้ตรงและครบถ้วน
 function formatThaiMillion(num) {
     if (!num || num === 0) return "-";
-    if (num >= 1000000) {
-        const million = num / 1000000;
-        // ถ้าเป็นเลขลงตัว เช่น 1 ล้าน, 5 ล้าน
-        if (num % 1000000 === 0) return million + " ล้าน";
-        // ถ้ามีเศษ เช่น 1.5 ล้าน
-        return million.toFixed(1) + " ล้าน";
-    }
-    return num.toLocaleString(); // ต่ำกว่าล้านแสดงเลขปกติ
+    return Math.round(num).toLocaleString();
 }
 
 // ==================== ภาษี (TAX) ====================
@@ -9168,7 +9161,7 @@ async function exportTableToPDF(actionType = 'preview') {
                 doc.text(currentPlan, 105, 13, { align: 'center' }); 
                 
                 const formatN = typeof formatNum === 'function' ? formatNum : (n) => n;
-                let sumDisplay = (d.sum % 1000000 === 0 && d.sum >= 1000000) ? (d.sum/1000000)+' ล้านบาท' : formatN(d.sum)+' บาท';
+                let sumDisplay = formatN(d.sum)+' บาท';
                 
                 const surrenderNote = isSurrenderActive ? ' | ทยอยเวนคืน' : '';
                 doc.setFontSize(14); doc.setTextColor(30, 58, 138);
