@@ -400,6 +400,8 @@ function handleSumInput(el) {
         el.value = Number(v).toLocaleString();
         calculate('sum', false);
         clearTimeout(_realtimeValidateTimer);
+        // 678: ช่องนี้คือ "ออมเงิน" (เบี้ย/ปี) ไม่ใช่ทุนประกัน — ข้ามการตรวจทุนขั้นต่ำแบบ real-time
+        if (currentAppPlan === '678 Step Savings') return;
         _realtimeValidateTimer = setTimeout(() => {
             const effectiveMinSum = getCLMinSum();
             const val = getSafeValue('sumInsuredInput');
@@ -746,27 +748,28 @@ function calculate(source, enforceMin = false) {
                 let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
 
                 if (source === 'cashflow') {
-                    // เงินคืนปีแรก = 9% ของทุนประกัน
+                    // เงินคืนปีแรก = 9% ของทุนประกัน → คำนวณทุน แล้วคำนวณเบี้ย (= ออมเงิน)
                     let cf = getSafeValue('cashFlowInput');
                     fSum = Math.round(cf / 0.09);
                     fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
-                } else if (source === 'sum') {
-                    fSum = Math.round(getSafeValue('sumInsuredInput'));
-                    fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
                 } else {
-                    fPrem = getSafeValue('premiumInput') || 0;
-                    let basePrem = fPrem - mfPrem;
+                    // ช่อง "ออมเงิน" = เบี้ยประกัน/ปี → คำนวณทุนประกันย้อนกลับ
+                    // (ให้ตรงกับคอลัมน์ "ออมเงิน" ในตาราง ซึ่งแสดงเบี้ย/ปี)
+                    let enteredPrem = Math.round(getSafeValue('sumInsuredInput'));
+                    let basePrem = enteredPrem - mfPrem;
                     if (basePrem < 0) basePrem = 0;
-                    // ไม่มีส่วนลดทุนประกันสำหรับ 678
-                    fSum = s678Rate > 0 ? Math.round((basePrem * 1000) / s678Rate) : 0;
+                    fSum = Math.round((basePrem * 1000) / s678Rate);
+                    fPrem = enteredPrem;
                 }
 
+                // บังคับทุนประกันขั้นต่ำ → คำนวณเบี้ย (ออมเงิน) ใหม่ตามทุนขั้นต่ำ
                 if (enforceMin && fSum < config.minSum) {
                     fSum = config.minSum;
                     fPrem = Math.round((fSum / 1000) * s678Rate) + mfPrem;
                 }
 
-                document.getElementById('sumInsuredInput').value = formatNum(fSum);
+                // ช่อง "ออมเงิน" แสดงเบี้ย/ปี ให้ตรงกับคอลัมน์ออมเงินในตาราง
+                document.getElementById('sumInsuredInput').value = formatNum(Math.round(fPrem));
                 document.getElementById('premiumInput').value = Math.round(fPrem).toLocaleString();
                 if (document.getElementById('cashFlowInput')) document.getElementById('cashFlowInput').value = Math.round(fSum * 0.09).toLocaleString();
             }
@@ -1082,7 +1085,9 @@ function calculate(source, enforceMin = false) {
         if(currentAppPlan === 'Whole Life Extra') cashFlowVal = getSafeValue('cashFlowInput1');
         else cashFlowVal = getSafeValue('cashFlowInput');
         
-        highlightActivePills(fSum, fPrem, cashFlowVal);
+        // 678: ปุ่มลัด "ออมเงิน" เก็บค่าเบี้ย (=fPrem) จึงไฮไลต์ด้วย fPrem แทนทุนประกัน
+        if (currentAppPlan === '678 Step Savings') highlightActivePills(fPrem, fPrem, cashFlowVal);
+        else highlightActivePills(fSum, fPrem, cashFlowVal);
         const _cxDD50Prem = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
         const _cxDD50SA = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
         // tpdPrem: 3D แผนใช้ _3dPremData, แผนอื่น (CL/TLA/ฯลฯ) ใช้ _generalTPDPrem
