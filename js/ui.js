@@ -2886,10 +2886,12 @@ function selectAppPlan(planName) {
         if (hecArea) hecArea.classList.add('hidden');
     }
 
-    // DD50 rider: show for CX only
+    // DD50 rider: show for CX + LPB / SLPA / CL (วางต่อจาก TPD)
     const globalDD50Container = document.getElementById('globalDD50Container');
-    if (planName === 'CI Extra Plus') {
-        if (globalDD50Container) globalDD50Container.classList.remove('hidden');
+    const _dd50Allowed = (planName === 'CI Extra Plus') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
+    if (_dd50Allowed) {
+        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = '8'; }
+        if (mainActionsGroup) mainActionsGroup.style.order = '9';
     } else {
         if (globalDD50Container) globalDD50Container.classList.add('hidden');
         window.currentDD50Enabled = false;
@@ -4191,12 +4193,13 @@ function _injectToPearLCanvas(d) {
             <td class="py-4 px-6 text-right font-bold text-[15px] ${clr[cls] || 'text-slate-800'}">${value}</td>
         </tr>`;
 
-    const _dd50P = (currentAppPlan === 'CI Extra Plus' && d.dd50Prem > 0) ? d.dd50Prem : 0;
+    const _dd50P = (d.dd50Prem > 0) ? d.dd50Prem : 0;
+    const _dd50BaseAbbr = cfg.abbr || currentAppPlan;
     const _cxBasePrem = _dd50P > 0 ? d.premium - _dd50P : d.premium;
 
     let rows = '';
     if (_dd50P > 0) {
-        rows += R('เบี้ยประกัน CX', fmtP(_cxBasePrem) + ' ฿ / ปี', 'rose');
+        rows += R(`เบี้ยประกัน ${_dd50BaseAbbr}`, fmtP(_cxBasePrem) + ' ฿ / ปี', 'rose');
         rows += R('เบี้ย DD50 (โรคร้ายแรง 50 โรค)', fmtP(_dd50P) + ' ฿ / ปี', 'rose');
         rows += R('รวมเบี้ยทั้งหมด', fmtP(d.premium) + ' ฿ / ปี', 'rose');
     } else {
@@ -4265,7 +4268,7 @@ function _injectToPearLCanvas(d) {
                     <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">เพศ: ${d.gender}</span>
                     <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">อายุ: ${d.age} ปี</span>
                     ${period ? `<span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">ระยะเวลา: ${period}</span>` : ''}
-                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${_dd50P > 0 ? 'เบี้ย CX' : premLabel}: <span class="font-bold text-slate-900">${_dd50P > 0 ? fmtP(_cxBasePrem) + ' ฿/ปี' : premiumDisplay}</span></span>
+                    <span class="px-3 py-1 text-[12px] rounded-full bg-white text-slate-700 font-medium border border-slate-200 shadow-sm">${_dd50P > 0 ? 'เบี้ย ' + _dd50BaseAbbr : premLabel}: <span class="font-bold text-slate-900">${_dd50P > 0 ? fmtP(_cxBasePrem) + ' ฿/ปี' : premiumDisplay}</span></span>
                     ${_dd50Chip}
                     <span class="px-3 py-1 text-[12px] rounded-full bg-[#00A651]/10 text-[#00A651] font-bold border border-[#00A651]/30 shadow-sm">ทุนประกันชีวิต: ${sumDisplay}</span>
                 </div>
@@ -5720,7 +5723,8 @@ function openUniversalModal(d) {
         const _premLabel = document.getElementById('modalPremiumLabel');
         const _dd50Row = document.getElementById('modalDD50Row');
         if (_dd50P > 0) {
-            if (_premLabel) _premLabel.textContent = 'เบี้ยประกัน CX';
+            const _ddBaseAbbr = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[currentAppPlan] && PLAN_CONFIG[currentAppPlan].abbr) || 'CX';
+            if (_premLabel) _premLabel.textContent = `เบี้ยประกัน ${_ddBaseAbbr}`;
             setText('modalPremium', Math.round(d.premium - _dd50P).toLocaleString());
             setText('modalDD50Prem', _dd50P.toLocaleString());
             if (_dd50Row) { _dd50Row.classList.remove('hidden'); _dd50Row.classList.add('flex'); }
@@ -6129,6 +6133,11 @@ function _updateDD50UI() {
         if (_cxCovEl) _cxCovEl.textContent = _cxSum.toLocaleString();
         if (_covEl) _covEl.textContent = _sa.toLocaleString();
         if (_totalCovEl) _totalCovEl.textContent = (_cxSum + _sa).toLocaleString();
+        const _ddAbbr = (typeof PLAN_CONFIG !== 'undefined' && PLAN_CONFIG[currentAppPlan] && PLAN_CONFIG[currentAppPlan].abbr) || 'CX';
+        const _totLbl = document.getElementById('dd50TotalPremLabel');
+        const _covLbl = document.getElementById('dd50TotalCovLabel');
+        if (_totLbl) _totLbl.textContent = `รวมเบี้ย ${_ddAbbr}+DD50`;
+        if (_covLbl) _covLbl.textContent = `วงเงินรวม ${_ddAbbr}+DD50`;
     } else {
         if (summaryBox) summaryBox.classList.add('hidden');
     }
@@ -6932,7 +6941,7 @@ function generatePolicyTableData() {
     const showAccidentColumn = isSLB;
     const showCoverageColumn = isCX || isCL || isSLPA || isTLA;
     const showCVColumn = isTLA ? false : isCX ? true : (isCL || isSLB) ? isShowCVActive : isLV ? isBreakevenActive : true;
-    const showDD50Column = isCX && isShowDD50ColActive && window.currentDD50Enabled && window.DD50_RATES;
+    const showDD50Column = (isCX ? isShowDD50ColActive : (isCL || isLPB || isSLPA)) && window.currentDD50Enabled && window.DD50_RATES;
 
     // ภาษี: คอลัมน์ลดหย่อนภาษี = 100,000 × ฐานภาษีที่เลือก
     const _taxRate = parseInt(window.currentTaxRate) || 0;

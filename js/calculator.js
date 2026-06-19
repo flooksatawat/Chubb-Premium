@@ -1017,10 +1017,11 @@ function calculate(source, enforceMin = false) {
             let tpdPrem = getHealthRate('TPD', _tpdSAStr, age, currentGender);
             _generalTPDPrem = tpdPrem;
 
-            // DD50 (CX only): cap ทุน ≤ min(5×ทุนหลัก, 10M); อายุ 16-65 จึงคิดเบี้ย
+            // DD50 (CX + LPB/SLPA/CL): cap ทุน ≤ min(5×ทุนหลัก, 10M); อายุ 16-65 จึงคิดเบี้ย
+            const _dd50PlanOK = currentAppPlan === 'CI Extra Plus' || (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
             dd50Prem = 0;
             let _cappedDD50SA = 0;
-            if (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) {
+            if (_dd50PlanOK && window.currentDD50Enabled) {
                 const _rawDD50SA = parseInt(window.currentDD50SA) || 0;
                 const _dd50Cap = Math.min((_fSumForCap || fSum) * 5, 10000000);
                 _cappedDD50SA = _fSumForCap > 0 ? Math.min(_rawDD50SA, _dd50Cap) : _rawDD50SA;
@@ -1104,8 +1105,9 @@ function calculate(source, enforceMin = false) {
         // 678: ปุ่มลัด "ออมเงิน" เก็บค่าเบี้ย (=fPrem) จึงไฮไลต์ด้วย fPrem แทนทุนประกัน
         if (currentAppPlan === '678 Step Savings') highlightActivePills(fPrem, fPrem, cashFlowVal);
         else highlightActivePills(fSum, fPrem, cashFlowVal);
-        const _cxDD50Prem = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
-        const _cxDD50SA = (currentAppPlan === 'CI Extra Plus' && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
+        const _dd50PlanFinal = currentAppPlan === 'CI Extra Plus' || (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
+        const _cxDD50Prem = (_dd50PlanFinal && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
+        const _cxDD50SA = (_dd50PlanFinal && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
         // tpdPrem: 3D แผนใช้ _3dPremData, แผนอื่น (CL/TLA/ฯลฯ) ใช้ _generalTPDPrem
         const _generalTpdFinal = window.currentTPDEnabled ? (typeof _generalTPDPrem !== 'undefined' ? _generalTPDPrem : 0) : 0;
         lastCalculationData = { premium: fPrem, sum: fSum, gender: currentGender==='male'?'ชาย':'หญิง', age: age, years: yearsStr, cashFlow: cashFlowVal, ...(window._3dPremData || {}), tpdPrem: window._3dPremData?.tpdPrem ?? _generalTpdFinal, tpdSA: window._3dPremData?.tpdSA ?? (window.currentTPDEnabled ? (window.currentTPDSA || '0') : '0'), dd50Prem: _cxDD50Prem, dd50SA: _cxDD50SA };
