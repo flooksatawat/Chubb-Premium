@@ -156,22 +156,37 @@ function generateSummaryText() {
         return lines.join('\n');
     }
 
-    // สัญญาเพิ่มเติม HEC: รวมเบี้ยหลัก + HEC และต่อชื่อแผนเป็น เช่น LPB+HEC
+    // สัญญาเพิ่มเติม (riders): TPD / DD50 รวมอยู่ใน d.premium อยู่แล้ว, HEC เป็นเบี้ยแยก
+    // ต่อชื่อแผน เช่น SLPA+TPD, LPB+DD50, CL+HEC, หรือผสม SLPA+TPD+HEC
+    const tpdPrem  = (window.currentTPDEnabled  && d.tpdPrem  > 0) ? Math.round(d.tpdPrem)  : 0;
+    const dd50Prem = (window.currentDD50Enabled && d.dd50Prem > 0) ? Math.round(d.dd50Prem) : 0;
     const hecOn = !!window.currentHECEnabled;
-    const hecPrem = hecOn && typeof window.hecCurrentPremium === 'function' ? window.hecCurrentPremium() : null;
-    const planAbbr = getPlanAbbr(currentAppPlan) + (hecOn ? '+HEC' : '');
+    const hecRaw = hecOn && typeof window.hecCurrentPremium === 'function' ? window.hecCurrentPremium() : null;
+    const hecPrem = (hecOn && hecRaw != null) ? hecRaw : 0;
 
-    if (hecOn && hecPrem != null) {
+    const riderNames = [];
+    if (tpdPrem  > 0) riderNames.push('TPD');
+    if (dd50Prem > 0) riderNames.push('DD50');
+    if (hecPrem  > 0) riderNames.push('HEC');
+
+    const planAbbr = getPlanAbbr(currentAppPlan) + (riderNames.length ? '+' + riderNames.join('+') : '');
+
+    if (riderNames.length) {
+        // d.premium = เบี้ยหลัก + TPD + DD50 (HEC ยังไม่รวม) → เบี้ยหลักล้วน = d.premium - tpd - dd50
+        const basePrem  = Math.round(d.premium) - tpdPrem - dd50Prem;
         const totalPrem = Math.round(d.premium) + hecPrem;
+        const _sa = (v) => { const n = parseInt(String(v || '').replace(/,/g, '')) || 0; return n > 0 ? ` (ทุน ${formatNum(n)})` : ''; };
         const lines = [
             `📋 แผน: ${planAbbr}`,
             `👤 เพศ: ${genderTh}`,
             `🎂 อายุ: ${d.age} ปี`,
-            `💰 เบี้ยหลัก: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
-            `➕ เบี้ย HEC: ${hecPrem.toLocaleString()} บาท/ปี`,
-            `💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`,
-            `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
+            `💰 เบี้ยหลัก: ${basePrem.toLocaleString()} บาท/ปี`,
         ];
+        if (tpdPrem  > 0) lines.push(`➕ TPD${_sa(d.tpdSA)}: ${tpdPrem.toLocaleString()} บาท/ปี`);
+        if (dd50Prem > 0) lines.push(`➕ DD50${_sa(d.dd50SA)}: ${dd50Prem.toLocaleString()} บาท/ปี`);
+        if (hecPrem  > 0) lines.push(`➕ HEC: ${hecPrem.toLocaleString()} บาท/ปี`);
+        lines.push(`💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`);
+        lines.push(`🛡️ วงเงิน: ${formatNum(d.sum)} บาท`);
         if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
         return lines.join('\n');
     }
