@@ -156,8 +156,28 @@ function generateSummaryText() {
         return lines.join('\n');
     }
 
+    // สัญญาเพิ่มเติม HEC: รวมเบี้ยหลัก + HEC และต่อชื่อแผนเป็น เช่น LPB+HEC
+    const hecOn = !!window.currentHECEnabled;
+    const hecPrem = hecOn && typeof window.hecCurrentPremium === 'function' ? window.hecCurrentPremium() : null;
+    const planAbbr = getPlanAbbr(currentAppPlan) + (hecOn ? '+HEC' : '');
+
+    if (hecOn && hecPrem != null) {
+        const totalPrem = Math.round(d.premium) + hecPrem;
+        const lines = [
+            `📋 แผน: ${planAbbr}`,
+            `👤 เพศ: ${genderTh}`,
+            `🎂 อายุ: ${d.age} ปี`,
+            `💰 เบี้ยหลัก: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
+            `➕ เบี้ย HEC: ${hecPrem.toLocaleString()} บาท/ปี`,
+            `💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`,
+            `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
+        ];
+        if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
+        return lines.join('\n');
+    }
+
     const lines = [
-        `📋 แผน: ${getPlanAbbr(currentAppPlan)}`,
+        `📋 แผน: ${planAbbr}`,
         `👤 เพศ: ${genderTh}`,
         `🎂 อายุ: ${d.age} ปี`,
         `💰 ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
