@@ -2890,7 +2890,8 @@ function selectAppPlan(planName) {
     const globalDD50Container = document.getElementById('globalDD50Container');
     const _dd50Allowed = (planName === 'CI Extra Plus') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
     if (_dd50Allowed) {
-        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = '8'; }
+        // DD50 อยู่บนสุดของ mainActionsGroup (เหนือปุ่ม) — ล้าง order เพื่อให้อยู่ต่อจาก TPD/HEC
+        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = ''; }
         if (mainActionsGroup) mainActionsGroup.style.order = '9';
     } else {
         if (globalDD50Container) globalDD50Container.classList.add('hidden');
