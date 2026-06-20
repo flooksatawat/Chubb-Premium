@@ -110,6 +110,108 @@ const PLAN_ALIASES = [
 ];
 
 // ------------------------------------------------------------------
+// 1b. MF COMPANY + PLAN ALIASES
+// ------------------------------------------------------------------
+const MF_COMPANY_ALIASES = [
+    { keys: ['aia','เอไอเอ','a.i.a'],                                         id: 'AIA' },
+    { keys: ['axa','แอ็กซ่า','แอกซ่า'],                                       id: 'AXA' },
+    { keys: ['generali','เจนเนอราลี','เจนเนอราลี่','เจนเนอ'],                 id: 'GENERALI' },
+    { keys: ['tokio','โตเกียว','โตเกียวมารีน'],                               id: 'TOKIO' },
+    { keys: ['chubb hi','chubb health','chubb','ชับบ์'],                       id: 'CHUBB_HI' },
+    { keys: ['bla','กรุงไทยแอ็กซ่า','กรุงไทยaxа','bangkok life'],            id: 'BLA' },
+    { keys: ['กรุงเทพประกัน','กรุงเทพ','bangkok insurance','bangkok'],        id: 'BANGKOK' },
+    { keys: ['fwd','เอฟดับบลิวดี','เอฟดับ'],                                  id: 'FWD' },
+    { keys: ['azay','อาซา','อาซาย'],                                           id: 'AZAY' },
+    { keys: ['เมืองไทย','muangthai'],                                          id: 'MUANGTHAI' },
+    { keys: ['นวกิจ','navakij'],                                               id: 'NAVAKIJ' },
+    { keys: ['tpb'],                                                            id: 'TPB' },
+    { keys: ['วิริยะ','viriyah'],                                              id: 'VIRIYAH' },
+    { keys: ['เอ็ทน่า','เอทน่า','etna'],                                      id: 'ETNA' },
+];
+
+const MF_PLAN_ALIASES = [
+    { co:'AIA',       id:'HS',              keys:['h&s','เฮลท์แอนด์เซฟ','health saving','hs aia'] },
+    { co:'AIA',       id:'HS_EXTRA',        keys:['h&s extra','hs extra','เฮลท์ extra'] },
+    { co:'AIA',       id:'HS_PLUS_GOLD',    keys:['hs plus gold','plus gold','hs plus'] },
+    { co:'AIA',       id:'HEALTH_HAPPY',    keys:['health happy','เฮลท์แฮปปี้','แฮปปี้'] },
+    { co:'AIA',       id:'INFINITE',        keys:['infinite','อินฟินิต','infinite care'] },
+    { co:'AXA',       id:'IHEALTHY_ULTRA',  keys:['ihealthy ultra','ไอเฮลท์ตี้ ultra','ultra'] },
+    { co:'AXA',       id:'IHEALTHY',        keys:['ihealthy','ไอเฮลท์ตี้','ไอเฮลตี้'] },
+    { co:'GENERALI',  id:'HEALTH_HERO',     keys:['health hero','เฮลท์ฮีโร่','ฮีโร่'] },
+    { co:'GENERALI',  id:'HS_EXTRA_PLUS',   keys:['hs extra plus','เฮลท์ extra plus'] },
+    { co:'GENERALI',  id:'HLS_EXTRA',       keys:['hls extra','hls'] },
+    { co:'GENERALI',  id:'GEN_HB',          keys:['gen hb','hb generali'] },
+    { co:'GENERALI',  id:'CANCER',          keys:['cancer generali','มะเร็ง generali'] },
+    { co:'GENERALI',  id:'LS_PLUS_IPDOPD', keys:['lump sum plus ipd opd','ls plus ipd opd'] },
+    { co:'GENERALI',  id:'LS_PLUS_IPD',    keys:['lump sum plus ipd','ls plus ipd'] },
+    { co:'GENERALI',  id:'LS_IPDOPD',      keys:['lump sum ipd opd','ls ipd opd'] },
+    { co:'GENERALI',  id:'LS_IPD',         keys:['lump sum ipd','ls ipd'] },
+    { co:'TOKIO',     id:'HSHH_COPAY',     keys:['hshh copay','copay'] },
+    { co:'TOKIO',     id:'HSHH',           keys:['hshh'] },
+    { co:'CHUBB_HI',  id:'HSPP',           keys:['hspp','เฮลท์โพรเทคเตอร์พลัส','health protector plus'] },
+    { co:'CHUBB_HI',  id:'HSP',            keys:['hsp','เฮลท์โพรเทคเตอร์','health protector'] },
+    { co:'BLA',       id:'PRESTIGE',       keys:['prestige','เพรสทีจ'] },
+    { co:'BLA',       id:'HAPPY_HEALTH',   keys:['happy health bla','bla happy'] },
+    { co:'BANGKOK',   id:'BBL_HEALTH_PLUS',keys:['bbl health plus','bbl health','bbl'] },
+    { co:'BANGKOK',   id:'HAPPY_HEALTHY_OPD',keys:['happy healthy opd'] },
+    { co:'BANGKOK',   id:'HAPPY_HEALTHY_IPD',keys:['happy healthy ipd','happy healthy'] },
+    { co:'FWD',       id:'FWD_HEALTH',     keys:['fwd health','health fwd'] },
+    { co:'AZAY',      id:'UNLOCK_ULTRA',   keys:['unlock ultra','ปลดล็อค','unlock'] },
+    { co:'AZAY',      id:'FIRST_CLASS',    keys:['first class','เฟิร์สคลาส'] },
+    { co:'MUANGTHAI', id:'ELITE_PLUS',     keys:['elite plus','อีลิท พลัส','อิลิทพลัส'] },
+    { co:'MUANGTHAI', id:'D_HEALTH',       keys:['d health','ดีเฮลท์'] },
+    { co:'MUANGTHAI', id:'ELITE_HEALTH',   keys:['elite health','อีลิทเฮลท์','อิลิทเฮลท์'] },
+    { co:'NAVAKIJ',   id:'PADSIANG',       keys:['แปดเซียน','padsiang','8เซียน','8 เซียน'] },
+    { co:'TPB',       id:'TPB_HEALTH',     keys:['tpb health'] },
+    { co:'VIRIYAH',   id:'BDMS',           keys:['bdms','บีดีเอ็มเอส'] },
+    { co:'VIRIYAH',   id:'UNJAIRUK_OPD',   keys:['อุ่นใจรักษ์ opd','อุ่นใจ opd'] },
+    { co:'VIRIYAH',   id:'UNJAIRUK_IPD',   keys:['อุ่นใจรักษ์','อุ่นใจ'] },
+    { co:'ETNA',      id:'ETNA_HEALTH',    keys:['etna health','ประกันสุขภาพ etna'] },
+];
+
+function detectMFCompany(t) {
+    for (const co of MF_COMPANY_ALIASES) {
+        for (const key of co.keys) {
+            if (t.includes(key)) return co.id;
+        }
+    }
+    return null;
+}
+
+function detectMFPlan(t, companyId) {
+    const list = companyId
+        ? MF_PLAN_ALIASES.filter(p => p.co === companyId)
+        : MF_PLAN_ALIASES;
+    for (const entry of list) {
+        for (const key of entry.keys) {
+            if (t.includes(key)) return { co: entry.co, id: entry.id };
+        }
+    }
+    return null;
+}
+
+function extractMFRoom(t, planRoomRates) {
+    // ค่าห้อง/ห้อง/วงเงิน + ตัวเลข
+    let m = t.match(/(?:ค่าห้อง|ห้อง|วงเงิน|room)\s*([\d,]+)/i);
+    if (m) return m[1].replace(/,/g, '');
+
+    // ถ้ามี roomRates list ให้ match กับ text
+    if (planRoomRates?.length) {
+        // เรียงจากยาวไปสั้นเพื่อ match คำยาวก่อน
+        const sorted = [...planRoomRates].sort((a,b) => b.length - a.length);
+        for (const r of sorted) {
+            if (t.includes(r.toLowerCase())) return r;
+        }
+    }
+
+    // fallback: ตัวเลข 3-5 หลักที่ไม่ใช่อายุ/จำนวนเงิน (เช่น 1000, 2200, 5000)
+    const numMatch = t.match(/\b(1[0-9]{3}|[2-9][0-9]{3}|[1-4][0-9]{4})\b/);
+    if (numMatch) return numMatch[1];
+
+    return null;
+}
+
+// ------------------------------------------------------------------
 // 2. ASR NORMALIZER — แก้คำที่ ASR มักถอดผิด
 // ------------------------------------------------------------------
 function normalizeASR(text) {
@@ -375,12 +477,28 @@ function parseCommand(rawText) {
         plan: null, gender: null, age: null,
         amount: null, amountType: null, years: null,
         hxRoom: null, hxo: null, hbf: null,
+        mfCompany: null, mfPlan: null, mfRoom: null,
         raw: rawText,
     };
 
     result.plan   = detectPlan(t);
     result.gender = /ชาย/.test(t) ? 'male' : /หญิง/.test(t) ? 'female' : null;
     result.age    = extractAge(t);
+
+    // MF company/plan/room — parse เมื่อ plan เป็น Medical Fund หรือตรวจพบ company ก็ switch plan อัตโนมัติ
+    if (result.plan === 'Medical Fund' || detectMFCompany(t)) {
+        if (!result.plan) result.plan = 'Medical Fund';
+        result.mfCompany = detectMFCompany(t);
+        const planHit = detectMFPlan(t, result.mfCompany);
+        if (planHit) {
+            if (!result.mfCompany) result.mfCompany = planHit.co;
+            result.mfPlan = planHit.id;
+        }
+        // room rates จาก data ที่โหลดแล้ว (ถ้ามี)
+        const loadedCo = window._mfData?.companies?.companies?.find(c => c.id === result.mfCompany);
+        const loadedPlanMeta = loadedCo?.plans?.find(p => p.id === result.mfPlan);
+        result.mfRoom = extractMFRoom(t, loadedPlanMeta?.roomRates || []);
+    }
 
     const { amount, type } = extractAmount(t);
     result.amount     = amount;
@@ -447,6 +565,74 @@ function executeCommand(parsed, showPopup = true) {
     }
 
     const plan = currentAppPlan;
+
+    // ── Medical Fund ─────────────────────────────────────────────────
+    if (plan === 'Medical Fund') {
+        const applyMF = async () => {
+            // โหลด companies ถ้ายังไม่มี
+            if (!window._mfData?.companies) {
+                try {
+                    const r = await fetch('data/MF/companies.json?v=' + Date.now());
+                    window._mfData.companies = await r.json();
+                } catch(e) {}
+            }
+            if (parsed.mfCompany) {
+                // โหลด rates ของบริษัทนั้น
+                if (typeof mfLoadRates === 'function') await mfLoadRates(parsed.mfCompany);
+
+                // ตรวจ room อีกรอบหลังโหลด data ครบ
+                let room = parsed.mfRoom;
+                if (!room) {
+                    const co = window._mfData?.companies?.companies?.find(c => c.id === parsed.mfCompany);
+                    const pm = co?.plans?.find(p => p.id === parsed.mfPlan);
+                    room = extractMFRoom(parsed.raw?.toLowerCase() || '', pm?.roomRates || []);
+                }
+
+                // set state สำหรับ standalone MF page
+                if (window._mfState) {
+                    window._mfState.company  = parsed.mfCompany;
+                    window._mfState.plan     = parsed.mfPlan || null;
+                    window._mfState.roomRate = room || null;
+                    if (parsed.gender) window._mfState.gender = parsed.gender;
+                    if (parsed.age)    window._mfState.age    = parsed.age;
+                }
+
+                // set state สำหรับ inline (rider) MF
+                if (window._mfInline !== undefined) {
+                    window._mfInline.company  = parsed.mfCompany;
+                    window._mfInline.plan     = parsed.mfPlan || null;
+                    window._mfInline.roomRate = room || null;
+                }
+
+                // set currentMF key (ให้ตารางหลักใช้)
+                if (parsed.mfPlan && (!parsed.mfPlan || room !== undefined)) {
+                    const key = [parsed.mfCompany, parsed.mfPlan, room].filter(Boolean).join('|');
+                    if (key) window.currentMF = key;
+                }
+            }
+
+            // render — ลอง mfInlineInit ก่อน ถ้าไม่มีให้ mfInit
+            if (typeof window.mfInlineInit === 'function') await window.mfInlineInit();
+            else if (typeof mfInit === 'function') await mfInit();
+            else if (typeof window.mfInlineRender === 'function') window.mfInlineRender();
+
+            // sync dropdowns ใน UI
+            ['mfInlineCompany','mfCompanySelect','mfPickerCompany'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && parsed.mfCompany) el.value = parsed.mfCompany;
+            });
+            ['mfInlinePlan','mfPlanSelect','mfPickerPlan'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && parsed.mfPlan) el.value = parsed.mfPlan;
+            });
+            ['mfInlineRoom','mfRoomSelect','mfPickerRoom'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && parsed.mfRoom) el.value = parsed.mfRoom;
+            });
+        };
+        applyMF().catch(e => console.warn('[MF voice]', e));
+        return null;
+    }
 
     if (plan === '3D Health Excellence') {
         if (parsed.hxRoom) {
@@ -538,6 +724,12 @@ function processVoiceCommand(transcript) {
     const parsed = parseCommand(transcript);
 
     const targetPlan = parsed.plan || (typeof currentAppPlan !== 'undefined' ? currentAppPlan : '');
+
+    // ── Medical Fund: ไม่ต้องมี amount/years ข้ามไปจัดการโดยตรง ───────
+    if (targetPlan === 'Medical Fund') {
+        if (typeof executeCommand === 'function') executeCommand(parsed, false);
+        return;
+    }
 
     // ── 1. ตรวจสอบข้อมูลครบก่อนคำนวณ ──────────────────────────────────
     // เพศ: จาก voice หรือที่เลือกไว้ใน UI แล้ว
