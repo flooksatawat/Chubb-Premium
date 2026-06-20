@@ -266,27 +266,27 @@ function detectPlan(text) {
 // 5. AGE EXTRACTOR
 // ------------------------------------------------------------------
 function extractAge(t) {
-    // "อายุ 35" / "อายุสามสิบห้า"
+    // "อายุ 35" / "อายุสามสิบห้า" — keyword ชัดเจน รับ 1-99
     let m = t.match(/(?:อายุ|age)\s*(\d{1,2})/i);
-    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 99) return v; }
 
     // อายุ + คำไทย
     m = t.match(/อายุ\s*((?:ยี่สิบ|สามสิบ|สี่สิบ|ห้าสิบ|หกสิบ|เจ็ดสิบ|แปดสิบ)[ก-๙]*)/);
-    if (m) { const v = parseThaiWordNumber(m[1]); if (!isNaN(v) && v >= 30 && v <= 80) return v; }
+    if (m) { const v = parseThaiWordNumber(m[1]); if (!isNaN(v) && v >= 1 && v <= 99) return v; }
 
-    // เพศ + ตัวเลข
+    // เพศ + ตัวเลข (รับ 1-75 เพื่อหลีกเลี่ยงชน amounts)
     m = t.match(/(?:ชาย|หญิง)\s+(\d{1,2})(?!\s*(?:ล้าน|แสน|หมื่น|พัน|k|m))/);
-    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 75) return v; }
 
     // ตัวเลข + "ทุน/ออม/เบี้ย"
     m = t.match(/\b(\d{1,2})\s+(?:ปี\s+)?(?:ทุน|ออม|เบี้ย|ค่าห้อง)/);
-    if (m) { const v = parseInt(m[1]); if (v >= 30 && v <= 80) return v; }
+    if (m) { const v = parseInt(m[1]); if (v >= 1 && v <= 75) return v; }
 
-    // fallback: ตัวเลข 2 หลัก 30-80
+    // fallback: ตัวเลข 2 หลัก 18-75 (กว้างขึ้นแต่ยังปลอดภัย)
     const nums = [...t.matchAll(/\b(\d{1,2})\b/g)];
     for (const n of nums) {
         const v = parseInt(n[1]);
-        if (v >= 30 && v <= 80) {
+        if (v >= 18 && v <= 75) {
             const after = t.slice(n.index + n[0].length, n.index + n[0].length + 5);
             if (!/^\s*ปี/.test(after)) return v;
         }
@@ -537,27 +537,61 @@ function processVoiceCommand(transcript) {
     if (typeof parseCommand !== 'function') return;
     const parsed = parseCommand(transcript);
 
-    // ต้องการระยะเวลาเฉพาะเมื่อมีการ "เปลี่ยนแผนใหม่" เท่านั้น
-    const PLANS_NEED_YEARS = ['CI Extra Plus','Signature Legacy','Century Life','Whole Life Extra'];
     const targetPlan = parsed.plan || (typeof currentAppPlan !== 'undefined' ? currentAppPlan : '');
-    if (parsed.plan && PLANS_NEED_YEARS.includes(targetPlan) && parsed.years === null) {
+
+    // ── 1. ตรวจสอบข้อมูลครบก่อนคำนวณ ──────────────────────────────────
+    // เพศ: จาก voice หรือที่เลือกไว้ใน UI แล้ว
+    const hasGender = !!parsed.gender ||
+        !!(typeof currentGender !== 'undefined' && currentGender);
+
+    // อายุ: จาก voice หรือ input ใน UI
+    const hasAge = parsed.age !== null || (() => {
+        const el = document.getElementById('ageInput');
+        return el && parseInt(el.value) > 0;
+    })();
+
+    // จำนวนเงิน: จาก voice หรือ input ใน UI
+    const hasAmount = (parsed.amount !== null && parsed.amount > 0) || (() => {
+        const pEl = document.getElementById('premiumInput');
+        const sEl = document.getElementById('sumInsuredInput');
+        const cEl = document.getElementById('cashFlowInput');
+        return (pEl && parseInt((pEl.value || '').replace(/,/g, '')) > 0)
+            || (sEl && parseInt((sEl.value || '').replace(/,/g, '')) > 0)
+            || (cEl && parseInt((cEl.value || '').replace(/,/g, '')) > 0);
+    })();
+
+    const missing = [];
+    if (!hasGender)  missing.push('เพศ');
+    if (!hasAge)     missing.push('อายุ');
+    if (!hasAmount)  missing.push('เบี้ย หรือ ทุนประกัน');
+    if (missing.length > 0) {
+        if (typeof showCustomError === 'function')
+            showCustomError('กรุณาระบุ: ' + missing.join(' · '));
+        return;
+    }
+
+    // ── 2. ตรวจสอบระยะเวลาสำหรับแผนที่ต้องการ (ทุกกรณี ไม่ใช่แค่เปลี่ยนแผน) ──
+    const PLANS_NEED_YEARS = {
+        'CI Extra Plus':        '10 หรือ 20 ปี',
+        'Signature Legacy':     '5 หรือ 10 ปี',
+        'Century Life':         '10, 20, 60, 90 หรือ 100 ปี',
+        '3D Health Excellence': '10, 20, 60, 90 หรือ 100 ปี',
+        'Whole Life Extra':     '10 หรือ 15 ปี',
+        'LifeTime Value':       '10, 15 หรือ 20 ปี',
+    };
+    if (targetPlan in PLANS_NEED_YEARS && parsed.years === null) {
         const inferred = (typeof _inferYearsForPlan === 'function')
             ? _inferYearsForPlan(targetPlan, typeof currentPlan !== 'undefined' ? currentPlan : '')
             : null;
         if (inferred !== null) {
             parsed.years = inferred;
         } else {
-            const hint = {
-                'CI Extra Plus':    '10 หรือ 20 ปี',
-                'Signature Legacy': '5 หรือ 10 ปี',
-                'Century Life':     '10, 20, 60, 90 หรือ 100 ปี',
-                'Whole Life Extra': '10 หรือ 15 ปี',
-            };
             if (typeof showCustomError === 'function')
-                showCustomError('กรุณาระบุระยะเวลาชำระ เช่น ' + (hint[targetPlan] || '10 ปี'));
+                showCustomError('กรุณาระบุระยะเวลาชำระ เช่น ' + PLANS_NEED_YEARS[targetPlan]);
             return;
         }
     }
+
     if (typeof executeCommand === 'function') executeCommand(parsed, true);
 }
 
