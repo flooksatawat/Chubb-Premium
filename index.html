@@ -2370,12 +2370,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
         setTimeout(() => { overlay.style.display = 'none'; }, 420);
-        // ถ้าเปิดจากใน LINE → แสดง prompt เปิด External Browser
-        if (window.IS_IN_LIFF && !getLS(EXT_SHOWN_KEY)) {
-            setTimeout(() => {
-                const p = $('openExternalPrompt');
-                if (p) p.style.display = 'flex';
-            }, 800);
+        // ถ้าเปิดจากใน LINE → redirect ไป Chrome อัตโนมัติ (ไม่ถาม)
+        if (window.IS_IN_LIFF) {
+            openInChrome();
         }
     }
 
