@@ -82,18 +82,13 @@ function generateShortShareText() {
         return text;
     }
 
-    const mfKey   = window.currentMF && window.currentMF !== 'ไม่เลือก' ? window.currentMF : null;
-    const mfLabel = mfKey ? (window._mfCurrentLabel || mfKey) : null;
     const riderNames = [];
-    if (mfKey)                                          riderNames.push('MF');
     if (window.currentTPDEnabled  && d.tpdPrem  > 0)   riderNames.push('TPD');
     if (window.currentDD50Enabled && d.dd50Prem > 0)   riderNames.push('DD50');
     if (window.currentHECEnabled)                       riderNames.push('HEC');
 
     const planAbbr = getPlanAbbr(currentAppPlan) + (riderNames.length ? '+' + riderNames.join('+') : '');
-    let text = `📋 สรุปแผน: ${planAbbr}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 เบี้ย/ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
-    if (mfLabel) text += `\n➕ MF: ${mfLabel}`;
-    return text;
+    return `📋 สรุปแผน: ${planAbbr}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 เบี้ย/ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
 }
 
 function generateResultText(type) {
@@ -170,14 +165,8 @@ function generateSummaryText() {
         return lines.join('\n');
     }
 
-    // MF rider: d.premium รวม mfPrem อยู่แล้ว → ต้องหักออกเพื่อแสดง basePrem
-    const genderEn  = d.gender === 'ชาย' ? 'male' : 'female';
-    const mfKey     = window.currentMF && window.currentMF !== 'ไม่เลือก' ? window.currentMF : null;
-    const mfPremRaw = mfKey && typeof getHealthRate === 'function' ? getHealthRate('MF', mfKey, d.age, genderEn) : 0;
-    const mfPrem    = mfPremRaw > 0 ? Math.round(mfPremRaw) : 0;
-    const mfLabel   = mfKey ? (window._mfCurrentLabel || mfKey) : null;
-
-    // สัญญาเพิ่มเติม (riders): MF / TPD / DD50 รวมอยู่ใน d.premium อยู่แล้ว, HEC เป็นเบี้ยแยก
+    // สัญญาเพิ่มเติม (riders): TPD / DD50 รวมอยู่ใน d.premium อยู่แล้ว, HEC เป็นเบี้ยแยก
+    // ต่อชื่อแผน เช่น SLPA+TPD, LPB+DD50, CL+HEC, หรือผสม SLPA+TPD+HEC
     const tpdPrem  = (window.currentTPDEnabled  && d.tpdPrem  > 0) ? Math.round(d.tpdPrem)  : 0;
     const dd50Prem = (window.currentDD50Enabled && d.dd50Prem > 0) ? Math.round(d.dd50Prem) : 0;
     const hecOn = !!window.currentHECEnabled;
@@ -185,7 +174,6 @@ function generateSummaryText() {
     const hecPrem = (hecOn && hecRaw != null) ? hecRaw : 0;
 
     const riderNames = [];
-    if (mfPrem   > 0) riderNames.push('MF');
     if (tpdPrem  > 0) riderNames.push('TPD');
     if (dd50Prem > 0) riderNames.push('DD50');
     if (hecPrem  > 0) riderNames.push('HEC');
@@ -193,8 +181,8 @@ function generateSummaryText() {
     const planAbbr = getPlanAbbr(currentAppPlan) + (riderNames.length ? '+' + riderNames.join('+') : '');
 
     if (riderNames.length) {
-        // d.premium = เบี้ยหลัก + MF + TPD + DD50 (HEC ยังไม่รวม)
-        const basePrem  = Math.round(d.premium) - mfPrem - tpdPrem - dd50Prem;
+        // d.premium = เบี้ยหลัก + TPD + DD50 (HEC ยังไม่รวม) → เบี้ยหลักล้วน = d.premium - tpd - dd50
+        const basePrem  = Math.round(d.premium) - tpdPrem - dd50Prem;
         const totalPrem = Math.round(d.premium) + hecPrem;
         const _sa = (v) => { const n = parseInt(String(v || '').replace(/,/g, '')) || 0; return n > 0 ? ` (ทุน ${formatNum(n)})` : ''; };
         const lines = [
@@ -203,7 +191,6 @@ function generateSummaryText() {
             `🎂 อายุ: ${d.age} ปี`,
             `💰 เบี้ยหลัก: ${basePrem.toLocaleString()} บาท/ปี`,
         ];
-        if (mfPrem   > 0) lines.push(`➕ MF (${mfLabel}): ${mfPrem.toLocaleString()} บาท/ปี`);
         if (tpdPrem  > 0) lines.push(`➕ TPD${_sa(d.tpdSA)}: ${tpdPrem.toLocaleString()} บาท/ปี`);
         if (dd50Prem > 0) lines.push(`➕ DD50${_sa(d.dd50SA)}: ${dd50Prem.toLocaleString()} บาท/ปี`);
         if (hecPrem  > 0) lines.push(`➕ HEC: ${hecPrem.toLocaleString()} บาท/ปี`);
