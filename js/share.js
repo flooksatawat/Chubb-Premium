@@ -190,15 +190,27 @@ function generateSummaryText() {
         // d.premium = เบี้ยหลัก + TPD + DD50 (HEC ยังไม่รวม) → เบี้ยหลักล้วน = d.premium - tpd - dd50
         const basePrem  = Math.round(d.premium) - tpdPrem - dd50Prem;
         const totalPrem = Math.round(d.premium) + hecPrem;
-        const _sa = (v) => { const n = parseInt(String(v || '').replace(/,/g, '')) || 0; return n > 0 ? ` (ทุน ${formatNum(n)})` : ''; };
+        const _saNum = (v) => parseInt(String(v || '').replace(/,/g, '')) || 0;
         const lines = [
             `📋 แผน: ${planAbbr}`,
+            `💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`,
+            ``,
             `👤 เพศ: ${genderTh}`,
             `🎂 อายุ: ${d.age} ปี`,
             `💰 เบี้ยหลัก: ${basePrem.toLocaleString()} บาท/ปี`,
         ];
-        if (tpdPrem  > 0) lines.push(`➕ TPD${_sa(d.tpdSA)}: ${tpdPrem.toLocaleString()} บาท/ปี`);
-        if (dd50Prem > 0) lines.push(`➕ DD50${_sa(d.dd50SA)}: ${dd50Prem.toLocaleString()} บาท/ปี`);
+        if (tpdPrem  > 0) {
+            const tpdSANum = _saNum(d.tpdSA);
+            lines.push(`➕ TPD`);
+            if (tpdSANum > 0) lines.push(`   ทุน: ${formatNum(tpdSANum)} บาท`);
+            lines.push(`   เบี้ย: ${tpdPrem.toLocaleString()} บาท/ปี`);
+        }
+        if (dd50Prem > 0) {
+            const dd50SANum = _saNum(d.dd50SA);
+            lines.push(`➕ DD50`);
+            if (dd50SANum > 0) lines.push(`   ทุน: ${formatNum(dd50SANum)} บาท`);
+            lines.push(`   เบี้ย: ${dd50Prem.toLocaleString()} บาท/ปี`);
+        }
         if (hecPrem  > 0) {
             lines.push(`➕ HEC: ${hecPrem.toLocaleString()} บาท/ปี`);
             const _hecPlan = window.HEC_PLANS && window.HEC_PLANS.find(p => p.id === window.currentHECPlan);
@@ -207,7 +219,6 @@ function generateSummaryText() {
                 lines.push(`💊 วงเงินเหมาจ่าย: ${_hecPlan.maxLabel}`);
             }
         }
-        lines.push(`💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`);
         lines.push(`🛡️ วงเงิน: ${formatNum(d.sum)} บาท`);
         if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
         return lines.join('\n');
