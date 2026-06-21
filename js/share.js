@@ -84,10 +84,16 @@ function generateShortShareText() {
     if (!lastCalculationData) return ''; const d = lastCalculationData;
 
     if (currentAppPlan === '3D Health Excellence') {
-        let text = `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
-        const lines = _get3DShareLines();
-        if (lines.length) text += '\n' + lines.join('\n');
-        return text;
+        const lines = [
+            `📋 สรุปแผน: ${getPlanAbbr(currentAppPlan)}`,
+            `👤 เพศ: ${d.gender}`,
+            `🎂 อายุ: ${d.age} ปี`,
+            `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
+            `💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
+        ];
+        const extra = _get3DShareLines();
+        extra.forEach(l => lines.push(l));
+        return lines.join('\n');
     }
 
     const riderNames = [];
@@ -96,7 +102,13 @@ function generateShortShareText() {
     if (window.currentHECEnabled)                       riderNames.push('HEC');
 
     const planAbbr = getPlanAbbr(currentAppPlan) + (riderNames.length ? '+' + riderNames.join('+') : '');
-    return `📋 สรุปแผน: ${planAbbr}\n👤 เพศ: ${d.gender} | 🎂 อายุ: ${d.age} ปี\n🛡️ วงเงิน: ${formatNum(d.sum)} บาท\n💰 เบี้ย/ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`;
+    return [
+        `📋 สรุปแผน: ${planAbbr}`,
+        `👤 เพศ: ${d.gender}`,
+        `🎂 อายุ: ${d.age} ปี`,
+        `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
+        `💰 เบี้ย/ออม: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
+    ].join('\n');
 }
 
 function generateResultText(type) {
