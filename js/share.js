@@ -66,8 +66,16 @@ function _get3DShareLines() {
     const hxd = window.currentHXD || 'ไม่เลือก';
     const hbf = parseInt(window.currentHBF) || 0;
     const lines = [];
-    if (hxo !== 'ไม่เลือก' && _3D_HXO_AMT[hxo]) lines.push(`💊 OPD (ผู้ป่วยนอก): ${_3D_HXO_AMT[hxo]} บ./ครั้ง`);
-    if (hxd !== 'ไม่เลือก' && _3D_HXD_AMT[hxd]) lines.push(`🔬 วงเงินตรวจ/วินิจฉัยเพิ่ม: ${_3D_HXD_AMT[hxd]} บ./ปี`);
+    if (hxo !== 'ไม่เลือก' && _3D_HXO_AMT[hxo]) {
+        const hxoTimes = parseInt(hxo.replace('HXO', '')) || 0;
+        lines.push(`💊 OPD (ผู้ป่วยนอก)`);
+        lines.push(`   วงเงิน: ${_3D_HXO_AMT[hxo]} บ./ครั้ง`);
+        if (hxoTimes > 0) lines.push(`   จำนวน: ${hxoTimes} ครั้ง/ปี`);
+    }
+    if (hxd !== 'ไม่เลือก' && _3D_HXD_AMT[hxd]) {
+        lines.push(`🔬 วงเงินตรวจ/วินิจฉัยเพิ่ม`);
+        lines.push(`   วงเงิน: ${_3D_HXD_AMT[hxd]} บ./ปี`);
+    }
     if (hbf > 0) lines.push(`🏨 ชดเชยรายวัน: ${hbf.toLocaleString()} บ./วัน`);
     return lines;
 }
