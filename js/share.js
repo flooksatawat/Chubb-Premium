@@ -198,6 +198,7 @@ function generateSummaryText() {
             `👤 เพศ: ${genderTh}`,
             `🎂 อายุ: ${d.age} ปี`,
             `💰 เบี้ยหลัก: ${basePrem.toLocaleString()} บาท/ปี`,
+            `🛡️ วงเงิน: ${formatNum(d.sum)} บาท`,
         ];
         if (tpdPrem  > 0) {
             const tpdSANum = _saNum(d.tpdSA);
@@ -219,7 +220,6 @@ function generateSummaryText() {
                 lines.push(`💊 วงเงินเหมาจ่าย: ${_hecPlan.maxLabel}`);
             }
         }
-        lines.push(`🛡️ วงเงิน: ${formatNum(d.sum)} บาท`);
         if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
         return lines.join('\n');
     }
