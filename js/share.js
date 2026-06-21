@@ -146,20 +146,20 @@ function generateSummaryText() {
     if (currentAppPlan === '3D Health Excellence') {
         const hx = window.currentHX || '';
         const hxInfo = hx && _3D_HX_INFO[hx] ? _3D_HX_INFO[hx] : null;
-        const planLine = hxInfo
-            ? `📋 แผน: ค่าห้อง ${hxInfo.room} บ. | เหมาจ่าย ${_fmtMillion(hxInfo.limit)}`
-            : `📋 แผน: 3D Health Excellence`;
         // วงเงินโรคร้ายแรง 2 เท่า = 2 × วงเงินเหมาจ่าย HX (ไม่ใช่ ทุนประกันสัญญาหลัก)
         const _hxLimitNum = hxInfo ? parseInt(String(hxInfo.limit).replace(/,/g,'')) || 0 : 0;
         const ciAmt = _hxLimitNum * 2;
-        const ciLine = `🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`;
         const lines = [
-            planLine,
-            `👤 เพศ: ${genderTh}`,
-            `🎂 อายุ: ${d.age} ปี`,
-            `💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`,
-            ciLine,
+            `📋 แผน: 3D Health Excellence`,
         ];
+        if (hxInfo) {
+            lines.push(`🏥 ค่าห้อง: ${hxInfo.room} บ./คืน`);
+            lines.push(`💊 วงเงินเหมาจ่าย: ${_fmtMillion(hxInfo.limit)}`);
+        }
+        lines.push(`👤 เพศ: ${genderTh}`);
+        lines.push(`🎂 อายุ: ${d.age} ปี`);
+        lines.push(`💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`);
+        if (ciAmt > 0) lines.push(`🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`);
         const extraLines = _get3DShareLines();
         extraLines.forEach(l => lines.push(l));
         const tpd3d = (window.currentTPDEnabled && d.tpdPrem > 0) ? Math.round(d.tpdPrem) : 0;
@@ -199,7 +199,14 @@ function generateSummaryText() {
         ];
         if (tpdPrem  > 0) lines.push(`➕ TPD${_sa(d.tpdSA)}: ${tpdPrem.toLocaleString()} บาท/ปี`);
         if (dd50Prem > 0) lines.push(`➕ DD50${_sa(d.dd50SA)}: ${dd50Prem.toLocaleString()} บาท/ปี`);
-        if (hecPrem  > 0) lines.push(`➕ HEC: ${hecPrem.toLocaleString()} บาท/ปี`);
+        if (hecPrem  > 0) {
+            lines.push(`➕ HEC: ${hecPrem.toLocaleString()} บาท/ปี`);
+            const _hecPlan = window.HEC_PLANS && window.HEC_PLANS.find(p => p.id === window.currentHECPlan);
+            if (_hecPlan) {
+                lines.push(`🏥 ค่าห้อง: ${_hecPlan.room} บ./คืน`);
+                lines.push(`💊 วงเงินเหมาจ่าย: ${_hecPlan.maxLabel}`);
+            }
+        }
         lines.push(`💵 เบี้ยรวม: ${totalPrem.toLocaleString()} บาท/ปี`);
         lines.push(`🛡️ วงเงิน: ${formatNum(d.sum)} บาท`);
         if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
