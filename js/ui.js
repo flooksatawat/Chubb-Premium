@@ -2861,7 +2861,7 @@ function selectAppPlan(planName) {
     const _tpdAllowed = !_tpdExcluded.includes(planName) && !(config && config.hasCashFlow);
     if (_tpdAllowed) {
         if (globalTPDContainer) { globalTPDContainer.classList.remove('hidden'); globalTPDContainer.style.order = '8'; }
-        if (mainActionsGroup) mainActionsGroup.style.order = '9';
+        if (mainActionsGroup) mainActionsGroup.style.order = '10';
     } else {
         if (globalTPDContainer) globalTPDContainer.classList.add('hidden');
         window.currentTPDEnabled = false;
@@ -2875,7 +2875,7 @@ function selectAppPlan(planName) {
     const globalHECContainer = document.getElementById('globalHECContainer');
     if ((window.HEC_SUPPORTED_PLANS || []).includes(planName)) {
         if (globalHECContainer) { globalHECContainer.classList.remove('hidden'); globalHECContainer.style.order = '7'; }
-        if (mainActionsGroup) mainActionsGroup.style.order = '9';
+        if (mainActionsGroup) mainActionsGroup.style.order = '10';
         if (typeof window.hecRenderSelector === 'function') window.hecRenderSelector();
     } else {
         if (globalHECContainer) globalHECContainer.classList.add('hidden');
@@ -2886,13 +2886,12 @@ function selectAppPlan(planName) {
         if (hecArea) hecArea.classList.add('hidden');
     }
 
-    // DD50 rider: show for CX + LPB / SLPA / CL (วางต่อจาก TPD)
+    // DD50 rider: show for CX + LPB / SLPA / CL / 3D (วางต่อจาก TPD เสมอ)
     const globalDD50Container = document.getElementById('globalDD50Container');
     const _dd50Allowed = (planName === 'CI Extra Plus') || (planName === '3D Health Excellence') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
     if (_dd50Allowed) {
-        // DD50 อยู่บนสุดของ mainActionsGroup (เหนือปุ่ม) — ล้าง order เพื่อให้อยู่ต่อจาก TPD/HEC
-        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = ''; }
-        if (mainActionsGroup) mainActionsGroup.style.order = '9';
+        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = '9'; }
+        if (mainActionsGroup) mainActionsGroup.style.order = '10';
     } else {
         if (globalDD50Container) globalDD50Container.classList.add('hidden');
         window.currentDD50Enabled = false;
