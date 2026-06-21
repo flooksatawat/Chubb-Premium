@@ -162,6 +162,12 @@ function generateSummaryText() {
         ];
         const extraLines = _get3DShareLines();
         extraLines.forEach(l => lines.push(l));
+        const tpd3d = (window.currentTPDEnabled && d.tpdPrem > 0) ? Math.round(d.tpdPrem) : 0;
+        if (tpd3d > 0) {
+            const tpdSA3d = parseInt(String(d.tpdSA || '').replace(/,/g, '')) || 0;
+            const tpdSAStr = tpdSA3d > 0 ? ` (ทุน ${formatNum(tpdSA3d)})` : '';
+            lines.push(`➕ TPD${tpdSAStr}: ${tpd3d.toLocaleString()} บาท/ปี`);
+        }
         return lines.join('\n');
     }
 
