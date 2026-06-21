@@ -155,11 +155,11 @@ function generateSummaryText() {
         if (hxInfo) {
             lines.push(`🏥 ค่าห้อง: ${hxInfo.room} บ./คืน`);
             lines.push(`💊 วงเงินเหมาจ่าย: ${_fmtMillion(hxInfo.limit)}`);
+            if (ciAmt > 0) lines.push(`🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`);
         }
         lines.push(`👤 เพศ: ${genderTh}`);
         lines.push(`🎂 อายุ: ${d.age} ปี`);
         lines.push(`💰 เบี้ย: ${Math.round(d.premium).toLocaleString()} บาท/ปี`);
-        if (ciAmt > 0) lines.push(`🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(ciAmt)}`);
         const extraLines = _get3DShareLines();
         extraLines.forEach(l => lines.push(l));
         const tpd3d = (window.currentTPDEnabled && d.tpdPrem > 0) ? Math.round(d.tpdPrem) : 0;
