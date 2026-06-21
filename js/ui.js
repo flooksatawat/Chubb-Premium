@@ -2902,7 +2902,7 @@ function selectAppPlan(planName) {
     const globalDD50Container = document.getElementById('globalDD50Container');
     const _dd50Allowed = (planName === 'CI Extra Plus') || (planName === '3D Health Excellence') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
     if (_dd50Allowed) {
-        if (globalDD50Container) globalDD50Container.classList.remove('hidden');
+        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = '9'; }
         if (mainActionsGroup) mainActionsGroup.style.order = '10';
     } else {
         if (globalDD50Container) globalDD50Container.classList.add('hidden');
