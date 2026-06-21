@@ -226,6 +226,10 @@ function generateSummaryText() {
             if (_hecPlan) {
                 lines.push(`🏥 ค่าห้อง: ${_hecPlan.room} บ./คืน`);
                 lines.push(`💊 วงเงินเหมาจ่าย: ${_hecPlan.maxLabel}`);
+                const _ciTotal = _hecPlan.maxBenefit * 2;
+                lines.push(`🦠 วงเงินโรคร้ายแรง: ${_fmtMillion(_ciTotal)}`);
+                const _ciCash = _hecPlan.id === '6' ? '100,000' : '50,000';
+                lines.push(`💊 ชดเชยโรคร้าย (1 ครั้ง/ชีวิต): ${_ciCash} บาท`);
             }
         }
         if (d.years) lines.push(`⏳ ระยะเวลา: ${d.years} ปี`);
