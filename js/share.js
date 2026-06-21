@@ -185,8 +185,16 @@ function generateSummaryText() {
         const tpd3d = (window.currentTPDEnabled && d.tpdPrem > 0) ? Math.round(d.tpdPrem) : 0;
         if (tpd3d > 0) {
             const tpdSA3d = parseInt(String(d.tpdSA || '').replace(/,/g, '')) || 0;
-            const tpdSAStr = tpdSA3d > 0 ? ` (ทุน ${formatNum(tpdSA3d)})` : '';
-            lines.push(`➕ TPD${tpdSAStr}: ${tpd3d.toLocaleString()} บาท/ปี`);
+            lines.push(`➕ TPD`);
+            if (tpdSA3d > 0) lines.push(`   ทุน: ${formatNum(tpdSA3d)} บาท`);
+            lines.push(`   เบี้ย: ${tpd3d.toLocaleString()} บาท/ปี`);
+        }
+        const dd50_3d = (window.currentDD50Enabled && d.dd50Prem > 0) ? Math.round(d.dd50Prem) : 0;
+        if (dd50_3d > 0) {
+            const dd50SA3d = parseInt(String(d.dd50SA || '').replace(/,/g, '')) || 0;
+            lines.push(`➕ DD50`);
+            if (dd50SA3d > 0) lines.push(`   ทุน: ${formatNum(dd50SA3d)} บาท`);
+            lines.push(`   เบี้ย: ${dd50_3d.toLocaleString()} บาท/ปี`);
         }
         return lines.join('\n');
     }

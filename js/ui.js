@@ -2888,7 +2888,7 @@ function selectAppPlan(planName) {
 
     // DD50 rider: show for CX + LPB / SLPA / CL (วางต่อจาก TPD)
     const globalDD50Container = document.getElementById('globalDD50Container');
-    const _dd50Allowed = (planName === 'CI Extra Plus') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
+    const _dd50Allowed = (planName === 'CI Extra Plus') || (planName === '3D Health Excellence') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
     if (_dd50Allowed) {
         // DD50 อยู่บนสุดของ mainActionsGroup (เหนือปุ่ม) — ล้าง order เพื่อให้อยู่ต่อจาก TPD/HEC
         if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = ''; }

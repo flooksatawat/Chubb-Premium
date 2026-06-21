@@ -943,7 +943,12 @@ function calculate(source, enforceMin = false) {
             const _tpdSA3d = String(_cappedTPDSA3d);
             let tpdPrem = getHealthRate('TPD', _tpdSA3d, age, currentGender);
 
-            let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem + tpdPrem;
+            const _rawDD50SA3d = window.currentDD50Enabled ? (parseInt(window.currentDD50SA) || 0) : 0;
+            const _cappedDD50SA3d = Math.min(_rawDD50SA3d, fSum * 5, 10000000);
+            const _dd50SA3d = String(_cappedDD50SA3d);
+            dd50Prem = window.currentDD50Enabled ? getHealthRate('DD50', _dd50SA3d, age, currentGender) : 0;
+
+            let totalHealthPrem = hxPrem + hxoPrem + hxdPrem + hbfPrem + mfPrem + tpdPrem + dd50Prem;
             let _3dClBasePrem = 0;
 
             if (source === 'sum') {
@@ -985,7 +990,7 @@ function calculate(source, enforceMin = false) {
                 _3dClBasePrem = basePrem;
                 document.getElementById('sumInsuredInput').value = formatNum(fSum);
             }
-            window._3dPremData = { clBasePrem: _3dClBasePrem, hxPrem, hxoPrem, hxdPrem, hbfPrem, tpdPrem, hxVal, hxoVal, hxdVal, hbfVal, clPlan, tpdSA: _tpdSA3d };
+            window._3dPremData = { clBasePrem: _3dClBasePrem, hxPrem, hxoPrem, hxdPrem, hbfPrem, tpdPrem, dd50Prem, hxVal, hxoVal, hxdVal, hbfVal, clPlan, tpdSA: _tpdSA3d, dd50SA: _dd50SA3d };
         }
         // ---------------- 5. แบบประกันทั่วไป (CX, TLA, LPB, SLB, CL) ----------------
         else {
@@ -1105,7 +1110,7 @@ function calculate(source, enforceMin = false) {
         // 678: ปุ่มลัด "ออมเงิน" เก็บค่าเบี้ย (=fPrem) จึงไฮไลต์ด้วย fPrem แทนทุนประกัน
         if (currentAppPlan === '678 Step Savings') highlightActivePills(fPrem, fPrem, cashFlowVal);
         else highlightActivePills(fSum, fPrem, cashFlowVal);
-        const _dd50PlanFinal = currentAppPlan === 'CI Extra Plus' || (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
+        const _dd50PlanFinal = currentAppPlan === 'CI Extra Plus' || currentAppPlan === '3D Health Excellence' || (window.HEC_SUPPORTED_PLANS || []).includes(currentAppPlan);
         const _cxDD50Prem = (_dd50PlanFinal && window.currentDD50Enabled) ? (typeof dd50Prem !== 'undefined' ? dd50Prem : 0) : 0;
         const _cxDD50SA = (_dd50PlanFinal && window.currentDD50Enabled) ? (window.currentDD50SA || '0') : '0';
         // tpdPrem: 3D แผนใช้ _3dPremData, แผนอื่น (CL/TLA/ฯลฯ) ใช้ _generalTPDPrem
