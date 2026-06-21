@@ -5,9 +5,9 @@
   "lang": "th",
   "start_url": "./",
   "scope": "./",
-  "display": "browser",
+  "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a1530",
+  "background_color": "#ffffff",
   "theme_color": "#0a1530",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
