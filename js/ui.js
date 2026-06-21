@@ -2886,11 +2886,11 @@ function selectAppPlan(planName) {
         if (hecArea) hecArea.classList.add('hidden');
     }
 
-    // DD50 rider: show for CX + LPB / SLPA / CL / 3D (วางต่อจาก TPD เสมอ)
+    // DD50 rider: show for CX + LPB / SLPA / CL / 3D (วางต่อจาก TPD ใน DOM)
     const globalDD50Container = document.getElementById('globalDD50Container');
     const _dd50Allowed = (planName === 'CI Extra Plus') || (planName === '3D Health Excellence') || (window.HEC_SUPPORTED_PLANS || []).includes(planName);
     if (_dd50Allowed) {
-        if (globalDD50Container) { globalDD50Container.classList.remove('hidden'); globalDD50Container.style.order = '9'; }
+        if (globalDD50Container) globalDD50Container.classList.remove('hidden');
         if (mainActionsGroup) mainActionsGroup.style.order = '10';
     } else {
         if (globalDD50Container) globalDD50Container.classList.add('hidden');
