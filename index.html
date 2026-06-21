@@ -583,7 +583,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
                     <!-- DD50 Rider container: visible for CX / 3D / LPB / SLPA / CL -->
                     <div id="globalDD50Container" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-2xl">
-                        <div id="dd50HeaderRow" class="flex items-center justify-between min-h-[28px] select-none touch-manipulation">
+                        <div id="dd50HeaderRow" class="flex items-center justify-between min-h-[28px] select-none touch-manipulation" onmousedown="window._dd50HoldT=setTimeout(()=>window.showDD50Info(),500)" onmouseup="clearTimeout(window._dd50HoldT)" onmouseleave="clearTimeout(window._dd50HoldT)" ontouchstart="window._dd50HoldT=setTimeout(()=>window.showDD50Info(),500)" ontouchend="clearTimeout(window._dd50HoldT)" ontouchcancel="clearTimeout(window._dd50HoldT)">
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-heart-circle-plus text-rose-500 text-[15px]"></i>
                                 <span class="text-[12px] font-bold text-rose-800 leading-none">เพิ่ม DD50 (โรคร้ายแรง 50 โรค)</span>

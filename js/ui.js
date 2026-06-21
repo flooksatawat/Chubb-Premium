@@ -1171,27 +1171,39 @@ function _showDD50Info() {
     overlay.id = 'dd50InfoPopup';
     overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm';
     overlay.innerHTML = `
-        <div class="bg-white border border-rose-200 rounded-2xl shadow-2xl p-4 w-[280px] mx-4">
+        <div class="bg-white border border-rose-200 rounded-2xl shadow-2xl p-4 w-[300px] mx-4 max-h-[85vh] overflow-y-auto">
             <div class="flex items-center gap-2 mb-3 pb-2.5 border-b border-rose-100">
                 <i class="fas fa-heart-circle-plus text-rose-500 text-[18px]"></i>
-                <span class="font-bold text-rose-800 text-[14px]">DD50 — โรคร้ายแรง 50 โรค</span>
+                <span class="font-bold text-rose-800 text-[14px]">สัญญาเพิ่มเติม DD50 — เงื่อนไข</span>
             </div>
             <div class="space-y-2 text-[12px]">
-                <div class="bg-rose-50 p-3 rounded-xl border border-rose-100">
-                    <p class="font-bold text-rose-700 mb-1"><i class="fas fa-user-check mr-1"></i>อายุรับประกัน</p>
-                    <p class="text-rose-600 font-semibold">16 – 65 ปี</p>
+                <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 space-y-1">
+                    <p class="text-rose-700">👤 อายุรับประกัน: <span class="font-bold">16 – 65 ปี</span></p>
+                    <p class="text-rose-700">🛡️ คุ้มครองถึง: <span class="font-bold">อายุ 84 ปี</span></p>
+                </div>
+                <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 space-y-1">
+                    <p class="text-rose-700">💰 ทุนขั้นต่ำ: <span class="font-bold">100,000 บาท</span></p>
+                    <p class="text-rose-700">💰 ทุนสูงสุด/กรมธรรม์: <span class="font-bold">10,000,000 บาท</span></p>
+                    <p class="text-rose-700">📊 รวมทุกกรมธรรม์: <span class="font-bold">ไม่เกิน 20,000,000 บาท</span></p>
+                    <p class="text-rose-700">📐 สัดส่วนสัญญาหลัก: <span class="font-bold">ไม่เกิน 5 เท่า</span></p>
                 </div>
                 <div class="bg-rose-50 p-3 rounded-xl border border-rose-100">
-                    <p class="font-bold text-rose-700 mb-1"><i class="fas fa-shield-heart mr-1"></i>เงื่อนไขทุนประกัน</p>
-                    <p class="text-rose-600 leading-relaxed">ซื้อได้สูงสุด <span class="font-bold">5 เท่า</span>ของทุนหลัก CX<br>และไม่เกิน <span class="font-bold">10,000,000 บาท</span></p>
+                    <p class="font-bold text-rose-800 mb-2">วงเงินตามรายได้ต่อปี</p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between"><span class="text-rose-600">อายุ 16–40 ปี</span><span class="font-bold text-rose-800">ไม่เกิน 20 เท่า</span></div>
+                        <div class="flex justify-between"><span class="text-rose-600">อายุ 41–50 ปี</span><span class="font-bold text-rose-800">ไม่เกิน 15 เท่า</span></div>
+                        <div class="flex justify-between"><span class="text-rose-600">อายุ 51–60 ปี</span><span class="font-bold text-rose-800">ไม่เกิน 8 เท่า</span></div>
+                        <div class="flex justify-between"><span class="text-rose-600">อายุ 61–65 ปี</span><span class="font-bold text-rose-800">ไม่เกิน 5 เท่า</span></div>
+                    </div>
                 </div>
             </div>
             <button onclick="document.getElementById('dd50InfoPopup').remove()" class="mt-3 w-full py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-xl text-[13px] transition-colors border border-rose-200">ปิด</button>
         </div>`;
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
-    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 6000);
+    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 8000);
 }
+window.showDD50Info = _showDD50Info;
 
 window._setupDD50LongPress = function() {
     const row = document.getElementById('dd50HeaderRow');
