@@ -589,7 +589,7 @@ function calculate(source, enforceMin = false) {
                 if (age > 45) age = 45;
             }
         }
-        
+
         if (currentAppPlan === '868 / 818 Elite Saving') {
             currentPlan = age <= 50 ? 'S868' : 'S818';
         }
@@ -600,9 +600,15 @@ function calculate(source, enforceMin = false) {
 
         if (currentAppPlan === 'LifeTime Value') {
             if (currentPlan === '15LV' && age > 45) age = 45;
-            if (currentPlan === '20LV' && age > 40) age = 40;
-            if (currentPlan === '10LV' && age > 55) age = 55;
+            else if (currentPlan === '20LV' && age > 40) age = 40;
+            else if (currentPlan === '10LV' && age > 55) age = 55;
+            if (age < 0) age = 0;
         }
+
+        if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && age > 55) age = 55;
+
+        // sync ageInput ให้ตรงกับ age ที่ถูก clamp เสมอ — ป้องกัน lastCalculationData.age ≠ ageInput
+        if (ageInput && parseInt(ageInput.value) !== age) ageInput.value = age;
 
         if (source === 'sum') fSum = getSafeValue('sumInsuredInput');
         else if (source === 'premium') fPrem = getSafeValue('premiumInput');
