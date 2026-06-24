@@ -607,9 +607,6 @@ function calculate(source, enforceMin = false) {
 
         if (currentAppPlan === 'Century Life' && currentPlan === '60CL' && age > 55) age = 55;
 
-        // sync ageInput ให้ตรงกับ age ที่ถูก clamp เสมอ — ป้องกัน lastCalculationData.age ≠ ageInput
-        if (ageInput && parseInt(ageInput.value) !== age) ageInput.value = age;
-
         if (source === 'sum') fSum = getSafeValue('sumInsuredInput');
         else if (source === 'premium') fPrem = getSafeValue('premiumInput');
 
