@@ -35,7 +35,7 @@ const PLAN_CONFIG = {
     "LifeTime Value": { abbr: "LV", minAge: 0, maxAge: 55, minSum: 80000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10LV', '15LV', '20LV'], hasCashFlow: true },
     "Century Life": { abbr: "CL", minAge: 0, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
-    "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 65, minSum: 1000000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
+    "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 60, minSum: 400000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
     "Smart Plan 21/7": { abbr: "7SM", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['7SM'], hasCashFlow: true },
     "Step Annuity": { abbr: "STA", minAge: 20, maxAge: 50, minSum: 100000, minPrem: 0, getMaxSum: (age) => 30000000, options: ['AS10', 'AS60'], hasCashFlow: false },
     "Medical Fund": { abbr: "MF", minAge: 0, maxAge: 99, minSum: 0, minPrem: 0, getMaxSum: (age) => Infinity, options: [], hasCashFlow: false }
@@ -1036,7 +1036,9 @@ function calculate(source, enforceMin = false) {
             }
 
             if (totalRate > 0) {
-                const _minS = currentAppPlan === 'Century Life' ? getCLMinSum() : config.minSum;
+                const _minS = currentAppPlan === 'Century Life' ? getCLMinSum()
+                           : currentAppPlan === 'Convertable Term' ? (currentGender === 'female' ? 600000 : 400000)
+                           : config.minSum;
                 const _maxS = config.getMaxSum ? config.getMaxSum(age) : Infinity;
                 if (source === 'sum') {
                     if (enforceMin && fSum < _minS) {

@@ -1289,7 +1289,7 @@ function showPlansByAge(age) {
         // 3D Health Excellence
         { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'',       desc:'ประกันสุขภาพ · รับอายุ 11–75 ปี',     minAge:11, maxAge:75 },
         // Convertable Term
-        { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'',       desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:65 },
+        { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'',       desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:60 },
         // Smart Plan 21/7
         { planName:'Smart Plan 21/7',        abbr:'7SM',    icon:'fa-bolt',              color:'yellow',  label:'Smart Plan 21/7',        badge:'',       desc:'ออม 21 ปี · ชำระ 7 ปี',              minAge:0,  maxAge:70 },
     ];
@@ -2425,7 +2425,7 @@ function getConditionsHTML(planName) {
         'Supreme Life Protector': 'แรกเกิด - 70 ปี',
         'Century Life':           'แรกเกิด - 75 ปี',
         '3D Health Excellence':   '11 - 75 ปี',
-        'Convertable Term':       '20 - 65 ปี',
+        'Convertable Term':       '20 - 60 ปี',
         'Medical Fund':           'ขึ้นกับบริษัทและแผนที่เลือก',
         'Smart Plan 21/7':        '31 วัน - 70 ปี',
         '678 Step Savings':       'แรกเกิด - 60 ปี',
@@ -2449,6 +2449,22 @@ function getConditionsHTML(planName) {
     }
     issueAge = issueAge || 'โปรดดูรายละเอียดในเล่มกรมธรรม์';
 
+    // TLA extra conditions block
+    const isTLAPlan = planName === 'Convertable Term';
+    const tlaExtraHTML = isTLAPlan ? `
+        <div class="bg-orange-50 p-3 rounded-xl border border-orange-100 space-y-1">
+            <p class="text-[12px] text-orange-700 font-bold mb-1">ทุนประกันขั้นต่ำ</p>
+            <div class="flex items-center gap-2"><i class="fas fa-mars text-blue-500 text-[13px] w-4"></i><span class="text-[13px] text-slate-700">ผู้ชาย: <span class="font-bold text-slate-800">400,000 บาท</span></span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-venus text-rose-500 text-[13px] w-4"></i><span class="text-[13px] text-slate-700">ผู้หญิง: <span class="font-bold text-slate-800">600,000 บาท</span></span></div>
+        </div>
+        <div class="bg-green-50 p-3 rounded-xl border border-green-100 flex items-start gap-3">
+            <i class="fas fa-plus-circle text-green-500 mt-0.5 text-[16px] shrink-0"></i>
+            <div class="flex-1">
+                <p class="text-[12px] text-slate-500 font-bold mb-1">สัญญาเพิ่มเติม</p>
+                <p class="text-[13px] text-green-800">สามารถซื้อสัญญาเพิ่มเติมแนบท้ายได้</p>
+            </div>
+        </div>` : '';
+
     return `<div class="space-y-2">
         <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3">
             <i class="fas fa-birthday-cake text-blue-500 mt-0.5 text-[16px] shrink-0"></i>
@@ -2457,6 +2473,7 @@ function getConditionsHTML(planName) {
                 <p class="text-[15px] font-bold text-blue-800 leading-tight">${issueAge}</p>
             </div>
         </div>
+        ${tlaExtraHTML}
     </div>`;
 }
 
@@ -7272,6 +7289,8 @@ function generatePolicyTableData() {
 
     for (let y = 1; y <= cfLoopEnd; y++) {
         let currentAge = d.age + y;
+        // LV: ใช้ start-of-year age เพื่อให้แถวแรกตรงกับอายุที่กรอก (เช่น อายุ 30 → แถวแรกแสดง 30)
+        const lvDisplayAge = isLV ? currentAge - 1 : currentAge;
 
         // SLPA: ทุนประกันเพิ่มขึ้น 5% ของทุนเริ่มต้น ทุกวันครบรอบ 5 ปีกรมธรรม์ (ไม่เกินอายุ 90 ปี)
         const slpaEffectiveSA = (isSLPA && !isSurrenderActive)
@@ -7339,8 +7358,8 @@ function generatePolicyTableData() {
                 else if (currentAge > 61 && currentAge < 90) cashFlowAmt = Math.round(currentSA * (0.10 + ((currentAge - 61) * 0.005)));
                 else if (currentAge == 90) cashFlowAmt = Math.round(currentSA);
             } else if (isLV) {
-                if (currentAge >= 100) cashFlowAmt = Math.round(currentSA * 1.50); // ครบกำหนดสัญญา 150%
-                else cashFlowAmt = Math.round(currentSA * lvCashbackPct(currentAge) / 100);
+                if (y === maxYear) cashFlowAmt = Math.round(currentSA * 1.50); // ครบกำหนดสัญญา อายุ 100 → 150%
+                else cashFlowAmt = Math.round(currentSA * lvCashbackPct(lvDisplayAge) / 100);
             } else if (isSM) {
                 if (y === 21) cashFlowAmt = Math.round(currentSA * 2.12); // ครบกำหนดสัญญา 212%
                 else if (y >= 2 && y <= 20) cashFlowAmt = Math.round(currentSA * 0.02); // คืน 2% ต่อปี
@@ -7372,7 +7391,7 @@ function generatePolicyTableData() {
             let breakevenValue = (isElitePlan || is678 || isTX || isWXN || isLV || isSM) ? surrenderTotal
                                : cvTotal;
             if (breakevenValue >= totalSaving) {
-                foundBreakeven = true; beYear = y; beAge = currentAge; beAmount = breakevenValue;
+                foundBreakeven = true; beYear = y; beAge = lvDisplayAge; beAmount = breakevenValue;
             }
         }
 
@@ -7390,7 +7409,7 @@ function generatePolicyTableData() {
             //   1) %ทุน × ทุนประกัน (100/150/200% ตามปี/อายุ)
             //   2) เงินสดพร้อมใช้ (cvTotal)
             //   3) 105% ของเบี้ยสะสม − เงินคืนสะสม (รวมปีปัจจุบัน)
-            const _lvTier  = Math.round(currentSA * lvDeathMultiplier(y, currentAge));
+            const _lvTier  = Math.round(currentSA * lvDeathMultiplier(y, lvDisplayAge));
             const _lvFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
         } else if (isSM && currentSA > 0) {
@@ -7413,7 +7432,7 @@ function generatePolicyTableData() {
 
         // ฝากสะสม ทบต้น: pool × (1+rate) + cashFlow ของปีนี้ (สะสมถึงอายุที่กำหนด)
         if (showDepositColumn) {
-            if (currentAge <= window._tableDepositUntilAge) {
+            if (lvDisplayAge <= window._tableDepositUntilAge) {
                 depositPool = Math.round(depositPool * (1 + window._tableDepositRate) + cashFlowAmt);
             } else {
                 depositPool = Math.round(depositPool * (1 + window._tableDepositRate));
@@ -7425,23 +7444,23 @@ function generatePolicyTableData() {
         const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
-        const rowId = (isBreakevenActive && y === beYear) ? 'breakevenRow' : `policyRow_${currentAge}`;
+        const rowId = (isBreakevenActive && y === beYear) ? 'breakevenRow' : `policyRow_${lvDisplayAge}`;
         if (isBreakevenActive && y === beYear) trClass = "be-highlight-row border-y-2 border-emerald-400 relative z-10";
         else if (isSurrenderActive && hasSurrenderMenu && (cfMainMode === 'specific' ? cfWithdrawalSchedule[y] !== undefined : y === cfFirstWithdrawalYear)) trClass = "bg-amber-50 border-y border-amber-300 cf-highlight-row";
 
         const _fSz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';';
         const _cvStar = (y === cvStarYear)
-            ? `<span onclick="event.stopPropagation();window._showCvStarDetail(${totalSaving},${accCashFlow},${cvTotal},${currentAge})" style="cursor:pointer;color:#f59e0b;margin-right:2px;" title="เงินสดพร้อมใช้มากกว่าเงินออมแล้ว">★</span>`
+            ? `<span onclick="event.stopPropagation();window._showCvStarDetail(${totalSaving},${accCashFlow},${cvTotal},${lvDisplayAge})" style="cursor:pointer;color:#f59e0b;margin-right:2px;" title="เงินสดพร้อมใช้มากกว่าเงินออมแล้ว">★</span>`
             : '';
         html += `<tr id="${rowId}" class="${trClass}">
-            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${_cvStar}${currentAge}</td>
+            <td class="${_tdBase} text-slate-700 font-medium text-center" style="${_fSz}">${_cvStar}${lvDisplayAge}</td>
             ${hideAnnualSaving ? '' : `<td class="${_tdBase} text-slate-700 text-right" style="${_fSz}">${annualSaving > 0 ? annualSaving.toLocaleString() : "-"}</td>`}
             ${showTaxColumn ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${(y <= payYears && annualSaving > 0) ? _taxAmt.toLocaleString() : "-"}</td>` : ''}
             ${hideAnnualSaving ? `<td class="${_tdBase} text-amber-700 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : '—'}</td>` : ''}
             ${forceShowCashFlow ? `<td class="${_tdBase} text-blue-600 font-bold text-right" style="${_fSz}">${cashFlowAmt > 0 ? cashFlowAmt.toLocaleString() : "-"}</td><td class="${_tdBase} text-indigo-600 font-bold text-right" style="${_fSz}">${accCashFlow > 0 ? accCashFlow.toLocaleString() : "-"}</td>` : ''}
-            ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${currentAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (currentAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
+            ${showDepositColumn ? `<td class="${_tdBase} font-bold text-right" style="${_fSz}${lvDisplayAge === window._tableDepositUntilAge ? 'color:#059669;background:rgba(5,150,105,0.08);' : (lvDisplayAge > window._tableDepositUntilAge ? 'color:#7c3aed;' : 'color:#0d9488;')}">${depositPool > 0 ? depositPool.toLocaleString() : '-'}</td>` : ''}`;
         if (_mfLabel && _mfMap) {
-            const _mfP = window.mfPremForAge(_mfMap, currentAge);
+            const _mfP = window.mfPremForAge(_mfMap, lvDisplayAge);
             const _mfChg = _mfP !== _mfPrevPrem;
             _mfPrevPrem = _mfP;
             const _mfStyle = _mfChg
