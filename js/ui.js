@@ -7518,12 +7518,15 @@ function generatePolicyTableData() {
         if (y >= cfLoopEnd) break;
     }
 
-    // --- บรรทัดสุดท้าย: รวมตัวเลข (เฉพาะ 7SM ที่เลือกภาษี) ---
-    if (showTaxColumn) {
+    // --- บรรทัดสุดท้าย: รวมตัวเลข (7SM ที่เลือกภาษี และ/หรือ สรุปเบี้ยประกันสุขภาพ+เงินคงเหลือ) ---
+    if (showTaxColumn || (_mfLabel && _mfMap)) {
         const _totFsz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';font-weight:800;';
         const _boxStyle = `${_totFsz}color:#1e3a8a;background:#eff6ff;`;
         const _boxTd = v => `<td class="${_tdBase} text-right" style="${_boxStyle}">${v.toLocaleString()}</td>`;
         const _blankTd = `<td class="${_tdBase}"></td>`;
+        const _finalMfRem = accCashFlow - _accMfPrem;
+        const _mfPremStyle = `${_totFsz}color:#c2410c;background:#fff7ed;`;
+        const _mfRemStyle = `${_totFsz}color:${_finalMfRem >= 0 ? '#059669' : '#dc2626'};background:#fff7ed;`;
         let trow = `<tr class="border-t-2 border-slate-300">`;
         trow += `<td class="${_tdBase} text-center" style="${_totFsz}color:#1e3a8a;">รวม</td>`;
         trow += hideAnnualSaving ? '' : _boxTd(totalSaving);
@@ -7531,7 +7534,12 @@ function generatePolicyTableData() {
         trow += hideAnnualSaving ? _blankTd : '';
         trow += forceShowCashFlow ? (_boxTd(accCashFlow) + _blankTd) : '';
         trow += showDepositColumn ? _blankTd : '';
-        if (_mfLabel) trow += _blankTd + _blankTd;
+        if (_mfLabel && _mfMap) {
+            trow += `<td class="${_tdBase} text-right" style="${_mfPremStyle}" title="เบี้ยประกันสุขภาพทั้งหมด">${_accMfPrem.toLocaleString('en-US')}</td>`;
+            trow += `<td class="${_tdBase} text-right" style="${_mfRemStyle}" title="เงินคงเหลือทั้งหมด">${_finalMfRem.toLocaleString('en-US')}</td>`;
+        } else if (_mfLabel) {
+            trow += _blankTd + _blankTd;
+        }
         if (window._netExtraRiders) { for (let _ri = 0; _ri < window._netExtraRiders.length; _ri++) trow += _blankTd + _blankTd; }
         trow += (isBreakevenActive || isShowCVActive || isSurrenderActive || isCVColActive) ? (_blankTd + _blankTd) : '';
         trow += showDD50Column ? _blankTd : '';
