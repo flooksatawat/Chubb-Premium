@@ -3,26 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/prepare-hosting-assets.mjs",
-    "dev": "next dev",
-    "prebuild": "node scripts/prepare-hosting-assets.mjs",
-    "build": "next build",
-    "start": "next start"
+    "build": "node scripts/build-static.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
-  },
-  "dependencies": {
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
-  },
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "@types/react": "^19.0.0",
-    "typescript": "^5.9.0"
-  },
-  "overrides": {
-    "postcss": "8.5.19"
   }
 }
