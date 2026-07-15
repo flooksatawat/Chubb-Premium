@@ -2,10 +2,20 @@
   "name": "chubb-premium",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "node scripts/build-static.mjs"
+    "predev": "node scripts/prepare-hosting-assets.mjs",
+    "dev": "vinext dev",
+    "prebuild": "node scripts/prepare-hosting-assets.mjs",
+    "build": "vinext build",
+    "postbuild": "node scripts/finalize-hosting-build.mjs",
+    "start": "vinext start"
   },
   "engines": {
     "node": ">=20.9.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-rsc": "0.5.27",
+    "vinext": "1.0.0-beta.1"
   }
 }
