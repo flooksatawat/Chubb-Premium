@@ -4,11 +4,12 @@
 //   Execute as: Me  |  Who has access: Anyone
 // ================================================================
 
-const SHEET_NAME   = 'users';
-const LINE_TOKEN   = '4iywSmI5WCO1DNj6ZKbeX/IEC0z8jolKXPBRNpr1z8PRMNpewEGeHv3CzciQ71jGjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3zSzGgLst8X+An6jf3Bb87YBlAOJd0V5emHgULgOe2zDwdB04t89/1O/w1cDnyilFU=';
-const ADMIN_ID     = 'U32acf744ebc29839f6639049cb5f3001';
-const ADMIN_KEY    = 'chubb2025admin';
-const GAS_URL      = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+const SHEET_NAME       = 'users';
+const ADMIN_SHEET_NAME = 'admins';
+const LINE_TOKEN       = '4iywSmI5WCO1DNj6ZKbeX/IEC0z8jolKXPBRNpr1z8PRMNpewEGeHv3CzciQ71jGjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3zSzGgLst8X+An6jf3Bb87YBlAOJd0V5emHgULgOe2zDwdB04t89/1O/w1cDnyilFU=';
+const ADMIN_ID         = 'U32acf744ebc29839f6639049cb5f3001';
+const ADMIN_KEY        = 'chubb2025admin';
+const GAS_URL          = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
 
 // ── CORS headers ──────────────────────────────────────────────
 function corsOutput(obj) {
@@ -139,6 +140,39 @@ function rejectUser(userId) {
   return { ok: false, error: 'not_found' };
 }
 
+function getAdminIds() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ADMIN_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return [ADMIN_ID];
+
+  const ids = sheet.getDataRange().getValues().slice(1)
+    .filter(row => String(row[2] || '').trim().toLowerCase() === 'active')
+    .map(row => String(row[0] || '').trim())
+    .filter(Boolean);
+  return [...new Set(ids.length ? ids : [ADMIN_ID])];
+}
+
+function pushToAdmins(messages) {
+  let sent = 0;
+  let failed = 0;
+  getAdminIds().forEach(adminId => {
+    try {
+      const response = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+        method: 'post',
+        contentType: 'application/json',
+        headers: { Authorization: 'Bearer ' + LINE_TOKEN },
+        payload: JSON.stringify({ to: adminId, messages }),
+        muteHttpExceptions: true
+      });
+      if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) sent++;
+      else failed++;
+    } catch (e) {
+      failed++;
+      console.error('pushToAdmins failed', e);
+    }
+  });
+  return { sent, failed };
+}
+
 // ── แจ้ง admin ผ่าน LINE Push (Flex Message) ──────────────────
 function notifyAdmin(userId, displayName, pictureUrl) {
   try {
@@ -167,13 +201,7 @@ function notifyAdmin(userId, displayName, pictureUrl) {
       }
     };
     const flex = { type: 'flex', altText: '🔔 คำขอใช้งานใหม่: ' + displayName, contents: bubble };
-    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
-      method: 'post',
-      contentType: 'application/json',
-      headers: { Authorization: 'Bearer ' + LINE_TOKEN },
-      payload: JSON.stringify({ to: ADMIN_ID, messages: [flex] }),
-      muteHttpExceptions: true
-    });
+    pushToAdmins([flex]);
   } catch (e) {
     console.error('notifyAdmin failed', e);
   }
@@ -213,13 +241,9 @@ function notifyAuthorizedAccess(userId, displayName, source, device) {
       }
     };
     const flex = { type: 'flex', altText: 'มีผู้เข้าใช้งาน: ' + (displayName || 'ไม่ทราบชื่อ'), contents: bubble };
-    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
-      method: 'post',
-      contentType: 'application/json',
-      headers: { Authorization: 'Bearer ' + LINE_TOKEN },
-      payload: JSON.stringify({ to: ADMIN_ID, messages: [flex] }),
-      muteHttpExceptions: true
-    });
+    const delivery = pushToAdmins([flex]);
+    if (delivery.sent === 0) return 'failed';
+    if (delivery.failed > 0) console.warn('Some admin notifications failed', delivery);
     return 'sent';
   } catch (e) {
     console.error('notifyAuthorizedAccess failed', e);
