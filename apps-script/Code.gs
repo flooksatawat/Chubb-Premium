@@ -6,10 +6,13 @@
 
 const SHEET_NAME       = 'users';
 const ADMIN_SHEET_NAME = 'admins';
-const LINE_TOKEN       = '4iywSmI5WCO1DNj6ZKbeX/IEC0z8jolKXPBRNpr1z8PRMNpewEGeHv3CzciQ71jGjhUN5EyaMOB4o05KMzhGPF5G4XU7/AVnoJMu3fPcQ3zSzGgLst8X+An6jf3Bb87YBlAOJd0V5emHgULgOe2zDwdB04t89/1O/w1cDnyilFU=';
-const ADMIN_ID         = 'U32acf744ebc29839f6639049cb5f3001';
-const ADMIN_KEY        = 'chubb2025admin';
 const GAS_URL          = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+
+function getRequiredScriptProperty(name) {
+  const value = PropertiesService.getScriptProperties().getProperty(name);
+  if (!value) throw new Error('Missing Script Property: ' + name);
+  return value;
+}
 
 // ── CORS headers ──────────────────────────────────────────────
 function corsOutput(obj) {
@@ -37,8 +40,9 @@ function doGet(e) {
     return corsOutput(result);
   }
   if (action === 'request') return corsOutput(requestAccess(userId, name, (e.parameter.pictureUrl || '').trim()));
-  if (action === 'approve' && key === ADMIN_KEY) return htmlOutput(approveUser(userId));
-  if (action === 'reject'  && key === ADMIN_KEY) return htmlOutput(rejectUser(userId));
+  const adminKey = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+  if (action === 'approve' && adminKey && key === adminKey) return htmlOutput(approveUser(userId));
+  if (action === 'reject'  && adminKey && key === adminKey) return htmlOutput(rejectUser(userId));
   return corsOutput({ ok: false, error: 'unknown action' });
 }
 
@@ -142,16 +146,18 @@ function rejectUser(userId) {
 
 function getAdminIds() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ADMIN_SHEET_NAME);
-  if (!sheet || sheet.getLastRow() < 2) return [ADMIN_ID];
+  const fallbackId = PropertiesService.getScriptProperties().getProperty('FALLBACK_ADMIN_ID');
+  if (!sheet || sheet.getLastRow() < 2) return fallbackId ? [fallbackId] : [];
 
   const ids = sheet.getDataRange().getValues().slice(1)
     .filter(row => String(row[2] || '').trim().toLowerCase() === 'active')
     .map(row => String(row[0] || '').trim())
     .filter(Boolean);
-  return [...new Set(ids.length ? ids : [ADMIN_ID])];
+  return [...new Set(ids.length ? ids : (fallbackId ? [fallbackId] : []))];
 }
 
 function pushToAdmins(messages) {
+  const lineToken = getRequiredScriptProperty('LINE_CHANNEL_ACCESS_TOKEN');
   let sent = 0;
   let failed = 0;
   getAdminIds().forEach(adminId => {
@@ -159,7 +165,7 @@ function pushToAdmins(messages) {
       const response = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
         method: 'post',
         contentType: 'application/json',
-        headers: { Authorization: 'Bearer ' + LINE_TOKEN },
+        headers: { Authorization: 'Bearer ' + lineToken },
         payload: JSON.stringify({ to: adminId, messages }),
         muteHttpExceptions: true
       });
@@ -176,8 +182,9 @@ function pushToAdmins(messages) {
 // ── แจ้ง admin ผ่าน LINE Push (Flex Message) ──────────────────
 function notifyAdmin(userId, displayName, pictureUrl) {
   try {
-    const approveUrl = GAS_URL + '?action=approve&userId=' + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
-    const rejectUrl  = GAS_URL + '?action=reject&userId='  + encodeURIComponent(userId) + '&key=' + ADMIN_KEY;
+    const adminKey = getRequiredScriptProperty('ADMIN_KEY');
+    const approveUrl = GAS_URL + '?action=approve&userId=' + encodeURIComponent(userId) + '&key=' + adminKey;
+    const rejectUrl  = GAS_URL + '?action=reject&userId='  + encodeURIComponent(userId) + '&key=' + adminKey;
     const bubble = {
       type: 'bubble',
       header: {
@@ -254,10 +261,11 @@ function notifyAuthorizedAccess(userId, displayName, source, device) {
 // ── แจ้ง user ผลการอนุมัติ ────────────────────────────────────
 function notifyUser(userId, message) {
   try {
+    const lineToken = getRequiredScriptProperty('LINE_CHANNEL_ACCESS_TOKEN');
     UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
       method: 'post',
       contentType: 'application/json',
-      headers: { Authorization: 'Bearer ' + LINE_TOKEN },
+      headers: { Authorization: 'Bearer ' + lineToken },
       payload: JSON.stringify({ to: userId, messages: [{ type: 'text', text: message }] }),
       muteHttpExceptions: true
     });
