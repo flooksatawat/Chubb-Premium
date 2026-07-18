@@ -69,6 +69,12 @@ function doPost(e) {
       return corsOutput({ ok: true });
     }
     const action = body.action || '';
+    if (action === 'add' || action === 'remove') {
+      const adminKey = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+      if (!adminKey || String(body.key || '').trim() !== adminKey) {
+        return corsOutput({ ok: false, error: 'unauthorized' });
+      }
+    }
     if (action === 'add')    return corsOutput(addUser(body.userId, body.displayName));
     if (action === 'remove') return corsOutput(removeUser(body.userId));
   } catch (err) {
@@ -105,13 +111,13 @@ function requestAccess(userId, displayName, pictureUrl) {
         sheet.getRange(i + 1, 2).setValue(displayName || data[i][1]);
         sheet.getRange(i + 1, 3).setValue('pending');
       }
-      notifyAdmin(userId, displayName || data[i][1], pictureUrl);
-      return { ok: true, status: 'pending' };
+      const delivery = notifyAdmin(userId, displayName || data[i][1], pictureUrl);
+      return { ok: true, status: 'pending', adminNotification: delivery };
     }
   }
   sheet.appendRow([userId, displayName || '', 'pending', new Date().toISOString().split('T')[0]]);
-  notifyAdmin(userId, displayName || '', pictureUrl);
-  return { ok: true, status: 'pending' };
+  const delivery = notifyAdmin(userId, displayName || '', pictureUrl);
+  return { ok: true, status: 'pending', adminNotification: delivery };
 }
 
 // ── อนุมัติ ────────────────────────────────────────────────────
@@ -158,9 +164,10 @@ function getAdminIds() {
 
 function pushToAdmins(messages) {
   const lineToken = getRequiredScriptProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  const adminIds = getAdminIds();
   let sent = 0;
   let failed = 0;
-  getAdminIds().forEach(adminId => {
+  adminIds.forEach(adminId => {
     try {
       const response = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
         method: 'post',
@@ -176,7 +183,7 @@ function pushToAdmins(messages) {
       console.error('pushToAdmins failed', e);
     }
   });
-  return { sent, failed };
+  return { recipientCount: adminIds.length, sent, failed };
 }
 
 // ── แจ้ง admin ผ่าน LINE Push (Flex Message) ──────────────────
@@ -208,9 +215,10 @@ function notifyAdmin(userId, displayName, pictureUrl) {
       }
     };
     const flex = { type: 'flex', altText: '🔔 คำขอใช้งานใหม่: ' + displayName, contents: bubble };
-    pushToAdmins([flex]);
+    return pushToAdmins([flex]);
   } catch (e) {
     console.error('notifyAdmin failed', e);
+    return { recipientCount: 0, sent: 0, failed: 1 };
   }
 }
 
