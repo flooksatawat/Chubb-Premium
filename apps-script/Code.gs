@@ -23,7 +23,18 @@ function doGet(e) {
   const name    = (e.parameter.displayName || '').trim();
   const key     = (e.parameter.key || '').trim();
 
-  if (action === 'check')   return corsOutput(checkUser(userId));
+  if (action === 'check') {
+    const result = checkUser(userId);
+    if (result.authorized && e.parameter.notifyAccess === '1') {
+      result.accessNotification = notifyAuthorizedAccess(
+        userId,
+        result.displayName,
+        (e.parameter.source || '').trim(),
+        (e.parameter.device || '').trim()
+      );
+    }
+    return corsOutput(result);
+  }
   if (action === 'request') return corsOutput(requestAccess(userId, name, (e.parameter.pictureUrl || '').trim()));
   if (action === 'approve' && key === ADMIN_KEY) return htmlOutput(approveUser(userId));
   if (action === 'reject'  && key === ADMIN_KEY) return htmlOutput(rejectUser(userId));
@@ -165,6 +176,54 @@ function notifyAdmin(userId, displayName, pictureUrl) {
     });
   } catch (e) {
     console.error('notifyAdmin failed', e);
+  }
+}
+
+// ── แจ้ง admin เมื่อผู้ใช้ที่ active เข้าใช้งาน ────────────────
+function notifyAuthorizedAccess(userId, displayName, source, device) {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'access_' + userId;
+  if (cache.get(cacheKey)) return 'deduplicated';
+
+  cache.put(cacheKey, '1', 1800);
+  try {
+    const accessedAt = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss');
+    const detailRow = (label, value) => ({
+      type: 'box', layout: 'baseline', spacing: 'sm',
+      contents: [
+        { type: 'text', text: label, color: '#64748b', size: 'sm', flex: 2 },
+        { type: 'text', text: value || '-', color: '#1e293b', size: 'sm', flex: 5, wrap: true }
+      ]
+    });
+    const bubble = {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: '#059669',
+        contents: [{ type: 'text', text: '✅ มีผู้เข้าใช้งาน', color: '#ffffff', weight: 'bold', size: 'lg' }]
+      },
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'md',
+        contents: [
+          { type: 'text', text: displayName || 'ไม่ทราบชื่อ', weight: 'bold', size: 'md', wrap: true },
+          { type: 'separator', margin: 'sm' },
+          detailRow('เวลา', accessedAt),
+          detailRow('ช่องทาง', source),
+          detailRow('อุปกรณ์', device)
+        ]
+      }
+    };
+    const flex = { type: 'flex', altText: 'มีผู้เข้าใช้งาน: ' + (displayName || 'ไม่ทราบชื่อ'), contents: bubble };
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + LINE_TOKEN },
+      payload: JSON.stringify({ to: ADMIN_ID, messages: [flex] }),
+      muteHttpExceptions: true
+    });
+    return 'sent';
+  } catch (e) {
+    console.error('notifyAuthorizedAccess failed', e);
+    return 'failed';
   }
 }
 

@@ -2367,9 +2367,21 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         return r.json();
     }
 
+    function accessContext() {
+        const ua = navigator.userAgent;
+        const device = /iPhone|iPad|iPod/i.test(ua) ? 'iPhone / iPad'
+            : /Android/i.test(ua) ? 'Android'
+            : 'คอมพิวเตอร์';
+        return {
+            notifyAccess: '1',
+            source: window.IS_IN_LIFF ? 'LINE LIFF' : 'เว็บเบราว์เซอร์',
+            device
+        };
+    }
+
     async function checkAuth(userId) {
         try {
-            const d = await callAPI({ action: 'check', userId });
+            const d = await callAPI({ action: 'check', userId, ...accessContext() });
             return { ...d, fromCache: false };
         } catch {
             const c = getLS(AUTH_CACHE_KEY);
