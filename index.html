@@ -2286,27 +2286,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     const CACHE_KEY        = 'chubb_profile_v2';
     const AUTH_CACHE_KEY   = 'chubb_auth_v2';
     const EXT_SHOWN_KEY    = 'chubb_ext_shown';
-    const SHEET_CSV_URL    = 'https://docs.google.com/spreadsheets/d/1rRFtQz1RSKXoA8wC9q5yAV12G7BuProEZcFfsL30IYc/export?format=csv&gid=568338827';
-
-    /* -- ตรวจสอบชื่อ LINE ใน Google Sheets ทุกครั้ง (fail-closed) -- */
-    async function checkSheet(displayName) {
-        try {
-            // ใช้ apiFetch เพื่อหลีกเลี่ยง CORS ใน LIFF browser
-            const r = await apiFetch(SHEET_CSV_URL);
-            if (!r.ok) return false;
-            const text = await r.text();
-            // ถ้า response เป็น HTML (redirect ไป login page) → ถือว่า fetch ไม่ได้
-            if (text.trim().startsWith('<')) return false;
-            const nameLower = displayName.trim().toLowerCase();
-            return text.split('\n').some(row =>
-                row.split(',').some(cell =>
-                    cell.replace(/^"|"$/g, '').trim().toLowerCase() === nameLower
-                )
-            );
-        } catch {
-            return false; // fail-closed — ถ้า error ให้บล็อกไว้ก่อน
-        }
-    }
 
     const overlay     = document.getElementById('lineLoginOverlay');
     const loginBtn    = document.getElementById('lineLoginBtn');
@@ -2515,19 +2494,24 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
             history.replaceState(null, '', location.pathname);
         }
 
-        /* 1. Cache authorized → ตรวจสอบ Sheet ก่อนเปิดแอปเสมอ */
+        /* 1. Cache authorized → ยืนยันสถานะด้วย LINE userId ก่อนเปิดแอปเสมอ */
         const cachedProfile = getLS(CACHE_KEY);
         const cachedAuth    = getLS(AUTH_CACHE_KEY);
         if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
-            setState('loading', 'กำลังตรวจสอบรายชื่อ...');
-            const inSheet = await checkSheet(cachedProfile.displayName);
-            if (!inSheet) {
-                /* ชื่อถูกลบออกจาก Sheet → ล้าง cache แล้วให้ขอสิทธิ์ใหม่ */
+            setState('loading', 'กำลังตรวจสอบสิทธิ์...');
+            const d = await checkAuth(cachedProfile.userId);
+            if (!d.authorized) {
                 clearLS();
                 $('authRequestName').textContent = `สวัสดี ${cachedProfile.displayName} 👋`;
                 window.lineProfile = cachedProfile;
-                setState('request');
+                if (d.status === 'pending') {
+                    setLS(CACHE_KEY, cachedProfile);
+                    setLS(AUTH_CACHE_KEY, { ok: false, status: 'pending', ts: Date.now() });
+                    setState('pending');
+                } else {
+                    setState('request');
+                }
                 return;
             }
             await window._liffReady;
@@ -2592,15 +2576,6 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         const d = await checkAuth(profile.userId);
 
         if (d.authorized) {
-            /* 5.1 อนุมัติแล้ว → ตรวจสอบ Sheet เป็นด่านสุดท้าย */
-            setState('loading', 'กำลังตรวจสอบรายชื่อ...');
-            const inSheet = await checkSheet(profile.displayName);
-            if (!inSheet) {
-                /* ถูกลบออกจาก Sheet → ให้ขอสิทธิ์ใหม่ */
-                $('authRequestName').textContent = `สวัสดี ${profile.displayName} 👋`;
-                setState('request');
-                return;
-            }
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
             openApp();
