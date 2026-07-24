@@ -686,10 +686,12 @@ function calculate(source, enforceMin = false) {
                     let baseDiscountArray = [5, 4, 2, 0];
                     fSum = 0;
                     for (let d_val of baseDiscountArray) { 
-                        let s = Math.round((basePrem * 1000) / (clRate - d_val)); 
+                        // Excel 24TX uses ROUND(..., 2) for premium -> sum assured.
+                        // Preserve satang-level precision before validating the discount tier.
+                        let s = Math.round(((basePrem * 1000) / (clRate - d_val)) * 100) / 100;
                         if (getDiscount(s, '24TX') === d_val) { fSum = s; break; } 
                     } 
-                    if (fSum === 0) fSum = clRate > 0 ? Math.round((basePrem * 1000) / clRate) : 0;
+                    if (fSum === 0) fSum = clRate > 0 ? Math.round(((basePrem * 1000) / clRate) * 100) / 100 : 0;
                 }
                 
                 const maxSumAllowed = config.getMaxSum ? config.getMaxSum(age) : Infinity;
