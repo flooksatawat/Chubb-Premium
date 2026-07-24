@@ -1,0 +1,77 @@
+---
+name: Telegram Notify
+
+'on':
+  workflow_run:
+    workflows:
+      - pages-build-deployment
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: telegram-notify-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Validate Telegram secrets
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Required Telegram secrets are not configured."
+            exit 1
+          fi
+
+      - name: Send Telegram notification
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_STATUS: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          MANUAL_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            source_name="${WORKFLOW_NAME:-GitHub Pages deployment}"
+            status="${WORKFLOW_STATUS:-unknown}"
+            commit_sha="${WORKFLOW_SHA:-unknown}"
+            default_url="$SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID"
+            run_url="${WORKFLOW_URL:-$default_url}"
+          else
+            source_name="Manual notification test"
+            status="success"
+            commit_sha="$MANUAL_SHA"
+            run_url="$SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID"
+          fi
+
+          short_sha="${commit_sha:0:7}"
+          message_format='GitHub notification\nRepository: %s\n'
+          message_format+='Workflow: %s\nStatus: %s\nCommit: %s\n'
+          message_format+='Actor: %s\nDetails: %s'
+          message=$(printf "$message_format" \
+            "$REPOSITORY" "$source_name" "$status" \
+            "$short_sha" "$ACTOR" "$run_url")
+
+          api_url="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}"
+          api_url+='/sendMessage'
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 --max-time 30 \
+            --request POST "$api_url" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" \
+            --output /dev/null
