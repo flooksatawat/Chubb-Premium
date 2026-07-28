@@ -29,6 +29,7 @@ ln -sfn "$TARGET/scripts/chubb-premium-ops.sh" "$BIN_DIR/chubb-premium-ops"
 chown -R "$RUNTIME_UID:$RUNTIME_GID" "$TARGET" "$LOG_DIR"
 chown "$RUNTIME_UID:$RUNTIME_GID" "$CALCULATOR_TARGET"
 chown -h "$RUNTIME_UID:$RUNTIME_GID" "$BIN_DIR/chubb-premium-ops"
+chown -R "$RUNTIME_UID:$RUNTIME_GID" /opt/data/.codex
 
 for build_path in "$REPO/public" "$REPO/dist"; do
   if [[ -e "$build_path" ]]; then
