@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chubb Premium Operations"
+  short_description: "แก้ข้อมูล ทดสอบ และ deploy Chubb Premium"
+  default_prompt: "Use $chubb-premium-ops to update Chubb Premium data, verify it, and deploy the production site."
