@@ -7419,7 +7419,7 @@ function generatePolicyTableData() {
             // Death benefit = MAX(เพิ่มตาม %ปี, CV, 105%เบี้ยสะสม)
             const _txMult  = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
             const _txTier  = Math.round(currentSA * _txMult);
-            const _txFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
+            const _txFloor = totalSaving - (accCashFlow + cashFlowAmt);
             deathBenefit = Math.max(_txTier, cvTotal, _txFloor);
         } else if (isSM && currentSA > 0) {
             // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบจำลองการสอบด้วยคอมพิวเตอร์ - บริษัทโตเกียวมารีนประกันชีวิต จำกัด</title>
+  <style>
+    :root{
+      --black:#252525;
+      --teal:#0d4a58;
+      --cyan:#149bb8;
+      --blue:#18a8c8;
+      --green:#9be8c2;
+      --yellow:#f4ea87;
+      --paper:#fff;
+      --grid:#6aa8b3;
+      --muted:#4f5b66;
+      --text:#111;
+      --line:#d6d6d6;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#fff;color:var(--text);font-family:Tahoma, Arial, sans-serif}
+    button,input,select{font:inherit}
+    .app{min-height:100vh;display:flex;flex-direction:column;background:#fff}
+
+    .topbar{height:112px;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
+    .topbar-inner{width:min(1250px, calc(100vw - 10px));display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:4px 8px 4px 4px}
+    .title-block{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.04;transform:translateY(-1px)}
+    .title-main{font-size:31px;font-weight:400;letter-spacing:0;text-align:center;white-space:nowrap}
+    .title-sub{font-size:17px;font-weight:400;margin-top:5px;color:#eaeaea}
+    .timer-wrap{display:flex;flex-direction:column;align-items:flex-end;min-width:286px;margin-top:-1px}
+    .timer-label{font-size:20px;font-weight:700;line-height:1;color:#fff;margin-right:12px}
+    .timer-row{display:grid;grid-template-columns:repeat(3, 1fr);width:280px;border:1px solid #ececec;background:#fff}
+    .timer-box{height:32px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#111;background:#fff;border-left:1px solid #b7b7b7}
+    .timer-box:first-child{border-left:0}
+    .timer-wrap .small{font-size:19px;font-weight:700;margin-right:31px;margin-top:2px;line-height:1;color:#fff}
+
+    .page{width:min(1250px, calc(100vw - 10px));margin:0 auto;padding:0 0 18px;background:#fff}
+    .screen{display:none}
+    .screen.active{display:block}
+
+    /* menu/list page */
+    .menu-screen{padding:24px 10px 0}
+    .menu-title{background:var(--teal);color:#fff;text-align:center;font-size:17px;padding:16px 10px;font-weight:700;letter-spacing:0;max-width:238px}
+    .menu-grid{width:238px;border-collapse:separate;border-spacing:0}
+    .menu-grid td{border:1px solid #0d6f80;background:#1fa8c7;color:#083341;text-align:center;height:25px;font-size:16px;padding:0;cursor:pointer}
+    .menu-grid td.state-unanswered{background:#1aa3c6;color:#fff}
+    .menu-grid td.state-answered{background:#95e2b8;color:#0c311b}
+    .menu-grid td.state-flagged{background:#f3e77d;color:#312d00}
+    .menu-grid td.state-current{outline:3px solid #fff;box-shadow:inset 0 0 0 2px #0b3a45}
+    .menu-wrap{display:flex;gap:22px;align-items:flex-start}
+    .menu-legend{width:238px;margin-top:24px}
+    .legend-row{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:17px;font-weight:700}
+    .legend-box{width:23px;height:23px;border:1px solid #4c4c4c}
+    .calc{width:238px;margin-top:22px;border:1px solid #2f2f2f}
+    .calc-head{background:#14a2b8;color:#0b1f28;text-align:center;padding:5px 0;font-size:17px}
+    .calc-screen{margin:10px;border:1px solid #7b7b7b;background:#bfbfbf;height:24px}
+    .calc-body{padding:0 8px 10px 8px}
+    .calc-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:7px;margin:8px 0}
+    .calc-row.row4{grid-template-columns:repeat(4,1fr)}
+    .calc-btn{height:25px;border:1px solid #7f7f7f;background:#eee;box-shadow:inset 0 1px 0 #fff;font-size:14px;line-height:1}
+
+    .menu-right{flex:1;padding-right:8px;padding-top:2px}
+    .question-meta{display:flex;justify-content:space-between;align-items:flex-start;margin:0 0 2px 0;font-size:14px;color:#222}
+    .question-meta strong{font-size:14px}
+    .part-title{font-size:16px;font-weight:700;margin:0 0 6px 0;line-height:1.15;color:#222}
+    .question-text{font-size:16px;line-height:1.55;margin:0 0 12px 0;font-weight:400;text-align:left;padding-right:8px}
+    .stem{font-size:16px;line-height:1.55;margin:0 0 10px 0;text-align:left;font-weight:400}
+    .choice-list{margin-top:0}
+    .choice{display:flex;align-items:flex-start;gap:10px;margin:11px 0 13px 0;font-size:15px;line-height:1.55;cursor:pointer;font-weight:400}
+    .radio{width:15px;height:15px;border-radius:50%;border:2px solid #a6a6a6;flex:0 0 15px;margin-top:4px;background:#fff}
+    .choice.selected .radio{background:#0f7f92;border-color:#0f7f92;box-shadow:inset 0 0 0 3px #fff}
+    .choice span{display:block}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:0 18px 0 170px}
+    .checkbox-wrap{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;cursor:pointer;user-select:none;border:0;background:transparent;padding:0}
+    .checkbox{width:14px;height:14px;border:1px solid #7a7a7a;background:#fff;display:inline-block;position:relative;flex:0 0 auto}
+    .checkbox.checked::after{content:"";position:absolute;left:3px;top:0;width:6px;height:10px;border-right:2px solid #111;border-bottom:2px solid #111;transform:rotate(40deg)}
+    .btn{border:1px solid #9f9f9f;background:#e9e9e9;color:#222;padding:5px 14px;font-size:15px;box-shadow:inset 0 1px 0 #fff;cursor:pointer}
+    .btn:hover{background:#f2f2f2}
+    .btns-right{display:flex;gap:180px;align-items:center}
+
+    .bottom-note{display:flex;justify-content:flex-end;padding:0 14px 12px;color:#666;font-size:12px}
+
+    /* description page */
+    .intro-screen{padding:14px 10px 0;background:#fff}
+    .intro-shell{max-width:1140px;margin:0 auto;border:0}
+    .intro-title{font-size:19px;font-weight:700;padding:8px 0 12px 0}
+    .intro-table{width:100%;border-collapse:collapse}
+    .intro-table td{vertical-align:top;padding:7px 10px;font-size:14px;line-height:1.65}
+    .intro-key{width:230px;font-weight:700}
+    .intro-box{border:1px solid #e3e3e3;background:#fff;padding:12px 14px}
+    .intro-radios{display:flex;gap:16px;flex-wrap:wrap}
+    .intro-radios label{display:flex;align-items:center;gap:7px;font-size:14px}
+    .intro-actions{display:flex;justify-content:center;margin:16px 0 0 0}
+    .intro-actions .btn{font-size:15px;padding:6px 15px}
+    .note{margin-top:10px;font-size:13px;line-height:1.65}
+    .start-wrap{display:flex;justify-content:center;margin-top:10px}
+    .start-btn{padding:6px 15px}
+    .desc-head{font-size:17px;font-weight:700;margin-bottom:10px;text-align:center}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:99}
+    .modal.open{display:flex}
+    .modal-card{width:min(720px,100%);background:#fff;border:2px solid #1f3137;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .modal-head{background:var(--teal);color:#fff;padding:12px 16px;font-size:18px;font-weight:700}
+    .modal-body{padding:18px 16px 16px;font-size:15px;line-height:1.75}
+    .modal-grid{width:100%;border-collapse:collapse;margin:12px 0}
+    .modal-grid td{border:1px solid #c7d7dc;padding:8px 10px}
+    .modal-grid td:first-child{background:#f5fafc;font-weight:700;width:42%}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:0 16px 16px}
+
+    @media (max-width:1100px){
+      .title-main{font-size:28px}
+      .title-sub{font-size:16px}
+      .timer-label,.timer-wrap .small{font-size:16px}
+      .menu-wrap{gap:18px}
+      .controls{padding-left:170px;gap:12px}
+      .btns-right{gap:90px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="title-block">
+          <div class="title-main">ระบบจำลองการสอบด้วยคอมพิวเตอร์</div>
+          <div class="title-sub">บริษัทโตเกียวมารีนประกันชีวิต จำกัด</div>
+        </div>
+        <div class="timer-wrap">
+          <div class="timer-label">รหัสกดสอบ</div>
+          <div class="timer-row" aria-label="รหัสกดสอบ">
+            <div class="timer-box">02</div>
+            <div class="timer-box">00</div>
+            <div class="timer-box">00</div>
+          </div>
+          <div class="small">เวลานับถอยหลัง</div>
+          <div class="timer-row" aria-label="เวลานับถอยหลัง" style="margin-top:2px;">
+            <div class="timer-box" id="timeH">02</div>
+            <div class="timer-box" id="timeM">00</div>
+            <div class="timer-box" id="timeS">00</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section id="screen-menu" class="screen active menu-screen">
+        <div class="menu-wrap">
+          <aside>
+            <div class="menu-title">แถบกระดาษคำตอบ *</div>
+            <table class="menu-grid" aria-label="แถบกระดาษคำตอบ">
+              <tbody id="sheetBody"></tbody>
+            </table>
+            <div class="menu-legend">
+              <div class="legend-row"><span class="legend-box" style="background:var(--blue)"></span><span>ข้อที่ยังไม่ได้เลือกตอบ</span></div>
+              <div class="legend-row"><span class="legend-box" style="background:var(--green)"></span><span>ข้อที่ได้เลือกตอบแล้ว</span></div>
+              <div class="legend-row"><span class="legend-box" style="background:var(--yellow)"></span><span>ข้อที่ไม่แน่ใจ</span></div>
+            </div>
+            <div class="calc">
+              <div class="calc-head">Calculator</div>
+              <div class="calc-screen"></div>
+              <div class="calc-body">
+                <div class="calc-row"><button class="calc-btn">7</button><button class="calc-btn">8</button><button class="calc-btn">9</button><button class="calc-btn">/</button><button class="calc-btn">%</button></div>
+                <div class="calc-row"><button class="calc-btn">4</button><button class="calc-btn">5</button><button class="calc-btn">6</button><button class="calc-btn">X</button><button class="calc-btn">C</button></div>
+                <div class="calc-row row4"><button class="calc-btn">1</button><button class="calc-btn">2</button><button class="calc-btn">3</button><button class="calc-btn">-</button></div>
+                <div class="calc-row row4"><button class="calc-btn">0</button><button class="calc-btn">.</button><button class="calc-btn">=</button><button class="calc-btn">+</button></div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="menu-right">
+            <div class="question-meta">
+              <div>ข้อที่ <strong id="metaNo">1</strong></div>
+              <div>จำนวนข้อทั้งหมด <strong>60</strong></div>
+            </div>
+            <h2 class="part-title">ชุดข้อสอบเพื่อขอรับใบอนุญาตตัวแทนประกันชีวิต</h2>
+            <p class="stem" id="questionText"></p>
+            <div class="choice-list" id="choiceList"></div>
+            <div class="controls">
+              <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+                <button class="btn" id="prevBtn" onclick="if(window.goPrev){goPrev()}">&lt;&lt; ข้อก่อนหน้า</button>
+                <button type="button" class="checkbox-wrap" id="uncertainToggle" aria-pressed="false">
+                  <span class="checkbox" id="uncertainBox"></span>
+                  <span>ข้อที่ไม่แน่ใจ</span>
+                </button>
+              </div>
+              <div class="btns-right">
+                <button class="btn" id="nextBtn">ข้อถัดไป &gt;&gt;</button>
+                <button class="btn" id="submitBtn">ส่งกระดาษคำตอบ</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="screen-intro" class="screen intro-screen">
+        <div class="intro-shell">
+          <div class="intro-title">คำอธิบาย</div>
+          <div class="intro-box">
+            <table class="intro-table" aria-label="คำอธิบาย">
+              <tr>
+                <td class="intro-key">ประเภทรูปแบบการสอบ</td>
+                <td>
+                  <div class="intro-radios">
+                    <label><input type="radio" name="examType" checked> ระบบตรวจวัดผลสอบแบบเสมือนจริง</label>
+                    <label><input type="radio" name="examType"> ระบบทำและเฉลยไปทีละข้อ</label>
+                    <label><input type="radio" name="examType"> ระบบตรวจวัดผลสอบแบบเสมือนจริง ไม่มีการจับเวลา</label>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="intro-key"></td>
+                <td class="note">
+                  1. ข้อสอบมีทั้งหมด 60 ข้อ กำหนดเวลาสอบ 120 นาที<br>
+                  2. ข้อสอบจะแสดงทีละข้อ โดยผู้เข้าสอบสามารถ<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- Click ที่หน้าตัวเลือกที่ต้องการเลือกเป็นคำตอบ<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- Click ที่ปุ่ม ข้อถัดไป &gt;&gt; เพื่อไปยังข้อถัดไป<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- Click ที่ปุ่ม &lt;&lt; ข้อก่อนหน้า เพื่อไปยังข้อก่อนหน้า<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- Click ที่ปุ่ม ส่งกระดาษคำตอบ เพื่อส่งกระดาษคำตอบและเสร็จสิ้นการสอบ<br>
+                  3. การไปยังข้อสอบที่ต้องการทำได้โดย Click ที่เลขที่ของข้อสอบที่ต้องการบนแถบกระดาษคำตอบทางด้านซ้ายมือ<br>
+                  4. ในระหว่างการสอบห้ามมิให้ผู้เข้าสอบกระทำการใดๆ นอกเหนือจากที่กำหนดไว้ โดยระบบจะทำการแจ้งเตือนเมื่อตรวจพบว่าผู้เข้าสอบได้กระทำการใด ๆ<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- การพยายามใช้ Right Click<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- การกดปุ่มใด ๆ บน Keyboard<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;- การเปิดโปรแกรมอื่นขึ้นมาในระหว่างการสอบ<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;ทั้งนี้หากระบบตรวจสอบพบการกระทำการใดๆ ที่นอกเหนือที่กำหนดเกินกว่าที่ตั้งไว้ จะถือว่าผู้เข้าสอบได้ทำการทุจริต และจะปรับให้สอบไม่ผ่านทันที<br>
+                  5. หากมีข้อสงสัยใดๆ ในระหว่างการสอบให้ยกมือเพื่อขอสอบถามจากเจ้าหน้าที่คุมสอบเท่านั้น<br>
+                  หากผู้เข้าสอบยินยอมรับข้อกำหนดและต้องการเริ่มสอบ ให้ Click ที่ปุ่ม "เริ่มทำการสอบ" ข้างล่างเพื่อเริ่มทำการสอบ
+                </td>
+              </tr>
+            </table>
+            <div class="start-wrap">
+              <button class="btn start-btn" id="startBtn" onclick="startExam()">เริ่มทำการสอบ</button>
+            </div>
+          </div>
+          <div class="intro-actions"></div>
+          <div class="note" style="margin-top:10px;text-align:center">*** หมายเหตุ : ระบบนี้เป็นเพียงตัวอย่างแสดงหน้าจอการสอบ และข้อสอบที่นำมาใช้เป็นเพียงตัวอย่างเท่านั้น ***</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="bottom-note">© SYSTEM ORIGINAL FOR TOKIO MARINE LIFE INSURANCE(THAILAND) PCL.</div>
+  </div>
+
+  <div class="modal" id="summaryModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+      <div class="modal-head" id="summaryTitle">สรุปผลการทำข้อสอบ</div>
+      <div class="modal-body" id="summaryBody"></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeSummary">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const totalQuestions = 60;
+    const bank = [
+      [
+        'ในระหว่างการเสนอขายแบบประกันชีวิต ตัวแทนได้อธิบายเฉพาะจุดเด่นของแผนประกันและย้ำว่าลูกค้าจะได้รับความคุ้มครองครบถ้วน แต่ไม่ได้อธิบายข้อยกเว้น เงื่อนไขการจ่ายผลประโยชน์ และข้อจำกัดที่อาจมีผลต่อการตัดสินใจของลูกค้า กรณีเช่นนี้ข้อใดสะท้อนหน้าที่ของตัวแทนได้ถูกต้องที่สุด',
+        ['เป็นการทำหน้าที่ที่เหมาะสมแล้วเพราะช่วยให้ปิดการขายได้เร็ว', 'ควรอธิบายข้อมูลให้ครบถ้วนเพื่อให้ลูกค้าตัดสินใจบนข้อมูลที่ถูกต้อง', 'ไม่จำเป็นต้องพูดถึงรายละเอียดเพราะลูกค้ามักอ่านเอง', 'ควรเน้นผลประโยชน์อย่างเดียวเพื่อสร้างความเชื่อมั่น']
+      ],
+      [
+        'ลูกค้ารายหนึ่งประกอบอาชีพอิสระ รายได้ไม่คงที่ในแต่ละเดือน และมีภาระค่าใช้จ่ายครอบครัวค่อนข้างมาก เมื่อพิจารณาเสนอความคุ้มครองชีวิตให้เหมาะกับสภาพการเงินของลูกค้า ควรเลือกแนวทางใดจึงจะสอดคล้องกับหลักการวิเคราะห์ความต้องการได้ดีที่สุด',
+        ['เลือกแบบที่เบี้ยสูงที่สุดเพื่อให้ทุนประกันมาก', 'เลือกแบบที่จ่ายเบี้ยได้ยืดหยุ่นและไม่กระทบกระแสเงินสดเกินไป', 'เลือกแบบที่มีระยะเวลาคุ้มครองสั้นที่สุดเสมอ', 'เลือกแบบที่มีเงื่อนไขซับซ้อนเพื่อให้ครอบคลุมทุกกรณี']
+      ],
+      [
+        'ก่อนให้ลูกค้าลงนามในใบคำขอเอาประกันชีวิต ตัวแทนควรแจ้งข้อมูลสำคัญข้อใดให้ครบถ้วนที่สุด โดยเฉพาะเมื่อแบบประกันที่เสนอมีทั้งข้อยกเว้น ระยะเวลารอคอย และเงื่อนไขการคุ้มครองที่แตกต่างกัน',
+        ['แจ้งเฉพาะชื่อแผนและเบี้ยประกันรายเดือน', 'แจ้งข้อยกเว้น ระยะเวลารอคอย และเงื่อนไขการจ่ายผลประโยชน์ให้ครบ', 'แจ้งเฉพาะว่าสามารถซื้อได้ง่ายและอนุมัติไว', 'แจ้งเพียงว่ากรมธรรม์นี้ขายดีในตลาด']
+      ],
+      [
+        'ในการกรอกใบคำขอเอาประกันชีวิต หากผู้เอาประกันแจ้งประวัติสุขภาพไม่ครบถ้วน หรือเลือกไม่เปิดเผยข้อมูลที่อาจมีผลต่อการพิจารณารับประกัน ในมุมของการปฏิบัติงานอย่างถูกต้องแล้วควรคำนึงถึงเรื่องใดเป็นหลัก',
+        ['ถือว่าเป็นข้อมูลเล็กน้อย ไม่กระทบอะไรต่อสัญญา', 'อาจกระทบการพิจารณารับประกันหรือการจ่ายสินไหมในอนาคตได้', 'ทำให้ตัวแทนปิดงานได้เร็วขึ้นเท่านั้น', 'เป็นเรื่องของฝ่ายบัญชี ไม่เกี่ยวกับการขาย']
+      ],
+      [
+        'ในกรมธรรม์ประกันชีวิต เมื่อมีการกำหนดผู้รับผลประโยชน์ไว้ ผู้รับผลประโยชน์นั้นหมายถึงบุคคลลักษณะใด และมีความสำคัญอย่างไรต่อการจัดทำสัญญา',
+        ['เป็นบุคคลที่ช่วยขายกรมธรรม์ให้บริษัท', 'เป็นบุคคลที่มีสิทธิได้รับเงินผลประโยชน์ตามกรมธรรม์เมื่อเกิดเหตุที่คุ้มครอง', 'เป็นพนักงานที่ดูแลเอกสารเท่านั้น', 'เป็นผู้ตรวจสอบใบคำขอแทนบริษัท']
+      ],
+      [
+        'หากลูกค้าต้องการยกเลิกกรมธรรม์ที่เพิ่งถือครองได้ไม่นาน ตัวแทนควรตอบสนองอย่างไรจึงจะเหมาะสมและสอดคล้องกับการให้บริการอย่างมืออาชีพมากที่สุด',
+        ['บอกให้ยกเลิกทันทีโดยไม่ต้องถามเหตุผล', 'อธิบายผลกระทบ เงื่อนไขเวนคืน และช่วยพิจารณาทางเลือกที่เหมาะสม', 'บอกให้เก็บไว้ก่อนเพราะจะเสียเวลา', 'ปิดบังข้อมูลเพื่อป้องกันไม่ให้ลูกค้าล้มเลิก']
+      ],
+      [
+        'ระหว่างการให้บริการ ตัวแทนได้รับสำเนาบัตรประชาชนและข้อมูลรายได้ของลูกค้าเพื่อใช้ประกอบการพิจารณาอนุมัติแบบประกัน ข้อใดเป็นแนวทางการปฏิบัติต่อข้อมูลส่วนบุคคลที่เหมาะสมที่สุด',
+        ['เปิดเผยให้ทีมงานทุกคนดูได้ตามสะดวก', 'เก็บรักษาเป็นความลับและใช้เฉพาะเท่าที่จำเป็นต่อการปฏิบัติงาน', 'ส่งต่อทางแชทกลุ่มเพื่อให้ช่วยกันตรวจ', 'โพสต์รายละเอียดไว้ในบันทึกสาธารณะเพื่อความรวดเร็ว']
+      ],
+      [
+        'เมื่อพบว่าลูกค้าระบุอาชีพและรายได้ไม่สอดคล้องกันกับข้อมูลในเอกสารประกอบ เช่น รายได้สูงแต่ลักษณะงานไม่สอดคล้องกับฐานรายได้ที่แจ้งไว้ ตัวแทนควรดำเนินการอย่างไรเพื่อให้ขั้นตอนเสนอขายเป็นไปอย่างถูกต้องที่สุด',
+        ['กรอกข้อมูลแทนลูกค้าให้เรียบร้อยเพื่อไม่ให้สะดุด', 'สอบถามและตรวจสอบข้อมูลเพิ่มเติมก่อนส่งเรื่องต่อ', 'ปล่อยผ่านเพราะเป็นหน้าที่ของฝ่ายรับประกัน', 'เลือกแผนที่แพงที่สุดเพื่อให้คุ้มกับรายได้']
+      ],
+      [
+        'การประเมินความต้องการของลูกค้าก่อนเสนอขายประกันชีวิตมีจุดประสงค์สำคัญเพื่ออะไร โดยเฉพาะเมื่อลูกค้ามีภาระหนี้สิน ครอบครัว และเป้าหมายทางการเงินที่แตกต่างกัน',
+        ['เพื่อเลือกแผนที่ขายง่ายที่สุดสำหรับตัวแทน', 'เพื่อเลือกความคุ้มครองที่เหมาะกับเป้าหมายและความสามารถในการชำระเบี้ย', 'เพื่อให้สามารถปิดการขายได้เร็วโดยไม่ต้องอธิบายมาก', 'เพื่อเพิ่มจำนวนเอกสารที่ต้องลงนาม']
+      ],
+      [
+        'ในกรณีที่ลูกค้าถามข้อมูลเกี่ยวกับเงื่อนไขกรมธรรม์ ผลประโยชน์ หรือข้อยกเว้นที่ตัวแทนยังไม่แน่ใจในขณะนั้น วิธีตอบสนองแบบใดจึงจะเหมาะสมและปลอดภัยที่สุดต่อทั้งลูกค้าและบริษัท',
+        ['ตอบตามที่คิดว่าน่าจะถูกเพื่อให้จบการสนทนา', 'ยอมรับว่าไม่แน่ใจและตรวจสอบข้อมูลจากฝ่ายที่เกี่ยวข้องก่อนตอบ', 'เปลี่ยนเรื่องไปคุยเรื่องอื่นทันที', 'บอกว่าข้อมูลไม่สำคัญจึงไม่จำเป็นต้องตอบ']
+      ],
+      [
+        'เมื่อตัวแทนต้องอธิบายแบบประกันให้ลูกค้าเข้าใจ คำอธิบายแบบใดจึงสะท้อนการนำเสนออย่างโปร่งใสและเป็นธรรมมากที่สุด โดยไม่ทำให้ลูกค้าเข้าใจคลาดเคลื่อน',
+        ['อธิบายเฉพาะข้อดีและบอกว่าทุกกรณีจะได้รับความคุ้มครองแน่นอน', 'อธิบายทั้งผลประโยชน์ เงื่อนไข ข้อจำกัด และความเสี่ยงที่เกี่ยวข้องอย่างครบถ้วน', 'ใช้คำพูดเร่งรัดให้เซ็นเอกสารก่อนอ่านรายละเอียด', 'เปรียบเทียบคู่แข่งในทางลบเพื่อให้สินค้าดูเด่นกว่า']
+      ],
+      [
+        'เมื่อมีการขอเปลี่ยนผู้รับผลประโยชน์ในกรมธรรม์ ตัวแทนควรตรวจสอบข้อมูลและสิทธิการเปลี่ยนแปลงในประเด็นใดเป็นลำดับแรก เพื่อให้การดำเนินการเป็นไปตามเงื่อนไขที่กำหนด',
+        ['ความสวยงามของเอกสารและรูปแบบตัวอักษร', 'สิทธิในการเปลี่ยนแปลงตามเงื่อนไขกรมธรรม์และเอกสารประกอบที่จำเป็น', 'ยอดขายประจำเดือนของตัวแทนผู้ดูแล', 'สีของหน้าปกกรมธรรม์ที่ลูกค้าเก็บไว้']
+      ]
+    ];
+    const questions = Array.from({length: totalQuestions}, (_, i) => bank[i % bank.length]);
+
+    const state = {
+      current: 0,
+      answers: Array(totalQuestions).fill(null),
+      unsure: Array(totalQuestions).fill(false),
+      deadline: Date.now() + 2 * 60 * 60 * 1000,
+      timerId: null,
+      finished: false,
+      mode: 'intro'
+    };
+
+    const screenMenu = document.getElementById('screen-menu');
+    const screenIntro = document.getElementById('screen-intro');
+    const sheetBody = document.getElementById('sheetBody');
+    const questionText = document.getElementById('questionText');
+    const choiceList = document.getElementById('choiceList');
+    const metaNo = document.getElementById('metaNo');
+    const uncertainToggle = document.getElementById('uncertainToggle');
+    const uncertainBox = document.getElementById('uncertainBox');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const startBtn = document.getElementById('startBtn');
+    const summaryModal = document.getElementById('summaryModal');
+    const summaryBody = document.getElementById('summaryBody');
+    const closeSummary = document.getElementById('closeSummary');
+    const timeH = document.getElementById('timeH');
+    const timeM = document.getElementById('timeM');
+    const timeS = document.getElementById('timeS');
+
+    function format2(n){ return String(n).padStart(2,'0'); }
+
+    function buildSheet(){
+      const rows = [];
+      let num = 1;
+      for(let r=0; r<12; r++){
+        const cells = [];
+        for(let c=0; c<5; c++){
+          cells.push(`<td data-q="${num}" class="state-unanswered">${num}</td>`);
+          num++;
+        }
+        rows.push(`<tr>${cells.join('')}</tr>`);
+      }
+      sheetBody.innerHTML = rows.join('');
+      sheetBody.querySelectorAll('td').forEach(td => {
+        td.setAttribute('role','button');
+        td.setAttribute('tabindex','0');
+        td.addEventListener('click', () => setCurrent(Number(td.dataset.q) - 1));
+        td.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrent(Number(td.dataset.q) - 1); }
+        });
+      });
+    }
+
+    function renderQuestion(){
+      const [stem, opts] = questions[state.current];
+      metaNo.textContent = String(state.current + 1);
+      questionText.textContent = 'ข้อที่ ' + (state.current + 1) + ' ' + stem;
+      choiceList.innerHTML = '';
+      opts.forEach((opt, idx) => {
+        const lab = document.createElement('label');
+        lab.className = 'choice' + (state.answers[state.current] === idx ? ' selected' : '');
+        lab.innerHTML = `<span class="radio"></span><span>${opt}</span>`;
+        lab.addEventListener('click', () => {
+          state.answers[state.current] = idx;
+          renderQuestion();
+          renderSheet();
+        });
+        choiceList.appendChild(lab);
+      });
+      uncertainBox.classList.toggle('checked', state.unsure[state.current]);
+      uncertainToggle.setAttribute('aria-pressed', String(state.unsure[state.current]));
+      nextBtn.textContent = state.current === totalQuestions - 1 ? 'ส่งกระดาษคำตอบ' : 'ข้อถัดไป >>';
+      renderSheet();
+    }
+
+    function renderSheet(){
+      sheetBody.querySelectorAll('td').forEach(td => {
+        const q = Number(td.dataset.q) - 1;
+        td.classList.remove('state-unanswered','state-answered','state-flagged','state-current');
+        if(state.unsure[q]) td.classList.add('state-flagged');
+        else if(state.answers[q] !== null) td.classList.add('state-answered');
+        else td.classList.add('state-unanswered');
+        if(q === state.current) td.classList.add('state-current');
+      });
+    }
+
+    function setCurrent(index){
+      if(index < 0 || index >= totalQuestions) return;
+      state.current = index;
+      renderQuestion();
+    }
+
+    function goPrev(){
+      if(state.current > 0) setCurrent(state.current - 1);
+    }
+
+    function goNext(){
+      if(state.current < totalQuestions - 1) setCurrent(state.current + 1);
+      else submitAnswers(false);
+    }
+
+    function countdownTick(){
+      const diff = Math.max(0, Math.floor((state.deadline - Date.now()) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      timeH.textContent = format2(h);
+      timeM.textContent = format2(m);
+      timeS.textContent = format2(s);
+      if(diff <= 0 && !state.finished){
+        state.finished = true;
+        clearInterval(state.timerId);
+        submitAnswers(true);
+      }
+    }
+
+    function submitAnswers(timeUp=false){
+      const answered = state.answers.filter(v => v !== null).length;
+      const unsure = state.unsure.filter(Boolean).length;
+      const unanswered = totalQuestions - answered;
+      const answeredList = state.answers.map((v,i) => v !== null ? i + 1 : null).filter(Boolean).slice(0, 18).join(', ');
+      const unsureList = state.unsure.map((v,i) => v ? i + 1 : null).filter(Boolean).slice(0, 18).join(', ');
+      summaryBody.innerHTML = `
+        <div>${timeUp ? 'หมดเวลาแล้ว ระบบสรุปผลอัตโนมัติ' : 'สรุปผลก่อนส่งกระดาษคำตอบ'}</div>
+        <table class="modal-grid">
+          <tr><td>ตอบแล้ว</td><td>${answered} ข้อ</td></tr>
+          <tr><td>ยังไม่ตอบ</td><td>${unanswered} ข้อ</td></tr>
+          <tr><td>ทำเครื่องหมายไม่แน่ใจ</td><td>${unsure} ข้อ</td></tr>
+          <tr><td>ข้อที่ตอบแล้ว</td><td>${answeredList || '-'}</td></tr>
+          <tr><td>ข้อที่ไม่แน่ใจ</td><td>${unsureList || '-'}</td></tr>
+        </table>
+      `;
+      summaryModal.classList.add('open');
+      summaryModal.setAttribute('aria-hidden','false');
+    }
+
+    function closeSummaryModal(){
+      summaryModal.classList.remove('open');
+      summaryModal.setAttribute('aria-hidden','true');
+    }
+
+    function switchToMenu(){
+      state.mode = 'menu';
+      screenIntro.classList.remove('active');
+      screenMenu.classList.add('active');
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function switchToIntro(){
+      state.mode = 'intro';
+      screenMenu.classList.remove('active');
+      screenIntro.classList.add('active');
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function startExam(){
+      state.mode = 'exam';
+      screenIntro.classList.remove('active');
+      screenMenu.classList.add('active');
+      renderQuestion();
+      if(!state.timerId){
+        countdownTick();
+        state.timerId = setInterval(countdownTick, 1000);
+      }
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    buildSheet();
+    renderQuestion();
+    switchToIntro();
+
+    startBtn.addEventListener('click', startExam);
+    uncertainToggle.addEventListener('click', () => {
+      state.unsure[state.current] = !state.unsure[state.current];
+      renderQuestion();
+    });
+    document.getElementById('prevBtn')?.addEventListener('click', () => {
+      if(state.current > 0) setCurrent(state.current - 1);
+    });
+    nextBtn.addEventListener('click', goNext);
+    submitBtn.addEventListener('click', () => submitAnswers(false));
+    closeSummary.addEventListener('click', closeSummaryModal);
+
+    summaryModal.addEventListener('click', (e) => { if(e.target === summaryModal) closeSummaryModal(); });
+  </script>
+</body>
+</html>

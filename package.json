@@ -10,7 +10,9 @@
     "prebuild": "node scripts/prepare-hosting-assets.mjs",
     "build": "vinext build",
     "postbuild": "node scripts/finalize-hosting-build.mjs",
-    "start": "vinext start"
+    "start": "vinext start",
+    "deploy:hostinger": "npm run build && node scripts/deploy-hostinger.mjs",
+    "deploy:hostinger:check": "node scripts/deploy-hostinger.mjs --check"
   },
   "engines": {
     "node": ">=20.9.0"

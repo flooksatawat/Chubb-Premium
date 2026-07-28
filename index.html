@@ -2379,9 +2379,9 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         };
     }
 
-    async function checkAuth(userId) {
+    async function checkAuth(userId, opts = {}) {
         try {
-            const d = await callAPI({ action: 'check', userId, ...accessContext() });
+            const d = await callAPI({ action: 'check', userId, ...accessContext(), ...opts });
             return { ...d, fromCache: false };
         } catch {
             const c = getLS(AUTH_CACHE_KEY);
@@ -2416,7 +2416,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         clearInterval(_pollTimer);
         const profile = getLS(CACHE_KEY);
         if (!profile) { location.reload(); return; }
-        const d = await checkAuth(profile.userId);
+        const d = await checkAuth(profile.userId, { notifyAccess: '1' });
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
             showProfile(profile);
@@ -2512,7 +2512,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         if (cachedAuth && !cachedAuth.ok) localStorage.removeItem(AUTH_CACHE_KEY);
         if (cachedProfile && cachedAuth && cachedAuth.ok) {
             setState('loading', 'กำลังตรวจสอบสิทธิ์...');
-            const d = await checkAuth(cachedProfile.userId);
+            const d = await checkAuth(cachedProfile.userId, { notifyAccess: '1' });
             if (!d.authorized) {
                 clearLS();
                 $('authRequestName').textContent = `สวัสดี ${cachedProfile.displayName} 👋`;
@@ -2585,7 +2585,7 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 
         /* 5. ตรวจสอบสิทธิ์จาก Apps Script */
         setState('loading', 'กำลังตรวจสอบสิทธิ์...');
-        const d = await checkAuth(profile.userId);
+        const d = await checkAuth(profile.userId, { notifyAccess: '1' });
 
         if (d.authorized) {
             setLS(AUTH_CACHE_KEY, { ok: true, status: 'active', ts: Date.now() });
