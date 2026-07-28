@@ -33,6 +33,32 @@ function _compareCalcSA(planCode, gender, age, premium) {
     return Math.round(sa);
 }
 
+function _compareTxCashback(sa, issueAge, year) {
+    const attainedAge = issueAge + year;
+    if (year % 3 === 0 && year <= 24) return Math.round(sa * 0.05);
+    if (year === 25) return Math.round(sa * 0.70);
+    if (year >= 26 && attainedAge < 90) return Math.round(sa * 0.08);
+    if (attainedAge === 90) return Math.round(sa);
+    return 0;
+}
+
+function _compareTxDeathBenefit(sa, annualPrem, gender, age, year) {
+    let totalPaid = 0;
+    let totalCashback = 0;
+    for (let y = 1; y <= year; y++) {
+        if (y <= 24) totalPaid += annualPrem;
+        totalCashback += _compareTxCashback(sa, age, y);
+    }
+    const cvRate = _compareGetCV('24TX', gender, age, year);
+    const cv = cvRate ? Math.round((sa * cvRate) / 1000) : 0;
+    const txMult = 1.0 + 0.10 * Math.max(0, Math.floor((year - 1) / 3));
+    return Math.max(
+        Math.round(sa * txMult),
+        cv,
+        Math.round(totalPaid - totalCashback)
+    );
+}
+
 function _compareCalcOne(plan, gender, age, premium) {
     let planCode = plan.planCode;
     if (plan.abbr === 'Elite' && age > 50) planCode = 'S818';
@@ -78,7 +104,7 @@ function _compareCalcOne(plan, gender, age, premium) {
         }
     }
 
-    return { sa, annualPrem, cv10, cv20, beAge };
+    return { sa, annualPrem, cv10, cv20, beAge, gender, age };
 }
 
 function _initCompareState() {
@@ -121,16 +147,13 @@ window._buildCompareHTML = function() {
                     const mult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (attainedAge <= 70 ? 2.0 : 1.5);
                     return Math.round(r.sa * mult);
                 }
-                // 24TX: +10% ทุก 3 ปี เริ่มปีที่ 4
-                if (r.plan.abbr === 'TX') {
-                    const txMult = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
-                    return Math.round(r.sa * txMult);
-                }
+                if (r.plan.abbr === 'TX') return _compareTxDeathBenefit(r.sa, r.annualPrem, r.gender, r.age, y);
                 return r.sa;
             }
             function fmtSaCell(v, r) {
                 if (r.plan.abbr === 'SLPA' && v > r.sa) return `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>`;
                 if (r.plan.abbr === 'LV'   && v > r.sa) return `<span style="color:#7c3aed;font-weight:800;">${v.toLocaleString()}</span>`;
+                if (r.plan.abbr === 'TX'   && v > r.sa) return `<span style="color:#0284c7;font-weight:800;">${v.toLocaleString()}</span>`;
                 return v.toLocaleString();
             }
             const rows = [

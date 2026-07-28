@@ -7416,7 +7416,7 @@ function generatePolicyTableData() {
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
         } else if (isTX && currentSA > 0) {
             // 24TX: ทุนประกันเพิ่ม 10% ทุก 3 ปี เริ่มปีที่ 4 (ปี 1-3=100%, 4-6=110%, ...)
-            // Death benefit = MAX(เพิ่มตาม %ปี, CV, 105%เบี้ยสะสม)
+            // Death benefit = MAX(เพิ่มตาม %ปี, CV, เบี้ยสะสม - เงินคืนสะสม)
             const _txMult  = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
             const _txTier  = Math.round(currentSA * _txMult);
             const _txFloor = totalSaving - (accCashFlow + cashFlowAmt);
