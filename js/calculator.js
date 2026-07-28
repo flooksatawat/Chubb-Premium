@@ -36,7 +36,7 @@ const PLAN_CONFIG = {
     "Century Life": { abbr: "CL", minAge: 0, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "3D Health Excellence": { abbr: "3D", minAge: 11, maxAge: 75, minSum: 100000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['10CL', '20CL', '60CL', '90CL', '100CL'], hasCashFlow: false },
     "Convertable Term": { abbr: "TLA", minAge: 20, maxAge: 60, minSum: 400000, minPrem: 4000, getMaxSum: (age) => Infinity, options: ['TLA'], hasCashFlow: false },
-    "Smart Plan 21/7": { abbr: "7SM", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['7SM'], hasCashFlow: true },
+    "Smart Plan": { abbr: "SM", minAge: 0, maxAge: 70, minSum: 100000, minPrem: 0, getMaxSum: (age) => Infinity, options: ['21/7', '21/15'], hasCashFlow: true },
     "Step Annuity": { abbr: "STA", minAge: 20, maxAge: 50, minSum: 100000, minPrem: 0, getMaxSum: (age) => 30000000, options: ['AS10', 'AS60'], hasCashFlow: false },
     "Medical Fund": { abbr: "MF", minAge: 0, maxAge: 99, minSum: 0, minPrem: 0, getMaxSum: (age) => Infinity, options: [], hasCashFlow: false }
 };
@@ -54,7 +54,7 @@ const allInsurancePlans = [
     { name: "868 / 818 Elite Saving", desc: "สินทรัพย์กระแสเงินสด", icon: "fas fa-money-bill-trend-up", color: "text-indigo-500", bg: "bg-indigo-100" },
     { name: "678 Step Savings", desc: "ออม 6 ปี รับเงินคืนทุกปี ครบสัญญาอายุ 78", icon: "fas fa-stairs", color: "text-fuchsia-500", bg: "bg-fuchsia-100" },
     { name: "LifeTime Value", desc: "ออมยาว รับเงินคืนทุกปี ถึงอายุ 100", icon: "fas fa-hourglass-half", color: "text-violet-500", bg: "bg-violet-100" },
-    { name: "Smart Plan 21/7", desc: "ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%", icon: "fas fa-seedling", color: "text-teal-500", bg: "bg-teal-100" },
+    { name: "Smart Plan", desc: "ออมทรัพย์ 21 ปี รับเงินคืน 212%", icon: "fas fa-seedling", color: "text-teal-500", bg: "bg-teal-100" },
     { name: "Step Annuity", desc: "บำนาญรายปี เพิ่มขึ้นทุก 5 ปี ถึงอายุ 90", icon: "fas fa-stairs", color: "text-orange-500", bg: "bg-orange-100" },
     { name: "Medical Fund", desc: "ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง", icon: "fas fa-hospital", color: "text-sky-500", bg: "bg-sky-100" }
 ];
@@ -840,9 +840,10 @@ function calculate(source, enforceMin = false) {
             }
         }
 
-        // ---------------- 3c. Smart Plan 21/7 (7SM) ----------------
-        else if (currentAppPlan === 'Smart Plan 21/7') {
-            let smRate = LIFE_RATES['7SM']?.[currentGender]?.[age] || 275;
+        // ---------------- 3c. Smart Plan (21/7, 21/15) ----------------
+        else if (currentAppPlan === 'Smart Plan') {
+            const planKey = currentPlan === '21/15' ? '15SPN' : '7SM';
+            let smRate = LIFE_RATES[planKey]?.[currentGender]?.[age] || 275;
             let mfPrem = getHealthRate('MF', window.currentMF, age, currentGender);
 
             if (source === 'cashflow') {

@@ -1290,8 +1290,8 @@ function showPlansByAge(age) {
         { planName:'3D Health Excellence',   abbr:'10CL',   icon:'fa-hospital',          color:'pink',    label:'3D Health Excellence',   badge:'',       desc:'ประกันสุขภาพ · รับอายุ 11–75 ปี',     minAge:11, maxAge:75 },
         // Convertable Term
         { planName:'Convertable Term',       abbr:'TLA',    icon:'fa-rotate',            color:'orange',  label:'Convertable Term',       badge:'',       desc:'ชั่วคราว · ต่ออายุได้ทุกปี',          minAge:20, maxAge:60 },
-        // Smart Plan 21/7
-        { planName:'Smart Plan 21/7',        abbr:'7SM',    icon:'fa-bolt',              color:'yellow',  label:'Smart Plan 21/7',        badge:'',       desc:'ออม 21 ปี · ชำระ 7 ปี',              minAge:0,  maxAge:70 },
+        // Smart Plan
+        { planName:'Smart Plan',        abbr:'SM',    icon:'fa-seedling',              color:'teal',   label:'Smart Plan',        badge:'',       desc:'ออม 21 ปี · 2 แบบ',              minAge:0,  maxAge:70 },
     ];
 
     const matched = ALL_SUB_PLANS.filter(p => age >= p.minAge && age <= p.maxAge);
@@ -1588,7 +1588,7 @@ function openInstallmentModal() {
 
 // ==================== APP ROUTING & PLAN SELECTION ====================
 function getPlanAbbr(planName) {
-    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite", "678 Step Savings": "678", "LifeTime Value": "LV", "Smart Plan 21/7": "7SM" };
+    const abbrMap = { "CI Extra Plus": "CX", "Life Protector 20": "LPB", "Supreme Life Protector": "SLPA", "Signature Legacy": "SLB", "Convertable Term": "TLA", "Century Life": "CL", "3D Health Excellence": "3D", "Whole Life Extra": "WXN", "24 TX": "TX", "868 / 818 Elite Saving": "Elite", "678 Step Savings": "678", "LifeTime Value": "LV", "Smart Plan": "SM" };
     return abbrMap[planName] || planName;
 }
 
@@ -1711,7 +1711,7 @@ const modernPlansData = [
     { name: '868 / 818 Elite Saving', desc: 'สินทรัพย์กระแสเงินสด', icon: 'fas fa-sack-dollar', isHighlight: false, bg: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200', text: 'text-fuchsia-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-fuchsia-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: '678 Step Savings', desc: 'ออม 6 ปี รับเงินคืนทุกปี ครบสัญญาอายุ 78', icon: 'fas fa-stairs', isHighlight: false, bg: 'bg-gradient-to-br from-pink-100 to-fuchsia-200', text: 'text-fuchsia-600', border: 'border border-white hover:border-fuchsia-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-fuchsia-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: 'LifeTime Value', desc: 'ออมยาว รับเงินคืนทุกปี ถึงอายุ 100', icon: 'fas fa-hourglass-half', isHighlight: false, bg: 'bg-gradient-to-br from-violet-100 to-violet-200', text: 'text-violet-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-violet-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-violet-100 group-hover:text-violet-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
-    { name: 'Smart Plan 21/7', desc: 'ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%', icon: 'fas fa-seedling', isHighlight: false, bg: 'bg-gradient-to-br from-teal-100 to-teal-200', text: 'text-teal-600', border: 'border border-white hover:border-teal-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-teal-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
+    { name: 'Smart Plan', desc: 'ออมทรัพย์ รับเงินคืน 19 ปี ครบสัญญา 212%', icon: 'fas fa-seedling', isHighlight: false, bg: 'bg-gradient-to-br from-teal-100 to-teal-200', text: 'text-teal-600', border: 'border border-white hover:border-teal-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-teal-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-teal-100 group-hover:text-teal-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: 'Step Annuity', desc: 'บำนาญรายปี เพิ่มขึ้นทุก 5 ปี ถึงอายุ 90', icon: 'fas fa-stairs', isHighlight: false, bg: 'bg-gradient-to-br from-orange-100 to-orange-200', text: 'text-orange-600', border: 'border border-white hover:border-orange-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-orange-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-orange-100 group-hover:text-orange-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' },
     { name: 'Medical Fund', desc: 'ประกันสุขภาพ เลือกบริษัท/แผน/ค่าห้อง', icon: 'fas fa-hospital', isHighlight: false, bg: 'bg-gradient-to-br from-sky-100 to-sky-200', text: 'text-sky-600', border: 'border border-white hover:border-blue-200', cardBg: 'bg-white hover:bg-slate-50', title: 'text-slate-800 group-hover:text-sky-700', sub: 'text-slate-500', btn: 'bg-slate-100 text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600', shadow: 'shadow-[0_4px_15px_rgba(0,0,0,0.04)]', iconBorder: 'border-white/50' }
 ];
@@ -2068,7 +2068,7 @@ function updateQuickPills(planName) {
             const btn = document.getElementById('cashPill' + (i + 1));
             if (btn) { btn.textContent = opt.label; btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`); }
         });
-    } else if (planName === 'Smart Plan 21/7') {
+    } else if (planName === 'Smart Plan') {
         sumPillWrapper.innerHTML = sumBgHtml + `<button id="sumPill1" onclick="setQuickSum(1000000)" class="${inactiveClass}">1 ล้าน</button><button id="sumPill2" onclick="setQuickSum(2000000)" class="${inactiveClass}">2 ล้าน</button><button id="sumPill3" onclick="setQuickSum(3000000)" class="${inactiveClass}">3 ล้าน</button><button id="sumPill4" onclick="setQuickSum(5000000)" class="${inactiveClass}">5 ล้าน</button><button id="sumPill5" onclick="setQuickSum(10000000)" class="${inactiveClass}">10 ล้าน</button>`;
         premPillContainer.innerHTML = premBgHtml + `<button id="premPill1" onclick="setQuickPremium(20000)" class="${inactiveClass}">2 หมื่น</button><button id="premPill2" onclick="setQuickPremium(40000)" class="${inactiveClass}">4 หมื่น</button><button id="premPill3" onclick="setQuickPremium(60000)" class="${inactiveClass}">6 หมื่น</button><button id="premPill4" onclick="setQuickPremium(80000)" class="${inactiveClass}">8 หมื่น</button><button id="premPill5" onclick="setQuickPremium(100000)" class="${inactiveClass}">1 แสน</button>`;
     } else if (planName === '678 Step Savings') {
@@ -2174,8 +2174,8 @@ function updateQuickPills(planName) {
                 btn.setAttribute('onclick', `setQuickCashFlow(${opt.val})`);
             }
         });
-    } else if (planName === 'Smart Plan 21/7') {
-        // 7SM เงินคืนรายปี = 2% ของทุน
+    } else if (planName === 'Smart Plan') {
+        // Smart Plan เงินคืนรายปี = 2% ของทุน
         const smOpts = [
             { label: '2 หมื่น', val: 20000 },
             { label: '4 หมื่น', val: 40000 },
@@ -2427,7 +2427,7 @@ function getConditionsHTML(planName) {
         '3D Health Excellence':   '11 - 75 ปี',
         'Convertable Term':       '20 - 60 ปี',
         'Medical Fund':           'ขึ้นกับบริษัทและแผนที่เลือก',
-        'Smart Plan 21/7':        '31 วัน - 70 ปี',
+        'Smart Plan':        '31 วัน - 70 ปี',
         '678 Step Savings':       'แรกเกิด - 60 ปี',
         'Step Annuity':           'แรกเกิด - 70 ปี',
     };
@@ -2652,7 +2652,7 @@ function selectAppPlan(planName) {
     const premiumSubLabel = document.getElementById('premiumSubLabel');
     if(premiumSubLabel) premiumSubLabel.className = 'text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full font-medium border border-slate-200';
     // reset MF column: ล้าง currentMF เมื่อเปลี่ยนไปแบบที่ไม่มีปุ่ม MF
-    const _mfSupportedPlans = ['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence'];
+    const _mfSupportedPlans = ['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan', 'Whole Life Extra', '3D Health Excellence'];
     if (!_mfSupportedPlans.includes(planName)) {
         window.currentMF = 'ไม่เลือก';
         window._mfCurrentLabel = null;
@@ -2720,7 +2720,7 @@ function selectAppPlan(planName) {
             document.getElementById('dualCashFlowBox').classList.add('hidden');
             document.getElementById('dualCashFlowBox').classList.remove('flex');
         }
-    } else if (planName === 'Smart Plan 21/7') {
+    } else if (planName === 'Smart Plan') {
         currentMode = 'premium';
         document.getElementById('premiumInput').value = "100,000";
         document.getElementById('sumInsuredInput').value = "1,000,000";
@@ -2938,7 +2938,7 @@ function selectAppPlan(planName) {
     
     const medFundBtnContainer = document.getElementById('medicalFundBtnContainer');
     if (medFundBtnContainer) {
-        if (['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan 21/7', 'Whole Life Extra', '3D Health Excellence', 'Step Annuity'].includes(planName)) {
+        if (['24 TX', '868 / 818 Elite Saving', 'LifeTime Value', 'Smart Plan', 'Whole Life Extra', '3D Health Excellence', 'Step Annuity'].includes(planName)) {
             medFundBtnContainer.classList.remove('hidden');
         } else {
             medFundBtnContainer.classList.add('hidden');
@@ -2952,10 +2952,10 @@ function selectAppPlan(planName) {
             hospitalSearchBtnContainer.classList.add('hidden');
         }
     }
-    // เมนูภาษี: แสดงเฉพาะแบบ 7SM (Smart Plan 21/7)
+    // เมนูภาษี: แสดงเฉพาะแบบ Smart Plan
     const taxBtn = document.getElementById('taxBtn');
     if (taxBtn) {
-        if (planName === 'Smart Plan 21/7') {
+        if (planName === 'Smart Plan') {
             taxBtn.classList.remove('hidden');
         } else {
             taxBtn.classList.add('hidden');
@@ -3652,7 +3652,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         const isTX    = pName === '24 TX';
         const isWXN   = pName === 'Whole Life Extra';
         const isLV    = pName === 'LifeTime Value';
-        const isSM    = pName === 'Smart Plan 21/7';
+        const isSM    = pName === 'Smart Plan';
         const isCL    = pName === 'Century Life';
         const isSLB   = pName === 'Signature Legacy';
         const isTLA   = pName === 'Convertable Term';
@@ -4263,7 +4263,7 @@ function _injectToPearLCanvas(d) {
         rows += R('เงินคืนรายปี (1%)',                 fmtP(Math.round(d.sum * 0.01)) + ' ฿', 'cg');
         rows += R('ครบสัญญา อายุ 100 ปี (150%)',       fmtP(Math.round(d.sum * 1.5))  + ' ฿', 'cg');
         rows += R('กรณีเสียชีวิตสูงสุด (200%)',        fmtP(Math.round(d.sum * 2))    + ' ฿', 'rose');
-    } else if (currentAppPlan === 'Smart Plan 21/7') {
+    } else if (currentAppPlan === 'Smart Plan') {
         rows += R('เงินคืนรายปี (2%)',                 fmtP(Math.round(d.sum * 0.02)) + ' ฿', 'cg');
         rows += R('ครบกำหนดสัญญา ปีที่ 21 (212%)',    fmtP(Math.round(d.sum * 2.12)) + ' ฿', 'cg');
         rows += R('กรณีเสียชีวิตสูงสุด (175%)',        fmtP(Math.round(d.sum * 1.75)) + ' ฿', 'rose');
@@ -5509,10 +5509,10 @@ function showPlanIRRPopup() {
         const premium   = Math.round(parseFloat(d.premium)||0);
         const sa        = Math.round(parseFloat(d.sum)||0);
         const payYears  = planType==='WXN' ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10')
-                        : planType==='TX'    ? 24 : planType==='ELITE' ? 8 : 7;
+                        : planType==='TX'    ? 24 : planType==='ELITE' ? 8 : planType==='SM' ? (currentPlan==='21/15' ? 15 : 7) : 7;
         const isMale    = (d.gender==='male'||d.gender==='ชาย');
         const maxAge    = planType==='ELITE' ? (startAge<=50?68:startAge+18) : planType==='SM' ? startAge+21 : 90;
-        const planLabels = { WXN:'Whole Life Extra', TX:'24 TX', ELITE:'868/818 Elite Saving', SM:'Smart Plan 21/7' };
+        const planLabels = { WXN:'Whole Life Extra', TX:'24 TX', ELITE:'868/818 Elite Saving', SM:'Smart Plan' };
 
         _planIrrState = { startAge, premium, sa, payYears, planType, isMale };
 
@@ -5891,7 +5891,7 @@ const _COM_KEY_MAP = {
     'TLA': '20TLA', 'Convertable Term': '20TLA',
     '24 TX': '24TX',
     'S868': 'S868', 'S818': 'S818',
-    'Smart Plan 21/7': '7SM',
+    'Smart Plan': 'SM',
 };
 
 function getComRateArray(planKey) {
@@ -6259,7 +6259,7 @@ function renderCVMiniTable() {
 function _updateSumResultDisplay() {
     const el = document.getElementById('sumResultDisplay');
     if (!el) return;
-    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan 21/7', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity', 'Signature Legacy', 'Century Life', '678 Step Savings'];
+    const noDisplay = ['CI Extra Plus', 'Whole Life Extra', '868 / 818 Elite Saving', '24 TX', 'LifeTime Value', 'Smart Plan', 'Medical Fund', 'Life Protector 20', 'Supreme Life Protector', 'Step Annuity', 'Signature Legacy', 'Century Life', '678 Step Savings'];
     if (noDisplay.includes(currentAppPlan) || !lastCalculationData) {
         el.textContent = '';
         el.classList.add('hidden');
@@ -6727,7 +6727,7 @@ function generatePolicyTableData() {
     const isElite = planName.includes('ELITE') || planName.includes('868') || planName.includes('818');
     const isTX = planName.includes('24 TX') || planAbbr === 'TX';
     const isLV = planAbbr === 'LV' || planName.includes('LIFETIME VALUE');
-    const isSM = planAbbr === '7SM' || planName.includes('SMART PLAN');
+    const isSM = planAbbr === 'SM' || planName.includes('SMART PLAN');
     const isCL = planName.includes('CENTURY LIFE') || planAbbr === 'CL' || planAbbr === 'CLA';
     const isCX = currentAppPlan === 'CI Extra Plus' || planAbbr === 'CX';
     const isTLA = currentAppPlan === 'Convertable Term' || planAbbr === 'TLA';
@@ -7390,7 +7390,7 @@ function generatePolicyTableData() {
         let cvTotal = Math.round((currentSA * cvRate) / 1000);
         if (currentSA <= 0) cvTotal = 0;
 
-        // ภาษี: สะสมเงินลดหย่อนภาษีของปีนี้ (7SM) — นำไปรวมในจุดคุ้มทุนด้วย
+        // ภาษี: สะสมเงินลดหย่อนภาษีของปีนี้ (Smart Plan) — นำไปรวมในจุดคุ้มทุนด้วย
         const _taxThisYear = (showTaxColumn && y <= payYears && annualSaving > 0) ? _taxAmt : 0;
         accTax += _taxThisYear;
 
@@ -7434,7 +7434,7 @@ function generatePolicyTableData() {
             const _txFloor = totalSaving - (accCashFlow + cashFlowAmt); // ปี 90: floor ติดลบ → MAX ใช้ค่า SA/CV แทน
             deathBenefit = Math.max(_txTier, cvTotal, _txFloor);
         } else if (isSM && currentSA > 0) {
-            // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)
+            // Smart Plan: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)
             //   1) %ทุนประกัน (ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175%)
             //   2) มูลค่าเวนคืนเงินสด (cvTotal)
             //   3) เบี้ยที่ชำระมาแล้วทั้งหมด หักด้วยเงินจ่ายคืนที่ได้รับไปแล้ว
@@ -7541,7 +7541,7 @@ function generatePolicyTableData() {
         if (y >= cfLoopEnd) break;
     }
 
-    // --- บรรทัดสุดท้าย: รวมตัวเลข (7SM ที่เลือกภาษี และ/หรือ สรุปเบี้ยประกันสุขภาพ+เงินคงเหลือ) ---
+    // --- บรรทัดสุดท้าย: รวมตัวเลข (Smart Plan ที่เลือกภาษี และ/หรือ สรุปเบี้ยประกันสุขภาพ+เงินคงเหลือ) ---
     if (showTaxColumn || (_mfLabel && _mfMap)) {
         const _totFsz = (_isCompact ? 'font-size:9px;' : (_isMedium ? 'font-size:13px;' : '')) + 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\';font-weight:800;';
         const _boxStyle = `${_totFsz}color:#1e3a8a;background:#eff6ff;`;

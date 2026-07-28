@@ -463,7 +463,7 @@ window._mfPayYearsForPlan = function() {
     if (ap === '868 / 818 Elite Saving') return 8;
     if (ap === '678 Step Savings') return 6;
     if (ap === '24 TX') return 24;
-    if (ap === 'Smart Plan 21/7') return 7;
+    if (ap === 'Smart Plan') return (window.currentPlan === '21/15') ? 15 : 7;
     // WXN / LifeTime Value: ใช้ตัวเลขจากรหัสแผน (WXN10→10, 15LV→15)
     const m = (typeof currentPlan !== 'undefined' ? currentPlan : '').match(/\d+/);
     return m ? parseInt(m[0]) : 10;

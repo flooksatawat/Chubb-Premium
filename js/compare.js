@@ -11,7 +11,7 @@ const _COMPARE_PLANS = [
     { appPlan: '868 / 818 Elite Saving', planCode: 'S868',   label: '868 Elite Saving',      abbr: 'Elite', payYears: 8,  coverAge: 99,  color: '#9333ea', bg: '#faf5ff' },
     { appPlan: '678 Step Savings',       planCode: 'A78',    label: '678 Step Savings',      abbr: '678',   payYears: 6,  coverAge: 78,  color: '#c026d3', bg: '#fdf4ff' },
     { appPlan: 'LifeTime Value',         planCode: '20LV',   label: 'LifeTime Value 20',     abbr: 'LV',    payYears: 20, coverAge: 100, color: '#7c3aed', bg: '#f5f3ff' },
-    { appPlan: 'Smart Plan 21/7',        planCode: '7SM',    label: 'Smart Plan 21/7',       abbr: '7SM',   payYears: 7,  coverAge: 99,  color: '#0d9488', bg: '#f0fdfa' },
+    { appPlan: 'Smart Plan',        planCode: 'SM',    label: 'Smart Plan',       abbr: 'SM',   payYears: 15,  coverAge: 99,  color: '#0d9488', bg: '#f0fdfa' },
 ];
 
 function _compareGetCV(planCode, gender, age, year) {

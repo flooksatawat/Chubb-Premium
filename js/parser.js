@@ -99,7 +99,11 @@ const PLAN_ALIASES = [
     { keys: [
         'smart plan','สมาร์ท แพลน','สมาร์ทแพลน','7sm','21/7','21 7',
         'smart plan 21','สมาร์ท','7สมาร์ท','ออมสมาร์ท','สมาร์ทเพลน',
-    ], plan: 'Smart Plan 21/7' },
+    ], plan: 'Smart Plan' },
+
+    { keys: [
+        '21/15','21 15','15spn','smart 15','สมาร์ท 15',
+    ], plan: 'Smart Plan', subPlan: '21/15' },
 
     { keys: [
         'medical fund','เมดิคัล ฟันด์','เมดิคัล','medical',
@@ -655,7 +659,7 @@ function executeCommand(parsed, showPopup = true) {
             if (el && cur < 150000) el.value = '150,000';
         }
         if (typeof calculate === 'function') calculate('sum', true);
-    } else if (['24 TX','868 / 818 Elite Saving','678 Step Savings','LifeTime Value','Smart Plan 21/7','Whole Life Extra'].includes(plan)) {
+    } else if (['24 TX','868 / 818 Elite Saving','678 Step Savings','LifeTime Value','Smart Plan','Whole Life Extra'].includes(plan)) {
         if (parsed.amountType === 'premium' && parsed.amount > 0) {
             const el = document.getElementById('premiumInput');
             if (el) el.value = parsed.amount.toLocaleString();
