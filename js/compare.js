@@ -121,6 +121,11 @@ window._buildCompareHTML = function() {
                     const mult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (attainedAge <= 70 ? 2.0 : 1.5);
                     return Math.round(r.sa * mult);
                 }
+                // 24TX: +10% ทุก 3 ปี เริ่มปีที่ 4
+                if (r.plan.abbr === 'TX') {
+                    const txMult = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
+                    return Math.round(r.sa * txMult);
+                }
                 return r.sa;
             }
             function fmtSaCell(v, r) {

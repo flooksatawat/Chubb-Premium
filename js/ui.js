@@ -3732,6 +3732,10 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                 effectiveSA = Math.round(initSA * lvMult);
             } else if (is678) {
                 effectiveSA = Math.round(initSA * Math.min(y, 6));
+            } else if (isTX) {
+                // 24TX: +10% ทุก 3 ปี เริ่มปีที่ 4 (ปี 1-3=100%, 4-6=110%, 7-9=120%, ...)
+                const txMult = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
+                effectiveSA = Math.round(initSA * txMult);
             }
 
             accCF += cfAmt;
@@ -7410,6 +7414,13 @@ function generatePolicyTableData() {
             const _lvTier  = Math.round(currentSA * lvDeathMultiplier(y, currentAge));
             const _lvFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
             deathBenefit = Math.max(_lvTier, cvTotal, _lvFloor);
+        } else if (isTX && currentSA > 0) {
+            // 24TX: ทุนประกันเพิ่ม 10% ทุก 3 ปี เริ่มปีที่ 4 (ปี 1-3=100%, 4-6=110%, ...)
+            // Death benefit = MAX(เพิ่มตาม %ปี, CV, 105%เบี้ยสะสม)
+            const _txMult  = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
+            const _txTier  = Math.round(currentSA * _txMult);
+            const _txFloor = Math.round(totalSaving * 1.05) - (accCashFlow + cashFlowAmt);
+            deathBenefit = Math.max(_txTier, cvTotal, _txFloor);
         } else if (isSM && currentSA > 0) {
             // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)
             //   1) %ทุนประกัน (ปีที่ 1-5 = 100% / ปีที่ 6-21 = 175%)
