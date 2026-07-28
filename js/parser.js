@@ -148,6 +148,7 @@ const MF_PLAN_ALIASES = [
     { co:'GENERALI',  id:'LS_IPD',         keys:['lump sum ipd','ls ipd'] },
     { co:'TOKIO',     id:'HSHH_COPAY',     keys:['hshh copay','copay'] },
     { co:'TOKIO',     id:'HSHH',           keys:['hshh'] },
+    { co:'TOKIO',     id:'GOOD_HEALTH',     keys:['good health','กู๊ดเฮลธ์','goodhealth'] },
     { co:'CHUBB_HI',  id:'HSPP',           keys:['hspp','เฮลท์โพรเทคเตอร์พลัส','health protector plus'] },
     { co:'CHUBB_HI',  id:'HSP',            keys:['hsp','เฮลท์โพรเทคเตอร์','health protector'] },
     { co:'BLA',       id:'PRESTIGE',       keys:['prestige','เพรสทีจ'] },
