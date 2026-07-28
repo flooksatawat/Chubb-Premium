@@ -8,6 +8,9 @@ readonly TARGET="$TARGET_ROOT/chubb-premium-ops"
 readonly CALCULATOR_OVERRIDE="$REPO/ops/hermes-skill-overrides/chubb-premium-calculator/SKILL.md"
 readonly CALCULATOR_TARGET="$TARGET_ROOT/chubb-premium-calculator/SKILL.md"
 readonly BIN_DIR="/opt/data/.local/bin"
+readonly LOG_DIR="/opt/data/logs/chubb-premium-ops"
+readonly RUNTIME_UID="$(stat -c %u /opt/data)"
+readonly RUNTIME_GID="$(stat -c %g /opt/data)"
 
 [[ -f "$SOURCE/SKILL.md" ]] || {
   printf 'Missing skill source: %s\n' "$SOURCE" >&2
@@ -18,11 +21,14 @@ readonly BIN_DIR="/opt/data/.local/bin"
   exit 1
 }
 
-mkdir -p "$TARGET" "$(dirname "$CALCULATOR_TARGET")" "$BIN_DIR"
+mkdir -p "$TARGET" "$(dirname "$CALCULATOR_TARGET")" "$BIN_DIR" "$LOG_DIR"
 cp -R "$SOURCE/." "$TARGET/"
 cp "$CALCULATOR_OVERRIDE" "$CALCULATOR_TARGET"
 chmod +x "$TARGET/scripts/chubb-premium-ops.sh"
 ln -sfn "$TARGET/scripts/chubb-premium-ops.sh" "$BIN_DIR/chubb-premium-ops"
+chown -R "$RUNTIME_UID:$RUNTIME_GID" "$TARGET" "$LOG_DIR"
+chown "$RUNTIME_UID:$RUNTIME_GID" "$CALCULATOR_TARGET"
+chown -h "$RUNTIME_UID:$RUNTIME_GID" "$BIN_DIR/chubb-premium-ops"
 
 cmp -s "$SOURCE/SKILL.md" "$TARGET/SKILL.md"
 cmp -s "$CALCULATOR_OVERRIDE" "$CALCULATOR_TARGET"
