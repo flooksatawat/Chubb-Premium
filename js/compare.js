@@ -166,8 +166,6 @@ window._buildCompareHTML = function() {
                 { label: 'ทุนประกัน ตั้งต้น (บาท)', getVal: r => r.sa,                fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
                 { label: 'ทุนประกัน ปีที่ 10 (บาท)', getVal: r => saAtYear(r, 10),    fmt: fmtSaCell, best: 'max', raw: true },
                 { label: 'ทุนประกัน ปีที่ 20 (บาท)', getVal: r => saAtYear(r, 20),    fmt: fmtSaCell, best: 'max', raw: true },
-                { label: 'ทุนประกัน ปีที่ 60 (บาท)', getVal: r => r.plan.coverAge >= 60 ? saAtYear(r, Math.min(60, r.plan.coverAge - r.age)) : null, fmt: (v,r) => v != null ? fmtSaCell(v,r) : '-', best: 'max', raw: true },
-                { label: 'ทุนประกัน ปีที่ 90 (บาท)', getVal: r => r.plan.coverAge >= 90 ? saAtYear(r, Math.min(90, r.plan.coverAge - r.age)) : null, fmt: (v,r) => v != null ? fmtSaCell(v,r) : '-', best: 'max', raw: true },
                 { label: 'เบี้ย/ปี (บาท)',            getVal: r => r.annualPrem,       fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'min' },
                 { label: 'ชำระเบี้ย (ปี)',            getVal: r => r.plan.payYears,    fmt: v => v + ' ปี',                        best: 'min' },
                 { label: 'คุ้มครองถึงอายุ',           getVal: r => r.plan.coverAge,    fmt: v => v + ' ปี',                        best: 'max' },

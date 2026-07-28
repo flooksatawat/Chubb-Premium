@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/24tx-calculation-parity.test.cjs",
+    "test": "node tests/24tx-calculation-parity.test.cjs && node tests/24tx-death-benefit-parity.test.cjs && node tests/24tx-compare-engine.test.cjs",
     "predev": "node scripts/prepare-hosting-assets.mjs",
     "dev": "vinext dev",
     "prebuild": "node scripts/prepare-hosting-assets.mjs",

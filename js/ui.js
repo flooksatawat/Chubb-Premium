@@ -3709,7 +3709,10 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
                     if (y % 3 === 0 && y <= 24) cfAmt = Math.round(initSA * 0.05);
                     else if (y === 25) cfAmt = Math.round(initSA * 0.70);
                     else if (y >= 26 && age < 90) cfAmt = Math.round(initSA * 0.08);
-                    else if (age === 90) cfAmt = initSA;
+                    else if (age === 90) {
+                        // 24TX ครบสัญญา: จ่ายตาม %เพิ่ม 10% ทุก 3 ปี
+                        cfAmt = Math.round(initSA * (1.0 + 0.10 * Math.floor((y - 1) / 3)));
+                    }
                 } else if (isWXN) {
                     if (age <= 60) cfAmt = Math.round(initSA * 0.0225);
                     else if (age === 61) cfAmt = Math.round(initSA * 0.10);
@@ -3739,7 +3742,8 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
             }
 
             accCF += cfAmt;
-            const netCash = cvTotal + accCF;
+            // 24TX: ปีครบสัญญาไม่นับ CV ซ้ำ (cfAmt รวมมูลค่า CV แล้ว)
+            const netCash = (isTX && age === 90) ? accCF : (cvTotal + accCF);
             rows.push({ age, annSav, totalSaving, cfAmt, accCF, netCash, cvTotal, currentSA, effectiveSA });
         }
         return rows;
@@ -7457,7 +7461,7 @@ function generatePolicyTableData() {
         }
 
         // 6. สร้างแถวตาราง
-        const saCompact = (isLPB || isSLPA || isLV || isSM) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
+        const saCompact = (isLPB || isSLPA || isLV || isSM || isTX) ? (deathBenefit > 0 ? deathBenefit.toLocaleString() : '—') : formatThaiMillion(deathBenefit);
         const accidentCompact = (isSLB && currentAge <= 70) ? formatThaiMillion(Math.min(deathBenefit * 2, 100000000)) : '—';
 
         let trClass = "border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-[#00A651]/5 transition-colors";
