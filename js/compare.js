@@ -7,7 +7,7 @@ const _COMPARE_PLANS = [
     { appPlan: 'Signature Legacy',       planCode: '10SLB',  label: 'Signature Legacy',      abbr: 'SLB',   payYears: 10, coverAge: 99,  color: '#d97706', bg: '#fffbeb' },
     { appPlan: 'Century Life',           planCode: '20CL',   label: 'Century Life 20',       abbr: 'CL',    payYears: 20, coverAge: 100, color: '#7c3aed', bg: '#f5f3ff' },
     { appPlan: 'Whole Life Extra',       planCode: 'WXN10',  label: 'Whole Life Extra',      abbr: 'WXN',   payYears: 10, coverAge: 99,  color: '#4f46e5', bg: '#eef2ff' },
-    { appPlan: '24 TX',                  planCode: '24TX',   label: '24 TX',                 abbr: 'TX',    payYears: 24, coverAge: 99,  color: '#0284c7', bg: '#eff6ff' },
+    { appPlan: '24 TX',                  planCode: '24TX',   label: '24 TX',                 abbr: 'TX',    payYears: 24, coverAge: 90,  color: '#0284c7', bg: '#eff6ff' },
     { appPlan: '868 / 818 Elite Saving', planCode: 'S868',   label: '868 Elite Saving',      abbr: 'Elite', payYears: 8,  coverAge: 99,  color: '#9333ea', bg: '#faf5ff' },
     { appPlan: '678 Step Savings',       planCode: 'A78',    label: '678 Step Savings',      abbr: '678',   payYears: 6,  coverAge: 78,  color: '#c026d3', bg: '#fdf4ff' },
     { appPlan: 'LifeTime Value',         planCode: '20LV',   label: 'LifeTime Value 20',     abbr: 'LV',    payYears: 20, coverAge: 100, color: '#7c3aed', bg: '#f5f3ff' },
@@ -89,7 +89,8 @@ function _compareCalcOne(plan, gender, age, premium) {
     const isElite = plan.abbr === 'Elite';
     let beAge = null;
     let totalPaid = 0;
-    const coverYears = Math.min(plan.coverAge - age, 60);
+    const isTxPlan = plan.abbr === 'TX';
+    const coverYears = isTxPlan ? Math.max(1, plan.coverAge - age) : Math.min(plan.coverAge - age, 60);
     for (let y = 1; y <= coverYears; y++) {
         if (y <= payYears) totalPaid += annualPrem;
         if (totalPaid <= 0) continue;
@@ -151,6 +152,7 @@ window._buildCompareHTML = function() {
                     const mult = y <= 10 ? 1.0 : y <= 20 ? 1.5 : (attainedAge <= 70 ? 2.0 : 1.5);
                     return Math.round(r.sa * mult);
                 }
+                // 24TX: ทุนประกันเพิ่ม 10% ทุก 3 ปี ตามปีกรมธรรม์ (ไม่นับ CV ซ้ำ)
                 if (r.plan.abbr === 'TX') return _compareTxDeathBenefit(r.sa, r.annualPrem, r.gender, r.age, y);
                 return r.sa;
             }
@@ -164,6 +166,8 @@ window._buildCompareHTML = function() {
                 { label: 'ทุนประกัน ตั้งต้น (บาท)', getVal: r => r.sa,                fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'max' },
                 { label: 'ทุนประกัน ปีที่ 10 (บาท)', getVal: r => saAtYear(r, 10),    fmt: fmtSaCell, best: 'max', raw: true },
                 { label: 'ทุนประกัน ปีที่ 20 (บาท)', getVal: r => saAtYear(r, 20),    fmt: fmtSaCell, best: 'max', raw: true },
+                { label: 'ทุนประกัน ปีที่ 60 (บาท)', getVal: r => r.plan.coverAge >= 60 ? saAtYear(r, Math.min(60, r.plan.coverAge - r.age)) : null, fmt: (v,r) => v != null ? fmtSaCell(v,r) : '-', best: 'max', raw: true },
+                { label: 'ทุนประกัน ปีที่ 90 (บาท)', getVal: r => r.plan.coverAge >= 90 ? saAtYear(r, Math.min(90, r.plan.coverAge - r.age)) : null, fmt: (v,r) => v != null ? fmtSaCell(v,r) : '-', best: 'max', raw: true },
                 { label: 'เบี้ย/ปี (บาท)',            getVal: r => r.annualPrem,       fmt: v => v > 0 ? v.toLocaleString() : '-', best: 'min' },
                 { label: 'ชำระเบี้ย (ปี)',            getVal: r => r.plan.payYears,    fmt: v => v + ' ปี',                        best: 'min' },
                 { label: 'คุ้มครองถึงอายุ',           getVal: r => r.plan.coverAge,    fmt: v => v + ' ปี',                        best: 'max' },
