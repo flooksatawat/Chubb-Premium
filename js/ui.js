@@ -7353,7 +7353,11 @@ function generatePolicyTableData() {
                 if (y % 3 === 0 && y <= 24) cashFlowAmt = Math.round(currentSA * 0.05); 
                 else if (y === 25) cashFlowAmt = Math.round(currentSA * 0.70); 
                 else if (y >= 26 && currentAge < 90) cashFlowAmt = Math.round(currentSA * 0.08); 
-                else if (currentAge === 90) cashFlowAmt = Math.round(currentSA); 
+                else if (currentAge === 90) {
+                    // 24TX ครบกำหนดสัญญาอายุ 90: จ่ายทุนประกันตาม %เพิ่ม 10% ทุก 3 ปี (ใช้ปีปัจจุบัน y)
+                    const _txMatMult = 1.0 + 0.10 * Math.floor((y - 1) / 3);
+                    cashFlowAmt = Math.round(currentSA * _txMatMult);
+                }
             } else if (isWXN) {
                 if (currentAge <= 60) cashFlowAmt = Math.round(currentSA * 0.0225);
                 else if (currentAge == 61) cashFlowAmt = Math.round(currentSA * 0.10);
@@ -7387,6 +7391,8 @@ function generatePolicyTableData() {
         accTax += _taxThisYear;
 
         let surrenderTotal = cvTotal + accCashFlow + cashFlowAmt + accTax;
+        // 24TX: ปีที่ 90 ครบกำหนดสัญญา — cashFlowAmt รวมมูลค่า CV แล้ว ไม่นับ cvTotal ซ้ำ
+        if (isTX && currentAge === 90) surrenderTotal = accCashFlow + cashFlowAmt + accTax;
 
         // 4. จุดคุ้มทุน
         if (!foundBreakeven && totalSaving > 0) {
@@ -7417,9 +7423,11 @@ function generatePolicyTableData() {
         } else if (isTX && currentSA > 0) {
             // 24TX: ทุนประกันเพิ่ม 10% ทุก 3 ปี เริ่มปีที่ 4 (ปี 1-3=100%, 4-6=110%, ...)
             // Death benefit = MAX(เพิ่มตาม %ปี, CV, เบี้ยสะสม - เงินคืนสะสม)
-            const _txMult  = 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3));
+            // 24TX SA schedule: +10% ทุก 3 ปี จนถึงอายุ 90 (สูงสุด 390%)
+            const SA_MAX_AGE = 90; // ป้องกันคำนวณเกินอายุครบสัญญา
+            const _txMult  = Math.min(1.0 + 0.10 * Math.floor((SA_MAX_AGE - 1) / 3), 1.0 + 0.10 * Math.max(0, Math.floor((y - 1) / 3)));
             const _txTier  = Math.round(currentSA * _txMult);
-            const _txFloor = totalSaving - (accCashFlow + cashFlowAmt);
+            const _txFloor = totalSaving - (accCashFlow + cashFlowAmt); // ปี 90: floor ติดลบ → MAX ใช้ค่า SA/CV แทน
             deathBenefit = Math.max(_txTier, cvTotal, _txFloor);
         } else if (isSM && currentSA > 0) {
             // 7SM: ความคุ้มครองการเสียชีวิต = สูงสุดของ 3 ค่า (ตามเงื่อนไขกรมธรรม์)

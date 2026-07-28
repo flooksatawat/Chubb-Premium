@@ -38,7 +38,11 @@ function _compareTxCashback(sa, issueAge, year) {
     if (year % 3 === 0 && year <= 24) return Math.round(sa * 0.05);
     if (year === 25) return Math.round(sa * 0.70);
     if (year >= 26 && attainedAge < 90) return Math.round(sa * 0.08);
-    if (attainedAge === 90) return Math.round(sa);
+    if (attainedAge === 90) {
+        // 24TX ครบกำหนดสัญญาอายุ 90: จ่ายทุนประกันตาม %เพิ่ม 10% ทุก 3 ปี (ใช้ปีปัจจุบัน)
+        const _cmpTxMatMult = 1.0 + 0.10 * Math.floor((year - 1) / 3);
+        return Math.round(sa * _cmpTxMatMult);
+    }
     return 0;
 }
 
