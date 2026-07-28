@@ -30,6 +30,13 @@ chown -R "$RUNTIME_UID:$RUNTIME_GID" "$TARGET" "$LOG_DIR"
 chown "$RUNTIME_UID:$RUNTIME_GID" "$CALCULATOR_TARGET"
 chown -h "$RUNTIME_UID:$RUNTIME_GID" "$BIN_DIR/chubb-premium-ops"
 
+for build_path in "$REPO/public" "$REPO/dist"; do
+  if [[ -e "$build_path" ]]; then
+    chown -R "$RUNTIME_UID:$RUNTIME_GID" "$build_path"
+    chmod -R u+rwX,g+rwX,o-rwx "$build_path"
+  fi
+done
+
 cmp -s "$SOURCE/SKILL.md" "$TARGET/SKILL.md"
 cmp -s "$CALCULATOR_OVERRIDE" "$CALCULATOR_TARGET"
 

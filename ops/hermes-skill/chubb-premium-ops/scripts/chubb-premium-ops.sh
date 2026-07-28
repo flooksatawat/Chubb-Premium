@@ -9,6 +9,7 @@ readonly SKILL_DIR="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 readonly RESULT_EXTRACTOR="$SKILL_DIR/scripts/extract-codex-result.mjs"
 readonly LOG_DIR="${CHUBB_OPS_LOG_DIR:-/opt/data/logs/chubb-premium-ops}"
 readonly SITES_PACKAGER="/opt/data/.codex/plugins/cache/openai-bundled-sites/sites/0.1.31/scripts/package-site.sh"
+readonly HERMES_UID="$(stat -c %u /opt/data)"
 RELEASE_RAW_OUTPUT=""
 
 cleanup() {
@@ -24,6 +25,8 @@ fail() {
 }
 
 require_repo() {
+  [[ "$(id -u)" == "$HERMES_UID" ]] ||
+    fail "Run this operator as the Hermes runtime user"
   [[ -d "$REPO/.git" ]] || fail "Chubb Premium workspace not found: $REPO"
   [[ -f "$REPO/.openai/hosting.json" ]] || fail "Sites metadata is missing"
   [[ "$(git -C "$REPO" branch --show-current)" == "main" ]] ||
@@ -159,11 +162,12 @@ release() {
   [[ "$head" == "$origin_head" ]] ||
     fail "GitHub main does not match the release commit"
 
-  umask 077
   mkdir -p "$LOG_DIR"
+  chmod 700 "$LOG_DIR"
 
   local safe_result prompt
   RELEASE_RAW_OUTPUT=$(
+    umask 077
     mktemp "${TMPDIR:-/tmp}/chubb-premium-sites.XXXXXX"
   )
 
@@ -210,6 +214,8 @@ EOF
 
   rm -f "$RELEASE_RAW_OUTPUT"
   RELEASE_RAW_OUTPUT=""
+  touch "$LOG_DIR/releases.log"
+  chmod 600 "$LOG_DIR/releases.log"
   printf '%s commit=%s result=%s\n' \
     "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$head" "$safe_result" \
     >>"$LOG_DIR/releases.log"
