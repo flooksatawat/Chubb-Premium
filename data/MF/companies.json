@@ -263,6 +263,20 @@
             "15000",
             "25000"
           ]
+        },
+        {
+          "id": "GOOD_HEALTH_PRIME",
+          "name": "Good Health Prime",
+          "hasRoomRate": true,
+          "roomRates": [
+            "2000",
+            "3000",
+            "4000",
+            "6000",
+            "8000",
+            "10000",
+            "12000"
+          ]
         }
       ]
     },
