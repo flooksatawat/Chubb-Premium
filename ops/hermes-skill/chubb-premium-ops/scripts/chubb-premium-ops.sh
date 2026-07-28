@@ -4,7 +4,8 @@ set -euo pipefail
 readonly REPO="${CHUBB_PREMIUM_REPO:-/workspaces/Chubb-Premium}"
 readonly SITE_URL="https://chubb-premium.flooksatawat.chatgpt.site"
 readonly CODEX_BIN="${CODEX_BIN:-/opt/data/.local/bin/codex}"
-readonly SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
+readonly SKILL_DIR="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 readonly RESULT_EXTRACTOR="$SKILL_DIR/scripts/extract-codex-result.mjs"
 readonly LOG_DIR="${CHUBB_OPS_LOG_DIR:-/opt/data/logs/chubb-premium-ops}"
 readonly SITES_PACKAGER="/opt/data/.codex/plugins/cache/openai-bundled-sites/sites/0.1.31/scripts/package-site.sh"
@@ -182,12 +183,13 @@ Perform this release:
 3. Push the exact commit $head to the Sites source main branch using per-command
    authentication. If the Sites source branch differs, fetch it first and use a
    force-with-lease tied to its observed head; never force-push GitHub.
-4. Package the already-built site with $SITES_PACKAGER.
-5. Save exactly one new Sites version using commit_sha $head and that archive.
-6. Deploy that saved version immediately with the existing public access mode.
+4. List recent saved versions. If a version already references commit $head,
+   reuse the newest exact match. Otherwise package the already-built site with
+   $SITES_PACKAGER and save exactly one new version using commit_sha $head.
+5. Deploy the selected saved version immediately with the existing public access mode.
    The Telegram request gives explicit publication approval, so do not
    ask for a second confirmation.
-7. Poll until the deployment succeeds or fails. Do not open a browser.
+6. Poll until the deployment succeeds or fails. Do not open a browser.
 
 Your final message must contain only this JSON shape and no other keys:
 {"status":"succeeded","deployed_url":"$SITE_URL","version":INTEGER,"commit_sha":"$head"}

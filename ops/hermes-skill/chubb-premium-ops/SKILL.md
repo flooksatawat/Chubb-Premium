@@ -59,8 +59,8 @@ Ask one concise question before proceeding when:
 
 `release` is the only production path. It verifies again, requires a clean
 committed `main`, pushes GitHub, pushes the exact same commit to Sites source,
-saves one Sites version, deploys it, and records only a sanitized audit result
-on the VPS.
+reuses an existing version for the exact commit on retries or saves one new
+version, deploys it, and records only a sanitized audit result on the VPS.
 
 ## Data And Logic Rules
 
