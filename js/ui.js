@@ -9658,15 +9658,21 @@ window.onload = async () => {
     if (typeof applyDayColorTheme === 'function') applyDayColorTheme();
     
     // === ORIENTATION LOCK: มือถือใน PWA standalone → ล็อก portrait ===
-    // แท็บเล็ต/เดสก์ท็อปหมุนได้อิสระ (manifest ตั้งเป็น "any")
+    // แท็บเล็ต/เดสก์ท็อป → unlock (เผื่อ manifest cache ยังเป็น portrait จากเวอร์ชันเก่า)
     (function lockMobileOrientation() {
         if (!window.matchMedia('(display-mode: standalone)').matches) return;
         const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (!isTouch) return;
         const maxScreenDim = Math.max(screen.width, screen.height);
-        if (!isTouch || maxScreenDim > 932) return; // 932 = iPhone 15 Pro Max landscape width
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('portrait').catch(() => {});
+        if (!screen.orientation) return;
+        
+        if (maxScreenDim > 932) {
+            // แท็บเล็ต: ปลดล็อกทันที (override manifest cache เก่า)
+            screen.orientation.unlock();
+            return;
         }
+        // มือถือ (≤932px): ล็อก portrait
+        screen.orientation.lock('portrait').catch(() => {});
     })();
     
     document.querySelectorAll('button[onclick^="closePopup"]').forEach(btn => {
