@@ -1,5 +1,5 @@
 ﻿// ==================== LAYOUT BREAKPOINT (Tablet / iPad / Foldable inner screen) ====================
-// ตรงกับ CSS media query: (min-width: 700px) and (min-height: 600px)
+// ตรงกับ CSS media query: (min-width: 600px) and (min-height: 500px)
 // ใช้ documentElement.clientWidth/Height (viewport CSS จริง — ตรงกับ matchMedia)
 // แทน window.innerWidth/Height (window inner รวม scrollbar/sidebar) เพื่อ sync กับ CSS
 // รองรับ:
@@ -12,7 +12,7 @@
 window.isWideLayout = function () {
     const w = document.documentElement.clientWidth || window.innerWidth;
     const h = document.documentElement.clientHeight || window.innerHeight;
-    return w >= 600 && h >= 500;
+    return w >= 600 && h >= 550;
 };
 
 function fitHeaderTitle() {
@@ -9656,6 +9656,18 @@ window.onload = async () => {
     const oldCompare = document.getElementById('comparePanelView');
     if (oldCompare) oldCompare.remove();
     if (typeof applyDayColorTheme === 'function') applyDayColorTheme();
+    
+    // === ORIENTATION LOCK: มือถือใน PWA standalone → ล็อก portrait ===
+    // แท็บเล็ต/เดสก์ท็อปหมุนได้อิสระ (manifest ตั้งเป็น "any")
+    (function lockMobileOrientation() {
+        if (!window.matchMedia('(display-mode: standalone)').matches) return;
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const maxScreenDim = Math.max(screen.width, screen.height);
+        if (!isTouch || maxScreenDim > 932) return; // 932 = iPhone 15 Pro Max landscape width
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(() => {});
+        }
+    })();
     
     document.querySelectorAll('button[onclick^="closePopup"]').forEach(btn => {
         const card = btn.closest('.modal-content-card');

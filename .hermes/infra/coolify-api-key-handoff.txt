@@ -1,0 +1,13 @@
+# Go to: http://187.77.126.198:8000
+# Settings → API Keys → New API Key
+
+Name:  hermes-deploy
+Scope:
+  - ☑ Deploy       (needed to create/manage services)
+  - ☑ Server Read  (needed to check server status)
+  - ☐ Full Admin   (NOT needed)
+
+# After creation, store the key:
+# On Hermes machine:
+#   echo "your-key-here" > /opt/data/secrets/coolify-api-key
+#   chmod 600 /opt/data/secrets/coolify-api-key

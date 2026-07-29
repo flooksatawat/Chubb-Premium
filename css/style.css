@@ -183,7 +183,7 @@
 
         /* จอนอกของมือถือพับ (แนว landscape เท่านั้น เช่น 792×353) — บังคับเป็น mobile
            ใช้เงื่อนไขเข้มงวดเพื่อไม่กระทบคอมที่หน้าต่าง browser เตี้ยกว่าปกติ */
-        @media (max-height: 450px) and (orientation: landscape) and (max-width: 1000px) {
+        @media (max-height: 550px) and (orientation: landscape) and (max-width: 1000px) {
             .right-pane { display: none !important; }
             .app-container {
                 max-width: 440px !important;
