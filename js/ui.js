@@ -954,7 +954,7 @@ function showDepositIRRPopup() {
     if (!planType && (currentAppPlan || '').toUpperCase().includes('LIFETIME')) planType = 'LV';
     const payYears = planType === 'WXN' ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10')
                    : planType === 'TX'    ? 24 : planType === 'ELITE' ? 8
-                   : planType === 'SM'    ? 7  : planType === 'LV'
+                   : planType === 'SM'    ? (currentPlan === '21/15' ? 15 : 7)  : planType === 'LV'
                    ? parseInt((currentPlan||'').match(/\d+/)?.[0]||'10') : 10;
     const maxAge   = planType === 'ELITE' ? (startAge <= 50 ? 68 : startAge + 18)
                    : planType === 'SM'    ? startAge + 21 : 100;
@@ -3664,7 +3664,7 @@ window.renderCompareView = async function(planA, planB, settingsA, settingsB) {
         else if (is678) { payYears = 6; maxYear = 78 - d.age; }
         else if (isTX)  { payYears = 24; maxYear = 90 - d.age; }
         else if (isLV)  { payYears = parseInt(d.years) || 10; maxYear = 100 - d.age; }
-        else if (isSM)  { payYears = 7;  maxYear = 21; }
+        else if (isSM)  { payYears = (pOpt === '21/15') ? 15 : 7;  maxYear = 21; }
         else if (isCL)  {
             maxYear = 100 - d.age;
             const clNum = parseInt((pOpt || '').match(/\d+/)?.[0]);
