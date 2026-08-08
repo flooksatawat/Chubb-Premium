@@ -11,7 +11,8 @@ const _COMPARE_PLANS = [
     { appPlan: '868 / 818 Elite Saving', planCode: 'S868',   label: '868 Elite Saving',      abbr: 'Elite', payYears: 8,  coverAge: 99,  color: '#9333ea', bg: '#faf5ff' },
     { appPlan: '678 Step Savings',       planCode: 'A78',    label: '678 Step Savings',      abbr: '678',   payYears: 6,  coverAge: 78,  color: '#c026d3', bg: '#fdf4ff' },
     { appPlan: 'LifeTime Value',         planCode: '20LV',   label: 'LifeTime Value 20',     abbr: 'LV',    payYears: 20, coverAge: 100, color: '#7c3aed', bg: '#f5f3ff' },
-    { appPlan: 'Smart Plan',        planCode: 'SM',    label: 'Smart Plan',       abbr: 'SM',   payYears: 15,  coverAge: 99,  color: '#0d9488', bg: '#f0fdfa' },
+    { appPlan: 'Smart Plan',        planCode: '7SM',   label: 'Smart Plan 21/7',  abbr: 'SM7',  payYears: 7,  coverAge: 99,  color: '#0d9488', bg: '#f0fdfa' },
+    { appPlan: 'Smart Plan',        planCode: '15SPN', label: 'Smart Plan 21/15', abbr: 'SM15', payYears: 15, coverAge: 99,  color: '#0f766e', bg: '#ccfbf1' },
 ];
 
 function _compareGetCV(planCode, gender, age, year) {
@@ -160,6 +161,7 @@ window._buildCompareHTML = function() {
                 if (r.plan.abbr === 'SLPA' && v > r.sa) return `<span style="color:#0891b2;font-weight:800;">${v.toLocaleString()}</span>`;
                 if (r.plan.abbr === 'LV'   && v > r.sa) return `<span style="color:#7c3aed;font-weight:800;">${v.toLocaleString()}</span>`;
                 if (r.plan.abbr === 'TX'   && v > r.sa) return `<span style="color:#0284c7;font-weight:800;">${v.toLocaleString()}</span>`;
+                if ((r.plan.abbr === 'SM7' || r.plan.abbr === 'SM15') && v > r.sa) return `<span style="color:#0d9488;font-weight:800;">${v.toLocaleString()}</span>`;
                 return v.toLocaleString();
             }
             const rows = [
