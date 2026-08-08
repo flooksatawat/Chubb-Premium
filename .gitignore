@@ -5,3 +5,5 @@ dist/
 public/
 next-env.d.ts
 *.tgz
+deploy_tech.py
+tech-th/
