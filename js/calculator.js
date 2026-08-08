@@ -1109,8 +1109,13 @@ function calculate(source, enforceMin = false) {
             }
         }
         
-        let yearsStr = '20'; const matchYears = currentPlan.match(/\d+/); if (matchYears) yearsStr = matchYears[0];
-        if (currentAppPlan === '678 Step Savings') yearsStr = '6';
+        let yearsStr = '20';
+                if (currentAppPlan === 'Smart Plan') {
+                    yearsStr = currentPlan === '21/15' ? '15' : '7';
+                } else {
+                    const matchYears = currentPlan.match(/\d+/); if (matchYears) yearsStr = matchYears[0];
+                }
+                if (currentAppPlan === '678 Step Savings') yearsStr = '6';
         let cashFlowVal = 0;
         if(currentAppPlan === 'Whole Life Extra') cashFlowVal = getSafeValue('cashFlowInput1');
         else cashFlowVal = getSafeValue('cashFlowInput');
