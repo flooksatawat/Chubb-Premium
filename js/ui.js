@@ -6322,7 +6322,7 @@ function refreshAllDisplays() {
             if (_plan.includes('ELITE') || _plan.includes('868') || _plan.includes('818')) _py = 8;
             else if ((currentAppPlan || '').includes('678')) _py = 6;
             else if ((currentAppPlan || '').includes('24 TX')) _py = 24;
-            else if ((currentAppPlan || '').includes('Smart Plan')) _py = 7;
+            else if ((currentAppPlan || '').includes('Smart Plan')) _py = (currentPlan === '21/15') ? 15 : 7;
             _total = _prem * _py;
         }
         if (_total > 0) {
