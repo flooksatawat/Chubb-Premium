@@ -7,3 +7,4 @@ next-env.d.ts
 *.tgz
 deploy_tech.py
 tech-th/
+_search_drive.py
