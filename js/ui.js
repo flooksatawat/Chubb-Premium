@@ -5891,7 +5891,8 @@ const _COM_KEY_MAP = {
     'TLA': '20TLA', 'Convertable Term': '20TLA',
     '24 TX': '24TX',
     'S868': 'S868', 'S818': 'S818',
-    'Smart Plan': 'SM',
+    '21/7': '7SM', '21/15': '15SPN',
+    'Smart Plan': '7SM',
 };
 
 function getComRateArray(planKey) {
