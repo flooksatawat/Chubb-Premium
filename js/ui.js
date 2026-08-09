@@ -7206,7 +7206,7 @@ function generatePolicyTableData() {
         payYears = parseInt(d.years) || 10; // LV: ชำระเบี้ย 10 / 15 / 20 ปี
         maxYear = 100 - d.age;              // คุ้มครองถึงอายุ 100 ปี
     } else if (isSM) {
-        payYears = 7;   // ชำระเบี้ย 7 ปี
+        payYears = (currentPlan === '21/15') ? 15 : 7;   // ชำระเบี้ยตามแผนย่อย
         maxYear = 21;   // คุ้มครอง 21 ปี
     } else if (isCL) {
         maxYear = 100 - d.age; // Century Life คุ้มครองตลอดชีพ ถึงอายุ 100
