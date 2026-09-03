@@ -4,18 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/24tx-calculation-parity.test.cjs && node tests/24tx-death-benefit-parity.test.cjs && node tests/24tx-compare-engine.test.cjs",
+    "test": "node tests/24tx-calculation-parity.test.cjs && node tests/24tx-death-benefit-parity.test.cjs && node tests/24tx-compare-engine.test.cjs && node --test tests/access-store.test.mjs tests/access-api.test.mjs",
+    "test:access": "node --test tests/access-store.test.mjs tests/access-api.test.mjs",
     "predev": "node scripts/prepare-hosting-assets.mjs",
     "dev": "vinext dev",
     "prebuild": "node scripts/prepare-hosting-assets.mjs",
     "build": "vinext build",
     "postbuild": "node scripts/finalize-hosting-build.mjs",
-    "start": "vinext start",
+    "start": "node server.mjs",
+    "import:access": "node scripts/import-access.mjs",
     "deploy:hostinger": "npm run build && node scripts/deploy-hostinger.mjs",
     "deploy:hostinger:check": "node scripts/deploy-hostinger.mjs --check"
   },
   "engines": {
     "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3"
   },
   "devDependencies": {
     "@vitejs/plugin-rsc": "0.5.27",

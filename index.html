@@ -2282,7 +2282,10 @@ body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
 <!-- ------------------------------------------ -->
 <script>
 (function () {
-    const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+    const LEGACY_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4EHWmyd_9SQQA5m6ZhZudpza1aiQfUZmzw9stsIWZotqjpQ-1VoP6QrysCfZAM4t5VA/exec';
+    const APPS_SCRIPT_URL = location.hostname === 'chubb-premium.srv1846983.hstgr.cloud'
+        ? '/api/access'
+        : LEGACY_APPS_SCRIPT_URL;
     const CACHE_KEY        = 'chubb_profile_v2';
     const AUTH_CACHE_KEY   = 'chubb_auth_v2';
     const EXT_SHOWN_KEY    = 'chubb_ext_shown';

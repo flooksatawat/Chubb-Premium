@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+.hermes
+.next
+dist
+node_modules
+tmp
+*.tgz
+_search_drive.py
+deploy_tech.py
